@@ -1,0 +1,21 @@
+namespace FlatBuffer.Response;
+
+table CreateRoom {
+	id: uint;
+}
+
+table JoinRoom {
+	users: [ulong];
+}
+
+table LeaveRoom {
+	
+}
+
+table KickRoom {
+	success: bool;
+}
+
+table KickedRoom {
+	
+}

@@ -1,0 +1,17 @@
+namespace FlatBuffer.Request;
+
+table CreateRoom {
+	
+}
+
+table JoinRoom {
+	id: uint;
+}
+
+table LeaveRoom {
+	
+}
+
+table KickRoom {
+	user: ulong;
+}

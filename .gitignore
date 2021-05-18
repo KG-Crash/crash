@@ -74,3 +74,8 @@ client/Temp
 client/UserSettings
 client/.vsconfig
 client/Logs
+client/obj
+server/**/*.exe
+server/.vscode
+server/pkg
+server/bin
