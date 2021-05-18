@@ -14,7 +14,7 @@ namespace Protocol.Response
 
     public class CreateRoom : IProtocol
     {
-        public static readonly Identity Identity = Protocol.Response.Identity.CREATE_ROOM;
+        public uint Identity => (uint)Protocol.Response.Identity.CREATE_ROOM;
 
         public uint Id { get; set; }
 
@@ -48,7 +48,7 @@ namespace Protocol.Response
 
     public class JoinRoom : IProtocol
     {
-        public static readonly Identity Identity = Protocol.Response.Identity.JOIN_ROOM;
+        public uint Identity => (uint)Protocol.Response.Identity.JOIN_ROOM;
 
         public List<ulong> Users { get; set; }
 
@@ -82,7 +82,7 @@ namespace Protocol.Response
 
     public class LeaveRoom : IProtocol
     {
-        public static readonly Identity Identity = Protocol.Response.Identity.LEAVE_ROOM;
+        public uint Identity => (uint)Protocol.Response.Identity.LEAVE_ROOM;
 
         
 
@@ -115,7 +115,7 @@ namespace Protocol.Response
 
     public class KickRoom : IProtocol
     {
-        public static readonly Identity Identity = Protocol.Response.Identity.KICK_ROOM;
+        public uint Identity => (uint)Protocol.Response.Identity.KICK_ROOM;
 
         public bool Success { get; set; }
 
@@ -149,7 +149,7 @@ namespace Protocol.Response
 
     public class KickedRoom : IProtocol
     {
-        public static readonly Identity Identity = Protocol.Response.Identity.KICKED_ROOM;
+        public uint Identity => (uint)Protocol.Response.Identity.KICKED_ROOM;
 
         
 

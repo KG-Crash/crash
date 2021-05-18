@@ -13,7 +13,7 @@ namespace Protocol.Request
 
     public class CreateRoom : IProtocol
     {
-        public static readonly Identity Identity = Protocol.Request.Identity.CREATE_ROOM;
+        public uint Identity => (uint)Protocol.Request.Identity.CREATE_ROOM;
 
         
 
@@ -46,7 +46,7 @@ namespace Protocol.Request
 
     public class JoinRoom : IProtocol
     {
-        public static readonly Identity Identity = Protocol.Request.Identity.JOIN_ROOM;
+        public uint Identity => (uint)Protocol.Request.Identity.JOIN_ROOM;
 
         public uint Id { get; set; }
 
@@ -80,7 +80,7 @@ namespace Protocol.Request
 
     public class LeaveRoom : IProtocol
     {
-        public static readonly Identity Identity = Protocol.Request.Identity.LEAVE_ROOM;
+        public uint Identity => (uint)Protocol.Request.Identity.LEAVE_ROOM;
 
         
 
@@ -113,7 +113,7 @@ namespace Protocol.Request
 
     public class KickRoom : IProtocol
     {
-        public static readonly Identity Identity = Protocol.Request.Identity.KICK_ROOM;
+        public uint Identity => (uint)Protocol.Request.Identity.KICK_ROOM;
 
         public ulong User { get; set; }
 
