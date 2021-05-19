@@ -36,10 +36,10 @@ namespace Network
             .Option(ChannelOption.TcpNodelay, true)
             .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
             {
-                IChannelPipeline pipeline = channel.Pipeline;
-                pipeline.AddLast(new LengthFieldBasedFrameDecoder(ByteOrder.LittleEndian, 1024 * 1024, 0, 4, 0, 4, true));
-                pipeline.AddLast(new LengthFieldPrepender(ByteOrder.LittleEndian, 4, 0, false));
-                pipeline.AddLast(new IdleStateHandler(0, 30, 0));
+                channel.Pipeline.AddLast(new LengthFieldBasedFrameDecoder(ByteOrder.LittleEndian, 1024 * 1024, 0, 4, 0, 4, true));
+                channel.Pipeline.AddLast(new LengthFieldPrepender(ByteOrder.LittleEndian, 4, 0, false));
+                channel.Pipeline.AddLast(new IdleStateHandler(0, 30, 0));
+                channel.Pipeline.AddLast(Handler.Instance);
             }));
         }
 

@@ -1,7 +1,5 @@
 using Network;
 using Protocol.Request;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Test : MonoBehaviour
@@ -24,7 +22,6 @@ public class Test : MonoBehaviour
         {
             await Client.Instance.Send(new CreateRoom { });
             await Client.Instance.Send(new JoinRoom { Id = 1001 });
-            await Client.Instance.Disconnect();
         }
     }
 }

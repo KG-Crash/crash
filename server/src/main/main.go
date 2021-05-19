@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 
+	Protocol "protocol"
 	Request "protocol/Request"
 	Response "protocol/Response"
 )
@@ -21,6 +22,20 @@ func NewSession(conn net.Conn) Session {
 		conn:  conn,
 		queue: make([]byte, 0, 4096),
 	}
+}
+
+func (session *Session) Write(p Protocol.Protocol) {
+	serialized := p.Serialize()
+	size := uint32(len(serialized))
+
+	bytes := make([]byte, 8, 8+size)
+	binary.LittleEndian.PutUint32(bytes[:], uint32(4+len(serialized)))
+
+	identity := uint32(p.Identity())
+	binary.LittleEndian.PutUint32(bytes[4:], identity)
+
+	bytes = append(bytes, serialized...)
+	session.conn.Write(bytes)
 }
 
 func OnCreateRoom(x *Response.CreateRoom) {
@@ -65,10 +80,16 @@ func ReceiveHandler(session *Session) {
 				x.Deserialize(payload)
 				fmt.Println(x)
 
+				session.Write(&Response.CreateRoom{
+					Id: 10,
+				})
+
 			case Request.JOIN_ROOM:
 				x := Request.JoinRoom{}
 				x.Deserialize(payload)
 				fmt.Println(x)
+
+				session.Write(&Response.JoinRoom{})
 			}
 
 			session.queue = session.queue[size+4:]
