@@ -1,10 +1,38 @@
-package Request
+package request
 
 import (
+	"protocol"
 	source "protocol/FlatBuffer/Request"
 
 	flatbuffers "github.com/google/flatbuffers/go"
 )
+
+var Allocator map[uint32]func([]byte) protocol.Protocol
+
+func init() {
+	Allocator = make(map[uint32]func([]byte) protocol.Protocol)
+
+	Allocator[CREATE_ROOM] = func(bytes []byte) protocol.Protocol {
+		x := &CreateRoom{}
+		return x.Deserialize(bytes)
+	}
+
+	Allocator[JOIN_ROOM] = func(bytes []byte) protocol.Protocol {
+		x := &JoinRoom{}
+		return x.Deserialize(bytes)
+	}
+
+	Allocator[LEAVE_ROOM] = func(bytes []byte) protocol.Protocol {
+		x := &LeaveRoom{}
+		return x.Deserialize(bytes)
+	}
+
+	Allocator[KICK_ROOM] = func(bytes []byte) protocol.Protocol {
+		x := &KickRoom{}
+		return x.Deserialize(bytes)
+	}
+
+}
 
 const (
 	CREATE_ROOM = iota
@@ -39,7 +67,7 @@ func (obj *CreateRoom) Serialize() []byte {
 	return builder.FinishedBytes()
 }
 
-func (obj *CreateRoom) Deserialize(bytes []byte) *CreateRoom {
+func (obj *CreateRoom) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsCreateRoom(bytes, 0)
 	return obj.parse(root)
 }
@@ -73,7 +101,7 @@ func (obj *JoinRoom) Serialize() []byte {
 	return builder.FinishedBytes()
 }
 
-func (obj *JoinRoom) Deserialize(bytes []byte) *JoinRoom {
+func (obj *JoinRoom) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsJoinRoom(bytes, 0)
 	return obj.parse(root)
 }
@@ -104,7 +132,7 @@ func (obj *LeaveRoom) Serialize() []byte {
 	return builder.FinishedBytes()
 }
 
-func (obj *LeaveRoom) Deserialize(bytes []byte) *LeaveRoom {
+func (obj *LeaveRoom) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsLeaveRoom(bytes, 0)
 	return obj.parse(root)
 }
@@ -138,7 +166,7 @@ func (obj *KickRoom) Serialize() []byte {
 	return builder.FinishedBytes()
 }
 
-func (obj *KickRoom) Deserialize(bytes []byte) *KickRoom {
+func (obj *KickRoom) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsKickRoom(bytes, 0)
 	return obj.parse(root)
 }

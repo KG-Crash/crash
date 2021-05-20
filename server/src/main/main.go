@@ -1,139 +1,45 @@
 package main
 
 import (
-	"encoding/binary"
-	"fmt"
-	"io"
-	"log"
-	"net"
+	"network"
 
-	Protocol "protocol"
-	Request "protocol/Request"
-	Response "protocol/Response"
+	"protocol"
+	"protocol/request"
+	"protocol/response"
 )
 
-type Session struct {
-	conn  net.Conn
-	queue []byte
-}
+var handler map[uint32]func(*network.Session, protocol.Protocol)
 
-func NewSession(conn net.Conn) Session {
-	return Session{
-		conn:  conn,
-		queue: make([]byte, 0, 4096),
+func init() {
+	handler = make(map[uint32]func(*network.Session, protocol.Protocol))
+	handler[request.CREATE_ROOM] = func(s *network.Session, p protocol.Protocol) {
+		OnCreateRoom(s, p.(*request.CreateRoom))
+	}
+	handler[request.JOIN_ROOM] = func(s *network.Session, p protocol.Protocol) {
+		OnJoinRoom(s, p.(*request.JoinRoom))
 	}
 }
 
-func (session *Session) Write(p Protocol.Protocol) {
-	serialized := p.Serialize()
-	size := uint32(len(serialized))
-
-	bytes := make([]byte, 8, 8+size)
-	binary.LittleEndian.PutUint32(bytes[:], uint32(4+len(serialized)))
-
-	identity := uint32(p.Identity())
-	binary.LittleEndian.PutUint32(bytes[4:], identity)
-
-	bytes = append(bytes, serialized...)
-	session.conn.Write(bytes)
+func OnCreateRoom(session *network.Session, x *request.CreateRoom) {
+	session.Write(&response.CreateRoom{
+		Id: 123,
+	})
 }
 
-func OnCreateRoom(x *Response.CreateRoom) {
-	fmt.Println(x)
-}
-
-func OnJoinRoom(x *Response.JoinRoom) {}
-
-func DisconnectedHandler(session *Session) {
-
-}
-
-func ReceiveHandler(session *Session) {
-
-	buffer := make([]byte, 512)
-	for {
-		numRead, err := session.conn.Read(buffer)
-		if err == io.EOF {
-			go DisconnectedHandler(session)
-			return
-		}
-
-		session.queue = append(session.queue, buffer[:numRead]...)
-
-		for len(session.queue) > 0 {
-			offset := 0
-			size := binary.LittleEndian.Uint32(session.queue[offset:4])
-			offset += 4
-
-			if uint32(len(session.queue[offset:])) < size {
-				break
-			}
-
-			identity := binary.LittleEndian.Uint32(session.queue[offset : offset+4])
-			offset += 4
-
-			payload := session.queue[offset : offset+int(size)-4]
-
-			switch identity {
-			case Request.CREATE_ROOM:
-				x := Request.CreateRoom{}
-				x.Deserialize(payload)
-				fmt.Println(x)
-
-				session.Write(&Response.CreateRoom{
-					Id: 10,
-				})
-
-			case Request.JOIN_ROOM:
-				x := Request.JoinRoom{}
-				x.Deserialize(payload)
-				fmt.Println(x)
-
-				session.Write(&Response.JoinRoom{})
-			}
-
-			session.queue = session.queue[size+4:]
-		}
-	}
-}
-
-func AcceptHandler(port int) {
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	defer listener.Close()
-
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-
-		session := NewSession(conn)
-		go ReceiveHandler(&session)
-	}
+func OnJoinRoom(session *network.Session, x *request.JoinRoom) {
+	session.Write(&response.JoinRoom{
+		Users: []uint64{1, 2, 3, 4, 5},
+	})
 }
 
 func main() {
-	// m := map[int]interface{}{
-	// 	Response.CREATE_ROOM: OnCreateRoom,
-	// 	Response.JOIN_ROOM:   OnJoinRoom,
-	// }
+	acceptor := network.NewAcceptor(
+		func(session *network.Session, identity uint32, payload []byte) {
+			deserialized := request.Allocator[identity](payload)
+			handler[identity](session, deserialized)
+		}, func(session *network.Session) {
 
-	// id := Response.CREATE_ROOM
-	// handler := m[id]
+		})
 
-	// switch id {
-
-	// case Response.CREATE_ROOM:
-	// 	handler.(func(*Response.CreateRoom))(&Response.CreateRoom{})
-
-	// case Response.JOIN_ROOM:
-	// 	handler.(func(*Response.JoinRoom))(&Response.JoinRoom{})
-	// }
-
-	AcceptHandler(8000)
+	acceptor.Run(8000)
 }

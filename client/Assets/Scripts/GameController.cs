@@ -1,5 +1,5 @@
 using Network;
-using Protocol.Request;
+using Protocol.Response;
 using UnityEngine;
 
 public class GameController : MonoBehaviour

@@ -57,7 +57,7 @@ namespace Protocol.Response
 
         public JoinRoom(FlatBuffer.Response.JoinRoom obj)
         {
-            this.Users = Enumerable.Range(0, obj.UsersLength).Cast<ulong>().ToList();
+            this.Users = Enumerable.Range(0, obj.UsersLength).Select(x => (ulong)System.Convert.ChangeType(x, typeof(ulong))).ToList();
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.JoinRoom> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
