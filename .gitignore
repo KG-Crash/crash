@@ -79,3 +79,4 @@ server/**/*.exe
 server/.vscode
 server/pkg
 server/bin
+server/src/github.com
