@@ -8,8 +8,15 @@ import (
 )
 
 var Allocator map[uint32]func([]byte) protocol.Protocol
+var Text map[uint32]string
 
 func init() {
+	Text = make(map[uint32]string)
+	Text[CREATE_ROOM] = "CREATE_ROOM"
+	Text[JOIN_ROOM] = "JOIN_ROOM"
+	Text[LEAVE_ROOM] = "LEAVE_ROOM"
+	Text[KICK_ROOM] = "KICK_ROOM"
+
 	Allocator = make(map[uint32]func([]byte) protocol.Protocol)
 
 	Allocator[CREATE_ROOM] = func(bytes []byte) protocol.Protocol {

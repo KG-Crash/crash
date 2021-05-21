@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"network"
 
 	"protocol"
@@ -33,13 +34,17 @@ func OnJoinRoom(session *network.Session, x *request.JoinRoom) {
 }
 
 func main() {
+	log.SetFlags(log.Ldate | log.Ltime)
+
 	acceptor := network.NewAcceptor(
-		func(session *network.Session, identity uint32, payload []byte) {
-			deserialized := request.Allocator[identity](payload)
-			handler[identity](session, deserialized)
+		func(session *network.Session, identity uint32, p protocol.Protocol) {
+			handler[identity](session, p)
 		}, func(session *network.Session) {
 
 		})
 
-	acceptor.Run(8000)
+	port := uint16(8000)
+	log.Printf("CRASH SERVER IS RUNNING : %d", port)
+
+	acceptor.Run(port)
 }

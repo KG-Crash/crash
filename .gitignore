@@ -80,3 +80,4 @@ server/.vscode
 server/pkg
 server/bin
 server/src/github.com
+server/src/main/__debug_*

@@ -8,8 +8,13 @@ import (
 )
 
 var Allocator map[uint32]func([]byte) protocol.Protocol
+var Text map[uint32]string
 
 func init() {
+    Text = make(map[uint32]string){% for data in dataSet %}
+    Text[{{ data.name.upper_snake }}] = "{{ data.name.upper_snake }}"
+    {%- endfor %}
+
 	Allocator = make(map[uint32]func([]byte) protocol.Protocol)
     {% for data in dataSet %}
     Allocator[{{ data.name.upper_snake }}] = func(bytes []byte) protocol.Protocol {
