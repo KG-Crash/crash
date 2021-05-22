@@ -10,15 +10,18 @@ import (
 	"protocol/response"
 )
 
+type ReceiveFunc func(*Session, protocol.Protocol)
+type DisconnectedFunc func(*Session)
+
 type Session struct {
 	conn                 net.Conn
 	queue                []byte
 	output               chan protocol.Protocol
-	callbackReceive      func(*Session, uint32, protocol.Protocol)
-	callbackDisconnected func(*Session)
+	callbackReceive      ReceiveFunc
+	callbackDisconnected DisconnectedFunc
 }
 
-func NewSession(conn net.Conn, callbackReceive func(*Session, uint32, protocol.Protocol), callbackDisconnected func(*Session)) Session {
+func NewSession(conn net.Conn, callbackReceive ReceiveFunc, callbackDisconnected DisconnectedFunc) Session {
 	session := Session{
 		conn:                 conn,
 		queue:                make([]byte, 0, 4096),
@@ -51,7 +54,7 @@ func (session *Session) processWrite() {
 		bytes = append(bytes, serialized...)
 		session.conn.Write(bytes)
 
-		log.Printf("[%s] Response %s : %s", session.Host(), response.Text[identity], p)
+		log.Printf("[%s] Response %s : %s", session.Host(), response.Text(p), p)
 	}
 }
 
@@ -73,14 +76,10 @@ func (session *Session) Read(buffer []byte) error {
 			break
 		}
 
-		identity := binary.LittleEndian.Uint32(session.queue[offset : offset+4])
-		offset += 4
+		deserialized := request.Deserialize(size, session.queue[offset:])
 
-		payload := session.queue[offset : offset+int(size)-4]
-		deserialized := request.Allocator[identity](payload)
-
-		log.Printf("[%s] Request %s : %s", session.Host(), request.Text[identity], deserialized)
-		session.callbackReceive(session, identity, deserialized)
+		log.Printf("[%s] Request %s : %s", session.Host(), request.Text(deserialized), deserialized)
+		session.callbackReceive(session, deserialized)
 		session.queue = session.queue[size+4:]
 	}
 

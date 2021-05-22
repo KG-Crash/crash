@@ -5,16 +5,15 @@ import (
 	"io"
 	"log"
 	"net"
-	"protocol"
 )
 
 type Acceptor struct {
 	sessions             map[*Session]*Session
-	callbackReceive      func(*Session, uint32, protocol.Protocol)
-	callbackDisconnected func(*Session)
+	callbackReceive      ReceiveFunc
+	callbackDisconnected DisconnectedFunc
 }
 
-func NewAcceptor(callbackReceive func(*Session, uint32, protocol.Protocol), callbackDisconnected func(*Session)) *Acceptor {
+func NewAcceptor(callbackReceive ReceiveFunc, callbackDisconnected DisconnectedFunc) *Acceptor {
 	return &Acceptor{
 		sessions:             make(map[*Session]*Session),
 		callbackReceive:      callbackReceive,

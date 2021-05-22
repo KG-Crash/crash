@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"network"
 
@@ -8,18 +9,6 @@ import (
 	"protocol/request"
 	"protocol/response"
 )
-
-var handler map[uint32]func(*network.Session, protocol.Protocol)
-
-func init() {
-	handler = make(map[uint32]func(*network.Session, protocol.Protocol))
-	handler[request.CREATE_ROOM] = func(s *network.Session, p protocol.Protocol) {
-		OnCreateRoom(s, p.(*request.CreateRoom))
-	}
-	handler[request.JOIN_ROOM] = func(s *network.Session, p protocol.Protocol) {
-		OnJoinRoom(s, p.(*request.JoinRoom))
-	}
-}
 
 func OnCreateRoom(session *network.Session, x *request.CreateRoom) {
 	session.Write(&response.CreateRoom{
@@ -37,8 +26,22 @@ func main() {
 	log.SetFlags(log.Ldate | log.Ltime)
 
 	acceptor := network.NewAcceptor(
-		func(session *network.Session, identity uint32, p protocol.Protocol) {
-			handler[identity](session, p)
+		func(session *network.Session, p protocol.Protocol) {
+
+			switch msg := p.(type) {
+			case *request.CreateRoom:
+				OnCreateRoom(session, msg)
+
+			case *request.JoinRoom:
+				OnJoinRoom(session, msg)
+
+			case *request.LeaveRoom:
+				fmt.Println(msg)
+
+			case *request.KickRoom:
+				fmt.Println(msg)
+			}
+
 		}, func(session *network.Session) {
 
 		})

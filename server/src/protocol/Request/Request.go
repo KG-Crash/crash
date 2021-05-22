@@ -1,44 +1,56 @@
 package request
 
 import (
+	"encoding/binary"
 	"protocol"
 	source "protocol/FlatBuffer/Request"
 
 	flatbuffers "github.com/google/flatbuffers/go"
 )
 
-var Allocator map[uint32]func([]byte) protocol.Protocol
-var Text map[uint32]string
+func Deserialize(size uint32, bytes []byte) protocol.Protocol {
+	offset := 0
+	identity := binary.LittleEndian.Uint32(bytes[:4])
+	offset += 4
 
-func init() {
-	Text = make(map[uint32]string)
-	Text[CREATE_ROOM] = "CREATE_ROOM"
-	Text[JOIN_ROOM] = "JOIN_ROOM"
-	Text[LEAVE_ROOM] = "LEAVE_ROOM"
-	Text[KICK_ROOM] = "KICK_ROOM"
-
-	Allocator = make(map[uint32]func([]byte) protocol.Protocol)
-
-	Allocator[CREATE_ROOM] = func(bytes []byte) protocol.Protocol {
+	payload := bytes[offset : offset+int(size)]
+	switch identity {
+	case CREATE_ROOM:
 		x := &CreateRoom{}
-		return x.Deserialize(bytes)
-	}
+		return x.Deserialize(payload)
 
-	Allocator[JOIN_ROOM] = func(bytes []byte) protocol.Protocol {
+	case JOIN_ROOM:
 		x := &JoinRoom{}
-		return x.Deserialize(bytes)
-	}
+		return x.Deserialize(payload)
 
-	Allocator[LEAVE_ROOM] = func(bytes []byte) protocol.Protocol {
+	case LEAVE_ROOM:
 		x := &LeaveRoom{}
-		return x.Deserialize(bytes)
-	}
+		return x.Deserialize(payload)
 
-	Allocator[KICK_ROOM] = func(bytes []byte) protocol.Protocol {
+	case KICK_ROOM:
 		x := &KickRoom{}
-		return x.Deserialize(bytes)
+		return x.Deserialize(payload)
+
 	}
 
+	return nil
+}
+
+func Text(p protocol.Protocol) string {
+	switch p.(type) {
+	case *CreateRoom:
+		return "CREATE_ROOM"
+
+	case *JoinRoom:
+		return "JOIN_ROOM"
+
+	case *LeaveRoom:
+		return "LEAVE_ROOM"
+
+	case *KickRoom:
+		return "KICK_ROOM"
+	}
+	return ""
 }
 
 const (
