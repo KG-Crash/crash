@@ -1,0 +1,14 @@
+using NetworkShared;
+using System.Collections.Generic;
+
+namespace MasterData.{{ usage }}
+{
+    {% for table in tables -%}
+    [Table("json/{{ table.name }}.json")]
+    public partial class Table{{ table.name }} : {{ table.type }}{{ table.generic }}
+    { }
+    {%- if not loop.last %}
+
+    {% endif %}
+    {%- endfor %}
+}

@@ -1,0 +1,17 @@
+using Newtonsoft.Json;
+
+namespace NetworkShared
+{
+    [DescriptiveEnumEnforcement(DescriptiveEnumEnforcementAttribute.EnforcementTypeEnum.ThrowException)]
+    public enum {{ name }}
+    {
+        {% for enum in enums -%}
+        [Description("{{ enum.desc }}")]
+        {{ enum.name }}
+        {%- if not loop.last -%},{%- endif %}
+        {%- if not loop.last %}
+
+        {% endif %}
+        {%- endfor %}
+    }
+}
