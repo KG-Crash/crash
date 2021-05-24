@@ -82,3 +82,4 @@ server/bin
 server/src/github.com
 server/src/main/__debug_*
 server/src/*.org
+table/converter/output

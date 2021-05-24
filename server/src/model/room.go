@@ -1,38 +1,38 @@
 package model
 
 import (
-	"sync"
+	"sync/atomic"
 )
 
+type RoomEnter struct {
+	*User
+}
+type RoomLeave struct {
+	*User
+}
+
 type Room struct {
-	id     uint32
-	users  map[string]*User
-	master *User
-
-	in  chan *User
-	out chan *User
-
+	id              uint32
+	users           map[string]*User
+	master          *User
+	messages        chan interface{}
 	callbackDestroy func(*Room)
 }
 
 var index uint32 // TODO 스케일아웃하면 Redis에서 관리할 필요가 있음
-var mutex *sync.Mutex
 
 func init() {
 	index = 0
-	mutex = &sync.Mutex{}
 }
 
 func NewRoom(master *User, callbackDestroy func(*Room)) *Room {
-	mutex.Lock()
 	room := &Room{
 		id:              index,
 		master:          master,
 		users:           make(map[string]*User),
 		callbackDestroy: callbackDestroy,
 	}
-	index++
-	mutex.Unlock()
+	atomic.AddUint32(&index, 1)
 
 	return room
 }
@@ -40,23 +40,24 @@ func NewRoom(master *User, callbackDestroy func(*Room)) *Room {
 func (room *Room) process() {
 
 	for {
-		select {
-		case user := <-room.in:
-			if room.contains(user) {
+		message := <-room.messages
+		switch msg := message.(type) {
+		case *RoomEnter:
+			if room.contains(msg.User) {
 				return
 			}
 
-			room.users[user.session.Host()] = user
+			room.users[msg.User.session.Host()] = msg.User
 
-		case user := <-room.out:
-			if !room.contains(user) {
+		case *RoomLeave:
+			if !room.contains(msg.User) {
 				return
 			}
 
-			if room.master == user {
+			if room.master == msg.User {
 				room.callbackDestroy(room)
 			} else {
-				delete(room.users, user.session.Host())
+				delete(room.users, msg.User.session.Host())
 			}
 		}
 	}
@@ -68,13 +69,9 @@ func (room *Room) contains(user *User) bool {
 }
 
 func (room *Room) Enter(user *User) {
-	room.in <- user
+	room.messages <- &RoomEnter{User: user}
 }
 
 func (room *Room) Leave(user *User) {
-	room.out <- user
-}
-
-func (room *Room) Start() {
-
+	room.messages <- &RoomLeave{User: user}
 }
