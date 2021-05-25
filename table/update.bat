@@ -1,5 +1,5 @@
 PUSHD converter
-RMDIR output /s/q
+RMDIR output /s /q
 CALL app.exe --dir=.. --out=output
 PAUSE
 
