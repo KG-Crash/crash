@@ -3,89 +3,75 @@ package network
 import (
 	"encoding/binary"
 	"io"
-	"log"
 	"net"
 	"protocol"
 	"protocol/request"
-	"protocol/response"
+
+	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
-type ReceiveFunc func(*Session, protocol.Protocol)
-type DisconnectedFunc func(*Session)
-
-type Session struct {
-	conn                 net.Conn
-	queue                []byte
-	output               chan protocol.Protocol
-	callbackReceive      ReceiveFunc
-	callbackDisconnected DisconnectedFunc
+type SessionActor struct {
+	net.Conn
+	queue []byte
 }
 
-func NewSession(conn net.Conn, callbackReceive ReceiveFunc, callbackDisconnected DisconnectedFunc) Session {
-	session := Session{
-		conn:                 conn,
-		queue:                make([]byte, 0, 4096),
-		output:               make(chan protocol.Protocol),
-		callbackReceive:      callbackReceive,
-		callbackDisconnected: callbackDisconnected,
-	}
-
-	go session.processWrite()
-
-	return session
+type SetConn struct {
+	net.Conn
 }
 
-func (session *Session) Host() string {
-	return session.conn.RemoteAddr().String()
+type Receive struct {
 }
 
-func (session *Session) processWrite() {
-	for {
-		p := <-session.output
-		serialized := p.Serialize()
+type Write struct {
+	protocol.Protocol
+}
+
+func (state *SessionActor) Receive(context actor.Context) {
+	switch msg := context.Message().(type) {
+	case *SetConn:
+		state.Conn = msg.Conn
+		context.ActorSystem().Root.Send(context.Self(), &Receive{})
+
+	case *Receive:
+		buffer := make([]byte, 4096)
+		numRead, err := state.Conn.Read(buffer)
+		if err == io.EOF {
+			state.Conn.Close()
+			context.Stop(context.Self())
+			return
+		}
+		state.queue = append(state.queue, buffer[:numRead]...)
+
+		for len(state.queue) > 0 {
+			offset := 0
+			size := binary.LittleEndian.Uint32(state.queue[offset:4])
+			offset += 4
+
+			if uint32(len(state.queue[offset:])) < size {
+				break
+			}
+
+			deserialized := request.Deserialize(size-4, state.queue[offset:])
+			context.Send(context.Parent(), &Received{Protocol: deserialized})
+
+			state.queue = state.queue[size+4:]
+		}
+
+		context.ActorSystem().Root.Send(context.Self(), &Receive{})
+
+	case *Write:
+		serialized := msg.Protocol.Serialize()
 		size := uint32(len(serialized))
 
 		bytes := make([]byte, 8, 8+size)
 		binary.LittleEndian.PutUint32(bytes[:], uint32(4+len(serialized)))
 
-		identity := uint32(p.Identity())
+		identity := uint32(msg.Protocol.Identity())
 		binary.LittleEndian.PutUint32(bytes[4:], identity)
 
 		bytes = append(bytes, serialized...)
-		session.conn.Write(bytes)
+		state.Conn.Write(bytes)
 
-		log.Printf("[%s] Response %s : %s", session.Host(), response.Text(p), p)
+		// log.Printf("[%s] Response %s : %s", state.Host(), response.Text(msg.Protocol), msg.Protocol)
 	}
-}
-
-func (session *Session) Read(buffer []byte) error {
-	numRead, err := session.conn.Read(buffer)
-	if err == io.EOF {
-		session.callbackDisconnected(session)
-		return io.EOF
-	}
-
-	session.queue = append(session.queue, buffer[:numRead]...)
-
-	for len(session.queue) > 0 {
-		offset := 0
-		size := binary.LittleEndian.Uint32(session.queue[offset:4])
-		offset += 4
-
-		if uint32(len(session.queue[offset:])) < size {
-			break
-		}
-
-		deserialized := request.Deserialize(size, session.queue[offset:])
-
-		log.Printf("[%s] Request %s : %s", session.Host(), request.Text(deserialized), deserialized)
-		session.callbackReceive(session, deserialized)
-		session.queue = session.queue[size+4:]
-	}
-
-	return nil
-}
-
-func (session *Session) Write(p protocol.Protocol) {
-	session.output <- p
 }

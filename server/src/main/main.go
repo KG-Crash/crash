@@ -5,49 +5,30 @@ import (
 	"log"
 	"network"
 
-	"protocol"
-	"protocol/request"
-	"protocol/response"
+	console "github.com/AsynkronIT/goconsole"
+	"github.com/AsynkronIT/protoactor-go/actor"
 )
-
-func OnCreateRoom(session *network.Session, x *request.CreateRoom) {
-	session.Write(&response.CreateRoom{
-		Id: 123,
-	})
-}
-
-func OnJoinRoom(session *network.Session, x *request.JoinRoom) {
-	session.Write(&response.JoinRoom{
-		Users: []uint64{1, 2, 3, 4, 5},
-	})
-}
 
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime)
 
-	acceptor := network.NewAcceptor(
-		func(session *network.Session, p protocol.Protocol) {
-
-			switch msg := p.(type) {
-			case *request.CreateRoom:
-				OnCreateRoom(session, msg)
-
-			case *request.JoinRoom:
-				OnJoinRoom(session, msg)
-
-			case *request.LeaveRoom:
-				fmt.Println(msg)
-
-			case *request.KickRoom:
-				fmt.Println(msg)
+	system := actor.NewActorSystem()
+	props := actor.PropsFromProducer(func() actor.Actor {
+		return &network.AcceptorActor{}
+	}).WithReceiverMiddleware(func(next actor.ReceiverFunc) actor.ReceiverFunc {
+		fn := func(c actor.ReceiverContext, env *actor.MessageEnvelope) {
+			switch msg := env.Message.(type) {
+			case *network.Received:
+				fmt.Println(msg.Protocol)
 			}
 
-		}, func(session *network.Session) {
+			next(c, env)
+		}
 
-		})
+		return fn
+	})
 
-	port := uint16(8000)
-	log.Printf("CRASH SERVER IS RUNNING : %d", port)
-
-	acceptor.Run(port)
+	pid := system.Root.Spawn(props)
+	system.Root.Send(pid, &network.Listen{Port: 8000})
+	_, _ = console.ReadLine()
 }

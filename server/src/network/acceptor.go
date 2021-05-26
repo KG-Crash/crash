@@ -2,54 +2,46 @@ package network
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net"
+	"protocol"
+
+	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
-type Acceptor struct {
-	sessions             map[*Session]*Session
-	callbackReceive      ReceiveFunc
-	callbackDisconnected DisconnectedFunc
+type AcceptorActor struct {
+	net.Listener
 }
 
-func NewAcceptor(callbackReceive ReceiveFunc, callbackDisconnected DisconnectedFunc) *Acceptor {
-	return &Acceptor{
-		sessions:             make(map[*Session]*Session),
-		callbackReceive:      callbackReceive,
-		callbackDisconnected: callbackDisconnected,
-	}
+type Listen struct {
+	Port uint16
 }
 
-func (acceptor *Acceptor) onAccept(session *Session) {
-
-	buffer := make([]byte, 512)
-	for {
-		err := session.Read(buffer)
-		if err == io.EOF {
-			delete(acceptor.sessions, session)
-			return
-		}
-	}
+type Accept struct {
 }
 
-func (acceptor *Acceptor) Run(port uint16) {
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	defer listener.Close()
+type Received struct {
+	protocol.Protocol
+}
 
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Print(err)
-			continue
-		}
+func (state *AcceptorActor) Receive(context actor.Context) {
+	switch msg := context.Message().(type) {
+	case *Listen:
+		state.Listener, _ = net.Listen("tcp", fmt.Sprintf(":%d", msg.Port))
+		context.ActorSystem().Root.Send(context.Self(), &Accept{})
+		log.Printf("CRASH SERVER IS RUNNING : %d", msg.Port)
 
-		session := NewSession(conn, acceptor.callbackReceive, acceptor.callbackDisconnected)
-		acceptor.sessions[&session] = &session
-		go acceptor.onAccept(&session)
+	case *Accept:
+		conn, _ := state.Listener.Accept()
+
+		props := actor.PropsFromProducer(func() actor.Actor {
+			return &SessionActor{
+				queue: make([]byte, 0),
+			}
+		})
+
+		session := context.Spawn(props)
+		context.ActorSystem().Root.Send(session, &SetConn{Conn: conn})
+		context.ActorSystem().Root.Send(context.Self(), &Accept{})
 	}
 }
