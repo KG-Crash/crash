@@ -26,7 +26,6 @@ namespace Network
         {
             try
             {
-                var size = msg.ReadableBytes;
                 var identity = (Identity)msg.ReadUnsignedIntLE();
                 
                 if (_allocators.TryGetValue(identity, out var allocator) == false)

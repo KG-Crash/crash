@@ -20,7 +20,12 @@ type Listen struct {
 type Accept struct {
 }
 
+type Accepted struct {
+	net.Conn
+}
+
 type Received struct {
+	net.Conn
 	protocol.Protocol
 }
 
@@ -34,14 +39,7 @@ func (state *AcceptorActor) Receive(context actor.Context) {
 	case *Accept:
 		conn, _ := state.Listener.Accept()
 
-		props := actor.PropsFromProducer(func() actor.Actor {
-			return &SessionActor{
-				queue: make([]byte, 0),
-			}
-		})
-
-		session := context.Spawn(props)
-		context.ActorSystem().Root.Send(session, &SetConn{Conn: conn})
-		context.ActorSystem().Root.Send(context.Self(), &Accept{})
+		context.Send(context.Self(), &Accepted{Conn: conn})
+		context.Send(context.Self(), &Accept{})
 	}
 }
