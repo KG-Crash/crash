@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"model"
 	"net"
 	"network"
 	"protocol"
@@ -12,7 +13,7 @@ import (
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
-func OnReceived(context actor.Context, receiver *network.SessionActor, protocol protocol.Protocol) {
+func OnReceived(context actor.Context, user *model.UserActor, protocol protocol.Protocol) {
 	switch protocol.(type) {
 	case *request.CreateRoom:
 		context.Send(context.Self(), &network.Write{
@@ -32,14 +33,14 @@ func OnReceived(context actor.Context, receiver *network.SessionActor, protocol 
 
 func OnAccepted(context actor.Context, acceptor *network.AcceptorActor, conn net.Conn) {
 	props := actor.PropsFromProducer(func() actor.Actor {
-		return &network.SessionActor{}
+		return &model.UserActor{}
 	})
 
-	session := context.Spawn(props)
-	context.Send(session, &network.BindSession{
+	user := context.Spawn(props)
+	context.Send(user, &model.BindUser{
 		OnReceived: OnReceived,
 	})
-	context.Send(session, &network.SetConn{Conn: conn})
+	context.Send(user, &network.SetConn{Conn: conn})
 }
 
 func main() {

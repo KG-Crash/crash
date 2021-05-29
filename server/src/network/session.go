@@ -2,17 +2,12 @@ package network
 
 import (
 	"net"
-	"protocol"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
-type OnReceived func(context actor.Context, receiver *SessionActor, protocol protocol.Protocol)
-
 type SessionActor struct {
 	net.Conn
-
-	OnReceived
 
 	Sender   *actor.PID
 	Receiver *actor.PID
@@ -23,10 +18,6 @@ type SetConn struct {
 }
 
 type Receive struct {
-}
-
-type BindSession struct {
-	OnReceived
 }
 
 func (state *SessionActor) Receive(context actor.Context) {
@@ -45,18 +36,13 @@ func (state *SessionActor) Receive(context actor.Context) {
 		context.Stop(state.Receiver)
 		state.Conn.Close()
 
-	case *BindSession:
-		state.OnReceived = msg.OnReceived
-
 	case *SetConn:
 		state.Conn = msg.Conn
 		context.Send(state.Sender, msg)
 		context.Send(state.Receiver, msg)
 
 	case *Received:
-		if state.OnReceived != nil {
-			state.OnReceived(context, state, msg.Protocol)
-		}
+		context.Send(context.Parent(), msg)
 
 	case *Write:
 		context.Send(state.Sender, msg)
