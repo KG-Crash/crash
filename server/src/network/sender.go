@@ -9,15 +9,22 @@ import (
 )
 
 type SenderActor struct {
+	net.Conn
 }
 
 type Write struct {
 	protocol.Protocol
-	net.Conn
+}
+
+func NewSenderActor() *SenderActor {
+	return &SenderActor{}
 }
 
 func (state *SenderActor) Receive(context actor.Context) {
 	switch msg := context.Message().(type) {
+	case *SetConn:
+		state.Conn = msg.Conn
+
 	case *Write:
 		serialized := msg.Protocol.Serialize()
 		size := uint32(len(serialized))
@@ -29,6 +36,6 @@ func (state *SenderActor) Receive(context actor.Context) {
 		binary.LittleEndian.PutUint32(bytes[4:], identity)
 
 		bytes = append(bytes, serialized...)
-		msg.Conn.Write(bytes)
+		state.Conn.Write(bytes)
 	}
 }
