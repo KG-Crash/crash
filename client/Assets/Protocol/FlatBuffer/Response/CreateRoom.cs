@@ -19,17 +19,23 @@ public struct CreateRoom : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public CreateRoom __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public uint Id { get { int o = __p.__offset(4); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
+  public string Id { get { int o = __p.__offset(4); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
+#if ENABLE_SPAN_T
+  public Span<byte> GetIdBytes() { return __p.__vector_as_span<byte>(4, 1); }
+#else
+  public ArraySegment<byte>? GetIdBytes() { return __p.__vector_as_arraysegment(4); }
+#endif
+  public byte[] GetIdArray() { return __p.__vector_as_array<byte>(4); }
 
   public static Offset<FlatBuffer.Response.CreateRoom> CreateCreateRoom(FlatBufferBuilder builder,
-      uint id = 0) {
+      StringOffset idOffset = default(StringOffset)) {
     builder.StartTable(1);
-    CreateRoom.AddId(builder, id);
+    CreateRoom.AddId(builder, idOffset);
     return CreateRoom.EndCreateRoom(builder);
   }
 
   public static void StartCreateRoom(FlatBufferBuilder builder) { builder.StartTable(1); }
-  public static void AddId(FlatBufferBuilder builder, uint id) { builder.AddUint(0, id, 0); }
+  public static void AddId(FlatBufferBuilder builder, StringOffset idOffset) { builder.AddOffset(0, idOffset.Value, 0); }
   public static Offset<FlatBuffer.Response.CreateRoom> EndCreateRoom(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Response.CreateRoom>(o);

@@ -26,13 +26,13 @@ func (rcv *JoinRoom) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *JoinRoom) Users(j int) uint64 {
+func (rcv *JoinRoom) Users(j int) []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
 		a := rcv._tab.Vector(o)
-		return rcv._tab.GetUint64(a + flatbuffers.UOffsetT(j*8))
+		return rcv._tab.ByteVector(a + flatbuffers.UOffsetT(j*4))
 	}
-	return 0
+	return nil
 }
 
 func (rcv *JoinRoom) UsersLength() int {
@@ -43,15 +43,6 @@ func (rcv *JoinRoom) UsersLength() int {
 	return 0
 }
 
-func (rcv *JoinRoom) MutateUsers(j int, n uint64) bool {
-	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
-	if o != 0 {
-		a := rcv._tab.Vector(o)
-		return rcv._tab.MutateUint64(a+flatbuffers.UOffsetT(j*8), n)
-	}
-	return false
-}
-
 func JoinRoomStart(builder *flatbuffers.Builder) {
 	builder.StartObject(1)
 }
@@ -59,7 +50,7 @@ func JoinRoomAddUsers(builder *flatbuffers.Builder, users flatbuffers.UOffsetT) 
 	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(users), 0)
 }
 func JoinRoomStartUsersVector(builder *flatbuffers.Builder, numElems int) flatbuffers.UOffsetT {
-	return builder.StartVector(8, numElems, 8)
+	return builder.StartVector(4, numElems, 4)
 }
 func JoinRoomEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

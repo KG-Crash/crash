@@ -5,7 +5,7 @@ table CreateRoom {
 }
 
 table JoinRoom {
-	id: uint;
+	id: string;
 }
 
 table LeaveRoom {
@@ -13,5 +13,5 @@ table LeaveRoom {
 }
 
 table KickRoom {
-	user: ulong;
+	user: string;
 }

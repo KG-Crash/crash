@@ -19,17 +19,23 @@ public struct KickRoom : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public KickRoom __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public ulong User { get { int o = __p.__offset(4); return o != 0 ? __p.bb.GetUlong(o + __p.bb_pos) : (ulong)0; } }
+  public string User { get { int o = __p.__offset(4); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
+#if ENABLE_SPAN_T
+  public Span<byte> GetUserBytes() { return __p.__vector_as_span<byte>(4, 1); }
+#else
+  public ArraySegment<byte>? GetUserBytes() { return __p.__vector_as_arraysegment(4); }
+#endif
+  public byte[] GetUserArray() { return __p.__vector_as_array<byte>(4); }
 
   public static Offset<FlatBuffer.Request.KickRoom> CreateKickRoom(FlatBufferBuilder builder,
-      ulong user = 0) {
+      StringOffset userOffset = default(StringOffset)) {
     builder.StartTable(1);
-    KickRoom.AddUser(builder, user);
+    KickRoom.AddUser(builder, userOffset);
     return KickRoom.EndKickRoom(builder);
   }
 
   public static void StartKickRoom(FlatBufferBuilder builder) { builder.StartTable(1); }
-  public static void AddUser(FlatBufferBuilder builder, ulong user) { builder.AddUlong(0, user, 0); }
+  public static void AddUser(FlatBufferBuilder builder, StringOffset userOffset) { builder.AddOffset(0, userOffset.Value, 0); }
   public static Offset<FlatBuffer.Request.KickRoom> EndKickRoom(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Request.KickRoom>(o);

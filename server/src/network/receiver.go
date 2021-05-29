@@ -27,7 +27,7 @@ func NewReceiverActor() *ReceiverActor {
 
 func (state *ReceiverActor) Receive(context actor.Context) {
 	switch msg := context.Message().(type) {
-	case *SetConn:
+	case *SetConnection:
 		state.Conn = msg.Conn
 		context.Send(context.Self(), &Receive{})
 

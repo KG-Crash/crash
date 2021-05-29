@@ -26,23 +26,19 @@ func (rcv *JoinRoom) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *JoinRoom) Id() uint32 {
+func (rcv *JoinRoom) Id() []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
-		return rcv._tab.GetUint32(o + rcv._tab.Pos)
+		return rcv._tab.ByteVector(o + rcv._tab.Pos)
 	}
-	return 0
-}
-
-func (rcv *JoinRoom) MutateId(n uint32) bool {
-	return rcv._tab.MutateUint32Slot(4, n)
+	return nil
 }
 
 func JoinRoomStart(builder *flatbuffers.Builder) {
 	builder.StartObject(1)
 }
-func JoinRoomAddId(builder *flatbuffers.Builder, id uint32) {
-	builder.PrependUint32Slot(0, id, 0)
+func JoinRoomAddId(builder *flatbuffers.Builder, id flatbuffers.UOffsetT) {
+	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(id), 0)
 }
 func JoinRoomEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

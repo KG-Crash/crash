@@ -21,7 +21,7 @@ public class Test : MonoBehaviour
         if (await Client.Instance.Connect("localhost", 8000))
         {
             await Client.Instance.Send(new CreateRoom { });
-            await Client.Instance.Send(new JoinRoom { Id = 1001 });
+            await Client.Instance.Send(new JoinRoom { Id = "hello" });
         }
     }
 }

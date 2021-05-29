@@ -13,7 +13,7 @@ type SessionActor struct {
 	Receiver *actor.PID
 }
 
-type SetConn struct {
+type SetConnection struct {
 	net.Conn
 }
 
@@ -36,7 +36,7 @@ func (state *SessionActor) Receive(context actor.Context) {
 		context.Stop(state.Receiver)
 		state.Conn.Close()
 
-	case *SetConn:
+	case *SetConnection:
 		state.Conn = msg.Conn
 		context.Send(state.Sender, msg)
 		context.Send(state.Receiver, msg)

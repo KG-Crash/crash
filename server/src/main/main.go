@@ -13,34 +13,29 @@ import (
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
+var game *actor.PID
+
 func OnReceived(context actor.Context, user *model.UserActor, protocol protocol.Protocol) {
 	switch protocol.(type) {
 	case *request.CreateRoom:
-		context.Send(context.Self(), &network.Write{
-			Protocol: &response.CreateRoom{
-				Id: 1000,
-			},
+		context.Send(game, &model.SpawnRoom{
+			Master: context.Self(),
 		})
 
 	case *request.JoinRoom:
 		context.Send(context.Self(), &network.Write{
 			Protocol: &response.JoinRoom{
-				Users: make([]uint64, 0),
+				Users: make([]string, 0),
 			},
 		})
 	}
 }
 
 func OnAccepted(context actor.Context, acceptor *network.AcceptorActor, conn net.Conn) {
-	props := actor.PropsFromProducer(func() actor.Actor {
-		return &model.UserActor{}
-	})
-
-	user := context.Spawn(props)
-	context.Send(user, &model.BindUser{
+	context.Send(game, &model.SpawnUser{
+		Conn:       conn,
 		OnReceived: OnReceived,
 	})
-	context.Send(user, &network.SetConn{Conn: conn})
 }
 
 func main() {
@@ -48,13 +43,17 @@ func main() {
 
 	system := actor.NewActorSystem()
 
-	pid := system.Root.Spawn(actor.PropsFromProducer(func() actor.Actor {
+	game = system.Root.Spawn(actor.PropsFromProducer(func() actor.Actor {
+		return model.NewGame()
+	}))
+
+	acceptor := system.Root.Spawn(actor.PropsFromProducer(func() actor.Actor {
 		return &network.AcceptorActor{}
 	}))
-	system.Root.Send(pid, &network.BindAcceptor{
+	system.Root.Send(acceptor, &network.BindAcceptor{
 		OnAccepted: OnAccepted,
 	})
-	system.Root.Send(pid, &network.Listen{Port: 8000})
+	system.Root.Send(acceptor, &network.Listen{Port: 8000})
 
 	_, _ = console.ReadLine()
 }

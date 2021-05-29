@@ -69,19 +69,20 @@ const (
 )
 
 type CreateRoom struct {
-	Id uint32
+	Id string
 }
 
 func (obj *CreateRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_id := builder.CreateString(obj.Id)
 
 	source.CreateRoomStart(builder)
-	source.CreateRoomAddId(builder, obj.Id)
+	source.CreateRoomAddId(builder, _id)
 
 	return source.CreateRoomEnd(builder)
 }
 
 func (obj *CreateRoom) parse(x *source.CreateRoom) *CreateRoom {
-	obj.Id = x.Id()
+	obj.Id = string(x.Id())
 
 	return obj
 }
@@ -103,19 +104,19 @@ func (obj *CreateRoom) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type JoinRoom struct {
-	Users []uint64
+	Users []string
 }
 
-func (obj *JoinRoom) users(builder *flatbuffers.Builder, users []uint64) flatbuffers.UOffsetT {
+func (obj *JoinRoom) users(builder *flatbuffers.Builder, users []string) flatbuffers.UOffsetT {
 	_size := len(users)
-	offsets := make([]uint64, _size)
+	offsets := make([]flatbuffers.UOffsetT, _size)
 	for i, x := range users {
-		offsets[_size-i-1] = x
+		offsets[_size-i-1] = builder.CreateString(x)
 	}
 
 	builder.StartVector(4, _size, 4)
 	for _, offset := range offsets {
-		builder.PrependUint64(offset)
+		builder.PrependUOffsetT(offset)
 	}
 	return builder.EndVector(_size)
 }
@@ -132,9 +133,9 @@ func (obj *JoinRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 func (obj *JoinRoom) parse(x *source.JoinRoom) *JoinRoom {
 
 	_sizeUsers := x.UsersLength()
-	obj.Users = make([]uint64, _sizeUsers)
+	obj.Users = make([]string, _sizeUsers)
 	for i := 0; i < _sizeUsers; i++ {
-		obj.Users = append(obj.Users, x.Users(i))
+		obj.Users = append(obj.Users, string(x.Users(i)))
 	}
 
 	return obj

@@ -92,19 +92,20 @@ func (obj *CreateRoom) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type JoinRoom struct {
-	Id uint32
+	Id string
 }
 
 func (obj *JoinRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_id := builder.CreateString(obj.Id)
 
 	source.JoinRoomStart(builder)
-	source.JoinRoomAddId(builder, obj.Id)
+	source.JoinRoomAddId(builder, _id)
 
 	return source.JoinRoomEnd(builder)
 }
 
 func (obj *JoinRoom) parse(x *source.JoinRoom) *JoinRoom {
-	obj.Id = x.Id()
+	obj.Id = string(x.Id())
 
 	return obj
 }
@@ -157,19 +158,20 @@ func (obj *LeaveRoom) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type KickRoom struct {
-	User uint64
+	User string
 }
 
 func (obj *KickRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_user := builder.CreateString(obj.User)
 
 	source.KickRoomStart(builder)
-	source.KickRoomAddUser(builder, obj.User)
+	source.KickRoomAddUser(builder, _user)
 
 	return source.KickRoomEnd(builder)
 }
 
 func (obj *KickRoom) parse(x *source.KickRoom) *KickRoom {
-	obj.User = x.User()
+	obj.User = string(x.User())
 
 	return obj
 }

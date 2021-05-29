@@ -48,7 +48,7 @@ namespace Protocol.Request
     {
         public uint Identity => (uint)Protocol.Request.Identity.JOIN_ROOM;
 
-        public uint Id { get; set; }
+        public string Id { get; set; }
 
         public JoinRoom()
         { }
@@ -60,7 +60,7 @@ namespace Protocol.Request
 
         public FlatBuffers.Offset<FlatBuffer.Request.JoinRoom> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _id = this.Id;
+            var _id = builder.CreateString(this.Id);
 
             return FlatBuffer.Request.JoinRoom.CreateJoinRoom(builder, _id);
         }
@@ -115,7 +115,7 @@ namespace Protocol.Request
     {
         public uint Identity => (uint)Protocol.Request.Identity.KICK_ROOM;
 
-        public ulong User { get; set; }
+        public string User { get; set; }
 
         public KickRoom()
         { }
@@ -127,7 +127,7 @@ namespace Protocol.Request
 
         public FlatBuffers.Offset<FlatBuffer.Request.KickRoom> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _user = this.User;
+            var _user = builder.CreateString(this.User);
 
             return FlatBuffer.Request.KickRoom.CreateKickRoom(builder, _user);
         }

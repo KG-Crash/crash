@@ -31,13 +31,10 @@ namespace {{ namespace }}
             {% for param in data.params -%}
             {%- if param.array -%}
             this.{{ param.name.upper }} = Enumerable.Range(0, obj.{{ param.name.upper }}Length)
-            {%- if param.element.name.base != 'int' -%}
-            .Select(x => ({{ param.element.name.base }})System.Convert.ChangeType(x, typeof({{ param.element.name.base }})))
-            {%- endif -%}
-            {%- if param.element.string -%}
-            .Select(x => obj.{{ param.name.upper }}(x))
-            {%- elif param.element.declared -%}
+            {%- if param.element.declared -%}
             .Select(x => new {{ param.element.name.base }}(obj.{{ param.name.upper }}(x).Value))
+            {%- else -%}
+            .Select(x => obj.{{ param.name.upper }}(x))
             {%- endif -%}
             .ToList();
             {%- else -%}

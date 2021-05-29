@@ -22,7 +22,7 @@ func NewSenderActor() *SenderActor {
 
 func (state *SenderActor) Receive(context actor.Context) {
 	switch msg := context.Message().(type) {
-	case *SetConn:
+	case *SetConnection:
 		state.Conn = msg.Conn
 
 	case *Write:

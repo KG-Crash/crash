@@ -1,11 +1,11 @@
 namespace FlatBuffer.Response;
 
 table CreateRoom {
-	id: uint;
+	id: string;
 }
 
 table JoinRoom {
-	users: [ulong];
+	users: [string];
 }
 
 table LeaveRoom {

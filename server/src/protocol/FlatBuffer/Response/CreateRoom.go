@@ -26,23 +26,19 @@ func (rcv *CreateRoom) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *CreateRoom) Id() uint32 {
+func (rcv *CreateRoom) Id() []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
-		return rcv._tab.GetUint32(o + rcv._tab.Pos)
+		return rcv._tab.ByteVector(o + rcv._tab.Pos)
 	}
-	return 0
-}
-
-func (rcv *CreateRoom) MutateId(n uint32) bool {
-	return rcv._tab.MutateUint32Slot(4, n)
+	return nil
 }
 
 func CreateRoomStart(builder *flatbuffers.Builder) {
 	builder.StartObject(1)
 }
-func CreateRoomAddId(builder *flatbuffers.Builder, id uint32) {
-	builder.PrependUint32Slot(0, id, 0)
+func CreateRoomAddId(builder *flatbuffers.Builder, id flatbuffers.UOffsetT) {
+	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(id), 0)
 }
 func CreateRoomEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

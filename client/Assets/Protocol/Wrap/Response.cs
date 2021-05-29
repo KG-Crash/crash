@@ -16,7 +16,7 @@ namespace Protocol.Response
     {
         public uint Identity => (uint)Protocol.Response.Identity.CREATE_ROOM;
 
-        public uint Id { get; set; }
+        public string Id { get; set; }
 
         public CreateRoom()
         { }
@@ -28,7 +28,7 @@ namespace Protocol.Response
 
         public FlatBuffers.Offset<FlatBuffer.Response.CreateRoom> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _id = this.Id;
+            var _id = builder.CreateString(this.Id);
 
             return FlatBuffer.Response.CreateRoom.CreateCreateRoom(builder, _id);
         }
@@ -50,19 +50,19 @@ namespace Protocol.Response
     {
         public uint Identity => (uint)Protocol.Response.Identity.JOIN_ROOM;
 
-        public List<ulong> Users { get; set; }
+        public List<string> Users { get; set; }
 
         public JoinRoom()
         { }
 
         public JoinRoom(FlatBuffer.Response.JoinRoom obj)
         {
-            this.Users = Enumerable.Range(0, obj.UsersLength).Select(x => (ulong)System.Convert.ChangeType(x, typeof(ulong))).ToList();
+            this.Users = Enumerable.Range(0, obj.UsersLength).Select(x => obj.Users(x)).ToList();
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.JoinRoom> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _users = FlatBuffer.Response.JoinRoom.CreateUsersVector(builder, this.Users.ToArray());
+            var _users = FlatBuffer.Response.JoinRoom.CreateUsersVector(builder, this.Users.Select(x => builder.CreateString(x)).ToArray());
 
             return FlatBuffer.Response.JoinRoom.CreateJoinRoom(builder, _users);
         }

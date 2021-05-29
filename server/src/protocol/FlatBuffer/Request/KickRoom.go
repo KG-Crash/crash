@@ -26,23 +26,19 @@ func (rcv *KickRoom) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *KickRoom) User() uint64 {
+func (rcv *KickRoom) User() []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
-		return rcv._tab.GetUint64(o + rcv._tab.Pos)
+		return rcv._tab.ByteVector(o + rcv._tab.Pos)
 	}
-	return 0
-}
-
-func (rcv *KickRoom) MutateUser(n uint64) bool {
-	return rcv._tab.MutateUint64Slot(4, n)
+	return nil
 }
 
 func KickRoomStart(builder *flatbuffers.Builder) {
 	builder.StartObject(1)
 }
-func KickRoomAddUser(builder *flatbuffers.Builder, user uint64) {
-	builder.PrependUint64Slot(0, user, 0)
+func KickRoomAddUser(builder *flatbuffers.Builder, user flatbuffers.UOffsetT) {
+	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(user), 0)
 }
 func KickRoomEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()
