@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Shared": {
+      "commandName": "Project",
+      "workingDirectory": "../../.."
+    }
+  }
+}

@@ -69,12 +69,12 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
-client/Library
-client/Temp
-client/UserSettings
-client/.vsconfig
-client/Logs
-client/obj
+client/unity/Library
+client/unity/Temp
+client/unity/UserSettings
+client/unity/.vsconfig
+client/unity/Logs
+client/unity/obj
 server/**/*.exe
 server/.vscode
 server/pkg
@@ -83,3 +83,4 @@ server/src/github.com
 server/src/main/__debug_*
 server/src/*.org
 table/converter/output
+_
