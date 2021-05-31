@@ -22,6 +22,7 @@ type LeavedRoom struct {
 }
 
 type DestroyedRoom struct {
+	RoomId string
 }
 
 func NewRoom(id string, master *actor.PID) *RoomActor {
@@ -74,13 +75,15 @@ func (state *RoomActor) OnLeaveRoom(context actor.Context, msg *LeaveRoom) {
 	if msg.User == state.Master {
 		delete(state.Users, msg.UserId)
 
-		context.Send(msg.User, &LeavedRoom{}) // master : LeavedRoom
+		context.Send(msg.User, &LeavedRoom{})
 
-		for _, user := range state.Users { // members : DestroyedRoom
-			context.Send(user, &DestroyedRoom{})
+		response := &DestroyedRoom{RoomId: state.Id}
+		context.Send(context.Parent(), response)
+		for _, user := range state.Users {
+			context.Send(user, response)
 		}
 
-		context.Stop(context.Self()) // Destroy room
+		context.Stop(context.Self())
 
 	} else {
 		response := &LeavedRoom{

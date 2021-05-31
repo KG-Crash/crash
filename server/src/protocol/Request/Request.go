@@ -31,6 +31,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &KickRoom{}
 		return x.Deserialize(payload)
 
+	case ROOM_LIST:
+		x := &RoomList{}
+		return x.Deserialize(payload)
+
 	}
 
 	return nil
@@ -49,6 +53,9 @@ func Text(p protocol.Protocol) string {
 
 	case *KickRoom:
 		return "KICK_ROOM"
+
+	case *RoomList:
+		return "ROOM_LIST"
 	}
 	return ""
 }
@@ -58,6 +65,7 @@ const (
 	JOIN_ROOM
 	LEAVE_ROOM
 	KICK_ROOM
+	ROOM_LIST
 )
 
 type CreateRoom struct {
@@ -189,5 +197,36 @@ func (obj *KickRoom) Serialize() []byte {
 
 func (obj *KickRoom) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsKickRoom(bytes, 0)
+	return obj.parse(root)
+}
+
+type RoomList struct {
+}
+
+func (obj *RoomList) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+
+	source.RoomListStart(builder)
+
+	return source.RoomListEnd(builder)
+}
+
+func (obj *RoomList) parse(x *source.RoomList) *RoomList {
+
+	return obj
+}
+
+func (obj *RoomList) Identity() int {
+	return ROOM_LIST
+}
+
+func (obj *RoomList) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *RoomList) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsRoomList(bytes, 0)
 	return obj.parse(root)
 }

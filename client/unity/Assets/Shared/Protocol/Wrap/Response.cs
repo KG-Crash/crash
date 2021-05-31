@@ -10,7 +10,8 @@ namespace Protocol.Response
         LEAVE_ROOM,
         KICK_ROOM,
         KICKED_ROOM,
-        DESTROYED_ROOM
+        DESTROYED_ROOM,
+        ROOM_LIST
     }
 
     public class CreateRoom : IProtocol
@@ -226,6 +227,43 @@ namespace Protocol.Response
         public static DestroyedRoom Deserialize(byte[] bytes)
         {
             return new DestroyedRoom(FlatBuffer.Response.DestroyedRoom.GetRootAsDestroyedRoom(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class RoomList : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.ROOM_LIST;
+
+        public List<string> Rooms { get; set; }
+        public uint Error { get; set; }
+
+        public RoomList()
+        { }
+
+        public RoomList(FlatBuffer.Response.RoomList obj)
+        {
+            this.Rooms = Enumerable.Range(0, obj.RoomsLength).Select(x => obj.Rooms(x)).ToList();
+            this.Error = obj.Error;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.RoomList> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _rooms = FlatBuffer.Response.RoomList.CreateRoomsVector(builder, this.Rooms.Select(x => builder.CreateString(x)).ToArray());
+            var _error = this.Error;
+
+            return FlatBuffer.Response.RoomList.CreateRoomList(builder, _rooms, _error);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static RoomList Deserialize(byte[] bytes)
+        {
+            return new RoomList(FlatBuffer.Response.RoomList.GetRootAsRoomList(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 }

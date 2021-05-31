@@ -32,6 +32,28 @@ type SpawnRoom struct {
 	UserId string
 }
 
+type RoomList struct {
+	User *actor.PID
+}
+
+func (state *GameActor) UserIdList() []string {
+	result := make([]string, 0, len(state.Users))
+	for id, _ := range state.Users {
+		result = append(result, id)
+	}
+
+	return result
+}
+
+func (state *GameActor) RoomIdList() []string {
+	result := make([]string, 0, len(state.Rooms))
+	for id := range state.Rooms {
+		result = append(result, id)
+	}
+
+	return result
+}
+
 func (state *GameActor) OnSpawnUser(context actor.Context, msg *SpawnUser) {
 	id := uuid.NewString()
 	if _, ok := state.Users[id]; ok {
@@ -69,11 +91,27 @@ func (state *GameActor) OnSpawnRoom(context actor.Context, msg *SpawnRoom) {
 		return NewRoom(id, msg.Master)
 	})
 	room := context.Spawn(props)
-	state.Rooms[msg.UserId] = room
+	state.Rooms[id] = room
 
 	context.Send(room, &JoinRoom{
 		User:   msg.Master,
 		UserId: msg.UserId,
+	})
+}
+
+func (state *GameActor) OnDestroyedRoom(context actor.Context, msg *DestroyedRoom) {
+	if _, ok := state.Rooms[msg.RoomId]; !ok {
+		return
+	}
+
+	delete(state.Rooms, msg.RoomId)
+}
+
+func (state *GameActor) OnRoomList(context actor.Context, msg *RoomList) {
+	context.Send(msg.User, &network.Write{
+		Protocol: &response.RoomList{
+			Rooms: state.RoomIdList(),
+		},
 	})
 }
 
@@ -84,6 +122,12 @@ func (state *GameActor) Receive(context actor.Context) {
 
 	case *SpawnRoom:
 		state.OnSpawnRoom(context, msg)
+
+	case *DestroyedRoom:
+		state.OnDestroyedRoom(context, msg)
+
+	case *RoomList:
+		state.OnRoomList(context, msg)
 
 	default:
 		fmt.Print(msg)

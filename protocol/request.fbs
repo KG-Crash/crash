@@ -15,3 +15,7 @@ table LeaveRoom {
 table KickRoom {
 	user: string;
 }
+
+table RoomList {
+	
+}

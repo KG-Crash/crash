@@ -39,6 +39,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &DestroyedRoom{}
 		return x.Deserialize(payload)
 
+	case ROOM_LIST:
+		x := &RoomList{}
+		return x.Deserialize(payload)
+
 	}
 
 	return nil
@@ -63,6 +67,9 @@ func Text(p protocol.Protocol) string {
 
 	case *DestroyedRoom:
 		return "DESTROYED_ROOM"
+
+	case *RoomList:
+		return "ROOM_LIST"
 	}
 	return ""
 }
@@ -74,6 +81,7 @@ const (
 	KICK_ROOM
 	KICKED_ROOM
 	DESTROYED_ROOM
+	ROOM_LIST
 )
 
 type CreateRoom struct {
@@ -311,5 +319,62 @@ func (obj *DestroyedRoom) Serialize() []byte {
 
 func (obj *DestroyedRoom) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsDestroyedRoom(bytes, 0)
+	return obj.parse(root)
+}
+
+type RoomList struct {
+	Rooms []string
+	Error uint32
+}
+
+func (obj *RoomList) rooms(builder *flatbuffers.Builder, rooms []string) flatbuffers.UOffsetT {
+	_size := len(rooms)
+	offsets := make([]flatbuffers.UOffsetT, _size)
+	for i, x := range rooms {
+		offsets[_size-i-1] = builder.CreateString(x)
+	}
+
+	builder.StartVector(4, _size, 4)
+	for _, offset := range offsets {
+		builder.PrependUOffsetT(offset)
+	}
+	return builder.EndVector(_size)
+}
+
+func (obj *RoomList) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_rooms := obj.rooms(builder, obj.Rooms)
+
+	source.RoomListStart(builder)
+	source.RoomListAddRooms(builder, _rooms)
+	source.RoomListAddError(builder, obj.Error)
+
+	return source.RoomListEnd(builder)
+}
+
+func (obj *RoomList) parse(x *source.RoomList) *RoomList {
+
+	_sizeRooms := x.RoomsLength()
+	obj.Rooms = make([]string, _sizeRooms)
+	for i := 0; i < _sizeRooms; i++ {
+		obj.Rooms = append(obj.Rooms, string(x.Rooms(i)))
+	}
+	obj.Error = x.Error()
+
+	return obj
+}
+
+func (obj *RoomList) Identity() int {
+	return ROOM_LIST
+}
+
+func (obj *RoomList) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *RoomList) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsRoomList(bytes, 0)
 	return obj.parse(root)
 }

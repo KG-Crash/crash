@@ -34,6 +34,10 @@ func OnReceived(context actor.Context, user *model.UserActor, protocol protocol.
 			UserId: user.Id,
 			User:   context.Self(),
 		})
+	case *request.RoomList:
+		context.Send(game, &model.RoomList{
+			User: context.Self(),
+		})
 	}
 }
 

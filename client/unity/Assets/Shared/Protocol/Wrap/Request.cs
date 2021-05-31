@@ -8,7 +8,8 @@ namespace Protocol.Request
         CREATE_ROOM,
         JOIN_ROOM,
         LEAVE_ROOM,
-        KICK_ROOM
+        KICK_ROOM,
+        ROOM_LIST
     }
 
     public class CreateRoom : IProtocol
@@ -142,6 +143,39 @@ namespace Protocol.Request
         public static KickRoom Deserialize(byte[] bytes)
         {
             return new KickRoom(FlatBuffer.Request.KickRoom.GetRootAsKickRoom(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class RoomList : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Request.Identity.ROOM_LIST;
+
+        
+
+        public RoomList()
+        { }
+
+        public RoomList(FlatBuffer.Request.RoomList obj)
+        {
+            
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Request.RoomList> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            FlatBuffer.Request.RoomList.StartRoomList(builder);
+            return FlatBuffer.Request.RoomList.EndRoomList(builder);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static RoomList Deserialize(byte[] bytes)
+        {
+            return new RoomList(FlatBuffer.Request.RoomList.GetRootAsRoomList(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 }

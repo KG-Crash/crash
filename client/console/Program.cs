@@ -47,6 +47,19 @@ public class Controller
             return true;
         }
     }
+
+    [FlatBufferEvent]
+    public bool OnRoomList(Protocol.Response.RoomList response)
+    {
+        if (response.Error > 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
 }
 
 namespace console
@@ -60,7 +73,10 @@ namespace console
             if (await Client.Instance.Connect("localhost", 8000))
             {
                 await Client.Instance.Send(new Protocol.Request.CreateRoom { });
+                await Client.Instance.Send(new Protocol.Request.RoomList { });
+
                 await Client.Instance.Send(new Protocol.Request.LeaveRoom { });
+                await Client.Instance.Send(new Protocol.Request.RoomList { });
             }
 
             Console.ReadLine();

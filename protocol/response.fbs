@@ -27,3 +27,8 @@ table KickedRoom {
 table DestroyedRoom {
 	error: uint32;
 }
+
+table RoomList {
+	rooms: [string];
+	error: uint32;
+}
