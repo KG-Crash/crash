@@ -10,15 +10,42 @@ public class Controller
     }
 
     [FlatBufferEvent]
-    public bool OnCreateRoom(Protocol.Response.CreateRoom response)
+    public bool OnJoinRoom(Protocol.Response.JoinRoom response)
     {
-        return true;
+        if (response.Error > 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 
     [FlatBufferEvent]
-    public bool OnJoinRoom(Protocol.Response.JoinRoom response)
+    public bool OnLeaveRoom(Protocol.Response.LeaveRoom response)
     {
-        return true;
+        if (response.Error > 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    [FlatBufferEvent]
+    public bool OnDestroyRoom(Protocol.Response.DestroyedRoom response)
+    {
+        if (response.Error > 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 }
 
@@ -33,7 +60,7 @@ namespace console
             if (await Client.Instance.Connect("localhost", 8000))
             {
                 await Client.Instance.Send(new Protocol.Request.CreateRoom { });
-                await Client.Instance.Send(new Protocol.Request.JoinRoom { Id = "hello" });
+                await Client.Instance.Send(new Protocol.Request.LeaveRoom { });
             }
 
             Console.ReadLine();

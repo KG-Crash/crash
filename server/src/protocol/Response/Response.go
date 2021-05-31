@@ -35,6 +35,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &KickedRoom{}
 		return x.Deserialize(payload)
 
+	case DESTROYED_ROOM:
+		x := &DestroyedRoom{}
+		return x.Deserialize(payload)
+
 	}
 
 	return nil
@@ -56,6 +60,9 @@ func Text(p protocol.Protocol) string {
 
 	case *KickedRoom:
 		return "KICKED_ROOM"
+
+	case *DestroyedRoom:
+		return "DESTROYED_ROOM"
 	}
 	return ""
 }
@@ -66,10 +73,12 @@ const (
 	LEAVE_ROOM
 	KICK_ROOM
 	KICKED_ROOM
+	DESTROYED_ROOM
 )
 
 type CreateRoom struct {
-	Id string
+	Id    string
+	Error uint32
 }
 
 func (obj *CreateRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
@@ -77,12 +86,14 @@ func (obj *CreateRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT
 
 	source.CreateRoomStart(builder)
 	source.CreateRoomAddId(builder, _id)
+	source.CreateRoomAddError(builder, obj.Error)
 
 	return source.CreateRoomEnd(builder)
 }
 
 func (obj *CreateRoom) parse(x *source.CreateRoom) *CreateRoom {
 	obj.Id = string(x.Id())
+	obj.Error = x.Error()
 
 	return obj
 }
@@ -105,6 +116,7 @@ func (obj *CreateRoom) Deserialize(bytes []byte) protocol.Protocol {
 
 type JoinRoom struct {
 	Users []string
+	Error uint32
 }
 
 func (obj *JoinRoom) users(builder *flatbuffers.Builder, users []string) flatbuffers.UOffsetT {
@@ -126,6 +138,7 @@ func (obj *JoinRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 
 	source.JoinRoomStart(builder)
 	source.JoinRoomAddUsers(builder, _users)
+	source.JoinRoomAddError(builder, obj.Error)
 
 	return source.JoinRoomEnd(builder)
 }
@@ -137,6 +150,7 @@ func (obj *JoinRoom) parse(x *source.JoinRoom) *JoinRoom {
 	for i := 0; i < _sizeUsers; i++ {
 		obj.Users = append(obj.Users, string(x.Users(i)))
 	}
+	obj.Error = x.Error()
 
 	return obj
 }
@@ -158,16 +172,23 @@ func (obj *JoinRoom) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type LeaveRoom struct {
+	Id    string
+	Error uint32
 }
 
 func (obj *LeaveRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_id := builder.CreateString(obj.Id)
 
 	source.LeaveRoomStart(builder)
+	source.LeaveRoomAddId(builder, _id)
+	source.LeaveRoomAddError(builder, obj.Error)
 
 	return source.LeaveRoomEnd(builder)
 }
 
 func (obj *LeaveRoom) parse(x *source.LeaveRoom) *LeaveRoom {
+	obj.Id = string(x.Id())
+	obj.Error = x.Error()
 
 	return obj
 }
@@ -190,18 +211,21 @@ func (obj *LeaveRoom) Deserialize(bytes []byte) protocol.Protocol {
 
 type KickRoom struct {
 	Success bool
+	Error   uint32
 }
 
 func (obj *KickRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 
 	source.KickRoomStart(builder)
 	source.KickRoomAddSuccess(builder, obj.Success)
+	source.KickRoomAddError(builder, obj.Error)
 
 	return source.KickRoomEnd(builder)
 }
 
 func (obj *KickRoom) parse(x *source.KickRoom) *KickRoom {
 	obj.Success = x.Success()
+	obj.Error = x.Error()
 
 	return obj
 }
@@ -223,16 +247,19 @@ func (obj *KickRoom) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type KickedRoom struct {
+	Error uint32
 }
 
 func (obj *KickedRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 
 	source.KickedRoomStart(builder)
+	source.KickedRoomAddError(builder, obj.Error)
 
 	return source.KickedRoomEnd(builder)
 }
 
 func (obj *KickedRoom) parse(x *source.KickedRoom) *KickedRoom {
+	obj.Error = x.Error()
 
 	return obj
 }
@@ -250,5 +277,39 @@ func (obj *KickedRoom) Serialize() []byte {
 
 func (obj *KickedRoom) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsKickedRoom(bytes, 0)
+	return obj.parse(root)
+}
+
+type DestroyedRoom struct {
+	Error uint32
+}
+
+func (obj *DestroyedRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+
+	source.DestroyedRoomStart(builder)
+	source.DestroyedRoomAddError(builder, obj.Error)
+
+	return source.DestroyedRoomEnd(builder)
+}
+
+func (obj *DestroyedRoom) parse(x *source.DestroyedRoom) *DestroyedRoom {
+	obj.Error = x.Error()
+
+	return obj
+}
+
+func (obj *DestroyedRoom) Identity() int {
+	return DESTROYED_ROOM
+}
+
+func (obj *DestroyedRoom) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *DestroyedRoom) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsDestroyedRoom(bytes, 0)
 	return obj.parse(root)
 }

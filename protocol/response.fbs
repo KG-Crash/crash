@@ -2,20 +2,28 @@ namespace FlatBuffer.Response;
 
 table CreateRoom {
 	id: string;
+	error: uint32;
 }
 
 table JoinRoom {
 	users: [string];
+	error: uint32;
 }
 
 table LeaveRoom {
-	
+	id: string;
+	error: uint32;
 }
 
 table KickRoom {
 	success: bool;
+	error: uint32;
 }
 
 table KickedRoom {
-	
+	error: uint32;
+}
+
+table DestroyedRoom {
+	error: uint32;
 }

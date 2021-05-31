@@ -7,7 +7,6 @@ import (
 	"network"
 	"protocol"
 	"protocol/request"
-	"protocol/response"
 
 	console "github.com/AsynkronIT/goconsole"
 	"github.com/AsynkronIT/protoactor-go/actor"
@@ -20,13 +19,20 @@ func OnReceived(context actor.Context, user *model.UserActor, protocol protocol.
 	case *request.CreateRoom:
 		context.Send(game, &model.SpawnRoom{
 			Master: context.Self(),
+			UserId: user.Id,
 		})
 
 	case *request.JoinRoom:
-		context.Send(context.Self(), &network.Write{
-			Protocol: &response.JoinRoom{
-				Users: make([]string, 0),
-			},
+		// context.Send(context.Self(), &network.Write{
+		// 	Protocol: &response.JoinRoom{
+		// 		Users: make([]string, 0),
+		// 	},
+		// })
+
+	case *request.LeaveRoom: // game > user > room
+		context.Send(context.Self(), &model.LeaveRoom{
+			UserId: user.Id,
+			User:   context.Self(),
 		})
 	}
 }

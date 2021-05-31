@@ -26,16 +26,20 @@ public struct CreateRoom : IFlatbufferObject
   public ArraySegment<byte>? GetIdBytes() { return __p.__vector_as_arraysegment(4); }
 #endif
   public byte[] GetIdArray() { return __p.__vector_as_array<byte>(4); }
+  public uint Error { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
 
   public static Offset<FlatBuffer.Response.CreateRoom> CreateCreateRoom(FlatBufferBuilder builder,
-      StringOffset idOffset = default(StringOffset)) {
-    builder.StartTable(1);
+      StringOffset idOffset = default(StringOffset),
+      uint error = 0) {
+    builder.StartTable(2);
+    CreateRoom.AddError(builder, error);
     CreateRoom.AddId(builder, idOffset);
     return CreateRoom.EndCreateRoom(builder);
   }
 
-  public static void StartCreateRoom(FlatBufferBuilder builder) { builder.StartTable(1); }
+  public static void StartCreateRoom(FlatBufferBuilder builder) { builder.StartTable(2); }
   public static void AddId(FlatBufferBuilder builder, StringOffset idOffset) { builder.AddOffset(0, idOffset.Value, 0); }
+  public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(1, error, 0); }
   public static Offset<FlatBuffer.Response.CreateRoom> EndCreateRoom(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Response.CreateRoom>(o);

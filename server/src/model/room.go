@@ -6,24 +6,102 @@ import (
 
 type RoomActor struct {
 	Id     string
-	Users  []*actor.PID
+	Users  map[string]*actor.PID
 	Master *actor.PID
 }
 
-type Join struct {
+type JoinRoom struct {
+	User   *actor.PID
+	UserId string
+}
+
+type LeavedRoom struct {
+	User   *actor.PID
+	UserId string
+	Error  uint32
+}
+
+type DestroyedRoom struct {
 }
 
 func NewRoom(id string, master *actor.PID) *RoomActor {
 	return &RoomActor{
 		Id:     id,
-		Users:  make([]*actor.PID, 0),
+		Users:  make(map[string]*actor.PID),
 		Master: master,
 	}
 }
 
-func (state *RoomActor) Receive(context actor.Context) {
-	switch context.Message().(type) {
-	case *Join:
+func (state *RoomActor) UserIdList() []string {
+	result := make([]string, 0, len(state.Users))
+	for id, _ := range state.Users {
+		result = append(result, id)
+	}
 
+	return result
+}
+
+// game > room
+func (state *RoomActor) OnJoinRoom(context actor.Context, msg *JoinRoom) {
+	if _, ok := state.Users[msg.UserId]; ok { // 이미 참여중인 유저가 다시 참여하려고 함
+		context.Send(msg.User, &JoinedRoom{Error: 1})
+		return
+	}
+
+	state.Users[msg.UserId] = msg.User
+
+	for _, user := range state.Users {
+		context.Send(user, &JoinedRoom{
+			UserId: msg.UserId,
+			User:   msg.User,
+			Room:   context.Self(),
+			Users:  state.UserIdList(),
+			Error:  0,
+		})
+	}
+}
+
+// game > user > room
+func (state *RoomActor) OnLeaveRoom(context actor.Context, msg *LeaveRoom) {
+
+	if _, ok := state.Users[msg.UserId]; !ok { // Room 소속 유저가 아님
+		context.Send(msg.User, &LeavedRoom{
+			Error: 1,
+		})
+		return
+	}
+
+	if msg.User == state.Master {
+		delete(state.Users, msg.UserId)
+
+		context.Send(msg.User, &LeavedRoom{}) // master : LeavedRoom
+
+		for _, user := range state.Users { // members : DestroyedRoom
+			context.Send(user, &DestroyedRoom{})
+		}
+
+		context.Stop(context.Self()) // Destroy room
+
+	} else {
+		response := &LeavedRoom{
+			User:   msg.User,
+			UserId: msg.UserId,
+			Error:  0,
+		}
+		for _, user := range state.Users {
+			context.Send(user, response)
+		}
+
+		delete(state.Users, msg.UserId)
+	}
+}
+
+func (state *RoomActor) Receive(context actor.Context) {
+	switch msg := context.Message().(type) {
+	case *JoinRoom:
+		state.OnJoinRoom(context, msg)
+
+	case *LeaveRoom:
+		state.OnLeaveRoom(context, msg)
 	}
 }

@@ -19,8 +19,17 @@ public struct KickedRoom : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public KickedRoom __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  public uint Error { get { int o = __p.__offset(4); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
 
-  public static void StartKickedRoom(FlatBufferBuilder builder) { builder.StartTable(0); }
+  public static Offset<FlatBuffer.Response.KickedRoom> CreateKickedRoom(FlatBufferBuilder builder,
+      uint error = 0) {
+    builder.StartTable(1);
+    KickedRoom.AddError(builder, error);
+    return KickedRoom.EndKickedRoom(builder);
+  }
+
+  public static void StartKickedRoom(FlatBufferBuilder builder) { builder.StartTable(1); }
+  public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(0, error, 0); }
   public static Offset<FlatBuffer.Response.KickedRoom> EndKickedRoom(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Response.KickedRoom>(o);
