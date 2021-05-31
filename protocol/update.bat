@@ -8,12 +8,12 @@ flatc --go response.fbs
 
 app.exe --root=protocol
 
-RMDIR ..\client\Assets\Protocol\FlatBuffer /s /q
-ROBOCOPY FlatBuffer ..\client\Assets\Protocol\FlatBuffer *.cs /E /njh /njs /ndl /nc /ns
+RMDIR ..\client\unity\Assets\Shared\Protocol\FlatBuffer /s /q
+ROBOCOPY FlatBuffer ..\client\unity\Assets\Shared\Protocol\FlatBuffer *.cs /E /njh /njs /ndl /nc /ns
 
 
-RMDIR ..\client\Assets\Protocol\Wrap /s /q
-ROBOCOPY output\cs ..\client\Assets\Protocol\Wrap *.cs /E /njh /njs /ndl /nc /ns
+RMDIR ..\client\unity\Assets\Shared\Protocol\Wrap /s /q
+ROBOCOPY output\cs ..\client\unity\Assets\Shared\Protocol\Wrap *.cs /E /njh /njs /ndl /nc /ns
 
 RMDIR ..\server\src\protocol\Request /s /q
 RMDIR ..\server\src\protocol\Response /s /q
