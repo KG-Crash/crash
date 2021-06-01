@@ -15,6 +15,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 
 	payload := bytes[offset : offset+int(size)]
 	switch identity {
+	case LOGIN:
+		x := &Login{}
+		return x.Deserialize(payload)
+
 	case CREATE_ROOM:
 		x := &CreateRoom{}
 		return x.Deserialize(payload)
@@ -43,6 +47,14 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &RoomList{}
 		return x.Deserialize(payload)
 
+	case CHAT:
+		x := &Chat{}
+		return x.Deserialize(payload)
+
+	case WHISPER:
+		x := &Whisper{}
+		return x.Deserialize(payload)
+
 	}
 
 	return nil
@@ -50,6 +62,9 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 
 func Text(p protocol.Protocol) string {
 	switch p.(type) {
+	case *Login:
+		return "LOGIN"
+
 	case *CreateRoom:
 		return "CREATE_ROOM"
 
@@ -70,19 +85,66 @@ func Text(p protocol.Protocol) string {
 
 	case *RoomList:
 		return "ROOM_LIST"
+
+	case *Chat:
+		return "CHAT"
+
+	case *Whisper:
+		return "WHISPER"
 	}
 	return ""
 }
 
 const (
-	CREATE_ROOM = iota
+	LOGIN = iota
+	CREATE_ROOM
 	JOIN_ROOM
 	LEAVE_ROOM
 	KICK_ROOM
 	KICKED_ROOM
 	DESTROYED_ROOM
 	ROOM_LIST
+	CHAT
+	WHISPER
 )
+
+type Login struct {
+	Id    string
+	Error uint32
+}
+
+func (obj *Login) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_id := builder.CreateString(obj.Id)
+
+	source.LoginStart(builder)
+	source.LoginAddId(builder, _id)
+	source.LoginAddError(builder, obj.Error)
+
+	return source.LoginEnd(builder)
+}
+
+func (obj *Login) parse(x *source.Login) *Login {
+	obj.Id = string(x.Id())
+	obj.Error = x.Error()
+
+	return obj
+}
+
+func (obj *Login) Identity() int {
+	return LOGIN
+}
+
+func (obj *Login) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *Login) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsLogin(bytes, 0)
+	return obj.parse(root)
+}
 
 type CreateRoom struct {
 	Id    string
@@ -184,22 +246,22 @@ func (obj *JoinRoom) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type LeaveRoom struct {
-	Id    string
+	User  string
 	Error uint32
 }
 
 func (obj *LeaveRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
-	_id := builder.CreateString(obj.Id)
+	_user := builder.CreateString(obj.User)
 
 	source.LeaveRoomStart(builder)
-	source.LeaveRoomAddId(builder, _id)
+	source.LeaveRoomAddUser(builder, _user)
 	source.LeaveRoomAddError(builder, obj.Error)
 
 	return source.LeaveRoomEnd(builder)
 }
 
 func (obj *LeaveRoom) parse(x *source.LeaveRoom) *LeaveRoom {
-	obj.Id = string(x.Id())
+	obj.User = string(x.User())
 	obj.Error = x.Error()
 
 	return obj
@@ -380,5 +442,89 @@ func (obj *RoomList) Serialize() []byte {
 
 func (obj *RoomList) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsRoomList(bytes, 0)
+	return obj.parse(root)
+}
+
+type Chat struct {
+	User    string
+	Message string
+	Error   uint32
+}
+
+func (obj *Chat) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_user := builder.CreateString(obj.User)
+	_message := builder.CreateString(obj.Message)
+
+	source.ChatStart(builder)
+	source.ChatAddUser(builder, _user)
+	source.ChatAddMessage(builder, _message)
+	source.ChatAddError(builder, obj.Error)
+
+	return source.ChatEnd(builder)
+}
+
+func (obj *Chat) parse(x *source.Chat) *Chat {
+	obj.User = string(x.User())
+	obj.Message = string(x.Message())
+	obj.Error = x.Error()
+
+	return obj
+}
+
+func (obj *Chat) Identity() int {
+	return CHAT
+}
+
+func (obj *Chat) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *Chat) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsChat(bytes, 0)
+	return obj.parse(root)
+}
+
+type Whisper struct {
+	User    string
+	Message string
+	Error   uint32
+}
+
+func (obj *Whisper) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_user := builder.CreateString(obj.User)
+	_message := builder.CreateString(obj.Message)
+
+	source.WhisperStart(builder)
+	source.WhisperAddUser(builder, _user)
+	source.WhisperAddMessage(builder, _message)
+	source.WhisperAddError(builder, obj.Error)
+
+	return source.WhisperEnd(builder)
+}
+
+func (obj *Whisper) parse(x *source.Whisper) *Whisper {
+	obj.User = string(x.User())
+	obj.Message = string(x.Message())
+	obj.Error = x.Error()
+
+	return obj
+}
+
+func (obj *Whisper) Identity() int {
+	return WHISPER
+}
+
+func (obj *Whisper) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *Whisper) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsWhisper(bytes, 0)
 	return obj.parse(root)
 }

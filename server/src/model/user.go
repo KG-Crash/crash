@@ -42,6 +42,17 @@ type Logout struct {
 	UserId string
 }
 
+type Chat struct {
+	UserId  string
+	Message string
+}
+
+type Whisper struct {
+	From    string
+	To      string
+	Message string
+}
+
 func NewUser(id string) *UserActor {
 	return &UserActor{
 		Id: id,
@@ -54,6 +65,11 @@ func (state *UserActor) OnStarted(context actor.Context) {
 	})
 
 	state.session = context.Spawn(props)
+
+	context.Send(context.Self(), &response.Login{
+		Id:    state.Id,
+		Error: 0,
+	})
 }
 
 // game > user
@@ -111,7 +127,7 @@ func (state *UserActor) OnLeavedRoom(context actor.Context, msg *LeavedRoom) {
 		state.Room = nil
 	}
 	context.Send(context.Self(), &response.LeaveRoom{
-		Id:    msg.UserId,
+		User:  msg.UserId,
 		Error: 0,
 	})
 
@@ -124,6 +140,19 @@ func (state *UserActor) OnDestroyedRoom(context actor.Context, msg *DestroyedRoo
 	context.Send(context.Self(), &response.DestroyedRoom{Error: 0})
 
 	log.Printf("User [%s]'s room is destroyed", state.Id)
+}
+
+// user direct
+func (state *UserActor) OnChat(context actor.Context, msg *Chat) {
+	if state.Room == nil {
+		context.Send(context.Self(), &response.Chat{
+			Error: 1,
+		})
+		return
+	}
+
+	context.Send(state.Room, msg)
+	log.Printf("User [%s] : %s", msg.UserId, msg.Message)
 }
 
 func (state *UserActor) Receive(context actor.Context) {
@@ -165,6 +194,9 @@ func (state *UserActor) Receive(context actor.Context) {
 
 	case *DestroyedRoom:
 		state.OnDestroyedRoom(context, msg)
+
+	case *Chat:
+		state.OnChat(context, msg)
 
 	case protocol.Protocol:
 		context.Send(state.session, &network.Write{

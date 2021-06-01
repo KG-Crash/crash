@@ -5,13 +5,53 @@ namespace Protocol.Response
 {
     public enum Identity
     {
+        LOGIN,
         CREATE_ROOM,
         JOIN_ROOM,
         LEAVE_ROOM,
         KICK_ROOM,
         KICKED_ROOM,
         DESTROYED_ROOM,
-        ROOM_LIST
+        ROOM_LIST,
+        CHAT,
+        WHISPER
+    }
+
+    public class Login : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.LOGIN;
+
+        public string Id { get; set; }
+        public uint Error { get; set; }
+
+        public Login()
+        { }
+
+        public Login(FlatBuffer.Response.Login obj)
+        {
+            this.Id = obj.Id;
+            this.Error = obj.Error;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.Login> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _id = builder.CreateString(this.Id);
+            var _error = this.Error;
+
+            return FlatBuffer.Response.Login.CreateLogin(builder, _id, _error);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Login Deserialize(byte[] bytes)
+        {
+            return new Login(FlatBuffer.Response.Login.GetRootAsLogin(new FlatBuffers.ByteBuffer(bytes)));
+        }
     }
 
     public class CreateRoom : IProtocol
@@ -95,7 +135,7 @@ namespace Protocol.Response
     {
         public uint Identity => (uint)Protocol.Response.Identity.LEAVE_ROOM;
 
-        public string Id { get; set; }
+        public string User { get; set; }
         public uint Error { get; set; }
 
         public LeaveRoom()
@@ -103,16 +143,16 @@ namespace Protocol.Response
 
         public LeaveRoom(FlatBuffer.Response.LeaveRoom obj)
         {
-            this.Id = obj.Id;
+            this.User = obj.User;
             this.Error = obj.Error;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.LeaveRoom> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _id = builder.CreateString(this.Id);
+            var _user = builder.CreateString(this.User);
             var _error = this.Error;
 
-            return FlatBuffer.Response.LeaveRoom.CreateLeaveRoom(builder, _id, _error);
+            return FlatBuffer.Response.LeaveRoom.CreateLeaveRoom(builder, _user, _error);
         }
 
         public byte[] Serialize()
@@ -267,6 +307,86 @@ namespace Protocol.Response
         public static RoomList Deserialize(byte[] bytes)
         {
             return new RoomList(FlatBuffer.Response.RoomList.GetRootAsRoomList(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class Chat : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.CHAT;
+
+        public string User { get; set; }
+        public string Message { get; set; }
+        public uint Error { get; set; }
+
+        public Chat()
+        { }
+
+        public Chat(FlatBuffer.Response.Chat obj)
+        {
+            this.User = obj.User;
+            this.Message = obj.Message;
+            this.Error = obj.Error;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.Chat> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _user = builder.CreateString(this.User);
+            var _message = builder.CreateString(this.Message);
+            var _error = this.Error;
+
+            return FlatBuffer.Response.Chat.CreateChat(builder, _user, _message, _error);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Chat Deserialize(byte[] bytes)
+        {
+            return new Chat(FlatBuffer.Response.Chat.GetRootAsChat(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class Whisper : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.WHISPER;
+
+        public string User { get; set; }
+        public string Message { get; set; }
+        public uint Error { get; set; }
+
+        public Whisper()
+        { }
+
+        public Whisper(FlatBuffer.Response.Whisper obj)
+        {
+            this.User = obj.User;
+            this.Message = obj.Message;
+            this.Error = obj.Error;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.Whisper> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _user = builder.CreateString(this.User);
+            var _message = builder.CreateString(this.Message);
+            var _error = this.Error;
+
+            return FlatBuffer.Response.Whisper.CreateWhisper(builder, _user, _message, _error);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Whisper Deserialize(byte[] bytes)
+        {
+            return new Whisper(FlatBuffer.Response.Whisper.GetRootAsWhisper(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 }

@@ -35,6 +35,14 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &RoomList{}
 		return x.Deserialize(payload)
 
+	case CHAT:
+		x := &Chat{}
+		return x.Deserialize(payload)
+
+	case WHISPER:
+		x := &Whisper{}
+		return x.Deserialize(payload)
+
 	}
 
 	return nil
@@ -56,6 +64,12 @@ func Text(p protocol.Protocol) string {
 
 	case *RoomList:
 		return "ROOM_LIST"
+
+	case *Chat:
+		return "CHAT"
+
+	case *Whisper:
+		return "WHISPER"
 	}
 	return ""
 }
@@ -66,6 +80,8 @@ const (
 	LEAVE_ROOM
 	KICK_ROOM
 	ROOM_LIST
+	CHAT
+	WHISPER
 )
 
 type CreateRoom struct {
@@ -228,5 +244,79 @@ func (obj *RoomList) Serialize() []byte {
 
 func (obj *RoomList) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsRoomList(bytes, 0)
+	return obj.parse(root)
+}
+
+type Chat struct {
+	Message string
+}
+
+func (obj *Chat) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_message := builder.CreateString(obj.Message)
+
+	source.ChatStart(builder)
+	source.ChatAddMessage(builder, _message)
+
+	return source.ChatEnd(builder)
+}
+
+func (obj *Chat) parse(x *source.Chat) *Chat {
+	obj.Message = string(x.Message())
+
+	return obj
+}
+
+func (obj *Chat) Identity() int {
+	return CHAT
+}
+
+func (obj *Chat) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *Chat) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsChat(bytes, 0)
+	return obj.parse(root)
+}
+
+type Whisper struct {
+	User    string
+	Message string
+}
+
+func (obj *Whisper) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_user := builder.CreateString(obj.User)
+	_message := builder.CreateString(obj.Message)
+
+	source.WhisperStart(builder)
+	source.WhisperAddUser(builder, _user)
+	source.WhisperAddMessage(builder, _message)
+
+	return source.WhisperEnd(builder)
+}
+
+func (obj *Whisper) parse(x *source.Whisper) *Whisper {
+	obj.User = string(x.User())
+	obj.Message = string(x.Message())
+
+	return obj
+}
+
+func (obj *Whisper) Identity() int {
+	return WHISPER
+}
+
+func (obj *Whisper) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *Whisper) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsWhisper(bytes, 0)
 	return obj.parse(root)
 }

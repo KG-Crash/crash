@@ -26,7 +26,7 @@ func (rcv *LeaveRoom) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *LeaveRoom) Id() []byte {
+func (rcv *LeaveRoom) User() []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
 		return rcv._tab.ByteVector(o + rcv._tab.Pos)
@@ -49,8 +49,8 @@ func (rcv *LeaveRoom) MutateError(n uint32) bool {
 func LeaveRoomStart(builder *flatbuffers.Builder) {
 	builder.StartObject(2)
 }
-func LeaveRoomAddId(builder *flatbuffers.Builder, id flatbuffers.UOffsetT) {
-	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(id), 0)
+func LeaveRoomAddUser(builder *flatbuffers.Builder, user flatbuffers.UOffsetT) {
+	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(user), 0)
 }
 func LeaveRoomAddError(builder *flatbuffers.Builder, error uint32) {
 	builder.PrependUint32Slot(1, error, 0)

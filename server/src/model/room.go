@@ -2,6 +2,7 @@ package model
 
 import (
 	"log"
+	"protocol/response"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
@@ -107,6 +108,20 @@ func (state *RoomActor) OnLeaveRoom(context actor.Context, msg *LeaveRoom) {
 	}
 }
 
+func (state *RoomActor) OnChat(context actor.Context, msg *Chat) {
+	if _, ok := state.Users[msg.UserId]; !ok {
+		return
+	}
+
+	for _, user := range state.Users {
+		context.Send(user, &response.Chat{
+			User:    msg.UserId,
+			Message: msg.Message,
+			Error:   0,
+		})
+	}
+}
+
 func (state *RoomActor) Receive(context actor.Context) {
 	switch msg := context.Message().(type) {
 	case *JoinRoom:
@@ -114,5 +129,8 @@ func (state *RoomActor) Receive(context actor.Context) {
 
 	case *LeaveRoom:
 		state.OnLeaveRoom(context, msg)
+
+	case *Chat:
+		state.OnChat(context, msg)
 	}
 }

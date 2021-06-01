@@ -9,7 +9,9 @@ namespace Protocol.Request
         JOIN_ROOM,
         LEAVE_ROOM,
         KICK_ROOM,
-        ROOM_LIST
+        ROOM_LIST,
+        CHAT,
+        WHISPER
     }
 
     public class CreateRoom : IProtocol
@@ -176,6 +178,77 @@ namespace Protocol.Request
         public static RoomList Deserialize(byte[] bytes)
         {
             return new RoomList(FlatBuffer.Request.RoomList.GetRootAsRoomList(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class Chat : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Request.Identity.CHAT;
+
+        public string Message { get; set; }
+
+        public Chat()
+        { }
+
+        public Chat(FlatBuffer.Request.Chat obj)
+        {
+            this.Message = obj.Message;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Request.Chat> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _message = builder.CreateString(this.Message);
+
+            return FlatBuffer.Request.Chat.CreateChat(builder, _message);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Chat Deserialize(byte[] bytes)
+        {
+            return new Chat(FlatBuffer.Request.Chat.GetRootAsChat(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class Whisper : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Request.Identity.WHISPER;
+
+        public string User { get; set; }
+        public string Message { get; set; }
+
+        public Whisper()
+        { }
+
+        public Whisper(FlatBuffer.Request.Whisper obj)
+        {
+            this.User = obj.User;
+            this.Message = obj.Message;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Request.Whisper> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _user = builder.CreateString(this.User);
+            var _message = builder.CreateString(this.Message);
+
+            return FlatBuffer.Request.Whisper.CreateWhisper(builder, _user, _message);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Whisper Deserialize(byte[] bytes)
+        {
+            return new Whisper(FlatBuffer.Request.Whisper.GetRootAsWhisper(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 }

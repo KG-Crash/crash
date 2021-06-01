@@ -19,26 +19,26 @@ public struct LeaveRoom : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public LeaveRoom __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public string Id { get { int o = __p.__offset(4); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
+  public string User { get { int o = __p.__offset(4); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
 #if ENABLE_SPAN_T
-  public Span<byte> GetIdBytes() { return __p.__vector_as_span<byte>(4, 1); }
+  public Span<byte> GetUserBytes() { return __p.__vector_as_span<byte>(4, 1); }
 #else
-  public ArraySegment<byte>? GetIdBytes() { return __p.__vector_as_arraysegment(4); }
+  public ArraySegment<byte>? GetUserBytes() { return __p.__vector_as_arraysegment(4); }
 #endif
-  public byte[] GetIdArray() { return __p.__vector_as_array<byte>(4); }
+  public byte[] GetUserArray() { return __p.__vector_as_array<byte>(4); }
   public uint Error { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
 
   public static Offset<FlatBuffer.Response.LeaveRoom> CreateLeaveRoom(FlatBufferBuilder builder,
-      StringOffset idOffset = default(StringOffset),
+      StringOffset userOffset = default(StringOffset),
       uint error = 0) {
     builder.StartTable(2);
     LeaveRoom.AddError(builder, error);
-    LeaveRoom.AddId(builder, idOffset);
+    LeaveRoom.AddUser(builder, userOffset);
     return LeaveRoom.EndLeaveRoom(builder);
   }
 
   public static void StartLeaveRoom(FlatBufferBuilder builder) { builder.StartTable(2); }
-  public static void AddId(FlatBufferBuilder builder, StringOffset idOffset) { builder.AddOffset(0, idOffset.Value, 0); }
+  public static void AddUser(FlatBufferBuilder builder, StringOffset userOffset) { builder.AddOffset(0, userOffset.Value, 0); }
   public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(1, error, 0); }
   public static Offset<FlatBuffer.Response.LeaveRoom> EndLeaveRoom(FlatBufferBuilder builder) {
     int o = builder.EndTable();

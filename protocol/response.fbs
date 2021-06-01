@@ -1,5 +1,10 @@
 namespace FlatBuffer.Response;
 
+table Login {
+	id: string;
+	error: uint32;
+}
+
 table CreateRoom {
 	id: string;
 	error: uint32;
@@ -12,7 +17,7 @@ table JoinRoom {
 }
 
 table LeaveRoom {
-	id: string;
+	user: string;
 	error: uint32;
 }
 
@@ -31,5 +36,17 @@ table DestroyedRoom {
 
 table RoomList {
 	rooms: [string];
+	error: uint32;
+}
+
+table Chat {
+	user: string;
+	message: string;
+	error: uint32;
+}
+
+table Whisper {
+	user: string;
+	message: string;
 	error: uint32;
 }

@@ -19,3 +19,12 @@ table KickRoom {
 table RoomList {
 	
 }
+
+table Chat {
+	message: string;
+}
+
+table Whisper {
+	user: string;
+	message: string;
+}

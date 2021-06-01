@@ -39,6 +39,19 @@ func OnReceived(context actor.Context, user *model.UserActor, protocol protocol.
 		context.Send(game, &model.RoomList{
 			User: context.Self(),
 		})
+
+	case *request.Chat:
+		context.Send(context.Self(), &model.Chat{
+			UserId:  user.Id,
+			Message: msg.Message,
+		})
+
+	case *request.Whisper:
+		context.Send(game, &model.Whisper{
+			From:    user.Id,
+			To:      msg.User,
+			Message: msg.Message,
+		})
 	}
 }
 

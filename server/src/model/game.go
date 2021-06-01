@@ -140,6 +140,26 @@ func (state *GameActor) OnLogout(context actor.Context, msg *Logout) {
 	log.Printf("User [%s] logout", msg.UserId)
 }
 
+func (state *GameActor) OnWhisper(context actor.Context, msg *Whisper) {
+	from, from_ok := state.Users[msg.From]
+	if !from_ok {
+		return
+	}
+
+	to, to_ok := state.Users[msg.To]
+	if !to_ok {
+		context.Send(from, &response.Whisper{Error: 1})
+		return
+	}
+
+	context.Send(to, &response.Whisper{
+		User:    msg.From,
+		Message: msg.Message,
+		Error:   0,
+	})
+	log.Printf("User [%s] whisper to user [%s] : %s", msg.From, msg.To, msg.Message)
+}
+
 func (state *GameActor) Receive(context actor.Context) {
 	switch msg := context.Message().(type) {
 	case *SpawnUser:
@@ -159,6 +179,9 @@ func (state *GameActor) Receive(context actor.Context) {
 
 	case *Logout:
 		state.OnLogout(context, msg)
+
+	case *Whisper:
+		state.OnWhisper(context, msg)
 
 	default:
 		fmt.Print(msg)
