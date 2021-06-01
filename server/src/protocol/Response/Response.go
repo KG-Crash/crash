@@ -123,6 +123,7 @@ func (obj *CreateRoom) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type JoinRoom struct {
+	User  string
 	Users []string
 	Error uint32
 }
@@ -142,9 +143,11 @@ func (obj *JoinRoom) users(builder *flatbuffers.Builder, users []string) flatbuf
 }
 
 func (obj *JoinRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_user := builder.CreateString(obj.User)
 	_users := obj.users(builder, obj.Users)
 
 	source.JoinRoomStart(builder)
+	source.JoinRoomAddUser(builder, _user)
 	source.JoinRoomAddUsers(builder, _users)
 	source.JoinRoomAddError(builder, obj.Error)
 
@@ -152,6 +155,7 @@ func (obj *JoinRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 }
 
 func (obj *JoinRoom) parse(x *source.JoinRoom) *JoinRoom {
+	obj.User = string(x.User())
 
 	_sizeUsers := x.UsersLength()
 	obj.Users = make([]string, _sizeUsers)

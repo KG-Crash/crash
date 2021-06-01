@@ -26,8 +26,16 @@ func (rcv *JoinRoom) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *JoinRoom) Users(j int) []byte {
+func (rcv *JoinRoom) User() []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
+	if o != 0 {
+		return rcv._tab.ByteVector(o + rcv._tab.Pos)
+	}
+	return nil
+}
+
+func (rcv *JoinRoom) Users(j int) []byte {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(6))
 	if o != 0 {
 		a := rcv._tab.Vector(o)
 		return rcv._tab.ByteVector(a + flatbuffers.UOffsetT(j*4))
@@ -36,7 +44,7 @@ func (rcv *JoinRoom) Users(j int) []byte {
 }
 
 func (rcv *JoinRoom) UsersLength() int {
-	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(6))
 	if o != 0 {
 		return rcv._tab.VectorLen(o)
 	}
@@ -44,7 +52,7 @@ func (rcv *JoinRoom) UsersLength() int {
 }
 
 func (rcv *JoinRoom) Error() uint32 {
-	o := flatbuffers.UOffsetT(rcv._tab.Offset(6))
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(8))
 	if o != 0 {
 		return rcv._tab.GetUint32(o + rcv._tab.Pos)
 	}
@@ -52,20 +60,23 @@ func (rcv *JoinRoom) Error() uint32 {
 }
 
 func (rcv *JoinRoom) MutateError(n uint32) bool {
-	return rcv._tab.MutateUint32Slot(6, n)
+	return rcv._tab.MutateUint32Slot(8, n)
 }
 
 func JoinRoomStart(builder *flatbuffers.Builder) {
-	builder.StartObject(2)
+	builder.StartObject(3)
+}
+func JoinRoomAddUser(builder *flatbuffers.Builder, user flatbuffers.UOffsetT) {
+	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(user), 0)
 }
 func JoinRoomAddUsers(builder *flatbuffers.Builder, users flatbuffers.UOffsetT) {
-	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(users), 0)
+	builder.PrependUOffsetTSlot(1, flatbuffers.UOffsetT(users), 0)
 }
 func JoinRoomStartUsersVector(builder *flatbuffers.Builder, numElems int) flatbuffers.UOffsetT {
 	return builder.StartVector(4, numElems, 4)
 }
 func JoinRoomAddError(builder *flatbuffers.Builder, error uint32) {
-	builder.PrependUint32Slot(1, error, 0)
+	builder.PrependUint32Slot(2, error, 0)
 }
 func JoinRoomEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

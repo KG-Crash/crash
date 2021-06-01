@@ -55,6 +55,7 @@ namespace Protocol.Response
     {
         public uint Identity => (uint)Protocol.Response.Identity.JOIN_ROOM;
 
+        public string User { get; set; }
         public List<string> Users { get; set; }
         public uint Error { get; set; }
 
@@ -63,16 +64,18 @@ namespace Protocol.Response
 
         public JoinRoom(FlatBuffer.Response.JoinRoom obj)
         {
+            this.User = obj.User;
             this.Users = Enumerable.Range(0, obj.UsersLength).Select(x => obj.Users(x)).ToList();
             this.Error = obj.Error;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.JoinRoom> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
+            var _user = builder.CreateString(this.User);
             var _users = FlatBuffer.Response.JoinRoom.CreateUsersVector(builder, this.Users.Select(x => builder.CreateString(x)).ToArray());
             var _error = this.Error;
 
-            return FlatBuffer.Response.JoinRoom.CreateJoinRoom(builder, _users, _error);
+            return FlatBuffer.Response.JoinRoom.CreateJoinRoom(builder, _user, _users, _error);
         }
 
         public byte[] Serialize()

@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"network"
 	"protocol/response"
@@ -79,11 +80,7 @@ func (state *GameActor) OnSpawnRoom(context actor.Context, msg *SpawnRoom) {
 
 	id := uuid.NewString()
 	if _, ok := state.Rooms[id]; ok {
-		context.Send(msg.Master, &network.Write{
-			Protocol: &response.CreateRoom{
-				Error: 1,
-			},
-		})
+		context.Send(msg.Master, &response.CreateRoom{Error: 1})
 		return
 	}
 
@@ -96,7 +93,10 @@ func (state *GameActor) OnSpawnRoom(context actor.Context, msg *SpawnRoom) {
 	context.Send(room, &JoinRoom{
 		User:   msg.Master,
 		UserId: msg.UserId,
+		RoomId: id,
 	})
+
+	log.Printf("Spawn Room [%s]", id)
 }
 
 func (state *GameActor) OnDestroyedRoom(context actor.Context, msg *DestroyedRoom) {
@@ -105,14 +105,39 @@ func (state *GameActor) OnDestroyedRoom(context actor.Context, msg *DestroyedRoo
 	}
 
 	delete(state.Rooms, msg.RoomId)
+	log.Printf("Destroyed Room [%s]", msg.RoomId)
 }
 
 func (state *GameActor) OnRoomList(context actor.Context, msg *RoomList) {
-	context.Send(msg.User, &network.Write{
-		Protocol: &response.RoomList{
-			Rooms: state.RoomIdList(),
-		},
+	context.Send(msg.User, &response.RoomList{
+		Rooms: state.RoomIdList(),
 	})
+}
+
+func (state *GameActor) OnJoinRoom(context actor.Context, msg *JoinRoom) {
+	room, ok := state.Rooms[msg.RoomId]
+	if !ok {
+		context.Send(msg.User, &JoinedRoom{
+			Error: 1,
+		})
+		return
+	}
+
+	context.Send(room, &JoinRoom{
+		User:   msg.User,
+		UserId: msg.UserId,
+	})
+	log.Printf("Request join user [%s] into Room [%s]", msg.UserId, msg.RoomId)
+}
+
+func (state *GameActor) OnLogout(context actor.Context, msg *Logout) {
+	_, ok := state.Users[msg.UserId]
+	if !ok {
+		return
+	}
+
+	delete(state.Users, msg.UserId)
+	log.Printf("User [%s] logout", msg.UserId)
 }
 
 func (state *GameActor) Receive(context actor.Context) {
@@ -128,6 +153,12 @@ func (state *GameActor) Receive(context actor.Context) {
 
 	case *RoomList:
 		state.OnRoomList(context, msg)
+
+	case *JoinRoom:
+		state.OnJoinRoom(context, msg)
+
+	case *Logout:
+		state.OnLogout(context, msg)
 
 	default:
 		fmt.Print(msg)

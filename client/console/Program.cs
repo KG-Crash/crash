@@ -74,9 +74,6 @@ namespace console
             {
                 await Client.Instance.Send(new Protocol.Request.CreateRoom { });
                 await Client.Instance.Send(new Protocol.Request.RoomList { });
-
-                await Client.Instance.Send(new Protocol.Request.LeaveRoom { });
-                await Client.Instance.Send(new Protocol.Request.RoomList { });
             }
 
             Console.ReadLine();

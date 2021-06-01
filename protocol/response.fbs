@@ -6,6 +6,7 @@ table CreateRoom {
 }
 
 table JoinRoom {
+	user: string;
 	users: [string];
 	error: uint32;
 }

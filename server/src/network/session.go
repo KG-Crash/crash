@@ -20,6 +20,10 @@ type SetConnection struct {
 type Receive struct {
 }
 
+type Disconnected struct {
+	*actor.PID
+}
+
 func (state *SessionActor) Receive(context actor.Context) {
 	switch msg := context.Message().(type) {
 	case *actor.Started:
@@ -30,6 +34,10 @@ func (state *SessionActor) Receive(context actor.Context) {
 		state.Receiver = context.Spawn(actor.PropsFromProducer(func() actor.Actor {
 			return NewReceiverActor()
 		}))
+
+	case *actor.Terminated:
+		state.Conn.Close()
+		context.Stop(context.Parent())
 
 	case *actor.Stop:
 		context.Stop(state.Sender)

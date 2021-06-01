@@ -1,6 +1,8 @@
 package model
 
 import (
+	"log"
+
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
@@ -13,6 +15,7 @@ type RoomActor struct {
 type JoinRoom struct {
 	User   *actor.PID
 	UserId string
+	RoomId string
 }
 
 type LeavedRoom struct {
@@ -60,6 +63,8 @@ func (state *RoomActor) OnJoinRoom(context actor.Context, msg *JoinRoom) {
 			Error:  0,
 		})
 	}
+
+	log.Printf("User [%s] joined into room [%s]", msg.UserId, state.Id)
 }
 
 // game > user > room
@@ -75,7 +80,10 @@ func (state *RoomActor) OnLeaveRoom(context actor.Context, msg *LeaveRoom) {
 	if msg.User == state.Master {
 		delete(state.Users, msg.UserId)
 
-		context.Send(msg.User, &LeavedRoom{})
+		context.Send(msg.User, &LeavedRoom{
+			User:   msg.User,
+			UserId: msg.UserId,
+		})
 
 		response := &DestroyedRoom{RoomId: state.Id}
 		context.Send(context.Parent(), response)

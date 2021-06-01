@@ -34,7 +34,7 @@ func (state *ReceiverActor) Receive(context actor.Context) {
 	case *Receive:
 		buffer := make([]byte, 4096)
 		numRead, err := state.Conn.Read(buffer)
-		if err == io.EOF {
+		if numRead == 0 || err == io.EOF {
 			context.Stop(context.Parent())
 			return
 		}

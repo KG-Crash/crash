@@ -19,25 +19,35 @@ public struct JoinRoom : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public JoinRoom __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public string Users(int j) { int o = __p.__offset(4); return o != 0 ? __p.__string(__p.__vector(o) + j * 4) : null; }
-  public int UsersLength { get { int o = __p.__offset(4); return o != 0 ? __p.__vector_len(o) : 0; } }
-  public uint Error { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
+  public string User { get { int o = __p.__offset(4); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
+#if ENABLE_SPAN_T
+  public Span<byte> GetUserBytes() { return __p.__vector_as_span<byte>(4, 1); }
+#else
+  public ArraySegment<byte>? GetUserBytes() { return __p.__vector_as_arraysegment(4); }
+#endif
+  public byte[] GetUserArray() { return __p.__vector_as_array<byte>(4); }
+  public string Users(int j) { int o = __p.__offset(6); return o != 0 ? __p.__string(__p.__vector(o) + j * 4) : null; }
+  public int UsersLength { get { int o = __p.__offset(6); return o != 0 ? __p.__vector_len(o) : 0; } }
+  public uint Error { get { int o = __p.__offset(8); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
 
   public static Offset<FlatBuffer.Response.JoinRoom> CreateJoinRoom(FlatBufferBuilder builder,
+      StringOffset userOffset = default(StringOffset),
       VectorOffset usersOffset = default(VectorOffset),
       uint error = 0) {
-    builder.StartTable(2);
+    builder.StartTable(3);
     JoinRoom.AddError(builder, error);
     JoinRoom.AddUsers(builder, usersOffset);
+    JoinRoom.AddUser(builder, userOffset);
     return JoinRoom.EndJoinRoom(builder);
   }
 
-  public static void StartJoinRoom(FlatBufferBuilder builder) { builder.StartTable(2); }
-  public static void AddUsers(FlatBufferBuilder builder, VectorOffset usersOffset) { builder.AddOffset(0, usersOffset.Value, 0); }
+  public static void StartJoinRoom(FlatBufferBuilder builder) { builder.StartTable(3); }
+  public static void AddUser(FlatBufferBuilder builder, StringOffset userOffset) { builder.AddOffset(0, userOffset.Value, 0); }
+  public static void AddUsers(FlatBufferBuilder builder, VectorOffset usersOffset) { builder.AddOffset(1, usersOffset.Value, 0); }
   public static VectorOffset CreateUsersVector(FlatBufferBuilder builder, StringOffset[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static VectorOffset CreateUsersVectorBlock(FlatBufferBuilder builder, StringOffset[] data) { builder.StartVector(4, data.Length, 4); builder.Add(data); return builder.EndVector(); }
   public static void StartUsersVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(1, error, 0); }
+  public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(2, error, 0); }
   public static Offset<FlatBuffer.Response.JoinRoom> EndJoinRoom(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Response.JoinRoom>(o);

@@ -15,7 +15,7 @@ import (
 var game *actor.PID
 
 func OnReceived(context actor.Context, user *model.UserActor, protocol protocol.Protocol) {
-	switch protocol.(type) {
+	switch msg := protocol.(type) {
 	case *request.CreateRoom:
 		context.Send(game, &model.SpawnRoom{
 			Master: context.Self(),
@@ -23,17 +23,18 @@ func OnReceived(context actor.Context, user *model.UserActor, protocol protocol.
 		})
 
 	case *request.JoinRoom:
-		// context.Send(context.Self(), &network.Write{
-		// 	Protocol: &response.JoinRoom{
-		// 		Users: make([]string, 0),
-		// 	},
-		// })
+		context.Send(game, &model.JoinRoom{
+			User:   context.Self(),
+			UserId: user.Id,
+			RoomId: msg.Id,
+		})
 
 	case *request.LeaveRoom: // game > user > room
 		context.Send(context.Self(), &model.LeaveRoom{
 			UserId: user.Id,
 			User:   context.Self(),
 		})
+
 	case *request.RoomList:
 		context.Send(game, &model.RoomList{
 			User: context.Self(),
