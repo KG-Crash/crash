@@ -13,7 +13,7 @@ public class Controller
     }
 
     [FlatBufferEvent]
-    public bool OnLogin(Protocol.Response.Login response)
+    public async Task<bool> OnLogin(Protocol.Response.Login response)
     {
         if (response.Error > 0)
             return false;
@@ -23,21 +23,21 @@ public class Controller
     }
 
     [FlatBufferEvent]
-    public bool OnJoinRoom(Protocol.Response.JoinRoom response)
+    public async Task<bool> OnJoinRoom(Protocol.Response.JoinRoom response)
     {
         if (response.Error > 0)
             return false;
 
         if (response.User == this.Id)
         {
-            _ = Client.Instance.Send(new Protocol.Request.Chat
+            await Client.Instance.Send(new Protocol.Request.Chat
             {
                 Message = "ㅆ1발ㅋㅋ"
             });
         }
         else
         {
-            _ = Client.Instance.Send(new Protocol.Request.Whisper
+            await Client.Instance.Send(new Protocol.Request.Whisper
             {
                 User = response.User,
                 Message = "ㅆ1발련 ㅋㅋ"
@@ -48,7 +48,7 @@ public class Controller
     }
 
     [FlatBufferEvent]
-    public bool OnLeaveRoom(Protocol.Response.LeaveRoom response)
+    public async Task<bool> OnLeaveRoom(Protocol.Response.LeaveRoom response)
     {
         if (response.Error > 0)
             return false;
@@ -58,7 +58,7 @@ public class Controller
     }
 
     [FlatBufferEvent]
-    public bool OnDestroyRoom(Protocol.Response.DestroyedRoom response)
+    public async Task<bool> OnDestroyRoom(Protocol.Response.DestroyedRoom response)
     {
         if (response.Error > 0)
         {
@@ -71,7 +71,7 @@ public class Controller
     }
 
     [FlatBufferEvent]
-    public bool OnRoomList(Protocol.Response.RoomList response)
+    public async Task<bool> OnRoomList(Protocol.Response.RoomList response)
     {
         if (response.Error > 0)
             return false;
@@ -79,21 +79,21 @@ public class Controller
 
         if (response.Rooms.Count > 0)
         {
-            _ = Client.Instance.Send(new Protocol.Request.JoinRoom
+            await Client.Instance.Send(new Protocol.Request.JoinRoom
             {
                 Id = response.Rooms.First()
             });
         }
         else
         {
-            _ = Client.Instance.Send(new Protocol.Request.CreateRoom { });
+            await Client.Instance.Send(new Protocol.Request.CreateRoom { });
         }
 
         return true;
     }
 
     [FlatBufferEvent]
-    public bool OnChat(Protocol.Response.Chat response)
+    public async Task<bool> OnChat(Protocol.Response.Chat response)
     {
         if (response.Error > 0)
             return false;
@@ -103,7 +103,7 @@ public class Controller
     }
 
     [FlatBufferEvent]
-    public bool OnWhisper(Protocol.Response.Whisper response)
+    public async Task<bool> OnWhisper(Protocol.Response.Whisper response)
     {
         if (response.Error > 0)
             return false;

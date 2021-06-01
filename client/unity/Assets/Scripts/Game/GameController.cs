@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Network;
 using Protocol.Response;
 using UnityEngine;
@@ -87,13 +88,13 @@ namespace Game
         }
 
         [FlatBufferEvent]
-        public bool OnCreateRoom(CreateRoom response)
+        public async Task<bool> OnCreateRoom(CreateRoom response)
         {
             return true;
         }
 
         [FlatBufferEvent]
-        public bool OnJoinRoom(JoinRoom response)
+        public async Task<bool> OnJoinRoom(JoinRoom response)
         {
             return true;
         }

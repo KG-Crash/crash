@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Network
 {
@@ -20,7 +21,7 @@ namespace Network
         public static Handler Instance => _ist.Value;
 
         private readonly Dictionary<Identity, Delegate> _allocators = new Dictionary<Identity, Delegate>();
-        private readonly Dictionary<Identity, Func<IProtocol, bool>> _bindedEvents = new Dictionary<Identity, Func<IProtocol, bool>>();
+        private readonly Dictionary<Identity, Func<IProtocol, Task<bool>>> _bindedEvents = new Dictionary<Identity, Func<IProtocol, Task<bool>>>();
 
         protected override void ChannelRead0(IChannelHandlerContext ctx, IByteBuffer msg)
         {
@@ -51,7 +52,7 @@ namespace Network
                 if (x.GetCustomAttribute<FlatBufferEventAttribute>() == null)
                     return false;
 
-                if (x.ReturnType != typeof(bool))
+                if (x.ReturnType != typeof(Task<bool>))
                     return false;
 
                 var parameters = x.GetParameters();
@@ -77,9 +78,9 @@ namespace Network
 
                     var delegateType = Expression.GetDelegateType(parameters.Select(x => x.ParameterType).Concat(new[] { method.ReturnType }).ToArray());
                     var createdDelegate = method.CreateDelegate(delegateType, t);
-                    _bindedEvents.Add((Identity)instance.Identity, new Func<IProtocol, bool>((protocol) =>
+                    _bindedEvents.Add((Identity)instance.Identity, new Func<IProtocol, Task<bool>>((protocol) =>
                     {
-                        return (bool)createdDelegate.DynamicInvoke(Convert.ChangeType(protocol, protocolType));
+                        return createdDelegate.DynamicInvoke(Convert.ChangeType(protocol, protocolType)) as Task<bool>;
                     }));
                 }
                 catch (Exception e)
