@@ -5,8 +5,10 @@ import (
 	"model"
 	"net"
 	"network"
+	"os"
 	"protocol"
 	"protocol/request"
+	"strconv"
 
 	console "github.com/AsynkronIT/goconsole"
 	"github.com/AsynkronIT/protoactor-go/actor"
@@ -83,7 +85,20 @@ func main() {
 	system.Root.Send(acceptor, &network.BindAcceptor{
 		OnAccepted: OnAccepted,
 	})
-	system.Root.Send(acceptor, &network.Listen{Port: 8000})
 
+	args := os.Args[1:]
+	port := args[0]
+
+	if port == "" {
+		port = "8000"
+	}
+
+	p, err := strconv.Atoi(port)
+	if err != nil {
+		log.Fatalf("Port must be unsigned short type. %s does not port format.", port)
+		return
+	}
+
+	system.Root.Send(acceptor, &network.Listen{Port: uint16(p)})
 	_, _ = console.ReadLine()
 }
