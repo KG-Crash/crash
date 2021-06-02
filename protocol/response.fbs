@@ -13,6 +13,7 @@ table CreateRoom {
 table JoinRoom {
 	user: string;
 	users: [string];
+	master: bool;
 	error: uint32;
 }
 

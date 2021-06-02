@@ -51,8 +51,20 @@ func (rcv *JoinRoom) UsersLength() int {
 	return 0
 }
 
-func (rcv *JoinRoom) Error() uint32 {
+func (rcv *JoinRoom) Master() bool {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(8))
+	if o != 0 {
+		return rcv._tab.GetBool(o + rcv._tab.Pos)
+	}
+	return false
+}
+
+func (rcv *JoinRoom) MutateMaster(n bool) bool {
+	return rcv._tab.MutateBoolSlot(8, n)
+}
+
+func (rcv *JoinRoom) Error() uint32 {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(10))
 	if o != 0 {
 		return rcv._tab.GetUint32(o + rcv._tab.Pos)
 	}
@@ -60,11 +72,11 @@ func (rcv *JoinRoom) Error() uint32 {
 }
 
 func (rcv *JoinRoom) MutateError(n uint32) bool {
-	return rcv._tab.MutateUint32Slot(8, n)
+	return rcv._tab.MutateUint32Slot(10, n)
 }
 
 func JoinRoomStart(builder *flatbuffers.Builder) {
-	builder.StartObject(3)
+	builder.StartObject(4)
 }
 func JoinRoomAddUser(builder *flatbuffers.Builder, user flatbuffers.UOffsetT) {
 	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(user), 0)
@@ -75,8 +87,11 @@ func JoinRoomAddUsers(builder *flatbuffers.Builder, users flatbuffers.UOffsetT) 
 func JoinRoomStartUsersVector(builder *flatbuffers.Builder, numElems int) flatbuffers.UOffsetT {
 	return builder.StartVector(4, numElems, 4)
 }
+func JoinRoomAddMaster(builder *flatbuffers.Builder, master bool) {
+	builder.PrependBoolSlot(2, master, false)
+}
 func JoinRoomAddError(builder *flatbuffers.Builder, error uint32) {
-	builder.PrependUint32Slot(2, error, 0)
+	builder.PrependUint32Slot(3, error, 0)
 }
 func JoinRoomEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

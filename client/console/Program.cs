@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 public class Controller
 {
     public string Id { get; private set; }
+    public bool IsMaster { get; private set; }
 
     public Controller()
     {
@@ -28,6 +29,8 @@ public class Controller
         if (response.Error > 0)
             return false;
 
+        this.IsMaster = response.Master;
+
         if (response.User == this.Id)
         {
             await Client.Instance.Send(new Protocol.Request.Chat
@@ -43,6 +46,12 @@ public class Controller
                 Message = "ㅆ1발련 ㅋㅋ"
             });
         }
+
+        // 내가 방장이면 오자마자 바로강퇴시킴
+        await Client.Instance.Send(new Protocol.Request.KickRoom
+        { 
+            User = response.User
+        });
 
         return true;
     }
@@ -109,6 +118,16 @@ public class Controller
             return false;
 
         Console.WriteLine($"{response.User}로부터 다음의 귓속말을 받음 : {response.Message}");
+        return true;
+    }
+
+    [FlatBufferEvent]
+    public async Task<bool> OnKicked(Protocol.Response.KickedRoom response)
+    { 
+        if(response.Error > 0)
+            return false;
+
+        Console.WriteLine("당신은 강퇴당했습니다.");
         return true;
     }
 }

@@ -29,6 +29,7 @@ type JoinedRoom struct {
 	UserId string
 	User   *actor.PID
 	Room   *actor.PID
+	Master bool
 	Users  []string
 	Error  uint32
 }
@@ -51,6 +52,14 @@ type Whisper struct {
 	From    string
 	To      string
 	Message string
+}
+
+type Kick struct {
+	From string
+	To   string
+}
+
+type Kicked struct {
 }
 
 func NewUser(id string) *UserActor {
@@ -155,6 +164,26 @@ func (state *UserActor) OnChat(context actor.Context, msg *Chat) {
 	log.Printf("User [%s] : %s", msg.UserId, msg.Message)
 }
 
+// user direct
+func (state *UserActor) OnKick(context actor.Context, msg *Kick) {
+	if state.Room == nil {
+		return
+	}
+
+	context.Send(state.Room, &Kick{
+		From: state.Id,
+		To:   msg.To,
+	})
+}
+
+// room > user
+func (state *UserActor) OnKicked(context actor.Context, msg *Kicked) {
+	state.Room = nil
+	context.Send(context.Self(), &response.KickedRoom{})
+
+	log.Printf("User [%s] has been kicked", state.Id)
+}
+
 func (state *UserActor) Receive(context actor.Context) {
 	switch msg := context.Message().(type) {
 	case *actor.Started:
@@ -197,6 +226,12 @@ func (state *UserActor) Receive(context actor.Context) {
 
 	case *Chat:
 		state.OnChat(context, msg)
+
+	case *Kick:
+		state.OnKick(context, msg)
+
+	case *Kicked:
+		state.OnKicked(context, msg)
 
 	case protocol.Protocol:
 		context.Send(state.session, &network.Write{

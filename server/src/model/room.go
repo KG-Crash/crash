@@ -59,6 +59,7 @@ func (state *RoomActor) OnJoinRoom(context actor.Context, msg *JoinRoom) {
 		context.Send(user, &JoinedRoom{
 			UserId: msg.UserId,
 			User:   msg.User,
+			Master: state.Master == msg.User,
 			Room:   context.Self(),
 			Users:  state.UserIdList(),
 			Error:  0,
@@ -122,6 +123,34 @@ func (state *RoomActor) OnChat(context actor.Context, msg *Chat) {
 	}
 }
 
+func (state *RoomActor) OnKick(context actor.Context, msg *Kick) {
+	if _, ok := state.Users[msg.From]; !ok {
+		return
+	}
+
+	if _, ok := state.Users[msg.To]; !ok {
+		return
+	}
+
+	if state.Users[msg.From] != state.Master {
+		return
+	}
+
+	if state.Users[msg.To] == state.Master {
+		return
+	}
+
+	to := state.Users[msg.To]
+	context.Send(to, &Kicked{})
+
+	delete(state.Users, msg.To)
+	for _, user := range state.Users {
+		context.Send(user, &response.LeaveRoom{
+			User: msg.To,
+		})
+	}
+}
+
 func (state *RoomActor) Receive(context actor.Context) {
 	switch msg := context.Message().(type) {
 	case *JoinRoom:
@@ -132,5 +161,8 @@ func (state *RoomActor) Receive(context actor.Context) {
 
 	case *Chat:
 		state.OnChat(context, msg)
+
+	case *Kick:
+		state.OnKick(context, msg)
 	}
 }

@@ -52,6 +52,12 @@ func OnReceived(context actor.Context, user *model.UserActor, protocol protocol.
 			To:      msg.User,
 			Message: msg.Message,
 		})
+
+	case *request.KickRoom:
+		context.Send(context.Self(), &model.Kick{
+			From: user.Id,
+			To:   msg.User,
+		})
 	}
 }
 

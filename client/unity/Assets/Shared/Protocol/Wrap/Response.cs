@@ -97,6 +97,7 @@ namespace Protocol.Response
 
         public string User { get; set; }
         public List<string> Users { get; set; }
+        public bool Master { get; set; }
         public uint Error { get; set; }
 
         public JoinRoom()
@@ -106,6 +107,7 @@ namespace Protocol.Response
         {
             this.User = obj.User;
             this.Users = Enumerable.Range(0, obj.UsersLength).Select(x => obj.Users(x)).ToList();
+            this.Master = obj.Master;
             this.Error = obj.Error;
         }
 
@@ -113,9 +115,10 @@ namespace Protocol.Response
         {
             var _user = builder.CreateString(this.User);
             var _users = FlatBuffer.Response.JoinRoom.CreateUsersVector(builder, this.Users.Select(x => builder.CreateString(x)).ToArray());
+            var _master = this.Master;
             var _error = this.Error;
 
-            return FlatBuffer.Response.JoinRoom.CreateJoinRoom(builder, _user, _users, _error);
+            return FlatBuffer.Response.JoinRoom.CreateJoinRoom(builder, _user, _users, _master, _error);
         }
 
         public byte[] Serialize()
