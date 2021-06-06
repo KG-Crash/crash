@@ -1,0 +1,39 @@
+// Generated code. DO NOT MODIFY DIRECTLY
+
+using MasterData.Types;
+using MasterData.Types.Common;
+using MasterData.Types.Dsl;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+
+namespace MasterData.{{ usage | capitalize }}
+{
+    {% for name, data in dataSet.items() -%}
+    public class {{ name }}
+    {
+        {% for property in data.properties -%}
+        {% if property.key -%}
+        [MasterData.Types.Util.Key]
+        {%- endif %}
+        public {{ property.type }} {{ property.name }} { get; set; }
+        {%- if not loop.last %}
+        {% endif -%}
+        {%- endfor %}
+    }
+
+    [Table("json/{{ name }}.json")]
+    public partial class Table{{ name }} : {% if data.primary -%}
+    BaseDict<{{ data.primary }}, {{ name }}>
+    {%- elif data.index -%}
+    BaseDict<{{ data.index }}, List<{{ name }}>>
+    {%- else -%}
+    BaseList<{{ name }}
+    { }
+    {%- endif -%}
+    {%- if not loop.last %}
+
+
+    {% endif -%}
+    {%- endfor %}
+}

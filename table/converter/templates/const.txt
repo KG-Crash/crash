@@ -1,11 +1,13 @@
+{%- if usage == 'common' -%}
+namespace Const.Common
+{%- else -%}
 namespace Const
+{%- endif %}
 {
     public static class {{ name }}
     {
-        {% for const in consts -%}
-        public static readonly {{ const.type }} {{ const.name }} = {{ const.value }};
-        {%- if not loop.last %}
-        {% endif %}
+        {%- for item in items %}
+        public static readonly {{ item.type.based }} {{ item.name }} = {% if item.type.based == 'string' and '\n' in item.value %}@{% endif %}{{ item.value }};
         {%- endfor %}
     }
 }

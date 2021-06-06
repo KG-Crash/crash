@@ -1,7 +1,15 @@
 PUSHD converter
 RMDIR output /s /q
 CALL app.exe --dir=.. --out=output
-PAUSE
+
+PUSHD output
+gofmt -s -w class\server\Table.go
+
+RMDIR /s /q ..\..\server\src\main\json
+ROBOCOPY json\server ..\..\..\server\src\main\json /E /NFL /NDL /NJH /NJS /nc /ns /np
+
+RMDIR /s /q ..\..\server\src\Table
+ROBOCOPY class\server ..\..\..\server\src\table /E /NFL /NDL /NJH /NJS /nc /ns /np
 
 rem RMDIR /s/q ..\..\shared\NetworkShared\MasterDataType
 rem ROBOCOPY output\class\common ..\..\shared\NetworkShared\MasterDataType /E /NFL /NDL /NJH /NJS /nc /ns /np

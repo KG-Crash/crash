@@ -86,11 +86,10 @@ func main() {
 		OnAccepted: OnAccepted,
 	})
 
+	port := "8000"
 	args := os.Args[1:]
-	port := args[0]
-
-	if port == "" {
-		port = "8000"
+	if len(args) > 0 {
+		port = args[0]
 	}
 
 	p, err := strconv.Atoi(port)
