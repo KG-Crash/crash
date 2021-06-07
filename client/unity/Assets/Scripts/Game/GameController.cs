@@ -1,8 +1,10 @@
+using Network;
+using Newtonsoft.Json;
+using Protocol.Response;
+using Shared.Table;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Network;
-using Protocol.Response;
 using UnityEngine;
 
 namespace Game
@@ -12,6 +14,15 @@ namespace Game
         // Start is called before the first frame update
         void Start()
         {
+            foreach (var pair in Table.From<TableSampleAttribute>())
+            {
+                UnityEngine.Debug.Log(JsonConvert.SerializeObject(pair.Value));
+
+                foreach (var sample in Table.From<TableSample>()[pair.Key])
+                {
+                    UnityEngine.Debug.Log(JsonConvert.SerializeObject(sample));
+                }
+            }
             Handler.Instance.Bind(this);
         }
 

@@ -75,6 +75,7 @@ client/unity/UserSettings
 client/unity/.vsconfig
 client/unity/Logs
 client/unity/obj
+client/unity/json
 server/**/*.exe
 server/.vscode
 server/pkg

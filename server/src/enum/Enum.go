@@ -1,3 +1,5 @@
+// DO NOT MODIFY
+
 package enum
 
 type _ItemType struct {

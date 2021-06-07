@@ -1,3 +1,5 @@
+// DO NOT MODIFY
+
 package constant
 
 type _Portal struct {

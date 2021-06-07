@@ -1,14 +1,13 @@
-using Newtonsoft.Json;
+// DO NOT MODIFY
 
-namespace NetworkShared
+namespace Shared
 {
     {% for enumName, enumSet in dataSet.items() -%}
     public enum {{ enumName }}
     {
         {% for name, desc in enumSet.items() -%}
-        [Description("{{ desc }}")]
         {{ name }}
-        {%- if not loop.last -%},{%- endif -%}
+        {%- if not loop.last -%},{%- endif %} // {{ desc }}
         {%- if not loop.last %}
 
         {% endif %}

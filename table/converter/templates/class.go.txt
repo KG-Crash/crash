@@ -1,3 +1,5 @@
+// DO NOT MODIFY
+
 package table
 
 import (

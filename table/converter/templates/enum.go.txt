@@ -1,3 +1,5 @@
+// DO NOT MODIFY
+
 package enum
 
 {% for enumName, enumSet in dataSet.items() -%}

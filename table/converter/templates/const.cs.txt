@@ -1,4 +1,6 @@
-namespace Const
+// DO NOT MODIFY
+
+namespace Shared.Const
 {
     {%- for name, constSet in dataSet.items() %}
     public static class {{ name }}

@@ -1,0 +1,138 @@
+using Newtonsoft.Json;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+
+
+namespace Shared.Table
+{
+    [AttributeUsage(AttributeTargets.Property)]
+    public class KeyAttribute : Attribute
+    {
+    }
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public class TableAttribute : Attribute
+    {
+        public string Path { get; private set; }
+
+        public TableAttribute(string path)
+        {
+            Path = path;
+        }
+    }
+
+    public abstract class BaseTable
+    {
+        protected string Path => GetType().GetCustomAttribute<TableAttribute>()?.Path ??
+            throw new Exception("cannot find TableAttribute.");
+
+        protected BaseTable()
+        {
+            Load();
+        }
+
+        protected abstract void Load();
+    }
+
+    public abstract class BaseList<T> : BaseTable, IReadOnlyList<T> where T : class
+    {
+        private List<T> _values = new List<T>();
+
+        public T this[int index]
+        {
+            get
+            {
+                if (index > _values.Count - 1)
+                    return null;
+
+                return _values[index];
+            }
+        }
+
+        public int Count => _values.Count;
+
+        public IEnumerator<T> GetEnumerator() => _values.GetEnumerator();
+
+        protected override void Load()
+        {
+            if (File.Exists(Path) == false)
+                _values = new List<T>();
+            else
+                _values = JsonConvert.DeserializeObject<List<T>>(File.ReadAllText(Path));
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => _values.GetEnumerator();
+    }
+
+    public abstract class BaseDict<K, T> : BaseTable, IReadOnlyDictionary<K, T> where T : class
+    {
+        private Dictionary<K, T> _dictionary = new Dictionary<K, T>();
+
+        public T this[K key]
+        {
+            get
+            {
+                if (_dictionary.TryGetValue(key, out var value) == false)
+                    return null;
+
+                return value;
+            }
+        }
+
+        public IEnumerable<K> Keys => _dictionary.Keys;
+
+        public IEnumerable<T> Values => _dictionary.Values;
+
+        public int Count => _dictionary.Count;
+
+        public bool ContainsKey(K key) => _dictionary.ContainsKey(key);
+
+        public IEnumerator<KeyValuePair<K, T>> GetEnumerator() => _dictionary.GetEnumerator();
+
+        public bool TryGetValue(K key, out T value) => _dictionary.TryGetValue(key, out value);
+
+        protected override void Load()
+        {
+            var property = typeof(T).GetProperties().FirstOrDefault(x => x.GetCustomAttribute<KeyAttribute>() != null);
+            if (File.Exists(Path) == false)
+                _dictionary = new Dictionary<K, T>();
+            else
+                _dictionary = JsonConvert.DeserializeObject<Dictionary<K, T>>(File.ReadAllText(Path));
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => _dictionary.GetEnumerator();
+    }
+
+    public static class Table
+    {
+        private static Dictionary<Type, BaseTable> _loadedTableDict = new Dictionary<Type, BaseTable>();
+
+        static Table()
+        {
+            Load();
+        }
+
+        public static void Load(string assemblyName = null)
+        {
+            var assembly = string.IsNullOrEmpty(assemblyName) ?
+                Assembly.GetExecutingAssembly() :
+                AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.GetName().Name == assemblyName);
+
+            _loadedTableDict = assembly.GetTypes()
+                .Where(x => x.IsAbstract == false && x.IsSubclassOf(typeof(BaseTable)))
+                .ToDictionary(x => x, x => Activator.CreateInstance(x) as BaseTable);
+        }
+
+        public static T From<T>() where T : BaseTable
+        {
+            if (_loadedTableDict.TryGetValue(typeof(T), out var value) == false)
+                return null;
+
+            return value as T;
+        }
+    }
+}
