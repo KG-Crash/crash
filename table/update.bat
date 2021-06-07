@@ -1,3 +1,5 @@
+@ECHO OFF
+
 PUSHD converter
 RMDIR output /s /q
 CALL app.exe --dir=.. --out=output
@@ -5,6 +7,7 @@ CALL app.exe --dir=.. --out=output
 PUSHD output
 gofmt -s -w class\server\Table.go
 gofmt -s -w const\server\Const.go
+gofmt -s -w enum\server\Enum.go
 
 RMDIR /s /q ..\..\..\server\src\main\json
 ROBOCOPY json\server ..\..\..\server\src\main\json /E /NFL /NDL /NJH /NJS /nc /ns /np
@@ -14,6 +17,10 @@ ROBOCOPY class\server ..\..\..\server\src\table /E /NFL /NDL /NJH /NJS /nc /ns /
 
 RMDIR /s /q ..\..\..\server\src\constant
 ROBOCOPY const\server ..\..\..\server\src\constant /E /NFL /NDL /NJH /NJS /nc /ns /np
+
+RMDIR /s /q ..\..\..\server\src\enum
+ROBOCOPY enum\server ..\..\..\server\src\enum /E /NFL /NDL /NJH /NJS /nc /ns /np
+pause
 
 rem RMDIR /s/q ..\..\shared\NetworkShared\MasterDataType
 rem ROBOCOPY output\class\common ..\..\shared\NetworkShared\MasterDataType /E /NFL /NDL /NJH /NJS /nc /ns /np

@@ -1,0 +1,32 @@
+package enum
+
+{% for enumName, enumSet in dataSet.items() -%}
+type _{{ enumName }} struct {
+    {% for name, desc in enumSet.items() -%}
+    {{ name }} uint32
+    {%- if not loop.last %}
+    {% endif %}
+    {%- endfor %}
+}
+{%- if not loop.last %}
+{% endif %}
+{% endfor %}
+
+{% for enumName, enumSet in dataSet.items() -%}
+var {{ enumName }} _{{ enumName }}
+{% endfor %}
+
+func init() {
+    {% for enumName, enumSet in dataSet.items() -%}
+    {{ enumName }} = _{{ enumName }} {
+        {% for name, desc in enumSet.items() -%}
+        {{ name }}: {{ loop.index }}, // {{ desc }}
+        {%- if not loop.last %}
+        {% endif %}
+        {%- endfor %}
+    }
+    {%- if not loop.last %}
+
+    {% endif %}
+    {%- endfor %}
+}

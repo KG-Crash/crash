@@ -9,8 +9,8 @@ type _Character struct {
 	InitStat string
 }
 
-const Portal _Portal
-const Character _Character
+var Portal _Portal
+var Character _Character
 
 func init() {
 	Portal = _Portal{
