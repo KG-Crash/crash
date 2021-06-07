@@ -4,12 +4,16 @@ CALL app.exe --dir=.. --out=output
 
 PUSHD output
 gofmt -s -w class\server\Table.go
+gofmt -s -w const\server\Const.go
 
-RMDIR /s /q ..\..\server\src\main\json
+RMDIR /s /q ..\..\..\server\src\main\json
 ROBOCOPY json\server ..\..\..\server\src\main\json /E /NFL /NDL /NJH /NJS /nc /ns /np
 
-RMDIR /s /q ..\..\server\src\Table
+RMDIR /s /q ..\..\..\server\src\Table
 ROBOCOPY class\server ..\..\..\server\src\table /E /NFL /NDL /NJH /NJS /nc /ns /np
+
+RMDIR /s /q ..\..\..\server\src\constant
+ROBOCOPY const\server ..\..\..\server\src\constant /E /NFL /NDL /NJH /NJS /nc /ns /np
 
 rem RMDIR /s/q ..\..\shared\NetworkShared\MasterDataType
 rem ROBOCOPY output\class\common ..\..\shared\NetworkShared\MasterDataType /E /NFL /NDL /NJH /NJS /nc /ns /np

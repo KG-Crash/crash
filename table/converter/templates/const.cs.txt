@@ -1,0 +1,24 @@
+namespace Const
+{
+    {%- for name, constSet in dataSet.items() %}
+    public static class {{ name }}
+    {
+        {% for key, const in constSet.items() -%}
+        {%- set prefix = "" -%}
+        {%- set suffix = "" -%}
+        {%- if const.type == 'string' -%}
+            {%- set prefix = '"' -%}
+            {%- set suffix = '"' -%}
+            {%- if '\n' in const.value -%}
+                {%- set prefix = '@"'-%}
+            {%- endif-%}
+        {%- endif -%}
+        public static readonly {{ const.type }} {{ key }} = {{ prefix }}{{ const.value }}{{ suffix }};
+        {%- if not loop.last %}
+        {% endif %}
+        {%- endfor %}
+    }
+    {%- if not loop.last %}
+    {% endif %}
+    {%- endfor %}
+}

@@ -1,0 +1,32 @@
+package constant
+{% for name, constSet in dataSet.items() %}
+type _{{ name }} struct {
+	{%- for key, const in constSet.items() %}
+    {{ key }} {{ const.type }}
+    {%- endfor %}
+}
+{% endfor %}
+{% for name, constSet in dataSet.items() -%}
+var {{ name }} _{{ name }}
+{% endfor %}
+func init() {
+    {% for name, constSet in dataSet.items() -%}
+    {{ name }} = _{{ name }}{
+        {% for key, const in constSet.items() %}
+        {%- set quote = "" -%}
+        {%- if const.type == 'string' -%}
+            {%- if '\n' in const.value -%}
+                {%- set quote = '`'-%}
+            {%- else -%}
+                {%- set quote = '"' -%}
+            {%- endif-%}
+        {%- endif -%}
+        {{ key }}: {{ quote }}{{ const.value }}{{ quote }},
+        {%- if not loop.last %}
+        {% endif %}
+        {%- endfor %}
+    }
+    {%- if not loop.last %}
+    {% endif %}
+    {%- endfor %}
+}
