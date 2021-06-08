@@ -101,6 +101,16 @@ namespace Game
             }
         }
 
+        public void ApplyCommand(IEnumerable<Command> commands)
+        {
+            
+        }
+
+        public void AppendCommand(Action<Command> commandAppend)
+        {
+            
+        }
+
         [FlatBufferEvent]
         public bool OnCreateRoom(CreateRoom response)
         {
