@@ -29,12 +29,12 @@ namespace Game
 
         public void Register(UnityObjects unityObjects)
         {
-            _unityObjs.Add(unityObjects.name, unityObjects);
+            _unityObjs.Add(unityObjects.name.ToLower(), unityObjects);
         }
 
         public void Unregister(UnityObjects unityObjects)
         {
-            _unityObjs.Remove(unityObjects.name);
+            _unityObjs.Remove(unityObjects.name.ToLower());
         }
     }
 }

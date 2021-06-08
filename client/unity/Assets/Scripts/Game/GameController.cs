@@ -1,82 +1,66 @@
-using Network;
-using Newtonsoft.Json;
-using Protocol.Response;
-using Shared.Table;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Text;
+using Network;
+using Protocol.Response;
 using UnityEngine;
 
 namespace Game
 {
     public class GameController : MonoBehaviour
     {
-        // Start is called before the first frame update
-        void Start()
-        {
-            foreach (var pair in Table.From<TableSampleAttribute>())
-            {
-                UnityEngine.Debug.Log(JsonConvert.SerializeObject(pair.Value));
-
-                foreach (var sample in Table.From<TableSample>()[pair.Key])
-                {
-                    UnityEngine.Debug.Log(JsonConvert.SerializeObject(sample));
-                }
-            }
-            Handler.Instance.Bind(this);
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
+        [NonSerialized] private int _playerTeam;
+        [NonSerialized] private List<int> _otherPlayerTeamList;
+        [NonSerialized] private List<Unit> _allUnits;
+        [NonSerialized] private List<Unit> _selectedUnits;
         
-        }
-
-        [ContextMenu("dd")]
-        private void OnEnable()
+        private void Awake()
         {
-            var camera = FindObjectOfType<Camera>();
-            var pointBuffer = new Vector3[4];
-            camera.CalculateFrustumCorners(camera.rect, camera.nearClipPlane, Camera.MonoOrStereoscopicEye.Mono, pointBuffer);
-
-            foreach (var pt in pointBuffer)
-            {
-                Debug.Log(pt);
-            }
-        }
-
-        public void GetFrustumPoints(Camera camera, Rect rectSS, Vector3[] frustumPoints)
-        {
-            if (frustumPoints.Length < 8)
-                throw new ArgumentException("frustumPoints minimum size is 8", nameof (frustumPoints));
+            Handler.Instance.Bind(this);
             
+            _playerTeam = 0;
+            _otherPlayerTeamList = new List<int>();
+            _allUnits = new List<Unit>();
+            _selectedUnits = new List<Unit>();
+        }
+
+        private void OnDestroy()
+        {
+            
+        }
+
+        public static Plane GetCreatePlaneFromQuad(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, bool reverse)
+        {
+            Vector3[] tris = new Vector3[4];
+            tris[0] = reverse? p3: p0;
+            tris[1] = reverse? p2: p1;
+            tris[2] = reverse? p1: p2;
+            tris[3] = reverse? p0: p3;
+            Plane plane;
+            GeometryUtility.TryCreatePlaneFromPolygon(tris, out plane);
+            return plane;
+        }
+
+        public void GetFrustumPlanes(Camera camera, Rect rectSS, Plane[] frustumPlanes)
+        {
+            var frustumPoints = new Vector3[8];
             var rectCS = new Rect(
             new Vector2(rectSS.center.x / camera.pixelWidth, rectSS.center.y / camera.pixelHeight),
                 new Vector2(rectSS.width / camera.pixelWidth, rectSS.height / camera.pixelHeight)
             );
-            var pointBuffer = new Vector3[4];
-            camera.CalculateFrustumCorners(rectCS, camera.nearClipPlane, Camera.MonoOrStereoscopicEye.Mono, pointBuffer);
-            Array.Copy(frustumPoints, pointBuffer, 4);
-            camera.CalculateFrustumCorners(rectCS, camera.farClipPlane, Camera.MonoOrStereoscopicEye.Mono, pointBuffer);
-            Array.Copy(frustumPoints, 4, pointBuffer, 0, 4);
-        }
-
-        public void GetFrustumPlanes(Vector3[] frustumPoints, Plane[] frustumPlanes)
-        {
-            if (frustumPoints.Length < 8)
-                throw new ArgumentException("frustumPoints minimum size is 8", nameof (frustumPoints));
-            if (frustumPlanes.Length < 6)
-                throw new ArgumentException("frustumPlanes minimum size is 6", nameof (frustumPlanes));
-
-            // frustumPoints Ordering: [0] = (Smaller,Smaller), [1] = (Smaller,Bigger), [2] = (Bigger,Bigger), [3] = (Bigger,Smaller)
-            // frustumPlanes Ordering: [0] = Left, [1] = Right, [2] = Down, [3] = Up, [4] = Near, [5] = Far
             
-            frustumPlanes[0] = new Plane(frustumPoints[0], frustumPoints[1], frustumPoints[4]);
-            frustumPlanes[1] = new Plane(frustumPoints[2], frustumPoints[3], frustumPoints[6]);
-            frustumPlanes[2] = new Plane(frustumPoints[0], frustumPoints[3], frustumPoints[4]);
-            frustumPlanes[3] = new Plane(frustumPoints[3], frustumPoints[2], frustumPoints[5]);
-            frustumPlanes[4] = new Plane(frustumPoints[0], frustumPoints[1], frustumPoints[2]);
-            frustumPlanes[5] = new Plane(frustumPoints[4], frustumPoints[5], frustumPoints[6]);
+            camera.CalculateFrustumCorners(rectCS, camera.farClipPlane, Camera.MonoOrStereoscopicEye.Mono, frustumPoints);
+            Array.Copy(frustumPoints, 0, frustumPoints, 4, 4);
+            camera.CalculateFrustumCorners(rectCS, camera.nearClipPlane, Camera.MonoOrStereoscopicEye.Mono, frustumPoints);
+            for (int i = 0; i < frustumPoints.Length; i++)
+                frustumPoints[i] = camera.transform.TransformPoint(frustumPoints[i]);
+            
+            frustumPlanes[0] = GetCreatePlaneFromQuad(frustumPoints[0], frustumPoints[1], frustumPoints[5], frustumPoints[4], false);
+            frustumPlanes[1] = GetCreatePlaneFromQuad(frustumPoints[2], frustumPoints[3], frustumPoints[7], frustumPoints[6], false);
+            frustumPlanes[2] = GetCreatePlaneFromQuad(frustumPoints[0], frustumPoints[3], frustumPoints[7], frustumPoints[4], true);
+            frustumPlanes[3] = GetCreatePlaneFromQuad(frustumPoints[1], frustumPoints[2], frustumPoints[6], frustumPoints[5], false);
+            frustumPlanes[4] = GetCreatePlaneFromQuad(frustumPoints[0], frustumPoints[1], frustumPoints[2], frustumPoints[3], true);
+            frustumPlanes[5] = GetCreatePlaneFromQuad(frustumPoints[4], frustumPoints[5], frustumPoints[6], frustumPoints[7], false);
         }
 
         private Vector3[] frustumPoints = new Vector3[8];
@@ -85,27 +69,46 @@ namespace Game
         public void UpdateDragRect(Rect rect)
         {
             var uobj = UnityResources._instance.Get("objects");
-            var selectedCamera = uobj.GetCamera(); 
-            GetFrustumPoints(selectedCamera, rect, frustumPoints);
-            GetFrustumPlanes(frustumPoints, frustumPlanes);
+            var selectedCamera = uobj.GetCamera();
 
-            var units = new List<Unit>(); 
-            uobj.IntersectUnits(frustumPlanes, units);
+            var units = new List<Unit>();
+            if (rect.size != Vector2.zero)
+            {
+                GetFrustumPlanes(selectedCamera, rect, frustumPlanes); 
+                uobj.IntersectUnits(frustumPlanes, units, _playerTeam);
+            }
+            else
+            {
+                var ray = selectedCamera.ScreenPointToRay(rect.position);
+                uobj.IntersectUnits(ray, units, _playerTeam);
+            }
             SelectUnits(units);
         }
 
         public void SelectUnits(List<Unit> selectedUnitList)
         {
+            foreach (var unit in _selectedUnits)
+            {
+                unit.Selected(false);
+            }
+            
+            _selectedUnits.Clear();
+            _selectedUnits.AddRange(selectedUnitList);
+
+            foreach (var unit in _selectedUnits)
+            {
+                unit.Selected(true);
+            }
         }
 
         [FlatBufferEvent]
-        public async Task<bool> OnCreateRoom(CreateRoom response)
+        public bool OnCreateRoom(CreateRoom response)
         {
             return true;
         }
 
         [FlatBufferEvent]
-        public async Task<bool> OnJoinRoom(JoinRoom response)
+        public bool OnJoinRoom(JoinRoom response)
         {
             return true;
         }
