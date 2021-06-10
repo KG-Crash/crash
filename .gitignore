@@ -85,3 +85,4 @@ server/src/main/__debug_*
 server/src/*.org
 table/converter/output
 _
+server/src/main/json
