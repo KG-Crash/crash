@@ -5,15 +5,15 @@ namespace Shared
     {% for enumName, enumSet in dataSet.items() -%}
     public enum {{ enumName }}
     {
-        {% for name, desc in enumSet.items() -%}
-        {{ name }}
-        {%- if not loop.last -%},{%- endif %} // {{ desc }}
+        {% for name, value in enumSet.items() -%}
+        {{ name }}{% if value != 'default' %} = 0x{{ '%08X' % value }}{% endif %}
+        {%- if not loop.last -%},{%- endif %}
         {%- if not loop.last %}
-
         {% endif %}
         {%- endfor %}
     }
     {%- if not loop.last %}
+
     {% endif %}
     {%- endfor %}
 }

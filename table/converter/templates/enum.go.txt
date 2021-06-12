@@ -21,8 +21,8 @@ var {{ enumName }} _{{ enumName }}
 func init() {
     {% for enumName, enumSet in dataSet.items() -%}
     {{ enumName }} = _{{ enumName }} {
-        {% for name, desc in enumSet.items() -%}
-        {{ name }}: {{ loop.index }}, // {{ desc }}
+        {% for name, value in enumSet.items() -%}
+        {{ name }}: {% if value != 'default' %}0x{{ '%08X' % value }}{% else %}{{ loop.index }}{% endif %},
         {%- if not loop.last %}
         {% endif %}
         {%- endfor %}

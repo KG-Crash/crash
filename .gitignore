@@ -86,3 +86,4 @@ server/src/*.org
 table/converter/output
 _
 server/src/main/json
+table/~$*.xlsx

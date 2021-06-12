@@ -1,3 +1,4 @@
+using Shared.Table;
 using System;
 using UnityEngine;
 
@@ -16,6 +17,9 @@ namespace Game
     
     public class Unit : MonoBehaviour, ISelectable, IRenderable
     {
+        public Shared.Table.Unit Table { get; private set; }
+        public Player Owner { get; private set; }
+
         [SerializeField] private int _unitOriginID;
         [SerializeField] private GameObject _highlighted;
         [SerializeField] private Animator _animator;
@@ -43,6 +47,10 @@ namespace Game
             set => _unitID = value;
         }
 
+        public int Damage => Table.Damage + (Owner?.Advanced[Shared.Advanced.UPGRADE_WEAPON] ?? 0);
+
+        public int Armor => Table.Armor + (Owner?.Advanced[Shared.Advanced.UPGRADE_ARMOR] ?? 0);
+
         [SerializeField] private int _team;
         [SerializeField] private bool _selectable = true;
         [SerializeField] private int _unitID;
@@ -57,6 +65,11 @@ namespace Game
         private void OnRefreshRenderers()
         {
             _rendereres = GetComponentsInChildren<Renderer>();
+        }
+
+        public Unit()
+        {
+            this.Table = Shared.Table.Table.From<TableUnit>()[this._unitOriginID];
         }
 
         private void Update()
@@ -75,6 +88,11 @@ namespace Game
 
         public void MoveTo(Vector3 position)
         {
+        }
+
+        public bool ContainsRange(Vector3 target)
+        {
+            return (this.transform.position - target).sqrMagnitude < Math.Pow(this.Table.AttackRange, 2);
         }
     }
 }

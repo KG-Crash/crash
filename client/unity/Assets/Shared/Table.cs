@@ -38,6 +38,26 @@ namespace Shared.Table
         public string Name { get; set; }
     }
 
+    public class Unit
+    {
+        [Key]
+        public int Id { get; set; }
+        
+        public int Hp { get; set; }
+        
+        public int Damage { get; set; }
+        
+        public int Armor { get; set; }
+        
+        public int AttackRange { get; set; }
+        
+        public int Speed { get; set; }
+        
+        public UnitSize Size { get; set; }
+        
+        public UnitType Type { get; set; }
+    }
+
     [Table("json/SampleAttribute.json")]
     public partial class TableSampleAttribute : BaseDict<string, SampleAttribute>
     { }
@@ -48,5 +68,9 @@ namespace Shared.Table
 
     [Table("json/Sample2.json")]
     public partial class TableSample2 : BaseDict<int, Sample2>
+    { }
+
+    [Table("json/Unit.json")]
+    public partial class TableUnit : BaseDict<int, Unit>
     { }
 }
