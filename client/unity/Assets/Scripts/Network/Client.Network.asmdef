@@ -1,0 +1,16 @@
+{
+    "name": "Crash.Network",
+    "rootNamespace": "",
+    "references": [
+        "GUID:b2cece15be0ddad4ca16d4785979604e"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
