@@ -2,7 +2,8 @@
     "name": "Crash.Network",
     "rootNamespace": "",
     "references": [
-        "GUID:b2cece15be0ddad4ca16d4785979604e"
+        "GUID:b2cece15be0ddad4ca16d4785979604e",
+        "GUID:560b04d1a97f54a4e82edc0cbbb69285"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
