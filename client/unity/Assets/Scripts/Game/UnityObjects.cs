@@ -33,6 +33,7 @@ namespace Game
         }
         
         public void IntersectUnits(Plane[] frustum, List<Unit> unitList, int team)
+        {                  
             foreach (var unit in _units)
             {
                 if (!unit.selectable || unit.team != team) continue;
