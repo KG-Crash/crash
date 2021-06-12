@@ -17,7 +17,8 @@ namespace Game
     public class Unit : MonoBehaviour, ISelectable, IRenderable
     {
         [SerializeField] private int _unitOriginID;
-        [SerializeField] private GameObject highlighted;
+        [SerializeField] private GameObject _highlighted;
+        [SerializeField] private Animator _animator;
 
         public int team
         {
@@ -69,7 +70,7 @@ namespace Game
 
         public void Selected(bool select)
         {
-            if (highlighted) highlighted.SetActive(select);
+            if (_highlighted) _highlighted.SetActive(select);
         }
 
         public void MoveTo(Vector3 position)

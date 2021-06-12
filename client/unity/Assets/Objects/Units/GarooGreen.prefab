@@ -45,8 +45,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27ea18366bfd4ec780f2c3fd70876b82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  highlighted: {fileID: 380659590001448223}
+  _unitOriginID: 0
+  _highlighted: {fileID: 380659590001448223}
+  _animator: {fileID: 296309932244197581}
+  _team: 0
   _selectable: 1
+  _unitID: 0
   _rendereres:
   - {fileID: 337698830708193431}
 --- !u!1 &380659590001448223
@@ -62,7 +66,7 @@ GameObject:
   - component: {fileID: 380659590001448194}
   - component: {fileID: 380659590001448221}
   m_Layer: 0
-  m_Name: Cylinder (1)
+  m_Name: highlighted
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -200,11 +204,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 95960639317094338, guid: ce32570ad266f224d92065cb1761d4d2, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 35c387a9648c6aa4bb7d7456950f0ec6, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ce32570ad266f224d92065cb1761d4d2, type: 3}
 --- !u!4 &380279806265146937 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4320639851688246, guid: ce32570ad266f224d92065cb1761d4d2, type: 3}
+  m_PrefabInstance: {fileID: 380659589898555151}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &296309932244197581 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 95960639317094338, guid: ce32570ad266f224d92065cb1761d4d2, type: 3}
   m_PrefabInstance: {fileID: 380659589898555151}
   m_PrefabAsset: {fileID: 0}
 --- !u!137 &337698830708193431 stripped
