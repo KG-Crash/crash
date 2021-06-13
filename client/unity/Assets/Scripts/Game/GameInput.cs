@@ -58,6 +58,25 @@ namespace Game
             _ui.UpdateDragRect(dragRectSS);
         }
 
+        public void OnPressAltBtn(Vector2 positionSS)
+        {
+            
+        }
+
+        public void OnDragAltBtn(Vector2 positionSS)
+        {
+            
+        }
+
+        public void OnReleaseAltBtn(Vector2 positionSS)
+        {
+            if (_controller.MoveSelectedUnitTo(positionSS))
+            {
+                _ui.MoveTo(positionSS);   
+            }
+        }
+
+
         public void OnUpKey()
         {
             var unityObject = UnityResources._instance.Get("objects");

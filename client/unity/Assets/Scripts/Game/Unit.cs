@@ -80,6 +80,23 @@ namespace Game
             }
         }
 
+        public float speed 
+        {
+            get
+            {
+                var speed = table.Speed;
+                if (owner.advanced.TryGetValue(Advanced.UPGRADE_SPEED, out var advanced))
+                    speed += advanced;
+
+                var additional = owner.AdditionalStat(unitID);
+                if (additional.TryGetValue(StatType.Speed, out var x))
+                    speed += x;
+
+                return speed;
+            }
+        }
+
+        [SerializeField] public float _speed = 1.0f; 
         [SerializeField] private int _team;
         [SerializeField] private bool _selectable = true;
         [SerializeField] private int _unitID;
@@ -90,6 +107,9 @@ namespace Game
         [NonSerialized] private Bounds _totalBounds = new Bounds();
         [SerializeField] private Renderer[] _rendereres;
 
+        [NonSerialized] private bool moveTo;
+        [NonSerialized] private Vector3 _moveTarget;
+        
         [ContextMenu("Gather renderers")]
         private void OnRefreshRenderers()
         {
@@ -98,7 +118,7 @@ namespace Game
 
         public Unit()
         {
-            // TODO : Á¦°ÅÇØ¾ßÇÔ Å×½ºÆ®ÄÚµåÀÓ
+            // TODO : ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ï¿½ï¿½ï¿½ ï¿½×½ï¿½Æ®ï¿½Úµï¿½ï¿½ï¿½
             this.owner = new Player();
             this.owner.abilities |= (Ability.UPGRADE_4 | Ability.UPGRADE_10);
             this.table = Shared.Table.Table.From<TableUnit>()[this._unitOriginID];
@@ -112,6 +132,24 @@ namespace Game
             {
                 _totalBounds.Encapsulate(renderer.bounds);
             }
+
+            if (moveTo)
+            {
+                var diff = (_moveTarget - transform.position);
+                var magnitude = diff.magnitude;
+                var direction = diff / magnitude;
+                var delta = Time.deltaTime;
+
+                if (speed * delta < magnitude + Shared.Const.Character.MoveEpsilon)
+                {
+                    transform.position += direction * speed * delta;
+                }
+                else
+                {
+                    transform.position = _moveTarget;
+                    moveTo = false;
+                }
+            }
         }
 
         public void Selected(bool select)
@@ -121,6 +159,8 @@ namespace Game
 
         public void MoveTo(Vector3 position)
         {
+            moveTo = true;
+            _moveTarget = position;
         }
 
         public bool ContainsRange(Vector3 target)

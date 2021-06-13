@@ -101,6 +101,27 @@ namespace Game
             }
         }
 
+        public bool MoveSelectedUnitTo(Vector2 positionSS)
+        {           
+            var uobj = UnityResources._instance.Get("objects");
+            var selectedCamera = uobj.GetCamera();
+            var camRay = selectedCamera.ScreenPointToRay(positionSS);
+
+            if (Physics.Raycast(camRay, out var hitInfo, selectedCamera.farClipPlane))
+            {
+                foreach (var unit in _selectedUnits)
+                {
+                    unit.MoveTo(hitInfo.point);
+                }
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public void ApplyCommand(IEnumerable<Command> commands)
         {
             

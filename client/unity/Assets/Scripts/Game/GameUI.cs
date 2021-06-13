@@ -21,5 +21,9 @@ namespace Game
             rect.sizeDelta = rectSS.size;
         }
 
+        public void MoveTo(Vector2 positionSS)
+        {
+            
+        }
     }
 }

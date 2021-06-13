@@ -11,6 +11,9 @@ namespace Game
         void OnPressMainBtn(Vector2 positionSS);
         void OnDragMainBtn(Vector2 positionSS);
         void OnReleaseMainBtn(Vector2 positionSS);
+        void OnPressAltBtn(Vector2 positionSS);
+        void OnDragAltBtn(Vector2 positionSS);
+        void OnReleaseAltBtn(Vector2 positionSS);
         void OnUpKey();
         void OnDownKey();
         void OnLeftKey();
@@ -65,6 +68,30 @@ namespace Game
             foreach (var subscriber in _inputSubscribers)
             {
                 subscriber.OnReleaseMainBtn(positionSS);
+            }
+        }
+        
+        public void OnPressAltBtn(Vector2 positionSS)
+        {
+            foreach (var subscriber in _inputSubscribers)
+            {
+                subscriber.OnPressAltBtn(positionSS);
+            }
+        }
+
+        public void OnDragAltBtn(Vector2 positionSS)
+        {
+            foreach (var subscriber in _inputSubscribers)
+            {
+                subscriber.OnDragAltBtn(positionSS);
+            }
+        }
+
+        public void OnReleaseAltBtn(Vector2 positionSS)
+        {
+            foreach (var subscriber in _inputSubscribers)
+            {
+                subscriber.OnReleaseAltBtn(positionSS);
             }
         }
 

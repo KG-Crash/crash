@@ -6,31 +6,43 @@ namespace Game
 
     public class LegacyUnityInput : MonoBehaviour
     {
-        private bool mousePressed = false;
+        private bool mouseMainBtnPressed = false;
+        private bool mouseAltBtnPressed = false;
         
         private void Update()
         {
             var inputBridge = InputBridge._instance;
 
             var mainFocusPos = Input.mousePosition;
-            if (mousePressed)
+            if (mouseMainBtnPressed)
             {
-                Debug.Log("else");
                 inputBridge.OnDragMainBtn(mainFocusPos);
-                Debug.Log("Input.GetMouseButtonUp(0)");
-                
                 // 마우스 밖으로 나가면 거시기 처리
             }
             if (Input.GetMouseButtonDown(0))
             {
-                Debug.Log("Input.GetMouseButtonDown(0)");
-                mousePressed = true;
+                mouseMainBtnPressed = true;
                 inputBridge.OnPressMainBtn(mainFocusPos);
             }
             if (Input.GetMouseButtonUp(0))
             {
-                mousePressed = false;
+                mouseMainBtnPressed = false;
                 inputBridge.OnReleaseMainBtn(mainFocusPos);
+            }
+            if (mouseAltBtnPressed)
+            {
+                inputBridge.OnDragAltBtn(mainFocusPos);
+                // 마우스 밖으로 나가면 거시기 처리
+            }
+            if (Input.GetMouseButtonDown(1))
+            {
+                mouseAltBtnPressed = true;
+                inputBridge.OnPressAltBtn(mainFocusPos);
+            }
+            if (Input.GetMouseButtonUp(1))
+            {
+                mouseAltBtnPressed = false;
+                inputBridge.OnReleaseAltBtn(mainFocusPos);
             }
 
             if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
