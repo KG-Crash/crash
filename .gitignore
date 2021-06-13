@@ -87,3 +87,5 @@ table/converter/output
 _
 server/src/main/json
 table/~$*.xlsx
+
+.idea
