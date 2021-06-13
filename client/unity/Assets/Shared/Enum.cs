@@ -25,6 +25,13 @@ namespace Shared
         Speed
     }
 
+    public enum CommandType
+    {
+        Move,
+        AttackSingleTarget,
+        AttackMultiTarget
+    }
+
     public enum Ability
     {
         NONE = 0x00000000,
@@ -53,6 +60,7 @@ namespace Shared
     public enum Advanced
     {
         UPGRADE_WEAPON,
-        UPGRADE_ARMOR
+        UPGRADE_ARMOR,
+        UPGRADE_SPEED
     }
 }

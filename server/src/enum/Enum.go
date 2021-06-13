@@ -22,6 +22,12 @@ type _StatType struct {
 	Speed       uint32
 }
 
+type _CommandType struct {
+	Move               uint32
+	AttackSingleTarget uint32
+	AttackMultiTarget  uint32
+}
+
 type _Ability struct {
 	NONE       uint32
 	UPGRADE_1  uint32
@@ -49,11 +55,13 @@ type _Ability struct {
 type _Advanced struct {
 	UPGRADE_WEAPON uint32
 	UPGRADE_ARMOR  uint32
+	UPGRADE_SPEED  uint32
 }
 
 var UnitSize _UnitSize
 var UnitType _UnitType
 var StatType _StatType
+var CommandType _CommandType
 var Ability _Ability
 var Advanced _Advanced
 
@@ -76,6 +84,12 @@ func init() {
 		Armor:       3,
 		AttackRange: 4,
 		Speed:       5,
+	}
+
+	CommandType = _CommandType{
+		Move:               1,
+		AttackSingleTarget: 2,
+		AttackMultiTarget:  3,
 	}
 
 	Ability = _Ability{
@@ -105,5 +119,6 @@ func init() {
 	Advanced = _Advanced{
 		UPGRADE_WEAPON: 1,
 		UPGRADE_ARMOR:  2,
+		UPGRADE_SPEED:  3,
 	}
 }

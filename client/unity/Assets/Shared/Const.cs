@@ -11,5 +11,6 @@ namespace Shared.Const
     public static class Character
     {
         public static readonly string InitStat = "캐릭터.스탯";
+        public static readonly double MoveEpsilon = 0.001;
     }
 }
