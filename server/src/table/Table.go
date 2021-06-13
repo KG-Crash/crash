@@ -21,6 +21,10 @@ func init() {
 		json.Unmarshal(data, &TableSample2)
 	}
 
+	if data, err := ioutil.ReadFile("json/UnitUpgrade.json"); err == nil {
+		json.Unmarshal(data, &TableUnitUpgrade)
+	}
+
 }
 
 type SampleAttribute struct {
@@ -47,3 +51,9 @@ type Sample2 struct {
 }
 
 var TableSample2 map[int]Sample2
+
+type UnitUpgrade struct {
+	Parent Ability
+}
+
+var TableUnitUpgrade map[Ability][]UnitUpgrade

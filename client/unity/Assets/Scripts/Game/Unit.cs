@@ -1,9 +1,10 @@
+using Shared;
 using Shared.Table;
 using System;
 using UnityEngine;
 
 namespace Game
-{   
+{
     public interface ISelectable
     {
         bool selectable { get; set; }
@@ -17,8 +18,8 @@ namespace Game
     
     public class Unit : MonoBehaviour, ISelectable, IRenderable
     {
-        public Shared.Table.Unit Table { get; private set; }
-        public Player Owner { get; private set; }
+        public Shared.Table.Unit table { get; private set; }
+        public Player owner { get; private set; }
 
         [SerializeField] private int _unitOriginID;
         [SerializeField] private GameObject _highlighted;
@@ -47,9 +48,37 @@ namespace Game
             set => _unitID = value;
         }
 
-        public int Damage => Table.Damage + (Owner?.Advanced[Shared.Advanced.UPGRADE_WEAPON] ?? 0);
+        public int damage
+        {
+            get
+            {
+                var damage = table.Damage;
+                if (owner.advanced.TryGetValue(Advanced.UPGRADE_WEAPON, out var advanced))
+                    damage += advanced;
 
-        public int Armor => Table.Armor + (Owner?.Advanced[Shared.Advanced.UPGRADE_ARMOR] ?? 0);
+                var additional = owner.AdditionalStat(unitID);
+                if (additional.TryGetValue(StatType.Damage, out var x))
+                    damage += x;
+
+                return damage;
+            }
+        }
+
+        public int armor
+        {
+            get
+            {
+                var armor = table.Armor;
+                if (owner.advanced.TryGetValue(Advanced.UPGRADE_ARMOR, out var advanced))
+                    armor += advanced;
+
+                var additional = owner.AdditionalStat(unitID);
+                if (additional.TryGetValue(StatType.Armor, out var x))
+                    armor += x;
+
+                return armor;
+            }
+        }
 
         [SerializeField] private int _team;
         [SerializeField] private bool _selectable = true;
@@ -69,7 +98,11 @@ namespace Game
 
         public Unit()
         {
-            this.Table = Shared.Table.Table.From<TableUnit>()[this._unitOriginID];
+            // TODO : 제거해야함 테스트코드임
+            this.owner = new Player();
+            this.owner.abilities |= (Ability.UPGRADE_4 | Ability.UPGRADE_10);
+            this.table = Shared.Table.Table.From<TableUnit>()[this._unitOriginID];
+            UnityEngine.Debug.Log(damage);
         }
 
         private void Update()
@@ -92,7 +125,7 @@ namespace Game
 
         public bool ContainsRange(Vector3 target)
         {
-            return (this.transform.position - target).sqrMagnitude < Math.Pow(this.Table.AttackRange, 2);
+            return (this.transform.position - target).sqrMagnitude < Math.Pow(this.table.AttackRange, 2);
         }
     }
 }

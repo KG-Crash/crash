@@ -14,6 +14,14 @@ type _UnitType struct {
 	Concussive uint32
 }
 
+type _StatType struct {
+	Hp          uint32
+	Damage      uint32
+	Armor       uint32
+	AttackRange uint32
+	Speed       uint32
+}
+
 type _Ability struct {
 	NONE       uint32
 	UPGRADE_1  uint32
@@ -45,6 +53,7 @@ type _Advanced struct {
 
 var UnitSize _UnitSize
 var UnitType _UnitType
+var StatType _StatType
 var Ability _Ability
 var Advanced _Advanced
 
@@ -59,6 +68,14 @@ func init() {
 		Normal:     1,
 		Explosive:  2,
 		Concussive: 3,
+	}
+
+	StatType = _StatType{
+		Hp:          1,
+		Damage:      2,
+		Armor:       3,
+		AttackRange: 4,
+		Speed:       5,
 	}
 
 	Ability = _Ability{

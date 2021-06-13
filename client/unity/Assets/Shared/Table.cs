@@ -58,6 +58,22 @@ namespace Shared.Table
         public UnitType Type { get; set; }
     }
 
+    public class UnitUpgradeAttribute
+    {
+        [Key]
+        public Ability Upgrade { get; set; }
+    }
+
+    public class UnitUpgrade
+    {
+        [Key]
+        public Ability Parent { get; set; }
+        
+        public int Unit { get; set; }
+        
+        public Dictionary<StatType, int> Additional { get; set; }
+    }
+
     [Table("json/SampleAttribute.json")]
     public partial class TableSampleAttribute : BaseDict<string, SampleAttribute>
     { }
@@ -72,5 +88,13 @@ namespace Shared.Table
 
     [Table("json/Unit.json")]
     public partial class TableUnit : BaseDict<int, Unit>
+    { }
+
+    [Table("json/UnitUpgradeAttribute.json")]
+    public partial class TableUnitUpgradeAttribute : BaseDict<Ability, UnitUpgradeAttribute>
+    { }
+
+    [Table("json/UnitUpgrade.json")]
+    public partial class TableUnitUpgrade : BaseDict<Ability, List<UnitUpgrade>>
     { }
 }

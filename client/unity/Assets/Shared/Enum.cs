@@ -16,6 +16,15 @@ namespace Shared
         Concussive
     }
 
+    public enum StatType
+    {
+        Hp,
+        Damage,
+        Armor,
+        AttackRange,
+        Speed
+    }
+
     public enum Ability
     {
         NONE = 0x00000000,

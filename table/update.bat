@@ -26,3 +26,4 @@ COPY enum\client\Enum.cs ..\..\..\client\unity\Assets\Shared
 COPY const\client\Const.cs ..\..\..\client\unity\Assets\Shared
 RMDIR /s /q ..\..\..\client\unity\json
 ROBOCOPY json\client ..\..\..\client\unity\json /E /NFL /NDL /NJH /NJS /nc /ns /np
+pause
