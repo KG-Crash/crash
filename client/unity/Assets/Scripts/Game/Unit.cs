@@ -1,6 +1,8 @@
 using Shared;
 using Shared.Table;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Game
@@ -15,10 +17,16 @@ namespace Game
     {
         Renderer[] renderers { get; }
     }
+
+    public interface IUnit
+    {
+        void OnDead(Unit unit);
+    }
     
     public class Unit : MonoBehaviour, ISelectable, IRenderable
     {
         public Shared.Table.Unit table { get; private set; }
+        public List<Shared.Table.Skill> skills { get; private set; }
         public Player owner { get; private set; }
 
         [SerializeField] private int _unitOriginID;
@@ -97,10 +105,53 @@ namespace Game
         }
 
         [SerializeField] public float _speed = 1.0f; 
+        public int attackSpeed
+        {
+            get
+            {
+                var attackSpeed = table.AttackSpeed;
+
+                var additional = owner.AdditionalStat(unitID);
+                if (additional.TryGetValue(StatType.AttackSpeed, out var x))
+                    attackSpeed += x;
+
+                return attackSpeed;
+            }
+        }
+
+        public int maxhp
+        {
+            get
+            {
+                var hp = table.Hp;
+                var additional = owner.AdditionalStat(unitID);
+                if (additional.TryGetValue(StatType.Hp, out var x))
+                    hp += x;
+
+                return hp;
+            }
+        }
+
+        public int hp
+        {
+            get => _hp;
+            set
+            {
+                _hp = Mathf.Clamp(value, 0, maxhp);
+                if (_hp <= 0)
+                    _listener?.OnDead(this);
+            }
+        }
+
+        public List<Skill> activeSkills => skills.Where(x => owner.abilities.HasFlag(x.Condition)).ToList();
+
         [SerializeField] private int _team;
         [SerializeField] private bool _selectable = true;
         [SerializeField] private int _unitID;
-        
+        [SerializeField] private DateTime _lastAttackTime = DateTime.MinValue;
+        [SerializeField] private int _hp;
+        [NonSerialized] private IUnit _listener;
+
         public Bounds bounds { get => _totalBounds; }
         public Renderer[] renderers { get => _rendereres; }
 
@@ -118,11 +169,12 @@ namespace Game
 
         public Unit()
         {
-            // TODO : �����ؾ��� �׽�Ʈ�ڵ���
+            // TODO : 제거해야함 테스트코드임
             this.owner = new Player();
-            this.owner.abilities |= (Ability.UPGRADE_4 | Ability.UPGRADE_10);
-            this.table = Shared.Table.Table.From<TableUnit>()[this._unitOriginID];
-            UnityEngine.Debug.Log(damage);
+            this.owner.SetAbilityFlag(Ability.UPGRADE_4 | Ability.UPGRADE_10);
+            this.table = Table.From<TableUnit>()[this._unitOriginID];
+            this.skills = Table.From<TableSkill>().Values.Where(x => x.Unit == this.unitOriginID).ToList();
+            this.hp = this.maxhp;
         }
 
         private void Update()
@@ -166,6 +218,57 @@ namespace Game
         public bool ContainsRange(Vector3 target)
         {
             return (this.transform.position - target).sqrMagnitude < Math.Pow(this.table.AttackRange, 2);
+        }
+
+        private int CalculateDamage(Unit unit)
+        {
+            var result = damage - unit.armor;
+
+            if (table.Type == UnitType.Explosive)
+            {
+                switch (unit.table.Size)
+                {
+                    case UnitSize.Small:
+                        return result;
+
+                    case UnitSize.Medium:
+                        return (int)(result * 0.75);
+
+                    case UnitSize.Large:
+                        return (int)(result * 0.5);
+                }
+            }
+
+            if (table.Type == UnitType.Concussive)
+            {
+                switch (unit.table.Size)
+                {
+                    case UnitSize.Large:
+                        return result;
+
+                    case UnitSize.Medium:
+                        return (int)(result * 0.75);
+
+                    case UnitSize.Small:
+                        return (int)(result * 0.5);
+                }
+            }
+
+            return result;
+        }
+
+        public bool Attack(Unit unit)
+        {
+            if (ContainsRange(unit.transform.position) == false)
+                return false;
+
+            var now = DateTime.Now;
+            if ((now - _lastAttackTime).Milliseconds < attackSpeed)
+                return false;
+
+            unit.hp -= CalculateDamage(unit);
+            _lastAttackTime = DateTime.Now;
+            return true;
         }
     }
 }

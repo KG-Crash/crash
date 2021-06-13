@@ -20,6 +20,7 @@ type _StatType struct {
 	Armor       uint32
 	AttackRange uint32
 	Speed       uint32
+	AttackSpeed uint32
 }
 
 type _CommandType struct {
@@ -84,6 +85,7 @@ func init() {
 		Armor:       3,
 		AttackRange: 4,
 		Speed:       5,
+		AttackSpeed: 6,
 	}
 
 	CommandType = _CommandType{

@@ -51,11 +51,15 @@ namespace Shared.Table
         
         public int AttackRange { get; set; }
         
+        public int AttackSpeed { get; set; }
+        
         public int Speed { get; set; }
         
         public UnitSize Size { get; set; }
         
         public UnitType Type { get; set; }
+        
+        public bool Controllable { get; set; }
     }
 
     public class UnitUpgradeAttribute
@@ -72,6 +76,16 @@ namespace Shared.Table
         public int Unit { get; set; }
         
         public Dictionary<StatType, int> Additional { get; set; }
+    }
+
+    public class Skill
+    {
+        [Key]
+        public int Id { get; set; }
+        
+        public int Unit { get; set; }
+        
+        public Ability Condition { get; set; }
     }
 
     [Table("json/SampleAttribute.json")]
@@ -96,5 +110,9 @@ namespace Shared.Table
 
     [Table("json/UnitUpgrade.json")]
     public partial class TableUnitUpgrade : BaseDict<Ability, List<UnitUpgrade>>
+    { }
+
+    [Table("json/Skill.json")]
+    public partial class TableSkill : BaseDict<int, Skill>
     { }
 }

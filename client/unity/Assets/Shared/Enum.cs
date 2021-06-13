@@ -22,7 +22,8 @@ namespace Shared
         Damage,
         Armor,
         AttackRange,
-        Speed
+        Speed,
+        AttackSpeed
     }
 
     public enum CommandType

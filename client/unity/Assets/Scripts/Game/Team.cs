@@ -16,7 +16,7 @@ namespace Game
         /// <summary>
         /// 업그레이드 상태
         /// </summary>
-        public Ability abilities { get; set; } = Ability.NONE;
+        public Ability abilities { get; private set; } = Ability.NONE;
         
         /// <summary>
         /// 누적되는 업그레이드 상태
@@ -39,6 +39,12 @@ namespace Game
                     .SelectMany(x => x.Additional)
                     .GroupBy(x => x.Key)
                     .ToDictionary(x => x.Key, x => x.Sum(x => x.Value));
+        }
+
+        public Ability SetAbilityFlag(Ability ability)
+        {
+            abilities |= ability;
+            return abilities;
         }
     }
 }
