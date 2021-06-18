@@ -1,0 +1,48 @@
+{
+	"authorization":
+	{
+		"user": "ubuntu",
+		"port": 22,
+		"key": "/ssh/fb"
+	},
+	"databases":
+	{
+		"main":
+		{
+			"host": "192.168.0.180",
+			"port": 3306,
+			"uid": "crash",
+			"pwd": "kg_crash"
+		},
+		"shard.1":
+		{
+			"host": "192.168.0.181",
+			"port": 3306,
+			"uid": "crash",
+			"pwd": "kg_crash"
+		},
+		"shard.2":
+		{
+			"host": "192.168.0.182",
+			"port": 3306,
+			"uid": "crash",
+			"pwd": "kg_crash"
+		}
+	},
+	"servers":
+	{
+		"game":
+		[
+			{
+				"host": {"public": "192.168.0.180", "private": "192.168.0.180"},
+				"port": 8000,
+				"mysql": ["main", "shard.2", "shard.3"]
+			},
+			{
+				"host": {"public": "192.168.0.181", "private": "192.168.0.181"},
+				"port": 8000,
+				"mysql": ["main", "shard.2", "shard.3"]
+			}
+		]
+	}
+}
