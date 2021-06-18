@@ -91,3 +91,5 @@ table/~$*.xlsx
 .idea
 __pycache__
 deploy/ubuntu.tar.gz
+deploy/ubuntu
+server/ssh
