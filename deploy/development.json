@@ -12,21 +12,24 @@
 			"host": "192.168.0.180",
 			"port": 3306,
 			"uid": "crash",
-			"pwd": "kg_crash"
+			"pwd": "kg_crash",
+			"database": "crash"
 		},
 		"shard.1":
 		{
 			"host": "192.168.0.181",
 			"port": 3306,
 			"uid": "crash",
-			"pwd": "kg_crash"
+			"pwd": "kg_crash",
+			"database": "crash"
 		},
 		"shard.2":
 		{
 			"host": "192.168.0.182",
 			"port": 3306,
 			"uid": "crash",
-			"pwd": "kg_crash"
+			"pwd": "kg_crash",
+			"database": "crash"
 		}
 	},
 	"servers":
@@ -34,14 +37,14 @@
 		"game":
 		[
 			{
-				"host": {"public": "192.168.0.180", "private": "192.168.0.180"},
-				"port": 8000,
-				"mysql": ["main", "shard.2", "shard.3"]
-			},
-			{
 				"host": {"public": "192.168.0.181", "private": "192.168.0.181"},
 				"port": 8000,
-				"mysql": ["main", "shard.2", "shard.3"]
+				"mysql": ["main", "shard.1", "shard.2"]
+			},
+			{
+				"host": {"public": "192.168.0.182", "private": "192.168.0.182"},
+				"port": 8000,
+				"mysql": ["main", "shard.1", "shard.2"]
 			}
 		]
 	}

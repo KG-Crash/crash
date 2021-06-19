@@ -1,0 +1,16 @@
+{
+    "databases":
+    [
+        {% for name in own.mysql -%}
+        {
+            "host": "{{ databases[name].host }}",
+            "port": {{ databases[name].port }},
+            "uid": "{{ databases[name].uid }}",
+            "pwd": "{{ databases[name].pwd }}",
+            "database": "{{ databases[name].database }}"
+        }{% if not loop.last %},{% endif %}
+        {%- if not loop.last %}
+        {% endif %}
+        {%- endfor %}
+    ]
+}
