@@ -53,7 +53,7 @@ type Sample2 struct {
 var TableSample2 map[int]Sample2
 
 type UnitUpgrade struct {
-	Parent Ability
+	Parent uint32
 }
 
-var TableUnitUpgrade map[Ability][]UnitUpgrade
+var TableUnitUpgrade map[uint32][]UnitUpgrade
