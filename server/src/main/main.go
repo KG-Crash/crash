@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"model"
 	"msg"
@@ -14,8 +13,6 @@ import (
 
 	console "github.com/AsynkronIT/goconsole"
 	"github.com/AsynkronIT/protoactor-go/actor"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 )
 
 var game *actor.PID
@@ -74,35 +71,7 @@ func OnAccepted(context actor.Context, conn net.Conn) {
 	})
 }
 
-type User struct {
-	Id   uint64 `gorm:"primaryKey;autoIncrement:true"`
-	Name string `gorm:"index;default:default name"`
-}
-
-type Room struct {
-	UserId uint64 `gorm:"index"`
-	User   User   `gorm:"foreignKey:Id;references:UserId"`
-}
-
 func main() {
-	dsn := "crash:kg_crash@tcp(127.0.0.1:3306)/crash?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	fmt.Println(db)
-
-	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Room{})
-
-	x := Room{}
-	db.Joins("User").Where(&Room{UserId: 4}).First(&x)
-	fmt.Println(x)
-
-	// user := &User{}
-	// db.Create(user)
-	// room := &Room{
-	// 	User: *user,
-	// }
-	// db.Create(room)
-
 	log.SetFlags(log.Ldate | log.Ltime)
 
 	system := actor.NewActorSystem()
