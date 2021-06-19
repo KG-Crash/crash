@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"model"
+	"msg"
 	"net"
 	"network"
 	"os"
@@ -12,65 +14,95 @@ import (
 
 	console "github.com/AsynkronIT/goconsole"
 	"github.com/AsynkronIT/protoactor-go/actor"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 var game *actor.PID
 
-func OnReceived(context actor.Context, user *model.UserActor, protocol protocol.Protocol) {
-	switch msg := protocol.(type) {
+func OnReceived(context actor.Context, id string, protocol protocol.Protocol) {
+	switch x := protocol.(type) {
 	case *request.CreateRoom:
-		context.Send(game, &model.SpawnRoom{
+		context.Send(game, &msg.SpawnRoom{
 			Master: context.Self(),
-			UserId: user.Id,
+			UserId: id,
 		})
 
 	case *request.JoinRoom:
-		context.Send(game, &model.JoinRoom{
+		context.Send(game, &msg.JoinRoom{
 			User:   context.Self(),
-			UserId: user.Id,
-			RoomId: msg.Id,
+			UserId: id,
+			RoomId: x.Id,
 		})
 
 	case *request.LeaveRoom: // game > user > room
-		context.Send(context.Self(), &model.LeaveRoom{
-			UserId: user.Id,
+		context.Send(context.Self(), &msg.LeaveRoom{
+			UserId: id,
 			User:   context.Self(),
 		})
 
 	case *request.RoomList:
-		context.Send(game, &model.RoomList{
+		context.Send(game, &msg.RoomList{
 			User: context.Self(),
 		})
 
 	case *request.Chat:
-		context.Send(context.Self(), &model.Chat{
-			UserId:  user.Id,
-			Message: msg.Message,
+		context.Send(context.Self(), &msg.Chat{
+			UserId:  id,
+			Message: x.Message,
 		})
 
 	case *request.Whisper:
-		context.Send(game, &model.Whisper{
-			From:    user.Id,
-			To:      msg.User,
-			Message: msg.Message,
+		context.Send(game, &msg.Whisper{
+			From:    id,
+			To:      x.User,
+			Message: x.Message,
 		})
 
 	case *request.KickRoom:
-		context.Send(context.Self(), &model.Kick{
-			From: user.Id,
-			To:   msg.User,
+		context.Send(context.Self(), &msg.Kick{
+			From: id,
+			To:   x.User,
 		})
 	}
 }
 
-func OnAccepted(context actor.Context, acceptor *network.AcceptorActor, conn net.Conn) {
-	context.Send(game, &model.SpawnUser{
+func OnAccepted(context actor.Context, conn net.Conn) {
+	context.Send(game, &msg.SpawnUser{
 		Conn:       conn,
 		OnReceived: OnReceived,
 	})
 }
 
+type User struct {
+	Id   uint64 `gorm:"primaryKey;autoIncrement:true"`
+	Name string `gorm:"index;default:default name"`
+}
+
+type Room struct {
+	UserId uint64 `gorm:"index"`
+	User   User   `gorm:"foreignKey:Id;references:UserId"`
+}
+
 func main() {
+	dsn := "crash:kg_crash@tcp(127.0.0.1:3306)/crash?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	fmt.Println(db)
+
+	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Room{})
+
+	x := Room{}
+	db.Joins("User").Where(&Room{UserId: 4}).First(&x)
+	fmt.Println(x)
+
+	// user := &User{}
+	// db.Create(user)
+	// room := &Room{
+	// 	User: *user,
+	// }
+	// db.Create(room)
+
 	log.SetFlags(log.Ldate | log.Ltime)
 
 	system := actor.NewActorSystem()
@@ -82,7 +114,7 @@ func main() {
 	acceptor := system.Root.Spawn(actor.PropsFromProducer(func() actor.Actor {
 		return &network.AcceptorActor{}
 	}))
-	system.Root.Send(acceptor, &network.BindAcceptor{
+	system.Root.Send(acceptor, &msg.BindAcceptor{
 		OnAccepted: OnAccepted,
 	})
 
@@ -98,6 +130,6 @@ func main() {
 		return
 	}
 
-	system.Root.Send(acceptor, &network.Listen{Port: uint16(p)})
+	system.Root.Send(acceptor, &msg.Listen{Port: uint16(p)})
 	_, _ = console.ReadLine()
 }

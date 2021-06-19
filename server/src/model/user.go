@@ -2,6 +2,7 @@ package model
 
 import (
 	"log"
+	"msg"
 	"network"
 	"protocol"
 	"protocol/response"
@@ -9,57 +10,13 @@ import (
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
-type OnReceived func(context actor.Context, receiver *UserActor, protocol protocol.Protocol)
-
 type UserActor struct {
 	session *actor.PID
 
 	Id   string
 	Room *actor.PID
 
-	OnReceived
-}
-
-type BindUser struct {
-	Id string
-	OnReceived
-}
-
-type JoinedRoom struct {
-	UserId string
-	User   *actor.PID
-	Room   *actor.PID
-	Master bool
-	Users  []string
-	Error  uint32
-}
-
-type LeaveRoom struct {
-	UserId string
-	User   *actor.PID
-}
-
-type Logout struct {
-	UserId string
-}
-
-type Chat struct {
-	UserId  string
-	Message string
-}
-
-type Whisper struct {
-	From    string
-	To      string
-	Message string
-}
-
-type Kick struct {
-	From string
-	To   string
-}
-
-type Kicked struct {
+	msg.OnReceived
 }
 
 func NewUser(id string) *UserActor {
@@ -82,13 +39,13 @@ func (state *UserActor) OnStarted(context actor.Context) {
 }
 
 // game > user
-func (state *UserActor) OnBindUser(context actor.Context, msg *BindUser) {
+func (state *UserActor) OnBindUser(context actor.Context, msg *msg.BindUser) {
 	state.Id = msg.Id
 	state.OnReceived = msg.OnReceived
 }
 
 // room > user
-func (state *UserActor) OnJoinedRoom(context actor.Context, msg *JoinedRoom) {
+func (state *UserActor) OnJoinedRoom(context actor.Context, msg *msg.JoinedRoom) {
 	if msg.Error > 0 {
 		context.Send(context.Self(), &response.JoinRoom{
 			User:  msg.UserId,
@@ -117,7 +74,7 @@ func (state *UserActor) OnJoinedRoom(context actor.Context, msg *JoinedRoom) {
 }
 
 // game > user > room
-func (state *UserActor) OnLeaveRoom(context actor.Context, msg *LeaveRoom) {
+func (state *UserActor) OnLeaveRoom(context actor.Context, msg *msg.LeaveRoom) {
 	if state.Room == nil { // 나가려는데 참여하는 방이 없는상태임
 		context.Send(context.Self(), &response.LeaveRoom{Error: 1})
 	} else {
@@ -126,7 +83,7 @@ func (state *UserActor) OnLeaveRoom(context actor.Context, msg *LeaveRoom) {
 }
 
 // room > user
-func (state *UserActor) OnLeavedRoom(context actor.Context, msg *LeavedRoom) {
+func (state *UserActor) OnLeavedRoom(context actor.Context, msg *msg.LeavedRoom) {
 	if msg.Error > 0 {
 		context.Send(context.Self(), &response.LeaveRoom{Error: msg.Error})
 		return
@@ -144,7 +101,7 @@ func (state *UserActor) OnLeavedRoom(context actor.Context, msg *LeavedRoom) {
 }
 
 // room > user
-func (state *UserActor) OnDestroyedRoom(context actor.Context, msg *DestroyedRoom) {
+func (state *UserActor) OnDestroyedRoom(context actor.Context, x *msg.DestroyedRoom) {
 	state.Room = nil
 	context.Send(context.Self(), &response.DestroyedRoom{Error: 0})
 
@@ -152,7 +109,7 @@ func (state *UserActor) OnDestroyedRoom(context actor.Context, msg *DestroyedRoo
 }
 
 // user direct
-func (state *UserActor) OnChat(context actor.Context, msg *Chat) {
+func (state *UserActor) OnChat(context actor.Context, x *msg.Chat) {
 	if state.Room == nil {
 		context.Send(context.Self(), &response.Chat{
 			Error: 1,
@@ -160,24 +117,24 @@ func (state *UserActor) OnChat(context actor.Context, msg *Chat) {
 		return
 	}
 
-	context.Send(state.Room, msg)
-	log.Printf("User [%s] : %s", msg.UserId, msg.Message)
+	context.Send(state.Room, x)
+	log.Printf("User [%s] : %s", x.UserId, x.Message)
 }
 
 // user direct
-func (state *UserActor) OnKick(context actor.Context, msg *Kick) {
+func (state *UserActor) OnKick(context actor.Context, x *msg.Kick) {
 	if state.Room == nil {
 		return
 	}
 
-	context.Send(state.Room, &Kick{
+	context.Send(state.Room, &msg.Kick{
 		From: state.Id,
-		To:   msg.To,
+		To:   x.To,
 	})
 }
 
 // room > user
-func (state *UserActor) OnKicked(context actor.Context, msg *Kicked) {
+func (state *UserActor) OnKicked(context actor.Context, x *msg.Kicked) {
 	state.Room = nil
 	context.Send(context.Self(), &response.KickedRoom{})
 
@@ -185,60 +142,60 @@ func (state *UserActor) OnKicked(context actor.Context, msg *Kicked) {
 }
 
 func (state *UserActor) Receive(context actor.Context) {
-	switch msg := context.Message().(type) {
+	switch x := context.Message().(type) {
 	case *actor.Started:
 		state.OnStarted(context)
 
 	case *actor.Terminated:
-		context.Send(context.Parent(), &Logout{
+		context.Send(context.Parent(), &msg.Logout{
 			UserId: state.Id,
 		})
 
 		if state.Room != nil {
-			context.Send(state.Room, &LeaveRoom{
+			context.Send(state.Room, &msg.LeaveRoom{
 				User:   context.Self(),
 				UserId: state.Id,
 			})
 		}
 
-	case *network.SetConnection:
-		context.Send(state.session, msg)
+	case *msg.SetConnection:
+		context.Send(state.session, x)
 
-	case *network.Received:
+	case *msg.Received:
 		if state.OnReceived != nil {
-			state.OnReceived(context, state, msg.Protocol)
+			state.OnReceived(context, state.Id, x.Protocol)
 		}
 
-	case *BindUser:
-		state.OnBindUser(context, msg)
+	case *msg.BindUser:
+		state.OnBindUser(context, x)
 
-	case *JoinedRoom:
-		state.OnJoinedRoom(context, msg)
+	case *msg.JoinedRoom:
+		state.OnJoinedRoom(context, x)
 
-	case *LeaveRoom:
-		state.OnLeaveRoom(context, msg)
+	case *msg.LeaveRoom:
+		state.OnLeaveRoom(context, x)
 
-	case *LeavedRoom:
-		state.OnLeavedRoom(context, msg)
+	case *msg.LeavedRoom:
+		state.OnLeavedRoom(context, x)
 
-	case *DestroyedRoom:
-		state.OnDestroyedRoom(context, msg)
+	case *msg.DestroyedRoom:
+		state.OnDestroyedRoom(context, x)
 
-	case *Chat:
-		state.OnChat(context, msg)
+	case *msg.Chat:
+		state.OnChat(context, x)
 
-	case *Kick:
-		state.OnKick(context, msg)
+	case *msg.Kick:
+		state.OnKick(context, x)
 
-	case *Kicked:
-		state.OnKicked(context, msg)
+	case *msg.Kicked:
+		state.OnKicked(context, x)
 
 	case protocol.Protocol:
-		context.Send(state.session, &network.Write{
-			Protocol: msg,
+		context.Send(state.session, &msg.Write{
+			Protocol: x,
 		})
 
 	default:
-		context.Send(context.Parent(), msg)
+		context.Send(context.Parent(), x)
 	}
 }

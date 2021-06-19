@@ -3,50 +3,34 @@ package network
 import (
 	"fmt"
 	"log"
+	"msg"
 	"net"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
-type OnAccepted func(context actor.Context, acceptor *AcceptorActor, conn net.Conn)
-
 type AcceptorActor struct {
 	net.Listener
-	OnAccepted
-}
-
-type Listen struct {
-	Port uint16
-}
-
-type Accept struct {
-}
-
-type Accepted struct {
-	net.Conn
-}
-
-type BindAcceptor struct {
-	OnAccepted
+	msg.OnAccepted
 }
 
 func (state *AcceptorActor) Receive(context actor.Context) {
-	switch msg := context.Message().(type) {
-	case *Listen:
-		state.Listener, _ = net.Listen("tcp", fmt.Sprintf(":%d", msg.Port))
-		context.ActorSystem().Root.Send(context.Self(), &Accept{})
-		log.Printf("CRASH SERVER IS RUNNING : %d", msg.Port)
+	switch x := context.Message().(type) {
+	case *msg.Listen:
+		state.Listener, _ = net.Listen("tcp", fmt.Sprintf(":%d", x.Port))
+		context.ActorSystem().Root.Send(context.Self(), &msg.Accept{})
+		log.Printf("CRASH SERVER IS RUNNING : %d", x.Port)
 
-	case *Accept:
+	case *msg.Accept:
 		conn, _ := state.Listener.Accept()
 
 		if state.OnAccepted != nil {
-			state.OnAccepted(context, state, conn)
+			state.OnAccepted(context, conn)
 		}
-		context.Send(context.Self(), &Accepted{Conn: conn})
-		context.Send(context.Self(), &Accept{})
+		context.Send(context.Self(), &msg.Accepted{Conn: conn})
+		context.Send(context.Self(), &msg.Accept{})
 
-	case *BindAcceptor:
-		state.OnAccepted = msg.OnAccepted
+	case *msg.BindAcceptor:
+		state.OnAccepted = x.OnAccepted
 	}
 }

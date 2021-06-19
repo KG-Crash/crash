@@ -1,6 +1,7 @@
 package network
 
 import (
+	"msg"
 	"net"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
@@ -13,19 +14,8 @@ type SessionActor struct {
 	Receiver *actor.PID
 }
 
-type SetConnection struct {
-	net.Conn
-}
-
-type Receive struct {
-}
-
-type Disconnected struct {
-	*actor.PID
-}
-
 func (state *SessionActor) Receive(context actor.Context) {
-	switch msg := context.Message().(type) {
+	switch x := context.Message().(type) {
 	case *actor.Started:
 		state.Sender = context.Spawn(actor.PropsFromProducer(func() actor.Actor {
 			return NewSenderActor()
@@ -44,15 +34,15 @@ func (state *SessionActor) Receive(context actor.Context) {
 		context.Stop(state.Receiver)
 		state.Conn.Close()
 
-	case *SetConnection:
-		state.Conn = msg.Conn
-		context.Send(state.Sender, msg)
-		context.Send(state.Receiver, msg)
+	case *msg.SetConnection:
+		state.Conn = x.Conn
+		context.Send(state.Sender, x)
+		context.Send(state.Receiver, x)
 
-	case *Received:
-		context.Send(context.Parent(), msg)
+	case *msg.Received:
+		context.Send(context.Parent(), x)
 
-	case *Write:
-		context.Send(state.Sender, msg)
+	case *msg.Write:
+		context.Send(state.Sender, x)
 	}
 }

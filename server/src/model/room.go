@@ -2,6 +2,7 @@ package model
 
 import (
 	"log"
+	"msg"
 	"protocol/response"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
@@ -11,22 +12,6 @@ type RoomActor struct {
 	Id     string
 	Users  map[string]*actor.PID
 	Master *actor.PID
-}
-
-type JoinRoom struct {
-	User   *actor.PID
-	UserId string
-	RoomId string
-}
-
-type LeavedRoom struct {
-	User   *actor.PID
-	UserId string
-	Error  uint32
-}
-
-type DestroyedRoom struct {
-	RoomId string
 }
 
 func NewRoom(id string, master *actor.PID) *RoomActor {
@@ -47,47 +32,47 @@ func (state *RoomActor) UserIdList() []string {
 }
 
 // game > room
-func (state *RoomActor) OnJoinRoom(context actor.Context, msg *JoinRoom) {
-	if _, ok := state.Users[msg.UserId]; ok { // 이미 참여중인 유저가 다시 참여하려고 함
-		context.Send(msg.User, &JoinedRoom{Error: 1})
+func (state *RoomActor) OnJoinRoom(context actor.Context, x *msg.JoinRoom) {
+	if _, ok := state.Users[x.UserId]; ok { // 이미 참여중인 유저가 다시 참여하려고 함
+		context.Send(x.User, &msg.JoinedRoom{Error: 1})
 		return
 	}
 
-	state.Users[msg.UserId] = msg.User
+	state.Users[x.UserId] = x.User
 
 	for _, user := range state.Users {
-		context.Send(user, &JoinedRoom{
-			UserId: msg.UserId,
-			User:   msg.User,
-			Master: state.Master == msg.User,
+		context.Send(user, &msg.JoinedRoom{
+			UserId: x.UserId,
+			User:   x.User,
+			Master: state.Master == x.User,
 			Room:   context.Self(),
 			Users:  state.UserIdList(),
 			Error:  0,
 		})
 	}
 
-	log.Printf("User [%s] joined into room [%s]", msg.UserId, state.Id)
+	log.Printf("User [%s] joined into room [%s]", x.UserId, state.Id)
 }
 
 // game > user > room
-func (state *RoomActor) OnLeaveRoom(context actor.Context, msg *LeaveRoom) {
+func (state *RoomActor) OnLeaveRoom(context actor.Context, x *msg.LeaveRoom) {
 
-	if _, ok := state.Users[msg.UserId]; !ok { // Room 소속 유저가 아님
-		context.Send(msg.User, &LeavedRoom{
+	if _, ok := state.Users[x.UserId]; !ok { // Room 소속 유저가 아님
+		context.Send(x.User, &msg.LeavedRoom{
 			Error: 1,
 		})
 		return
 	}
 
-	if msg.User == state.Master {
-		delete(state.Users, msg.UserId)
+	if x.User == state.Master {
+		delete(state.Users, x.UserId)
 
-		context.Send(msg.User, &LeavedRoom{
-			User:   msg.User,
-			UserId: msg.UserId,
+		context.Send(x.User, &msg.LeavedRoom{
+			User:   x.User,
+			UserId: x.UserId,
 		})
 
-		response := &DestroyedRoom{RoomId: state.Id}
+		response := &msg.DestroyedRoom{RoomId: state.Id}
 		context.Send(context.Parent(), response)
 		for _, user := range state.Users {
 			context.Send(user, response)
@@ -96,73 +81,73 @@ func (state *RoomActor) OnLeaveRoom(context actor.Context, msg *LeaveRoom) {
 		context.Stop(context.Self())
 
 	} else {
-		response := &LeavedRoom{
-			User:   msg.User,
-			UserId: msg.UserId,
+		response := &msg.LeavedRoom{
+			User:   x.User,
+			UserId: x.UserId,
 			Error:  0,
 		}
 		for _, user := range state.Users {
 			context.Send(user, response)
 		}
 
-		delete(state.Users, msg.UserId)
+		delete(state.Users, x.UserId)
 	}
 }
 
-func (state *RoomActor) OnChat(context actor.Context, msg *Chat) {
-	if _, ok := state.Users[msg.UserId]; !ok {
+func (state *RoomActor) OnChat(context actor.Context, x *msg.Chat) {
+	if _, ok := state.Users[x.UserId]; !ok {
 		return
 	}
 
 	for _, user := range state.Users {
 		context.Send(user, &response.Chat{
-			User:    msg.UserId,
-			Message: msg.Message,
+			User:    x.UserId,
+			Message: x.Message,
 			Error:   0,
 		})
 	}
 }
 
-func (state *RoomActor) OnKick(context actor.Context, msg *Kick) {
-	if _, ok := state.Users[msg.From]; !ok {
+func (state *RoomActor) OnKick(context actor.Context, x *msg.Kick) {
+	if _, ok := state.Users[x.From]; !ok {
 		return
 	}
 
-	if _, ok := state.Users[msg.To]; !ok {
+	if _, ok := state.Users[x.To]; !ok {
 		return
 	}
 
-	if state.Users[msg.From] != state.Master {
+	if state.Users[x.From] != state.Master {
 		return
 	}
 
-	if state.Users[msg.To] == state.Master {
+	if state.Users[x.To] == state.Master {
 		return
 	}
 
-	to := state.Users[msg.To]
-	context.Send(to, &Kicked{})
+	to := state.Users[x.To]
+	context.Send(to, &msg.Kicked{})
 
-	delete(state.Users, msg.To)
+	delete(state.Users, x.To)
 	for _, user := range state.Users {
 		context.Send(user, &response.LeaveRoom{
-			User: msg.To,
+			User: x.To,
 		})
 	}
 }
 
 func (state *RoomActor) Receive(context actor.Context) {
 	switch msg := context.Message().(type) {
-	case *JoinRoom:
+	case *msg.JoinRoom:
 		state.OnJoinRoom(context, msg)
 
-	case *LeaveRoom:
+	case *msg.LeaveRoom:
 		state.OnLeaveRoom(context, msg)
 
-	case *Chat:
+	case *msg.Chat:
 		state.OnChat(context, msg)
 
-	case *Kick:
+	case *msg.Kick:
 		state.OnKick(context, msg)
 	}
 }

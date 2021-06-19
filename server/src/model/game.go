@@ -3,8 +3,7 @@ package model
 import (
 	"fmt"
 	"log"
-	"net"
-	"network"
+	"msg"
 	"protocol/response"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
@@ -21,20 +20,6 @@ func NewGame() *GameActor {
 		Rooms: make(map[string]*actor.PID),
 		Users: make(map[string]*actor.PID),
 	}
-}
-
-type SpawnUser struct {
-	net.Conn
-	OnReceived
-}
-
-type SpawnRoom struct {
-	Master *actor.PID
-	UserId string
-}
-
-type RoomList struct {
-	User *actor.PID
 }
 
 func (state *GameActor) UserIdList() []string {
@@ -55,7 +40,7 @@ func (state *GameActor) RoomIdList() []string {
 	return result
 }
 
-func (state *GameActor) OnSpawnUser(context actor.Context, msg *SpawnUser) {
+func (state *GameActor) OnSpawnUser(context actor.Context, x *msg.SpawnUser) {
 	id := uuid.NewString()
 	if _, ok := state.Users[id]; ok {
 		// TODO : disconnect
@@ -68,122 +53,122 @@ func (state *GameActor) OnSpawnUser(context actor.Context, msg *SpawnUser) {
 
 	user := context.Spawn(props)
 	state.Users[id] = user
-	context.Send(user, &BindUser{
+	context.Send(user, &msg.BindUser{
 		Id:         id,
-		OnReceived: msg.OnReceived,
+		OnReceived: x.OnReceived,
 	})
-	context.Send(user, &network.SetConnection{Conn: msg.Conn})
+	context.Send(user, &msg.SetConnection{Conn: x.Conn})
 }
 
-func (state *GameActor) OnSpawnRoom(context actor.Context, msg *SpawnRoom) {
+func (state *GameActor) OnSpawnRoom(context actor.Context, x *msg.SpawnRoom) {
 	// TODO : 유저가 이미 방에 참여중인 상태에서 방을 생성하려는 시도를 할 수 있음
 
 	id := uuid.NewString()
 	if _, ok := state.Rooms[id]; ok {
-		context.Send(msg.Master, &response.CreateRoom{Error: 1})
+		context.Send(x.Master, &response.CreateRoom{Error: 1})
 		return
 	}
 
 	props := actor.PropsFromProducer(func() actor.Actor {
-		return NewRoom(id, msg.Master)
+		return NewRoom(id, x.Master)
 	})
 	room := context.Spawn(props)
 	state.Rooms[id] = room
 
-	context.Send(room, &JoinRoom{
-		User:   msg.Master,
-		UserId: msg.UserId,
+	context.Send(room, &msg.JoinRoom{
+		User:   x.Master,
+		UserId: x.UserId,
 		RoomId: id,
 	})
 
 	log.Printf("Spawn Room [%s]", id)
 }
 
-func (state *GameActor) OnDestroyedRoom(context actor.Context, msg *DestroyedRoom) {
-	if _, ok := state.Rooms[msg.RoomId]; !ok {
+func (state *GameActor) OnDestroyedRoom(context actor.Context, x *msg.DestroyedRoom) {
+	if _, ok := state.Rooms[x.RoomId]; !ok {
 		return
 	}
 
-	delete(state.Rooms, msg.RoomId)
-	log.Printf("Destroyed Room [%s]", msg.RoomId)
+	delete(state.Rooms, x.RoomId)
+	log.Printf("Destroyed Room [%s]", x.RoomId)
 }
 
-func (state *GameActor) OnRoomList(context actor.Context, msg *RoomList) {
-	context.Send(msg.User, &response.RoomList{
+func (state *GameActor) OnRoomList(context actor.Context, x *msg.RoomList) {
+	context.Send(x.User, &response.RoomList{
 		Rooms: state.RoomIdList(),
 	})
 }
 
-func (state *GameActor) OnJoinRoom(context actor.Context, msg *JoinRoom) {
-	room, ok := state.Rooms[msg.RoomId]
+func (state *GameActor) OnJoinRoom(context actor.Context, x *msg.JoinRoom) {
+	room, ok := state.Rooms[x.RoomId]
 	if !ok {
-		context.Send(msg.User, &JoinedRoom{
+		context.Send(x.User, &msg.JoinedRoom{
 			Error: 1,
 		})
 		return
 	}
 
-	context.Send(room, &JoinRoom{
-		User:   msg.User,
-		UserId: msg.UserId,
+	context.Send(room, &msg.JoinRoom{
+		User:   x.User,
+		UserId: x.UserId,
 	})
-	log.Printf("Request join user [%s] into Room [%s]", msg.UserId, msg.RoomId)
+	log.Printf("Request join user [%s] into Room [%s]", x.UserId, x.RoomId)
 }
 
-func (state *GameActor) OnLogout(context actor.Context, msg *Logout) {
-	_, ok := state.Users[msg.UserId]
+func (state *GameActor) OnLogout(context actor.Context, x *msg.Logout) {
+	_, ok := state.Users[x.UserId]
 	if !ok {
 		return
 	}
 
-	delete(state.Users, msg.UserId)
-	log.Printf("User [%s] logout", msg.UserId)
+	delete(state.Users, x.UserId)
+	log.Printf("User [%s] logout", x.UserId)
 }
 
-func (state *GameActor) OnWhisper(context actor.Context, msg *Whisper) {
-	from, from_ok := state.Users[msg.From]
+func (state *GameActor) OnWhisper(context actor.Context, x *msg.Whisper) {
+	from, from_ok := state.Users[x.From]
 	if !from_ok {
 		return
 	}
 
-	to, to_ok := state.Users[msg.To]
+	to, to_ok := state.Users[x.To]
 	if !to_ok {
 		context.Send(from, &response.Whisper{Error: 1})
 		return
 	}
 
 	context.Send(to, &response.Whisper{
-		User:    msg.From,
-		Message: msg.Message,
+		User:    x.From,
+		Message: x.Message,
 		Error:   0,
 	})
-	log.Printf("User [%s] whisper to user [%s] : %s", msg.From, msg.To, msg.Message)
+	log.Printf("User [%s] whisper to user [%s] : %s", x.From, x.To, x.Message)
 }
 
 func (state *GameActor) Receive(context actor.Context) {
-	switch msg := context.Message().(type) {
-	case *SpawnUser:
-		state.OnSpawnUser(context, msg)
+	switch x := context.Message().(type) {
+	case *msg.SpawnUser:
+		state.OnSpawnUser(context, x)
 
-	case *SpawnRoom:
-		state.OnSpawnRoom(context, msg)
+	case *msg.SpawnRoom:
+		state.OnSpawnRoom(context, x)
 
-	case *DestroyedRoom:
-		state.OnDestroyedRoom(context, msg)
+	case *msg.DestroyedRoom:
+		state.OnDestroyedRoom(context, x)
 
-	case *RoomList:
-		state.OnRoomList(context, msg)
+	case *msg.RoomList:
+		state.OnRoomList(context, x)
 
-	case *JoinRoom:
-		state.OnJoinRoom(context, msg)
+	case *msg.JoinRoom:
+		state.OnJoinRoom(context, x)
 
-	case *Logout:
-		state.OnLogout(context, msg)
+	case *msg.Logout:
+		state.OnLogout(context, x)
 
-	case *Whisper:
-		state.OnWhisper(context, msg)
+	case *msg.Whisper:
+		state.OnWhisper(context, x)
 
 	default:
-		fmt.Print(msg)
+		fmt.Print(x)
 	}
 }
