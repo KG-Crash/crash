@@ -15,7 +15,7 @@ namespace Shared.Const
                 {%- set prefix = '@"'-%}
             {%- endif-%}
         {%- endif -%}
-        public static readonly {{ const.type }} {{ key }} = {{ prefix }}{{ const.value }}{{ suffix }};
+        public static readonly {{ const.type }} {{ key }} = {{ prefix }}{% if const.value is none %}null{% else %}{{ const.value }}{% endif %}{{ suffix }};
         {%- if not loop.last %}
         {% endif %}
         {%- endfor %}
