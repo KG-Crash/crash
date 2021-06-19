@@ -9,6 +9,8 @@ WORKDIR /app
 COPY . .
 WORKDIR src/main
 
+RUN go get -u gorm.io/gorm
+RUN go get -u gorm.io/driver/mysql
 RUN go get
 RUN go build -o ./main
 
