@@ -29,7 +29,14 @@ namespace Game
         /// </summary>
         public Dictionary<uint, Unit> units { get; private set; } = new Dictionary<uint, Unit>();
 
-        public Dictionary<StatType, int> AdditionalStat(int unitID)
+        public void AddUnits(IEnumerable<Unit> otherUnits)
+        {            
+            units = 
+                units.Union(otherUnits.ToDictionary(u => u.unitID, u => u)).
+                ToDictionary(u => u.Key, u => u.Value);
+        }
+        
+        public Dictionary<StatType, int> AdditionalStat(uint unitID)
         {
             return Shared.Table.Table
                     .From<TableUnitUpgrade>()

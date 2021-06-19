@@ -45,12 +45,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27ea18366bfd4ec780f2c3fd70876b82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _unitOriginID: 0
+  _unitOriginID: 1
   _highlighted: {fileID: 380659590001448223}
   _animator: {fileID: 296309932244197581}
-  _team: 0
+  _rigidbody: {fileID: 0}
+  _speed: 1
+  _teamID: 0
   _selectable: 1
   _unitID: 0
+  _hp: 100
   _rendereres:
   - {fileID: 337698830708193431}
 --- !u!1 &380659590001448223

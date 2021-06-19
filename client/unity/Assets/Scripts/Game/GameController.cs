@@ -1,26 +1,47 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Network;
 using Protocol.Response;
+using Shared;
 using UnityEngine;
 
 namespace Game
 {
     public class GameController : MonoBehaviour
     {
-        [NonSerialized] private int _playerTeam;
-        [NonSerialized] private List<int> _otherPlayerTeamList;
-        [NonSerialized] private List<Unit> _allUnits;
+        [NonSerialized] private int _playerID;
+        [NonSerialized] private uint _playerTeamID;
+        [NonSerialized] private Team _allPlayerByTeam;
+        [NonSerialized] private Player _player;
         [NonSerialized] private List<Unit> _selectedUnits;
+
+        [SerializeField] private UnitTable _unitPrefabTable;
         
         private void Awake()
         {
             Handler.Instance.Bind(this);
-            
-            _playerTeam = 0;
-            _otherPlayerTeamList = new List<int>();
-            _allUnits = new List<Unit>();
+
+            // 임시 코드 지워야함
+            var units = new Unit[]
+            {
+                UnitFactory.GetNewUnit(0, 0,_unitPrefabTable),
+                UnitFactory.GetNewUnit(1, 0,_unitPrefabTable),
+                UnitFactory.GetNewUnit(2, 0, _unitPrefabTable)
+            };
+
+            units[0].transform.position = new Vector3(0, 0, -1.44f);
+            units[1].transform.position = new Vector3(0, 0, 0);
+            units[2].transform.position = new Vector3(0, 0, +1.44f);
+
+            _playerID = 0;
+            _playerTeamID = 0;
+            _player = new Player();
+            _player.AddUnits(units);
+            _allPlayerByTeam = new Team();
+            _allPlayerByTeam.players.Add(_playerTeamID, new List<Player>());
+            _allPlayerByTeam.players[_playerTeamID].Add(_player);
             _selectedUnits = new List<Unit>();
         }
 
@@ -70,37 +91,52 @@ namespace Game
         {
             var uobj = UnityResources._instance.Get("objects");
             var selectedCamera = uobj.GetCamera();
+            
+            var teamPlayers = _allPlayerByTeam.players[_playerTeamID];
+            var player = teamPlayers[_playerID];
+            var units = player.units.Values.ToArray();
+            var selectedUnits = new List<Unit>();
 
-            var units = new List<Unit>();
             if (rect.size != Vector2.zero)
             {
                 GetFrustumPlanes(selectedCamera, rect, frustumPlanes); 
-                uobj.IntersectUnits(frustumPlanes, units, _playerTeam);
+                UnityObjects.IntersectUnits(frustumPlanes, units, selectedUnits);
             }
             else
             {
                 var ray = selectedCamera.ScreenPointToRay(rect.position);
-                uobj.IntersectUnits(ray, units, _playerTeam);
+                UnityObjects.IntersectUnits(ray, units, selectedUnits);
             }
-            SelectUnits(units);
+            
+            SelectUnits(selectedUnits);
         }
 
         public void SelectUnits(List<Unit> selectedUnitList)
         {
-            foreach (var unit in _selectedUnits)
+            foreach (var unit in _selectedUnits.Except(selectedUnitList))
             {
                 unit.Selected(false);
             }
-            
-            _selectedUnits.Clear();
-            _selectedUnits.AddRange(selectedUnitList);
-
-            foreach (var unit in _selectedUnits)
+            foreach (var unit in selectedUnitList.Except(_selectedUnits))
             {
                 unit.Selected(true);
             }
+
+            _selectedUnits = selectedUnitList;
         }
 
+        public Vector3Int EncodePosition(Vector3 pos)
+        {
+            return new Vector3Int(
+                Mathf.RoundToInt(pos.x * 1000.0f), 
+                Mathf.RoundToInt(pos.y * 1000.0f), 
+                Mathf.RoundToInt(pos.z * 1000.0f));
+        }
+        public Vector3 DecodePosition(Vector3Int netPos)
+        {
+            return new Vector3(netPos.x / 1000.0f, netPos.y / 1000.0f, netPos.z / 1000.0f);
+        }
+        
         public bool MoveSelectedUnitTo(Vector2 positionSS)
         {           
             var uobj = UnityResources._instance.Get("objects");
@@ -111,7 +147,11 @@ namespace Game
             {
                 foreach (var unit in _selectedUnits)
                 {
-                    unit.MoveTo(hitInfo.point);
+                    AppendCommand(
+                        CommandFactory.CreateMoveCommand(
+                            unit.unitID, EncodePosition(hitInfo.point)
+                            )
+                        );
                 }
 
                 return true;
@@ -122,14 +162,36 @@ namespace Game
             }
         }
 
-        public void ApplyCommand(IEnumerable<Command> commands)
+        public void ApplyCommand(IEnumerable<ICommand> commands)
         {
+            var teamPlayers = _allPlayerByTeam.players[_playerTeamID];
+            var player = teamPlayers[_playerID];
             
+            foreach (var command in commands)
+            {
+                switch (command.type)
+                {
+                    case CommandType.Move:
+                        var unit = player.units[command.behaiveUnitID];
+                        var moveCommand = (MoveCommand) command;
+                        unit.MoveTo(DecodePosition(moveCommand._position));
+                        break;
+                    case CommandType.AttackSingleTarget:
+                        break;
+                    case CommandType.AttackMultiTarget:
+                        break;
+                }
+            }
         }
 
-        public void AppendCommand(Action<Command> commandAppend)
+        public void AppendCommand(ICommand command)
         {
-            
+            ApplyCommand(new ICommand[1] { command });
+        }
+
+        public void AppendCommand(IEnumerable<ICommand> commands)
+        {
+            ApplyCommand(commands);
         }
 
         [FlatBufferEvent]

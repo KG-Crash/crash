@@ -32,11 +32,11 @@ namespace Game
             return _focus;
         }
         
-        public void IntersectUnits(Plane[] frustum, List<Unit> unitList, int team)
+        public static void IntersectUnits(Plane[] frustum, IEnumerable<Unit> sourceUnits, List<Unit> unitList)
         {                  
-            foreach (var unit in _units)
+            foreach (var unit in sourceUnits)
             {
-                if (!unit.selectable || unit.team != team) continue;
+                if (!unit.selectable) continue;
                 
                 if (GeometryUtility.TestPlanesAABB(frustum, unit.bounds))
                 {
@@ -45,17 +45,17 @@ namespace Game
             }
         }
         
-        public void IntersectUnits(Ray ray, List<Unit> unitList, int team)
+        public static void IntersectUnits(Ray ray, IEnumerable<Unit> sourceUnits, List<Unit> outUnitList)
         {                  
             Debug.Log("IntersectUnits");
 
-            foreach (var unit in _units)
+            foreach (var unit in sourceUnits)
             {
-                if (!unit.selectable || unit.team != team) continue;
+                if (!unit.selectable) continue;
                 
                 if (unit.bounds.IntersectRay(ray))
                 {
-                    unitList.Add(unit);
+                    outUnitList.Add(unit);
                 }
             }
         }

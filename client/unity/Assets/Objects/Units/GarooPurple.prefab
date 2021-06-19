@@ -121,7 +121,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 912794023963841168}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.78, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 911018170249509346}
@@ -141,12 +141,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27ea18366bfd4ec780f2c3fd70876b82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _unitOriginID: 0
+  _unitOriginID: 2
   _highlighted: {fileID: 912794023439083145}
   _animator: {fileID: 1006711533067022248}
-  _team: 0
+  _rigidbody: {fileID: 0}
+  _speed: 1
+  _teamID: 0
   _selectable: 1
   _unitID: 0
+  _hp: 100
   _rendereres:
   - {fileID: 958655044301409254}
 --- !u!1001 &912794023911437030

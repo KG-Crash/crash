@@ -32,11 +32,12 @@ namespace Game
         [SerializeField] private int _unitOriginID;
         [SerializeField] private GameObject _highlighted;
         [SerializeField] private Animator _animator;
+        [SerializeField] private Rigidbody _rigidbody;
 
-        public int team
+        public uint teamID
         {
-            get => _team;
-            set => _team = value;
+            get => _teamID;
+            set => _teamID = value;
         }
 
         public bool selectable
@@ -50,7 +51,7 @@ namespace Game
             get => _unitOriginID;
         }
         
-        public int unitID
+        public uint unitID
         {
             get => _unitID;
             set => _unitID = value;
@@ -145,9 +146,9 @@ namespace Game
 
         public List<Skill> activeSkills => skills.Where(x => owner.abilities.HasFlag(x.Condition)).ToList();
 
-        [SerializeField] private int _team;
+        [SerializeField] private uint _teamID;
         [SerializeField] private bool _selectable = true;
-        [SerializeField] private int _unitID;
+        [SerializeField] private uint _unitID;
         [SerializeField] private DateTime _lastAttackTime = DateTime.MinValue;
         [SerializeField] private int _hp;
         [NonSerialized] private IUnit _listener;
@@ -192,11 +193,13 @@ namespace Game
                 var direction = diff / magnitude;
                 var delta = Time.deltaTime;
 
-                if (speed * delta < magnitude + Shared.Const.Character.MoveEpsilon)
+                transform.LookAt(_moveTarget);
+                
+                if (speed * delta < magnitude)
                 {
                     transform.position += direction * speed * delta;
                 }
-                else
+                else if (magnitude < Shared.Const.Character.MoveEpsilon)
                 {
                     transform.position = _moveTarget;
                     moveTo = false;
