@@ -1,0 +1,27 @@
+{
+  "1": {
+    "Condition": "UPGRADE_1",
+    "Id": 1,
+    "Unit": 1
+  },
+  "2": {
+    "Condition": "UPGRADE_1",
+    "Id": 2,
+    "Unit": 1
+  },
+  "3": {
+    "Condition": "UPGRADE_1",
+    "Id": 3,
+    "Unit": 1
+  },
+  "4": {
+    "Condition": "UPGRADE_2",
+    "Id": 4,
+    "Unit": 1
+  },
+  "5": {
+    "Condition": "UPGRADE_2",
+    "Id": 5,
+    "Unit": 1
+  }
+}

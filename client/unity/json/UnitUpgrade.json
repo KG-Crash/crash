@@ -1,0 +1,42 @@
+{
+  "UPGRADE_10": [
+    {
+      "Additional": {
+        "Damage": 20,
+        "Speed": 6
+      },
+      "Parent": "UPGRADE_10",
+      "Unit": 0
+    }
+  ],
+  "UPGRADE_3": [
+    {
+      "Additional": {
+        "AttackRange": 10
+      },
+      "Parent": "UPGRADE_3",
+      "Unit": 0
+    },
+    {
+      "Additional": {
+        "Speed": 3
+      },
+      "Parent": "UPGRADE_3",
+      "Unit": 1
+    },
+    {
+      "Additional": {},
+      "Parent": "UPGRADE_3",
+      "Unit": 2
+    }
+  ],
+  "UPGRADE_4": [
+    {
+      "Additional": {
+        "Damage": 10
+      },
+      "Parent": "UPGRADE_4",
+      "Unit": 0
+    }
+  ]
+}

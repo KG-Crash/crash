@@ -1,0 +1,23 @@
+{
+  "UPGRADE_10": [
+    {
+      "Parent": "UPGRADE_10"
+    }
+  ],
+  "UPGRADE_3": [
+    {
+      "Parent": "UPGRADE_3"
+    },
+    {
+      "Parent": "UPGRADE_3"
+    },
+    {
+      "Parent": "UPGRADE_3"
+    }
+  ],
+  "UPGRADE_4": [
+    {
+      "Parent": "UPGRADE_4"
+    }
+  ]
+}

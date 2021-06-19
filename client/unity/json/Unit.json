@@ -1,0 +1,38 @@
+{
+  "0": {
+    "Armor": 0,
+    "AttackRange": 10,
+    "AttackSpeed": 1000,
+    "Controllable": true,
+    "Damage": 5,
+    "Hp": 100,
+    "Id": 0,
+    "Size": "Small",
+    "Speed": 5,
+    "Type": "Normal"
+  },
+  "1": {
+    "Armor": 0,
+    "AttackRange": 10,
+    "AttackSpeed": 1000,
+    "Controllable": true,
+    "Damage": 10,
+    "Hp": 125,
+    "Id": 1,
+    "Size": "Medium",
+    "Speed": 5,
+    "Type": "Explosive"
+  },
+  "2": {
+    "Armor": 0,
+    "AttackRange": 10,
+    "AttackSpeed": 1000,
+    "Controllable": true,
+    "Damage": 15,
+    "Hp": 150,
+    "Id": 2,
+    "Size": "Large",
+    "Speed": 5,
+    "Type": "Concussive"
+  }
+}
