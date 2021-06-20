@@ -1,51 +1,110 @@
 {
-	"authorization":
-	{
-		"user": "ubuntu",
-		"port": 22,
-		"key": "/ssh/fb"
-	},
-	"databases":
-	{
-		"main":
-		{
-			"host": "192.168.0.180",
-			"port": 3306,
-			"uid": "crash",
-			"pwd": "kg_crash",
-			"database": "crash"
-		},
-		"shard.1":
-		{
-			"host": "192.168.0.181",
-			"port": 3306,
-			"uid": "crash",
-			"pwd": "kg_crash",
-			"database": "crash"
-		},
-		"shard.2":
-		{
-			"host": "192.168.0.182",
-			"port": 3306,
-			"uid": "crash",
-			"pwd": "kg_crash",
-			"database": "crash"
-		}
-	},
-	"servers":
-	{
-		"game":
-		[
-			{
-				"host": {"public": "192.168.0.181", "private": "192.168.0.181"},
-				"port": 8000,
-				"mysql": ["main", "shard.1", "shard.2"]
-			},
-			{
-				"host": {"public": "192.168.0.182", "private": "192.168.0.182"},
-				"port": 8000,
-				"mysql": ["main", "shard.1", "shard.2"]
-			}
-		]
-	}
+    "authorization":
+    {
+        "user": "ubuntu",
+        "port": 22,
+        "key": "/ssh/fb"
+    },
+    "haproxy":
+    {
+        "master":
+        {
+            "host": 
+            {
+                "public": "192.168.0.180",
+                "private": "192.168.0.180"
+            },
+            "port": 6380
+        },
+        "slave":
+        [
+            {
+                "host":
+                {
+                    "public": "192.168.0.181",
+                    "private": "192.168.0.181"
+                },
+                "port": 6380
+            },
+            {
+                "host":
+                {
+                    "public": "192.168.0.182",
+                    "private": "192.168.0.182"
+                },
+                "port": 6380
+            },
+            {
+                "host":
+                {
+                    "public": "192.168.0.183",
+                    "private": "192.168.0.183"
+                },
+                "port": 6380
+            }
+        ],
+        "sentinel":
+        [
+            {
+                "host":
+                {
+                    "public": "192.168.0.181",
+                    "private": "192.168.0.181"
+                },
+                "port": 26379
+            }
+        ],
+        "haproxy":
+        {
+            "host":
+            {
+                "public": "192.168.0.180",
+                "private": "192.168.0.180"
+            },
+            "port": 6379
+        }
+    },
+    "databases":
+    {
+        "main":
+        {
+            "host": "192.168.0.180",
+            "port": 3306,
+            "uid": "crash",
+            "pwd": "kg_crash",
+            "database": "crash"
+        },
+        "shard.1":
+        {
+            "host": "192.168.0.181",
+            "port": 3306,
+            "uid": "crash",
+            "pwd": "kg_crash",
+            "database": "crash"
+        },
+        "shard.2":
+        {
+            "host": "192.168.0.182",
+            "port": 3306,
+            "uid": "crash",
+            "pwd": "kg_crash",
+            "database": "crash"
+        }
+    },
+    "servers":
+    {
+        "game":
+        [
+            {
+                "host": {"public": "192.168.0.181", "private": "192.168.0.181"},
+                "port": 8000,
+                "mysql": ["main", "shard.1", "shard.2"]
+            },
+            {
+                "host": {"public": "192.168.0.182", "private": "192.168.0.182"},
+                "port": 8000,
+                "mysql": ["main", "shard.1", "shard.2"]
+            }
+        ]
+    }
 }

@@ -1,0 +1,9 @@
+port {{ port }}
+  
+dir "/tmp"
+
+sentinel resolve-hostnames yes
+sentinel monitor docker-cluster {{ master.host.private }} {{ master.port }} 1
+sentinel down-after-milliseconds docker-cluster 5000
+
+sentinel failover-timeout docker-cluster 5000

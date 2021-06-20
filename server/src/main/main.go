@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"model"
 	"msg"
@@ -13,6 +15,7 @@ import (
 
 	console "github.com/AsynkronIT/goconsole"
 	"github.com/AsynkronIT/protoactor-go/actor"
+	"github.com/go-redis/redis"
 )
 
 var game *actor.PID
@@ -72,6 +75,15 @@ func OnAccepted(context actor.Context, conn net.Conn) {
 }
 
 func main() {
+	ctx := context.Background()
+	client := redis.NewClient(&redis.Options{
+		Addr: "192.168.0.180:6379",
+	})
+
+	pong, err := client.Ping(ctx).Result()
+	fmt.Println(pong, err)
+	client.Close()
+
 	log.SetFlags(log.Ldate | log.Ltime)
 
 	system := actor.NewActorSystem()
