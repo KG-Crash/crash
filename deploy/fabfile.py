@@ -11,11 +11,14 @@ env.port = 22
 env.timeout = 60
 
 CONFIGURATION = None
+ENVIRONMENT = None
 
 @task
 def environment(e):
     global CONFIGURATION
+    global ENVIRONMENT
 
+    ENVIRONMENT = e
     with open(f'deploy/{e}.json') as f:
         CONFIGURATION = json.load(f)
 
@@ -41,12 +44,14 @@ def environment(e):
     env.hosts = list(set([host for role in env.roledefs.values() for host in role]))
 
 @task
+@runs_once
 def build(service='game'):
     with lcd('server'):
         local(f'docker build -t cshyeon/crash:{service} .')
         local(f'docker push cshyeon/crash:{service}')
 
     local(f'docker image prune -f')
+
 
 @task
 @parallel
@@ -72,6 +77,7 @@ def remove(service='game'):
 @parallel
 def deploy(service='game'):
     global CONFIGURATION
+    global ENVIRONMENT
 
     image_name = f'cshyeon/crash:{service}'
     sudo(f'docker pull {image_name}')
@@ -79,14 +85,19 @@ def deploy(service='game'):
     remove(service)
 
     configs = [x for x in CONFIGURATION['servers'][service] if env.host in (x['host']['private'], x['host']['public'])]
-    sudo('mkdir -p /etc/crash/appsettings')
     for i, config in enumerate(configs):
         config = {'own': copy.deepcopy(config)}
         config.update(CONFIGURATION)
-        # files.upload_template('appsettings.txt', f'/etc/crash/appsettings/appsettings.{i}.json', context=config, use_jinja=True, template_dir='deploy/templates', use_sudo=True) # TODO : appsettings 파일과 마운트
+        
+        root = f'/etc/crash/appsettings/{i}'
+        sudo(f'mkdir -p {root}')
+        
+        appsettings_fname = f'appsettings.{ENVIRONMENT}.json'
+        files.upload_template('appsettings.txt', f'{root}/{appsettings_fname}', context=config, use_jinja=True, template_dir='deploy/templates', use_sudo=True, backup=False)
 
         container_name = f'crash.{service}.{i}'
-        sudo(f"docker run -it -d --restart unless-stopped --name {container_name} -p {config['own']['port']}:{config['own']['port']} {image_name} ./main {config['own']['port']}")
+        print(f"docker run -it -d --restart unless-stopped --name {container_name} -p {config['own']['port']}:{config['own']['port']} -v {root}/{appsettings_fname}:/app/{appsettings_fname} -e CRASH_ENVIRONMENT={ENVIRONMENT} {image_name}")
+
 @task
 @roles('haproxy.master')
 def _haproxy_master():

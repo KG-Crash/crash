@@ -1,4 +1,5 @@
 {
+    "port": {{ own.port }},
     "databases":
     [
         {% for name in own.mysql -%}
