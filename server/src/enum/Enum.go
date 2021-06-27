@@ -8,6 +8,13 @@ type _UnitSize struct {
 	Large  uint32
 }
 
+type _UnitState struct {
+	Idle   uint32
+	Move   uint32
+	Attack uint32
+	Dead   uint32
+}
+
 type _UnitType struct {
 	Normal     uint32
 	Explosive  uint32
@@ -60,6 +67,7 @@ type _Advanced struct {
 }
 
 var UnitSize _UnitSize
+var UnitState _UnitState
 var UnitType _UnitType
 var StatType _StatType
 var CommandType _CommandType
@@ -71,6 +79,13 @@ func init() {
 		Small:  1,
 		Medium: 2,
 		Large:  3,
+	}
+
+	UnitState = _UnitState{
+		Idle:   1,
+		Move:   2,
+		Attack: 3,
+		Dead:   4,
 	}
 
 	UnitType = _UnitType{

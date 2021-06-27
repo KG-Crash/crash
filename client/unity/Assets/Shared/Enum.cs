@@ -9,6 +9,14 @@ namespace Shared
         Large
     }
 
+    public enum UnitState
+    {
+        Idle,
+        Move,
+        Attack,
+        Dead
+    }
+
     public enum UnitType
     {
         Normal,
