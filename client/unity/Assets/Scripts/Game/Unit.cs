@@ -119,6 +119,20 @@ namespace Game
                 return attackSpeed;
             }
         }
+        
+        public int attackRange
+        {
+            get
+            {
+                var attackRange = table.AttackRange;
+
+                var additional = owner.AdditionalStat(unitID);
+                if (additional.TryGetValue(StatType.AttackRange, out var x))
+                    attackRange += x;
+
+                return attackRange;
+            }
+        }
 
         public int maxhp
         {
@@ -161,6 +175,27 @@ namespace Game
 
         [NonSerialized] private bool moveTo;
         [NonSerialized] private Vector3 _moveTarget;
+        [NonSerialized] private UnitState _currentState;
+        [NonSerialized] private UnitState _reservedState;
+        
+        [NonSerialized] private float _stopMoveDistance;
+        [NonSerialized] private Vector3 _moveTargetPosition;
+        [NonSerialized] private Unit _targetUnit;
+
+        public Vector3 moveTargetPosition
+        {
+            get
+            {
+                if (_targetUnit != null)
+                {
+                    return _targetUnit.transform.position;
+                }
+                else
+                {
+                    return _moveTargetPosition;
+                }
+            }
+        }
         
         [ContextMenu("Gather renderers")]
         private void OnRefreshRenderers()
@@ -176,6 +211,7 @@ namespace Game
             this.table = Table.From<TableUnit>()[this._unitOriginID];
             this.skills = Table.From<TableSkill>().Values.Where(x => x.Unit == this.unitOriginID).ToList();
             this.hp = this.maxhp;
+            _listener = this;
         }
 
         private void Update()
@@ -186,24 +222,42 @@ namespace Game
                 _totalBounds.Encapsulate(renderer.bounds);
             }
 
-            if (moveTo)
+            switch (_currentState)
             {
-                var diff = (_moveTarget - transform.position);
-                var magnitude = diff.magnitude;
-                var direction = diff / magnitude;
-                var delta = Time.deltaTime;
+                case UnitState.Move:
+                    var diff = (moveTargetPosition - transform.position);
+                    var magnitude = diff.magnitude;
+                    var direction = diff / magnitude;
+                    var delta = Time.deltaTime;
 
-                transform.LookAt(_moveTarget);
+                    transform.LookAt(moveTargetPosition);
                 
-                if (speed * delta < magnitude)
-                {
-                    transform.position += direction * speed * delta;
-                }
-                else if (magnitude < Shared.Const.Character.MoveEpsilon)
-                {
-                    transform.position = _moveTarget;
-                    moveTo = false;
-                }
+                    if (magnitude < speed * delta || magnitude < _stopMoveDistance + Shared.Const.Character.MoveEpsilon)
+                    {
+                        SetReservedState();
+                    }
+                    else 
+                    {
+                        transform.position += direction * speed * delta;
+                    }
+                    break;
+                case UnitState.Attack:
+                    if (ContainsRange(_targetUnit.transform.position))
+                    {
+                        if (_targetUnit.hp <= 0)
+                        {
+                            SetReservedState();
+                        }
+                        else if (Attack(_targetUnit))
+                        {
+                            _animator.SetTrigger("Attack");
+                        }
+                    }
+                    else
+                    {
+                        AttackTo(_targetUnit);
+                    }
+                    break;
             }
         }
 
@@ -212,10 +266,40 @@ namespace Game
             if (_highlighted) _highlighted.SetActive(select);
         }
 
+        public void SetReservedState()
+        {
+            switch (_currentState = _reservedState)
+            {
+                case UnitState.Idle:
+                    _animator.SetTrigger("Idle");
+                    break;
+            }
+        }
+        
         public void MoveTo(Vector3 position)
         {
-            moveTo = true;
-            _moveTarget = position;
+            _currentState = UnitState.Move;
+            _reservedState = UnitState.Idle;
+            _targetUnit = null;
+            _moveTargetPosition = position;
+            _stopMoveDistance = 0.0f;
+            
+            _animator.SetTrigger("Move");
+        }
+
+        public void MoveTo(Unit target, float stopDistance = 0.0f, UnitState reservedState = UnitState.Idle)
+        {
+            _currentState = UnitState.Move;
+            _reservedState = reservedState;
+            _targetUnit = target;
+            _stopMoveDistance = stopDistance;
+            
+            _animator.SetTrigger("Move");
+        }
+
+        public void AttackTo(Unit target)
+        {
+            MoveTo(target, attackRange, UnitState.Attack);
         }
 
         public bool ContainsRange(Vector3 target)
@@ -262,16 +346,19 @@ namespace Game
 
         public bool Attack(Unit unit)
         {
-            if (ContainsRange(unit.transform.position) == false)
-                return false;
-
             var now = DateTime.Now;
-            if ((now - _lastAttackTime).Milliseconds < attackSpeed)
+            if ((now - _lastAttackTime).TotalMilliseconds < attackSpeed)
                 return false;
 
             unit.hp -= CalculateDamage(unit);
             _lastAttackTime = DateTime.Now;
             return true;
+        }
+
+        public void OnDead(Unit unit)
+        {
+            _currentState = UnitState.Dead;
+            _animator.SetTrigger("Dead");
         }
     }
 }

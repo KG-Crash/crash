@@ -16,10 +16,9 @@ namespace Game
         [NonSerialized] private Team _allPlayerByTeam;
         [NonSerialized] private Player _player;
         [NonSerialized] private List<Unit> _selectedUnits;
-
-        [SerializeField] private UnitTable _unitPrefabTable;
         [NonSerialized] private List<Unit> _allUnitInFrustum;
         
+        [SerializeField] private UnitTable _unitPrefabTable;
         private void Awake()
         {
             Handler.Instance.Bind(this);
@@ -61,6 +60,10 @@ namespace Game
             _selectedUnits = new List<Unit>();
             _allUnitInFrustum = new List<Unit>();
         }
+
+        private void Update()
+        {            
+            UpdateUnitInFrustumPlane();
         }
 
         private void OnDestroy()
@@ -89,7 +92,8 @@ namespace Game
             else
             {
                 var ray = selectedCamera.ScreenPointToRay(rect.position);
-                UnityObjects.IntersectUnits(ray, units, selectedUnits);
+                var selectedUnit = UnityObjects.IntersectNearestUnit(ray, units);
+                selectedUnits.Add(selectedUnit);
             }
             
             SelectUnits(selectedUnits);
@@ -109,17 +113,41 @@ namespace Game
             _selectedUnits = selectedUnitList;
         }
 
-        public bool MoveSelectedUnitTo(Vector2 positionSS)
-        {           
+        public void MoveOrAttackTo(Vector2 positionSS, out bool move)
+        {
             var uobj = UnityResources._instance.Get("objects");
             var selectedCamera = uobj.GetCamera();
-            var camRay = selectedCamera.ScreenPointToRay(positionSS);
 
-            if (Physics.Raycast(camRay, out var hitInfo, selectedCamera.farClipPlane))
+            var ray = selectedCamera.ScreenPointToRay(positionSS);
+            var selectedUnit = UnityObjects.IntersectNearestUnit(ray, _allUnitInFrustum);
+            
+            if (selectedUnit != null)
+            {
+                if (selectedUnit.teamID == _playerTeamID)
+                {
+                    MoveSelectedUnitTo(selectedUnit);
+                    move = true;
+                }
+                else
+                {
+                    AttackSelectedUnitTo(selectedUnit);
+                    move = false;
+                }
+            }
+            else
+            {
+                MoveSelectedUnitTo(ray, selectedCamera.farClipPlane);
+                move = true;
+            }
+        }
+        
+        public bool MoveSelectedUnitTo(Ray camRay, float farClipPlane)
+        {           
+            if (Physics.Raycast(camRay, out var hitInfo, farClipPlane))
             {
                 foreach (var unit in _selectedUnits)
                 {
-                    unit.MoveTo(CrashMath.EncodePosition(hitInfo.point));
+                    unit.MoveTo(hitInfo.point);
                 }
 
                 return true;
@@ -128,6 +156,37 @@ namespace Game
             {
                 return false;
             }
+        }
+
+        public void MoveSelectedUnitTo(Unit moveTargetUnit)
+        {                    
+            foreach (var unit in _selectedUnits)
+            {
+                unit.MoveTo(moveTargetUnit);
+            }
+        }
+
+        public void AttackSelectedUnitTo(Unit attackTargetUnit)
+        {
+            Debug.Log($"{attackTargetUnit.name}, {attackTargetUnit.teamID}");
+            
+            foreach (var unit in _selectedUnits)
+            {
+                unit.AttackTo(attackTargetUnit);
+            }
+        }
+
+        public void UpdateUnitInFrustumPlane()
+        {
+            var uobj = UnityResources._instance.Get("objects");
+            var selectedCamera = uobj.GetCamera();
+            var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(selectedCamera);
+            
+            _allUnitInFrustum = _allPlayerByTeam.players.
+                SelectMany(x => x.Value).
+                SelectMany(x => x.units).
+                Select(x => x.Value).
+                Where(x => GeometryUtility.TestPlanesAABB(frustumPlanes, x.bounds)).ToList();
         }
 
         public void ApplyCommand(IEnumerable<ICommand> commands)

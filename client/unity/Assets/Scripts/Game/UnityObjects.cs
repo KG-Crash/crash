@@ -46,9 +46,7 @@ namespace Game
         }
         
         public static void IntersectUnits(Ray ray, IEnumerable<Unit> sourceUnits, List<Unit> outUnitList)
-        {                  
-            Debug.Log("IntersectUnits");
-
+        {
             foreach (var unit in sourceUnits)
             {
                 if (!unit.selectable) continue;
@@ -58,6 +56,25 @@ namespace Game
                     outUnitList.Add(unit);
                 }
             }
+        }
+        
+        public static Unit IntersectNearestUnit(Ray ray, IEnumerable<Unit> sourceUnits)
+        {
+            var nearestDistance = float.PositiveInfinity;
+            Unit selectedUnit = null;
+            
+            foreach (var unit in sourceUnits)
+            {
+                if (!unit.selectable) continue;
+                
+                if (unit.bounds.IntersectRay(ray, out var distance) && distance < nearestDistance)
+                {
+                    distance = nearestDistance;
+                    selectedUnit = unit;
+                }
+            }
+
+            return selectedUnit;
         }
     }
 }

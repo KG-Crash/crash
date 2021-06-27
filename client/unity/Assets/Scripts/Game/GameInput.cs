@@ -70,12 +70,13 @@ namespace Game
 
         public void OnReleaseAltBtn(Vector2 positionSS)
         {
-            if (_controller.MoveSelectedUnitTo(positionSS))
+            _controller.MoveOrAttackTo(positionSS, out var isMove);
+
+            if (isMove)
             {
-                _ui.MoveTo(positionSS);   
+                _ui.MoveTo(positionSS);
             }
         }
-
 
         public void OnUpKey()
         {
