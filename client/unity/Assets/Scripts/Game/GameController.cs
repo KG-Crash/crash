@@ -18,6 +18,7 @@ namespace Game
         [NonSerialized] private List<Unit> _selectedUnits;
 
         [SerializeField] private UnitTable _unitPrefabTable;
+        [NonSerialized] private List<Unit> _allUnitInFrustum;
         
         private void Awake()
         {
@@ -26,8 +27,8 @@ namespace Game
             // 임시 코드 지워야함
             var units = new Unit[]
             {
-                UnitFactory.GetNewUnit(0, 0,_unitPrefabTable),
-                UnitFactory.GetNewUnit(1, 0,_unitPrefabTable),
+                UnitFactory.GetNewUnit(0, 0, _unitPrefabTable),
+                UnitFactory.GetNewUnit(1, 0, _unitPrefabTable),
                 UnitFactory.GetNewUnit(2, 0, _unitPrefabTable)
             };
 
@@ -42,7 +43,24 @@ namespace Game
             _allPlayerByTeam = new Team();
             _allPlayerByTeam.players.Add(_playerTeamID, new List<Player>());
             _allPlayerByTeam.players[_playerTeamID].Add(_player);
+
+            var enemyUnits = new Unit[]
+            {
+                UnitFactory.GetNewUnit(0, 1, _unitPrefabTable),
+                UnitFactory.GetNewUnit(1, 1, _unitPrefabTable),
+            };
+            
+            enemyUnits[0].transform.position = new Vector3(-1.44f * 1, 0, 0);
+            enemyUnits[1].transform.position = new Vector3(-1.44f * 2, 0, 0);
+            var otherPlayer = new Player();
+            otherPlayer.AddUnits(enemyUnits);
+            uint otherPlayerID = 1;
+            _allPlayerByTeam.players.Add(otherPlayerID, new List<Player>());
+            _allPlayerByTeam.players[otherPlayerID].Add(otherPlayer);
+            
             _selectedUnits = new List<Unit>();
+            _allUnitInFrustum = new List<Unit>();
+        }
         }
 
         private void OnDestroy()
