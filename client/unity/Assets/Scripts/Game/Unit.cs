@@ -23,7 +23,7 @@ namespace Game
         void OnDead(Unit unit);
     }
     
-    public class Unit : MonoBehaviour, ISelectable, IRenderable, IUnit
+    public class Unit : MonoBehaviour, ISelectable, IRenderable
     {
         public Shared.Table.Unit table { get; private set; }
         public List<Shared.Table.Skill> skills { get; private set; }
@@ -154,7 +154,10 @@ namespace Game
             {
                 _hp = Mathf.Clamp(value, 0, maxhp);
                 if (_hp <= 0)
+                {
+                    OnDead();
                     _listener?.OnDead(this);
+                }
             }
         }
 
