@@ -173,8 +173,6 @@ namespace Game
         [NonSerialized] private Bounds _totalBounds = new Bounds();
         [SerializeField] private Renderer[] _rendereres;
 
-        [NonSerialized] private bool moveTo;
-        [NonSerialized] private Vector3 _moveTarget;
         [NonSerialized] private UnitState _currentState;
         [NonSerialized] private UnitState _reservedState;
         
