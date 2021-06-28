@@ -23,7 +23,7 @@ namespace Game
         void OnDead(Unit unit);
     }
     
-    public class Unit : MonoBehaviour, ISelectable, IRenderable
+    public class Unit : MonoBehaviour, ISelectable, IRenderable, IUnit
     {
         public Shared.Table.Unit table { get; private set; }
         public List<Shared.Table.Skill> skills { get; private set; }
