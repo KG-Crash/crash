@@ -212,7 +212,6 @@ namespace Game
             this.table = Table.From<TableUnit>()[this._unitOriginID];
             this.skills = Table.From<TableSkill>().Values.Where(x => x.Unit == this.unitOriginID).ToList();
             this.hp = this.maxhp;
-            _listener = this;
         }
 
         private void Update()
