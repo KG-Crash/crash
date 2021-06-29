@@ -1,3 +1,4 @@
+using FixMath.NET;
 using Shared;
 using Shared.Table;
 using System;
@@ -134,7 +135,7 @@ namespace Game
             }
         }
 
-        public int maxhp
+        public Fix64 maxhp
         {
             get
             {
@@ -143,19 +144,18 @@ namespace Game
                 if (additional.TryGetValue(StatType.Hp, out var x))
                     hp += x;
 
-                return hp;
+                return new Fix64(hp);
             }
         }
 
-        public int hp
+        public Fix64 hp
         {
             get => _hp;
             set
             {
-                _hp = Mathf.Clamp(value, 0, maxhp);
-                if (_hp <= 0)
+                _hp = value > Fix64.Zero ? value < maxhp ? value : maxhp : Fix64.Zero;
+                if (_hp <= Fix64.Zero)
                 {
-                    OnDead();
                     _listener?.OnDead(this);
                 }
             }
@@ -167,7 +167,7 @@ namespace Game
         [SerializeField] private bool _selectable = true;
         [SerializeField] private uint _unitID;
         [SerializeField] private DateTime _lastAttackTime = DateTime.MinValue;
-        [SerializeField] private int _hp;
+        [SerializeField] private Fix64 _hp;
         [NonSerialized] private IUnit _listener;
 
         public Bounds bounds { get => _totalBounds; }
@@ -244,7 +244,7 @@ namespace Game
                 case UnitState.Attack:
                     if (ContainsRange(_targetUnit.transform.position))
                     {
-                        if (_targetUnit.hp <= 0)
+                        if (_targetUnit.hp <= Fix64.Zero)
                         {
                             SetReservedState();
                         }
@@ -307,7 +307,7 @@ namespace Game
             return (this.transform.position - target).sqrMagnitude < Math.Pow(this.table.AttackRange, 2);
         }
 
-        private int CalculateDamage(Unit unit)
+        private Fix64 CalculateDamage(Unit unit)
         {
             var result = damage - unit.armor;
 
@@ -316,13 +316,13 @@ namespace Game
                 switch (unit.table.Size)
                 {
                     case UnitSize.Small:
-                        return result;
+                        return new Fix64(result);
 
                     case UnitSize.Medium:
-                        return (int)(result * 0.75);
+                        return (Fix64)(result * 0.75f);
 
                     case UnitSize.Large:
-                        return (int)(result * 0.5);
+                        return (Fix64)(result * 0.5);
                 }
             }
 
@@ -331,17 +331,17 @@ namespace Game
                 switch (unit.table.Size)
                 {
                     case UnitSize.Large:
-                        return result;
+                        return new Fix64(result);
 
                     case UnitSize.Medium:
-                        return (int)(result * 0.75);
+                        return (Fix64)(result * 0.75);
 
                     case UnitSize.Small:
-                        return (int)(result * 0.5);
+                        return (Fix64)(result * 0.5);
                 }
             }
 
-            return result;
+            return new Fix64(result);
         }
 
         public bool Attack(Unit unit)
