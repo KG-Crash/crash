@@ -362,10 +362,13 @@ namespace Game
             return true;
         }
 
-        public void OnDead(Unit unit)
+        public void Die()
         {
             _currentState = UnitState.Dead;
             _animator.SetTrigger("Dead");
+            
+            this.owner = null;
+            //Destroy(this.gameObject);
         }
     }
 }

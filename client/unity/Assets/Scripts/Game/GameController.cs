@@ -80,7 +80,6 @@ namespace Game
         {
             var uobj = UnityResources._instance.Get("objects");
             var selectedCamera = uobj.GetCamera();
-            
             var teamPlayers = _allPlayerByTeam.players[_playerTeamID];
             var player = teamPlayers[_playerID];
             var units = player.units.Values.ToArray();
@@ -233,6 +232,13 @@ namespace Game
         public bool OnJoinRoom(JoinRoom response)
         {
             return true;
+        }
+
+        public void OnDead(Unit unit)
+        {
+            //unit.owner._units.DeleteUnit(unit.unitID);
+            unit.owner.units.DeleteUnit(unit);
+            throw new NotImplementedException();
         }
     }
 }
