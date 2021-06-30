@@ -28,7 +28,7 @@ namespace Game
     {
         public Shared.Table.Unit table { get; private set; }
         public List<Shared.Table.Skill> skills { get; private set; }
-        public Player owner { get; private set; }
+        public Player owner { get; set; }
 
         [SerializeField] private int _unitOriginID;
         [SerializeField] private GameObject _highlighted;
@@ -157,8 +157,15 @@ namespace Game
                 if (_hp <= Fix64.Zero)
                 {
                     _listener?.OnDead(this);
+                    
                 }
             }
+        }
+
+        public IUnit listener
+        {
+            get => _listener;
+            set => _listener = value;
         }
 
         public List<Skill> activeSkills => skills.Where(x => owner.abilities.HasFlag(x.Condition)).ToList();

@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Game
 {
-    public class GameController : MonoBehaviour
+    public class GameController : MonoBehaviour, IUnit
     {
         [NonSerialized] private int _playerID;
         [NonSerialized] private uint _playerTeamID;
@@ -26,9 +26,9 @@ namespace Game
             // 임시 코드 지워야함
             var units = new Unit[]
             {
-                UnitFactory.GetNewUnit(0, 0, _unitPrefabTable),
-                UnitFactory.GetNewUnit(1, 0, _unitPrefabTable),
-                UnitFactory.GetNewUnit(2, 0, _unitPrefabTable)
+                UnitFactory.GetNewUnit(0, 0, _unitPrefabTable, this),
+                UnitFactory.GetNewUnit(1, 0, _unitPrefabTable, this),
+                UnitFactory.GetNewUnit(2, 0, _unitPrefabTable, this)
             };
 
             units[0].transform.position = new Vector3(0, 0, -1.44f);
@@ -38,21 +38,23 @@ namespace Game
             _playerID = 0;
             _playerTeamID = 0;
             _player = new Player();
-            _player.AddUnits(units);
+            _player.units.AddRange(units);
+
             _allPlayerByTeam = new Team();
             _allPlayerByTeam.players.Add(_playerTeamID, new List<Player>());
             _allPlayerByTeam.players[_playerTeamID].Add(_player);
 
             var enemyUnits = new Unit[]
             {
-                UnitFactory.GetNewUnit(0, 1, _unitPrefabTable),
-                UnitFactory.GetNewUnit(1, 1, _unitPrefabTable),
+                UnitFactory.GetNewUnit(0, 1, _unitPrefabTable, this),
+                UnitFactory.GetNewUnit(1, 1, _unitPrefabTable, this),
             };
             
-            enemyUnits[0].transform.position = new Vector3(-1.44f * 1, 0, 0);
+            enemyUnits[0].transform.position = new Vector3(-1.44f * -1, 0, 0);
             enemyUnits[1].transform.position = new Vector3(-1.44f * 2, 0, 0);
+
             var otherPlayer = new Player();
-            otherPlayer.AddUnits(enemyUnits);
+            otherPlayer.units.AddRange(enemyUnits);
             uint otherPlayerID = 1;
             _allPlayerByTeam.players.Add(otherPlayerID, new List<Player>());
             _allPlayerByTeam.players[otherPlayerID].Add(otherPlayer);
@@ -185,7 +187,7 @@ namespace Game
             _allUnitInFrustum = _allPlayerByTeam.players.
                 SelectMany(x => x.Value).
                 SelectMany(x => x.units).
-                Select(x => x.Value).
+                Select(x => x).
                 Where(x => GeometryUtility.TestPlanesAABB(frustumPlanes, x.bounds)).ToList();
         }
 
