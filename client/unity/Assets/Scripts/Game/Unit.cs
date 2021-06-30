@@ -216,20 +216,27 @@ namespace Game
                 case UnitState.Move:
                     var diff = (moveTargetPosition - position);
                     var magnitude = diff.magnitude;
-                    var direction = diff / magnitude;
+                    if (magnitude != Fix64.Zero)
+                    {
+                        var direction = diff / magnitude;
 
-                    // TODO : 이거는 나중에 동기화 때 처리해야 할 문제 (Time.deltaTime을 사용하지 않아야 함)
-                    var delta = (Fix64)Time.deltaTime;
+                        // TODO : 이거는 나중에 동기화 때 처리해야 할 문제 (Time.deltaTime을 사용하지 않아야 함)
+                        var delta = (Fix64)Time.deltaTime;
 
-                    transform.LookAt(moveTargetPosition);
-                
-                    if (magnitude < speed * delta || magnitude < (Fix64)_stopMoveDistance + (Fix64)Shared.Const.Character.MoveEpsilon)
+                        transform.LookAt(moveTargetPosition);
+
+                        if (magnitude < (speed * delta) || magnitude < (Fix64)_stopMoveDistance + (Fix64)Shared.Const.Character.MoveEpsilon)
+                        {
+                            SetReservedState();
+                        }
+                        else
+                        {
+                            position += (direction * speed * delta);
+                        }
+                    }
+                    else
                     {
                         SetReservedState();
-                    }
-                    else 
-                    {
-                        position += (direction * speed * delta);
                     }
                     break;
                 case UnitState.Attack:
@@ -250,6 +257,8 @@ namespace Game
                     }
                     break;
             }
+
+            this.transform.position = this.position;
         }
 
         public void Selected(bool select)
