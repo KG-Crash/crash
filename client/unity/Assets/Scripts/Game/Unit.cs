@@ -90,7 +90,7 @@ namespace Game
             }
         }
 
-        public float speed 
+        public Fix64 speed 
         {
             get
             {
@@ -102,7 +102,7 @@ namespace Game
                 if (additional.TryGetValue(StatType.Speed, out var x))
                     speed += x;
 
-                return speed;
+                return (Fix64)speed;
             }
         }
 
@@ -187,23 +187,12 @@ namespace Game
         [NonSerialized] private UnitState _reservedState;
         
         [NonSerialized] private float _stopMoveDistance;
-        [NonSerialized] private Vector3 _moveTargetPosition;
+        [NonSerialized] private FixVector3 _moveTargetPosition;
         [NonSerialized] private Unit _targetUnit;
 
-        public Vector3 moveTargetPosition
-        {
-            get
-            {
-                if (_targetUnit != null)
-                {
-                    return _targetUnit.transform.position;
-                }
-                else
-                {
-                    return _moveTargetPosition;
-                }
-            }
-        }
+        public FixVector3 position { get; set; }
+
+        public FixVector3 moveTargetPosition => _targetUnit?.position ?? _moveTargetPosition;
         
         [ContextMenu("Gather renderers")]
         private void OnRefreshRenderers()
@@ -232,24 +221,33 @@ namespace Game
             switch (_currentState)
             {
                 case UnitState.Move:
-                    var diff = (moveTargetPosition - transform.position);
+                    var diff = (moveTargetPosition - position);
                     var magnitude = diff.magnitude;
-                    var direction = diff / magnitude;
-                    var delta = Time.deltaTime;
+                    if (magnitude != Fix64.Zero)
+                    {
+                        var direction = diff / magnitude;
 
-                    transform.LookAt(moveTargetPosition);
-                
-                    if (magnitude < speed * delta || magnitude < _stopMoveDistance + Shared.Const.Character.MoveEpsilon)
+                        // TODO : 이거는 나중에 동기화 때 처리해야 할 문제 (Time.deltaTime을 사용하지 않아야 함)
+                        var delta = (Fix64)Time.deltaTime;
+
+                        transform.LookAt(moveTargetPosition);
+
+                        if (magnitude < (speed * delta) || magnitude < (Fix64)_stopMoveDistance + (Fix64)Shared.Const.Character.MoveEpsilon)
+                        {
+                            SetReservedState();
+                        }
+                        else
+                        {
+                            position += (direction * speed * delta);
+                        }
+                    }
+                    else
                     {
                         SetReservedState();
                     }
-                    else 
-                    {
-                        transform.position += direction * speed * delta;
-                    }
                     break;
                 case UnitState.Attack:
-                    if (ContainsRange(_targetUnit.transform.position))
+                    if (ContainsRange(_targetUnit.position))
                     {
                         if (_targetUnit.hp <= Fix64.Zero)
                         {
@@ -266,6 +264,8 @@ namespace Game
                     }
                     break;
             }
+
+            this.transform.position = this.position;
         }
 
         public void Selected(bool select)
@@ -283,7 +283,7 @@ namespace Game
             }
         }
         
-        public void MoveTo(Vector3 position)
+        public void MoveTo(FixVector3 position)
         {
             _currentState = UnitState.Move;
             _reservedState = UnitState.Idle;
@@ -309,27 +309,27 @@ namespace Game
             MoveTo(target, attackRange, UnitState.Attack);
         }
 
-        public bool ContainsRange(Vector3 target)
+        public bool ContainsRange(FixVector3 target)
         {
-            return (this.transform.position - target).sqrMagnitude < Math.Pow(this.table.AttackRange, 2);
+            return (position - target).sqrMagnitude < (Fix64)Math.Pow(this.table.AttackRange, 2);
         }
 
         private Fix64 CalculateDamage(Unit unit)
         {
-            var result = damage - unit.armor;
+            var result = (Fix64)(damage - unit.armor);
 
             if (table.Type == UnitType.Explosive)
             {
                 switch (unit.table.Size)
                 {
                     case UnitSize.Small:
-                        return new Fix64(result);
+                        return result;
 
                     case UnitSize.Medium:
-                        return (Fix64)(result * 0.75f);
+                        return result * (Fix64)0.75;
 
                     case UnitSize.Large:
-                        return (Fix64)(result * 0.5);
+                        return result * (Fix64)0.5;
                 }
             }
 
@@ -338,17 +338,17 @@ namespace Game
                 switch (unit.table.Size)
                 {
                     case UnitSize.Large:
-                        return new Fix64(result);
+                        return result;
 
                     case UnitSize.Medium:
-                        return (Fix64)(result * 0.75);
+                        return result * (Fix64)0.75;
 
                     case UnitSize.Small:
-                        return (Fix64)(result * 0.5);
+                        return result * (Fix64)0.5;
                 }
             }
 
-            return new Fix64(result);
+            return result;
         }
 
         public bool Attack(Unit unit)
