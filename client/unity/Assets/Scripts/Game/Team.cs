@@ -88,6 +88,8 @@ namespace Game
         public void DeleteUnit(uint unitId)
         {
             _units[unitId].Die();
+            _units[unitId].listener.OnOwnerChanged(null, _units[unitId]);
+            _units.Remove(unitId);
         }
         public void DeleteUnit(Unit unit)
         {
