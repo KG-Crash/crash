@@ -92,7 +92,8 @@ namespace Game
         public void DeleteUnit(Unit unit)
         {
             unit.Die();
-            _units.Remove(unit.unitID);
+            unit.listener.OnOwnerChanged(null, unit);
+            _units.Remove(unit.unitID);            
         }
 
         public Dictionary<uint, Unit>.ValueCollection Values
