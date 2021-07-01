@@ -239,7 +239,11 @@ namespace Game
         {
             //unit.owner._units.DeleteUnit(unit.unitID);
             unit.owner.units.DeleteUnit(unit);
-            throw new NotImplementedException();
+        }
+
+        public void OnOwnerChanged(Player owner, Unit unit)
+        {
+            unit.ChangeOwner(owner);
         }
     }
 }

@@ -22,13 +22,14 @@ namespace Game
     public interface IUnit
     {
         void OnDead(Unit unit);
+        void OnOwnerChanged(Player owner, Unit unit);
     }
     
     public class Unit : MonoBehaviour, ISelectable, IRenderable
     {
         public Shared.Table.Unit table { get; private set; }
         public List<Shared.Table.Skill> skills { get; private set; }
-        public Player owner { get; set; }
+        public Player owner { get; private set; }
 
         [SerializeField] private int _unitOriginID;
         [SerializeField] private GameObject _highlighted;
@@ -366,9 +367,11 @@ namespace Game
         {
             _currentState = UnitState.Dead;
             _animator.SetTrigger("Dead");
-            
-            this.owner = null;
-            //Destroy(this.gameObject);
+        }
+
+        public void ChangeOwner(Player owner)
+        {
+            this.owner = owner;
         }
     }
 }

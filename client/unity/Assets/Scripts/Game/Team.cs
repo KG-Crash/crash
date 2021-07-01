@@ -72,14 +72,14 @@ namespace Game
 
         public void Add(Unit unit)
         {
-            unit.owner = this._owner;
+            unit.listener.OnOwnerChanged(this._owner, unit);
             _units.Add(unit.unitID, unit);
         }
         public void AddRange(IEnumerable<Unit> units)
         {
             foreach (Unit unit in units)
             {
-                unit.owner = this._owner;
+                unit.listener.OnOwnerChanged(this._owner, unit);
             }
             _units =
                 _units.Union(units.ToDictionary(u => u.unitID, u => u)).
