@@ -1,11 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using FixMath.NET;
 using Network;
 using Protocol.Response;
 using Shared;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Game
@@ -237,8 +235,8 @@ namespace Game
 
         public void OnDead(Unit unit)
         {
-            //unit.owner._units.DeleteUnit(unit.unitID);
-            unit.owner.units.DeleteUnit(unit);
+            unit.Die();
+            unit.owner.units.Delete(unit);
         }
 
         public void OnOwnerChanged(Player owner, Unit unit)

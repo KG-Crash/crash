@@ -6,11 +6,14 @@ using System.Linq;
 
 namespace Game
 {
+    #region Team
     public class Team
     {
         public Dictionary<uint, List<Player>> players { get; private set; } = new Dictionary<uint, List<Player>>();
     }
+    #endregion
 
+    #region Player
     public class Player
     {
         #region Upgrade
@@ -28,7 +31,6 @@ namespace Game
         /// <summary>
         /// 보유 유닛
         /// </summary>
-        //public Dictionary<uint, Unit> units { get; private set; } = new Dictionary<uint, Unit>();
         public UnitCollection units;
 
         public Player()
@@ -54,11 +56,14 @@ namespace Game
             return abilities;
         }
     }
+    #endregion
 
+    #region UnitCollection
     public class UnitCollection : IEnumerable<Unit>
     {
-        private Player _owner;
-        private Dictionary<uint, Unit> _units = new Dictionary<uint, Unit>();
+        private readonly Player _owner;
+        private readonly Dictionary<uint, Unit> _units = new Dictionary<uint, Unit>();
+
         public UnitCollection(Player owner)
         {
             _owner = owner;
@@ -66,43 +71,57 @@ namespace Game
 
         public Unit this[uint i]
         {
-            get { return _units[i]; }
-            set { _units[i] = value; }
+            get
+            {
+                if (_units.TryGetValue(i, out var unit))
+                    return unit;
+                else
+                    return null;
+            }
+            set
+            {
+                if (_units.ContainsKey(i))
+                    throw new System.Exception("duplicate key");
+
+                _units.Add(i, value);
+            }
         }
 
         public void Add(Unit unit)
         {
+            if (unit.owner != null)
+            {
+                // unit.owner.units.Delete 하면 안됨
+                // OnOwnerChanged가 2번 호출됨
+                unit.owner.units._units.Remove(unit.unitID);
+            }
+
             unit.owner = this._owner;
             _units.Add(unit.unitID, unit);
         }
+
         public void AddRange(IEnumerable<Unit> units)
         {
-            foreach (Unit unit in units)
+            foreach (var unit in units)
             {
-                unit.owner = this._owner;
+                Add(unit);
             }
-            _units =
-                _units.Union(units.ToDictionary(u => u.unitID, u => u)).
-                ToDictionary(u => u.Key, u => u.Value);
         }
-        public void DeleteUnit(uint unitId)
+
+        public void Delete(uint unitId)
         {
-            _units[unitId].Die();
             _units[unitId].owner = null;
             _units.Remove(unitId);
         }
-        public void DeleteUnit(Unit unit)
+
+        public void Delete(Unit unit)
         {
-            unit.Die();
             unit.owner = null;
-            _units.Remove(unit.unitID);            
+            _units.Remove(unit.unitID);
         }
 
-        public Dictionary<uint, Unit>.ValueCollection Values
-        {
-            get => _units.Values;
-        }
-        
+        public Dictionary<uint, Unit>.ValueCollection Values => _units.Values;
+
 
         public IEnumerator<Unit> GetEnumerator()
         {
@@ -113,9 +132,7 @@ namespace Game
             yield break;
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new System.NotImplementedException();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
+    #endregion
 }
