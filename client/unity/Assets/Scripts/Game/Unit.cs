@@ -175,6 +175,7 @@ namespace Game
             set
             {
                 _listener?.OnOwnerChanged(value, this);
+                _owner = value;
             }
         }
 
