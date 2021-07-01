@@ -72,14 +72,14 @@ namespace Game
 
         public void Add(Unit unit)
         {
-            unit.listener.OnOwnerChanged(this._owner, unit);
+            unit.owner = this._owner;
             _units.Add(unit.unitID, unit);
         }
         public void AddRange(IEnumerable<Unit> units)
         {
             foreach (Unit unit in units)
             {
-                unit.listener.OnOwnerChanged(this._owner, unit);
+                unit.owner = this._owner;
             }
             _units =
                 _units.Union(units.ToDictionary(u => u.unitID, u => u)).
@@ -88,13 +88,13 @@ namespace Game
         public void DeleteUnit(uint unitId)
         {
             _units[unitId].Die();
-            _units[unitId].listener.OnOwnerChanged(null, _units[unitId]);
+            _units[unitId].owner = null;
             _units.Remove(unitId);
         }
         public void DeleteUnit(Unit unit)
         {
             unit.Die();
-            unit.listener.OnOwnerChanged(null, unit);
+            unit.owner = null;
             _units.Remove(unit.unitID);            
         }
 

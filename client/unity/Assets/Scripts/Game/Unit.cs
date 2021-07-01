@@ -29,7 +29,7 @@ namespace Game
     {
         public Shared.Table.Unit table { get; private set; }
         public List<Shared.Table.Skill> skills { get; private set; }
-        public Player owner { get; private set; }
+        
 
         [SerializeField] private int _unitOriginID;
         [SerializeField] private GameObject _highlighted;
@@ -169,6 +169,17 @@ namespace Game
             set => _listener = value;
         }
 
+        public Player owner
+        {
+            get => _owner;
+            set
+            {
+                _listener?.OnOwnerChanged(value, this);
+            }
+        }
+
+
+
         public List<Skill> activeSkills => skills.Where(x => owner.abilities.HasFlag(x.Condition)).ToList();
 
         [SerializeField] private uint _teamID;
@@ -176,6 +187,7 @@ namespace Game
         [SerializeField] private uint _unitID;
         [SerializeField] private DateTime _lastAttackTime = DateTime.MinValue;
         [SerializeField] private Fix64 _hp;
+        [SerializeField] private Player _owner;
         [NonSerialized] private IUnit _listener;
 
         public Bounds bounds { get => _totalBounds; }
