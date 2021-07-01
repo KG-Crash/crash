@@ -384,7 +384,7 @@ namespace Game
 
         public void ChangeOwner(Player owner)
         {
-            this.owner = owner;
+            this._owner = owner;
         }
     }
 }
