@@ -93,7 +93,9 @@ namespace Game
             {
                 var ray = selectedCamera.ScreenPointToRay(rect.position);
                 var selectedUnit = UnityObjects.IntersectNearestUnit(ray, units);
-                selectedUnits.Add(selectedUnit);
+                
+                if (selectedUnit)
+                    selectedUnits.Add(selectedUnit);
             }
             
             SelectUnits(selectedUnits);
