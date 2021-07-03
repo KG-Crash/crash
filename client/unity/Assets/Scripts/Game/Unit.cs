@@ -402,5 +402,10 @@ namespace Game
             _currentState = UnitState.Dead;
             _animator.SetTrigger("Dead");
         }
+
+        private void OnAnimDeadEnd()
+        {
+            Debug.Log($"얘죽음 : {name}");
+        }
     }
 }
