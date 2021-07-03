@@ -226,7 +226,14 @@ namespace Game
             _totalBounds = new Bounds();
             foreach (var renderer in _rendereres)
             {
-                _totalBounds.Encapsulate(renderer.bounds);
+                if (_totalBounds == new Bounds())
+                {
+                    _totalBounds = renderer.bounds;
+                }
+                else
+                {
+                    _totalBounds.Encapsulate(renderer.bounds);   
+                }
             }
 
             switch (_currentState)
