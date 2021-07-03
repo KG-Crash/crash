@@ -18,15 +18,18 @@ namespace Game
     {
         Renderer[] renderers { get; }
     }
-
-    public interface IUnit
-    {
-        void OnDead(Unit unit);
-        void OnOwnerChanged(Player owner, Unit unit);
-    }
     
     public class Unit : MonoBehaviour, ISelectable, IRenderable
     {
+        public interface Listener
+        {
+            void OnAttack(Unit me, Unit you, Fix64 damage);
+            void OnHeal(Unit me, Unit you, Fix64 heal);
+            void OnDamaged(Unit me, Unit you, Fix64 damage);
+            void OnDead(Unit unit, Unit from);
+            void OnOwnerChanged(Player before, Player after, Unit unit);
+        }
+
         public Shared.Table.Unit table { get; private set; }
         public List<Shared.Table.Skill> skills { get; private set; }
         
@@ -152,18 +155,15 @@ namespace Game
         public Fix64 hp
         {
             get => _hp;
-            set
-            {
-                _hp = value > Fix64.Zero ? value < maxhp ? value : maxhp : Fix64.Zero;
-                if (_hp <= Fix64.Zero)
-                {
-                    _listener?.OnDead(this);
-                    
-                }
-            }
+            //set
+            //{
+            //    _hp = value > Fix64.Zero ? value < maxhp ? value : maxhp : Fix64.Zero;
+            //    if (_hp <= Fix64.Zero)
+            //        _listener?.OnDead(this);
+            //}
         }
 
-        public IUnit listener
+        public Listener listener
         {
             get => _listener;
             set => _listener = value;
@@ -174,8 +174,9 @@ namespace Game
             get => _owner;
             set
             {
-                _listener?.OnOwnerChanged(value, this);
+                var before = this._owner;
                 _owner = value;
+                _listener?.OnOwnerChanged(before, _owner, this);
             }
         }
 
@@ -189,7 +190,7 @@ namespace Game
         [SerializeField] private DateTime _lastAttackTime = DateTime.MinValue;
         [SerializeField] private Fix64 _hp;
         [SerializeField] private Player _owner;
-        [NonSerialized] private IUnit _listener;
+        [NonSerialized] private Listener _listener;
 
         public Bounds bounds { get => _totalBounds; }
         public Renderer[] renderers { get => _rendereres; }
@@ -221,7 +222,7 @@ namespace Game
             this.owner.SetAbilityFlag(Ability.UPGRADE_4 | Ability.UPGRADE_10);
             this.table = Table.From<TableUnit>()[this._unitOriginID];
             this.skills = Table.From<TableSkill>().Values.Where(x => x.Unit == this.unitOriginID).ToList();
-            this.hp = this.maxhp;
+            this._hp = this.maxhp;
         }
 
         private void Update()
@@ -365,13 +366,34 @@ namespace Game
             return result;
         }
 
+        public void AddHP(Fix64 value, Unit from = null)
+        {
+            _hp += value;
+            if (_hp > maxhp)
+                _hp = maxhp;
+
+            if (_hp < Fix64.Zero)
+                _hp = Fix64.Zero;
+
+            if (value < Fix64.Zero)
+                listener?.OnDamaged(this, from, -value);
+            else
+                listener?.OnHeal(this, from, value);
+
+            if (_hp == Fix64.Zero)
+                listener?.OnDead(this, from);
+        }
+
         public bool Attack(Unit unit)
         {
             var now = DateTime.Now;
             if ((now - _lastAttackTime).TotalMilliseconds < attackSpeed)
                 return false;
 
-            unit.hp -= CalculateDamage(unit);
+            var damage = CalculateDamage(unit);
+            unit.AddHP(damage, this);
+            listener?.OnAttack(this, unit, damage);
+            unit.listener?.OnDamaged(unit, this, damage);
             _lastAttackTime = DateTime.Now;
             return true;
         }
@@ -380,11 +402,6 @@ namespace Game
         {
             _currentState = UnitState.Dead;
             _animator.SetTrigger("Dead");
-        }
-
-        public void ChangeOwner(Player owner)
-        {
-            this._owner = owner;
         }
     }
 }

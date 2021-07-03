@@ -1,5 +1,4 @@
 using Network;
-using Protocol.Response;
 using Shared;
 using System;
 using System.Collections.Generic;
@@ -8,7 +7,7 @@ using UnityEngine;
 
 namespace Game
 {
-    public class GameController : MonoBehaviour, IUnit
+    public partial class GameController : MonoBehaviour
     {
         [NonSerialized] private int _playerID;
         [NonSerialized] private uint _playerTeamID;
@@ -221,29 +220,6 @@ namespace Game
         public void AppendCommand(IEnumerable<ICommand> commands)
         {
             ApplyCommand(commands);
-        }
-
-        [FlatBufferEvent]
-        public bool OnCreateRoom(CreateRoom response)
-        {
-            return true;
-        }
-
-        [FlatBufferEvent]
-        public bool OnJoinRoom(JoinRoom response)
-        {
-            return true;
-        }
-
-        public void OnDead(Unit unit)
-        {
-            unit.Die();
-            unit.owner.units.Delete(unit);
-        }
-
-        public void OnOwnerChanged(Player owner, Unit unit)
-        {
-            unit.ChangeOwner(owner);
         }
     }
 }
