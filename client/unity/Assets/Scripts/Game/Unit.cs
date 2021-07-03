@@ -28,6 +28,8 @@ namespace Game
             void OnDamaged(Unit me, Unit you, Fix64 damage);
             void OnDead(Unit unit, Unit from);
             void OnOwnerChanged(Player before, Player after, Unit unit);
+            void OnStartMove(Unit unit);
+            void OnEndMove(Unit unit);
         }
 
         public Shared.Table.Unit table { get; private set; }
@@ -36,7 +38,7 @@ namespace Game
 
         [SerializeField] private int _unitOriginID;
         [SerializeField] private GameObject _highlighted;
-        [SerializeField] private Animator _animator;
+        [NonSerialized] public Animator animator;
         [SerializeField] private Rigidbody _rigidbody;
 
         public uint teamID
@@ -155,12 +157,6 @@ namespace Game
         public Fix64 hp
         {
             get => _hp;
-            //set
-            //{
-            //    _hp = value > Fix64.Zero ? value < maxhp ? value : maxhp : Fix64.Zero;
-            //    if (_hp <= Fix64.Zero)
-            //        _listener?.OnDead(this);
-            //}
         }
 
         public Listener listener
@@ -270,7 +266,7 @@ namespace Game
                         }
                         else if (Attack(_targetUnit))
                         {
-                            _animator.SetTrigger("Attack");
+                            animator.SetTrigger("Attack");
                         }
                     }
                     else
@@ -293,7 +289,7 @@ namespace Game
             switch (_currentState = _reservedState)
             {
                 case UnitState.Idle:
-                    _animator.SetTrigger("Idle");
+                    animator.SetTrigger("Idle");
                     break;
             }
         }
@@ -305,8 +301,8 @@ namespace Game
             _targetUnit = null;
             _moveTargetPosition = position;
             _stopMoveDistance = 0.0f;
-            
-            _animator.SetTrigger("Move");
+
+            listener?.OnStartMove(this);
         }
 
         public void MoveTo(Unit target, float stopDistance = 0.0f, UnitState reservedState = UnitState.Idle)
@@ -315,8 +311,8 @@ namespace Game
             _reservedState = reservedState;
             _targetUnit = target;
             _stopMoveDistance = stopDistance;
-            
-            _animator.SetTrigger("Move");
+
+            listener?.OnStartMove(this);
         }
 
         public void AttackTo(Unit target)
@@ -381,7 +377,7 @@ namespace Game
                 listener?.OnHeal(this, from, value);
 
             if (_hp == Fix64.Zero)
-                listener?.OnDead(this, from);
+                Die(from);
         }
 
         public bool Attack(Unit unit)
@@ -397,10 +393,11 @@ namespace Game
             return true;
         }
 
-        public void Die()
+        public void Die(Unit from)
         {
             _currentState = UnitState.Dead;
-            _animator.SetTrigger("Dead");
+            listener?.OnDead(this, from);
+            owner.units.Delete(this);
         }
 
         private void OnAnimDeadEnd()

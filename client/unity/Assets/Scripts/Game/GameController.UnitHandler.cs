@@ -6,8 +6,7 @@ namespace Game
     {
         public void OnDead(Unit unit, Unit from)
         {
-            unit.Die();
-            unit.owner.units.Delete(unit);
+            unit.animator.SetTrigger("Dead");
         }
 
         public void OnOwnerChanged(Player before, Player after, Unit unit)
@@ -17,7 +16,7 @@ namespace Game
 
         public void OnAttack(Unit me, Unit you, Fix64 damage)
         {
-            // TODO : Attack animation
+            me.animator.SetTrigger("Attack");
         }
 
         public void OnDamaged(Unit me, Unit you, Fix64 damage)
@@ -29,6 +28,16 @@ namespace Game
         public void OnHeal(Unit me, Unit you, Fix64 heal)
         {
 
+        }
+
+        public void OnStartMove(Unit unit)
+        {
+            unit.animator.SetTrigger("Move");
+        }
+
+        public void OnEndMove(Unit unit)
+        {
+            unit.animator.SetTrigger("Idle");
         }
     }
 }
