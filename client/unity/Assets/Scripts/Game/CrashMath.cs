@@ -20,14 +20,15 @@ public class CrashMath
     public static void GetFrustumPlanes(Camera camera, Rect rectSS, Plane[] frustumPlanes)
     {
         var frustumPoints = new Vector3[8];
-        var rectCS = new Rect(
+        var cameraViewportRect = new Rect(
             new Vector2(rectSS.center.x / camera.pixelWidth, rectSS.center.y / camera.pixelHeight),
             new Vector2(rectSS.width / camera.pixelWidth, rectSS.height / camera.pixelHeight)
         );
+        cameraViewportRect.position -= cameraViewportRect.size / 2;
             
-        camera.CalculateFrustumCorners(rectCS, camera.farClipPlane, Camera.MonoOrStereoscopicEye.Mono, frustumPoints);
+        camera.CalculateFrustumCorners(cameraViewportRect, camera.farClipPlane, Camera.MonoOrStereoscopicEye.Mono, frustumPoints);
         Array.Copy(frustumPoints, 0, frustumPoints, 4, 4);
-        camera.CalculateFrustumCorners(rectCS, camera.nearClipPlane, Camera.MonoOrStereoscopicEye.Mono, frustumPoints);
+        camera.CalculateFrustumCorners(cameraViewportRect, camera.nearClipPlane, Camera.MonoOrStereoscopicEye.Mono, frustumPoints);
         for (int i = 0; i < frustumPoints.Length; i++)
             frustumPoints[i] = camera.transform.TransformPoint(frustumPoints[i]);
             
