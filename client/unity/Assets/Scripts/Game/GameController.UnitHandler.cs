@@ -23,6 +23,7 @@ namespace Game
         public void OnDamaged(Unit me, Unit you, Fix64 damage)
         {
             // TODO : Damaged animation
+            UnityEngine.Debug.Log($"hp : {me.hp}/{me.maxhp}");
         }
 
         public void OnHeal(Unit me, Unit you, Fix64 heal)

@@ -391,9 +391,8 @@ namespace Game
                 return false;
 
             var damage = CalculateDamage(unit);
-            unit.AddHP(damage, this);
+            unit.AddHP(-damage, this);
             listener?.OnAttack(this, unit, damage);
-            unit.listener?.OnDamaged(unit, this, damage);
             _lastAttackTime = DateTime.Now;
             return true;
         }
