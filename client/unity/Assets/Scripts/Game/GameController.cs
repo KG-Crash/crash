@@ -30,9 +30,9 @@ namespace Game
                 UnitFactory.GetNewUnit(2, 0, _unitPrefabTable, this)
             };
 
-            units[0].transform.position = new Vector3(0, 0, -1.44f);
-            units[1].transform.position = new Vector3(0, 0, 0);
-            units[2].transform.position = new Vector3(0, 0, +1.44f);
+            units[0].position = new Vector3(0, 0, -1.44f);
+            units[1].position = new Vector3(0, 0, 0);
+            units[2].position = new Vector3(0, 0, +1.44f);
 
             _playerID = 0;
             _playerTeamID = 0;
@@ -49,8 +49,8 @@ namespace Game
                 UnitFactory.GetNewUnit(1, 1, _unitPrefabTable, this),
             };
             
-            enemyUnits[0].transform.position = new Vector3(-1.44f * -1, 0, 0);
-            enemyUnits[1].transform.position = new Vector3(-1.44f * 2, 0, 0);
+            enemyUnits[0].position = new Vector3(-1.44f * -1, 0, 0);
+            enemyUnits[1].position = new Vector3(-1.44f * 2, 0, 0);
 
             var otherPlayer = new Player();
             otherPlayer.units.AddRange(enemyUnits);
