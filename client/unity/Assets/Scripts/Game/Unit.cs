@@ -265,16 +265,14 @@ namespace Game
                         _target = SearchEnemy();
                         if (_target != null)
                             _currentState = UnitState.Attack;
-
-                        Action();
+                        else
+                            DeltaMove((Fix64)Time.deltaTime);
                     }
                     else
                     {
                         // 특정유닛 공격
                         if (ContainsRange(_target.position))
                             _currentState = UnitState.Attack;
-
-                        Action();
                     }
                     break;
 
@@ -294,7 +292,6 @@ namespace Game
                             {
                                 _currentState = UnitState.Move;
                             }
-                            Action();
                         }
                     }
                     else
