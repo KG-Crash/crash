@@ -39,5 +39,10 @@ namespace Game
         {
             unit.animator.SetTrigger("Idle");
         }
+
+        public void OnStop(Unit unit)
+        {
+            unit.animator.SetTrigger("Idle");
+        }
     }
 }

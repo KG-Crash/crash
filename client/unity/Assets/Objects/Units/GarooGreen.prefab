@@ -47,13 +47,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _unitOriginID: 1
   _highlighted: {fileID: 380659590001448223}
-  _animator: {fileID: 296309932244197581}
+  animator: {fileID: 296309932244197581}
   _rigidbody: {fileID: 0}
   _speed: 1
   _teamID: 0
   _selectable: 1
   _unitID: 0
-  _hp: 100
   _rendereres:
   - {fileID: 337698830708193431}
 --- !u!1 &380659590001448223

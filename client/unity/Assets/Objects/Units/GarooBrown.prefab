@@ -143,13 +143,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _unitOriginID: 0
   _highlighted: {fileID: 851905331583271072}
-  _animator: {fileID: 758476538041926952}
+  animator: {fileID: 758476538041926952}
   _rigidbody: {fileID: 0}
   _speed: 1
   _teamID: 0
   _selectable: 1
   _unitID: 0
-  _hp: 100
   _rendereres:
   - {fileID: 735535215896598056}
 --- !u!1001 &851905332835706604

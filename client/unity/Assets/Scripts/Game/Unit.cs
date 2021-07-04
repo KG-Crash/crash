@@ -38,7 +38,7 @@ namespace Game
 
         [SerializeField] private int _unitOriginID;
         [SerializeField] private GameObject _highlighted;
-        [NonSerialized] public Animator animator;
+        [SerializeField] public Animator animator;
         [SerializeField] private Rigidbody _rigidbody;
 
         public uint teamID
@@ -195,16 +195,18 @@ namespace Game
         [SerializeField] private Renderer[] _rendereres;
 
         [NonSerialized] private UnitState _currentState;
-        [NonSerialized] private UnitState _reservedState;
+        [NonSerialized] private bool _watchEnemy; // 이동중에 적군을 만나면 공격을 할지 말지
         
         [NonSerialized] private float _stopMoveDistance;
-        [NonSerialized] private FixVector3 _moveTargetPosition;
-        [NonSerialized] private Unit _targetUnit;
+        [NonSerialized] private FixVector3? _moveTargetPosition;
+        [NonSerialized] private Unit _target;
 
         public FixVector3 position { get; set; }
 
-        public FixVector3 moveTargetPosition => _targetUnit?.position ?? _moveTargetPosition;
-        
+        public FixVector3? moveTargetPosition => _target?.position ?? _moveTargetPosition;
+
+        public bool IsDead => _hp == Fix64.Zero;
+
         [ContextMenu("Gather renderers")]
         private void OnRefreshRenderers()
         {
@@ -236,54 +238,113 @@ namespace Game
                 }
             }
 
+            Action();
+
+            this.transform.position = this.position;
+        }
+
+        private void Action()
+        {
             switch (_currentState)
             {
+                case UnitState.Idle:
+                    _target = SearchEnemy();
+                    if (_target != null)
+                        _currentState = UnitState.Attack;
+                    break;
+
                 case UnitState.Move:
-                    var diff = (moveTargetPosition - position);
-                    var magnitude = diff.magnitude;
-                    if (magnitude != Fix64.Zero)
+                    if (_watchEnemy == false)
                     {
-                        var direction = diff / magnitude;
+                        // 강제이동
+                        DeltaMove((Fix64)Time.deltaTime);
+                    }
+                    else if (_target == null)
+                    {
+                        // 어택땅
+                        _target = SearchEnemy();
+                        if (_target != null)
+                            _currentState = UnitState.Attack;
 
-                        // TODO : 이거는 나중에 동기화 때 처리해야 할 문제 (Time.deltaTime을 사용하지 않아야 함)
-                        var delta = (Fix64)Time.deltaTime;
-
-                        transform.LookAt(moveTargetPosition);
-
-                        if (magnitude < (speed * delta) || magnitude < (Fix64)_stopMoveDistance + (Fix64)Shared.Const.Character.MoveEpsilon)
-                        {
-                            SetReservedState();
-                        }
-                        else
-                        {
-                            position += (direction * speed * delta);
-                        }
+                        Action();
                     }
                     else
                     {
-                        SetReservedState();
+                        // 특정유닛 공격
+                        if (ContainsRange(_target.position))
+                            _currentState = UnitState.Attack;
+
+                        Action();
                     }
                     break;
+
                 case UnitState.Attack:
-                    if (ContainsRange(_targetUnit.position))
+                    if (ContainsRange(_target.position))
                     {
-                        if (_targetUnit.hp <= Fix64.Zero)
+                        Attack(_target);
+                        if (_target.IsDead)
                         {
-                            SetReservedState();
-                        }
-                        else if (Attack(_targetUnit))
-                        {
-                            animator.SetTrigger("Attack");
+                            _target = null;
+
+                            if (_moveTargetPosition == null) // 상대도 죽였는데 이동할 곳도 없음
+                            {
+                                _currentState = UnitState.Idle;
+                            }
+                            else // 갈 곳이 있음 => 어택땅 상태임
+                            {
+                                _currentState = UnitState.Move;
+                            }
+                            Action();
                         }
                     }
                     else
                     {
-                        AttackTo(_targetUnit);
+                        AttackTo(_target);
                     }
                     break;
             }
+        }
 
-            this.transform.position = this.position;
+        private void DeltaMove(Fix64 delta)
+        {
+            if (moveTargetPosition == null)
+                return;
+
+            var diff = (moveTargetPosition.Value - position);
+            var magnitude = diff.magnitude;
+            if (magnitude != Fix64.Zero)
+            {
+                var direction = diff / magnitude;
+
+                // TODO : 이거는 나중에 동기화 때 처리해야 할 문제 (Time.deltaTime을 사용하지 않아야 함)
+                transform.LookAt(moveTargetPosition.Value);
+
+                var arrived = magnitude < (speed * delta) || magnitude < (Fix64)_stopMoveDistance + (Fix64)Shared.Const.Character.MoveEpsilon;
+                if (arrived)
+                {
+                    Stop();
+                }
+                else
+                {
+                    position += (direction * speed * delta);
+                }
+            }
+            else
+            {
+                Stop();
+            }
+        }
+
+        private Unit SearchEnemy()
+        {
+            // TODO : 내 시야 범위 안에 있는 유닛 찾아내기
+            // 섹터 개념 도입 후 실제 적용
+            return null;
+        }
+
+        public void Stop()
+        {
+            _currentState = UnitState.Idle;
         }
 
         public void Selected(bool select)
@@ -291,40 +352,36 @@ namespace Game
             if (_highlighted) _highlighted.SetActive(select);
         }
 
-        public void SetReservedState()
-        {
-            switch (_currentState = _reservedState)
-            {
-                case UnitState.Idle:
-                    animator.SetTrigger("Idle");
-                    break;
-            }
-        }
-        
         public void MoveTo(FixVector3 position)
         {
             _currentState = UnitState.Move;
-            _reservedState = UnitState.Idle;
-            _targetUnit = null;
+            _target = null;
             _moveTargetPosition = position;
             _stopMoveDistance = 0.0f;
 
             listener?.OnStartMove(this);
         }
 
-        public void MoveTo(Unit target, float stopDistance = 0.0f, UnitState reservedState = UnitState.Idle)
+        public void MoveTo(Unit target, float stopDistance = 0.0f)
         {
             _currentState = UnitState.Move;
-            _reservedState = reservedState;
-            _targetUnit = target;
+            _target = target;
             _stopMoveDistance = stopDistance;
+            _moveTargetPosition = null;
 
             listener?.OnStartMove(this);
         }
 
         public void AttackTo(Unit target)
         {
-            MoveTo(target, attackRange, UnitState.Attack);
+            _watchEnemy = true;
+            MoveTo(target, attackRange);
+        }
+
+        public void AttackTo(FixVector3 position)
+        {
+            _watchEnemy = true;
+            MoveTo(position);
         }
 
         public bool ContainsRange(FixVector3 target)
@@ -366,7 +423,11 @@ namespace Game
                 }
             }
 
+#if DEBUG
+            return Fix64.MaxValue;
+#else
             return result;
+#endif
         }
 
         public void AddHP(Fix64 value, Unit from = null)
@@ -397,6 +458,8 @@ namespace Game
             unit.AddHP(-damage, this);
             listener?.OnAttack(this, unit, damage);
             _lastAttackTime = DateTime.Now;
+
+            transform.LookAt(unit.position);
             return true;
         }
 
