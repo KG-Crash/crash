@@ -467,9 +467,21 @@ namespace Game
             owner.units.Delete(this);
         }
 
-        private void OnAnimDeadEnd()
+        private void OnAnimEnd(UnitState state)
         {
-            Debug.Log($"얘죽음 : {name}");
+            Debug.Log($"{state} : {name}");
+            
+            switch (state)
+            {
+                case UnitState.Attack:
+                    break;
+                case UnitState.Move:
+                    break;
+                case UnitState.Dead:
+                    break;
+                case UnitState.Idle:
+                    break;
+            }
         }
     }
 }

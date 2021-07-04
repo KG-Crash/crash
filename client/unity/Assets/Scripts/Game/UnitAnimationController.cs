@@ -35,6 +35,11 @@ namespace Game
         public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             base.OnStateExit(animator, stateInfo, layerIndex);
+            
+            if (stateInfo.IsName("Attack"))
+                animator.gameObject.SendMessageUpwards("OnAnimEnd", UnitState.Attack);
+            else if (stateInfo.IsName("Move"))
+                animator.gameObject.SendMessageUpwards("OnAnimEnd", UnitState.Move);
         }
 
         public override void OnStateIK(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -53,7 +58,7 @@ namespace Game
             
             if (!dieAnimExecuted && stateInfo.IsName("Die") && stateInfo.normalizedTime >= 1.0f)
             {
-                animator.gameObject.SendMessageUpwards("OnAnimDeadEnd");
+                animator.gameObject.SendMessageUpwards("OnAnimEnd", UnitState.Dead);
                 dieAnimExecuted = true;
             }
         }
