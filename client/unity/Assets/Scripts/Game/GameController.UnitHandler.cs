@@ -32,11 +32,13 @@ namespace Game
 
         public void OnStartMove(Unit unit)
         {
+            unit.animator.SetFloat("Forward", 2);
             unit.animator.SetTrigger("Move");
         }
 
         public void OnEndMove(Unit unit)
         {
+            unit.animator.SetFloat("Forward", 0);
             unit.animator.SetTrigger("Idle");
         }
 
