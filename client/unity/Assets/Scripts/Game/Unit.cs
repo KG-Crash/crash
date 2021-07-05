@@ -342,6 +342,8 @@ namespace Game
         public void Stop()
         {
             _currentState = UnitState.Idle;
+            _moveTargetPosition = null;
+            listener?.OnEndMove(this);
         }
 
         public void Selected(bool select)
@@ -372,7 +374,15 @@ namespace Game
         public void AttackTo(Unit target)
         {
             _watchEnemy = true;
-            MoveTo(target, attackRange);
+            _target = target;
+            if (ContainsRange(target.position))
+            {
+                _currentState = UnitState.Attack;
+            }
+            else
+            {
+                MoveTo(target, attackRange);
+            }
         }
 
         public void AttackTo(FixVector3 position)
