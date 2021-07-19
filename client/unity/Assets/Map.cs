@@ -1,3 +1,5 @@
+using FixMath.NET;
+using System;
 using System.Linq;
 using UnityEngine;
 
@@ -20,59 +22,70 @@ public class Map : MonoBehaviour
             maximumZ = Mathf.Max(maximumZ, collider.bounds.max.z);
         }
 
-        this.transform.position = new Vector3(-minimumX, this.transform.position.y, -minimumZ);
-
-        var width = (int)Mathf.Ceil(maximumX - minimumX);
-        var height = (int)Mathf.Ceil(maximumZ - minimumZ);
-
-        var rows = 128;
-        var cols = 128;
-
-        var ratioX = rows / (double)width;
-        var ratioZ = cols / (double)height;
-        var maps = new float?[cols, rows];
+        var width = 512;
+        var height = 384;
+        var tileWidth = (Fix64)0.1;
+        var tileHeight = (Fix64)0.1;
+        var maps = new Fix64?[height, width];
 
         foreach (var tile in tiles)
         {
             var collider = tile.GetComponent<MeshCollider>();
-            var minX = tile.gameObject.transform.position.x + (collider.bounds.min.x - collider.bounds.center.x);
-            var maxX = tile.gameObject.transform.position.x + (collider.bounds.max.x - collider.bounds.center.x);
-            var minZ = tile.gameObject.transform.position.z + (collider.bounds.min.z - collider.bounds.center.z);
-            var maxZ = tile.gameObject.transform.position.z + (collider.bounds.max.z - collider.bounds.center.z);
+            var minX = (Fix64)(tile.gameObject.transform.position.x + (collider.bounds.min.x - collider.bounds.center.x));
+            var maxX = (Fix64)(tile.gameObject.transform.position.x + (collider.bounds.max.x - collider.bounds.center.x));
+            var minZ = (Fix64)(tile.gameObject.transform.position.z + (collider.bounds.min.z - collider.bounds.center.z));
+            var maxZ = (Fix64)(tile.gameObject.transform.position.z + (collider.bounds.max.z - collider.bounds.center.z));
 
-            var minOffsetX = (int)(minX * ratioX);
-            var maxOffsetX = (int)(maxX * ratioX);
+            var minOffsetX = (int)(minX / tileWidth);
+            var maxOffsetX = (int)(maxX / tileWidth);
+            var minOffsetZ = (int)(minZ / tileHeight);
+            var maxOffsetZ = (int)(maxZ / tileHeight);
 
-            var minOffsetZ = (int)(minZ * ratioZ);
-            var maxOffsetZ = (int)(maxZ * ratioZ);
-
-            for (var x = Mathf.Max(0, minOffsetX); x <= maxOffsetX; x++)
+            for (var x = minOffsetX; x <= maxOffsetX; x++)
             {
-                for (var z = Mathf.Max(0, minOffsetZ); z <= maxOffsetZ; z++)
+                if (minOffsetX <= 0)
+                    continue;
+
+                if (minOffsetX >= width)
+                    continue;
+
+                for (var z = minOffsetZ; z <= maxOffsetZ; z++)
                 {
-                    if (maps[x, z] == null)
-                        maps[x, z] = collider.bounds.max.y;
-                    else
-                        maps[x, z] = Mathf.Max(collider.bounds.max.y, maps[x, z].Value);
+                    if (minOffsetZ <= 0)
+                        continue;
+
+                    if (maxOffsetZ >= height)
+                        continue;
+
+                    try
+                    {
+                        if (maps[z, x] == null)
+                            maps[z, x] = (Fix64)collider.bounds.max.y;
+                        else
+                            maps[z, x] = (Fix64)collider.bounds.max.y > maps[z, x].Value ? (Fix64)collider.bounds.max.y : maps[z, x].Value;
+                    }
+                    catch (Exception e)
+                    {
+                        UnityEngine.Debug.Log(e.Message);
+                    }
                 }
             }
         }
 
-        var blocks = new bool[rows, cols];
-        var threshold = 1.0f;
-        var size = new Vector2(rows / (float)width, cols / (float)height);
-        for (int row = 0; row < rows; row++)
+        var blocks = new bool[height, width];
+        var threshold = (Fix64)1.0f;
+        for (int row = 0; row < height; row++)
         {
-            for (int col = 0; col < cols; col++)
+            for (int col = 0; col < width; col++)
             {
-                var movable = (maps[col, row] != null && maps[col, row].Value < threshold);
+                var movable = (maps[row, col] != null && maps[row, col].Value < threshold);
                 blocks[row, col] = !movable;
                 if (!movable)
                     continue;
 
                 var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                cube.transform.position = new Vector3(col / size.x, threshold, row / size.y);
-                cube.transform.localScale = new Vector3(width / (float)rows, 0.1f, height / (float)cols);
+                cube.transform.position = new FixVector3(new Fix64(col) * tileWidth, threshold, new Fix64(row) * tileHeight);
+                cube.transform.localScale = new Vector3(width / (float)height, 0.1f, height / (float)width);
                 cube.transform.parent = this.transform;
             }
         }
