@@ -197,3 +197,105 @@ public class Map : MonoBehaviour
         
     }
 }
+
+
+public class Node
+{
+    public Node(uint x, uint y) { _x = x; _y = y; }
+
+    //public bool _isBlocked { get; private set; }
+    public uint _x { get; private set; }
+    public uint _y { get; private set; }
+    public uint _G { get; set; } = 0;
+    public uint _H { get; set; } = 0;
+    public uint _F { get { return _G + _H; } }
+    public Node _parent { get; set; } = null;
+
+}
+public static class Astar
+{    
+    public static List<Node> GetRoot(FixVector3 beg, FixVector3 end, bool[,] maps, Node[,] nodeMap)
+    {
+        List<Node> resultList;
+        List<Node> openList, closedList;
+        Node begNode, endNode, curNode;
+
+        begNode = nodeMap[(uint)beg.x, (uint)beg.z];
+        endNode = nodeMap[(uint)end.x, (uint)end.z];
+
+        openList = new List<Node>() { begNode };
+        closedList = new List<Node>();
+        resultList = new List<Node>();
+
+        while (openList.Count > 0)
+        {
+            curNode = openList[0];
+            foreach (var openNode in openList)
+                if (openNode._F <= curNode._F && openNode._H < curNode._H)
+                    curNode = openNode;
+
+            openList.Remove(curNode);
+            closedList.Add(curNode);
+
+            if (curNode == endNode) 
+            {
+                Node tempNode = endNode;
+                while (tempNode != begNode)
+                {
+                    resultList.Add(tempNode);
+                    tempNode = tempNode._parent;
+                }
+                resultList.Add(begNode);
+                resultList.Reverse();
+
+                return resultList;
+            }
+
+            AddOpenList(curNode._x + 1, curNode._y + 1, maps, openList, closedList, nodeMap, endNode, curNode);
+            AddOpenList(curNode._x - 1, curNode._y + 1, maps, openList, closedList, nodeMap, endNode, curNode);
+            AddOpenList(curNode._x - 1, curNode._y - 1, maps, openList, closedList, nodeMap, endNode, curNode);
+            AddOpenList(curNode._x + 1, curNode._y - 1, maps, openList, closedList, nodeMap, endNode, curNode);
+
+            AddOpenList(curNode._x, curNode._y + 1, maps, openList, closedList, nodeMap, endNode, curNode);
+            AddOpenList(curNode._x + 1, curNode._y, maps, openList, closedList, nodeMap, endNode, curNode);
+            AddOpenList(curNode._x, curNode._y - 1, maps, openList, closedList, nodeMap, endNode, curNode);
+            AddOpenList(curNode._x - 1, curNode._y, maps, openList, closedList, nodeMap, endNode, curNode);
+        }
+
+        return null;
+    }
+
+    private static void AddOpenList(uint x, uint y, bool[,] maps, List<Node> openlist, List<Node> closedList, Node[,] nodeMap, Node endNode, Node curNode)
+    {
+        if (x >= 0 && x < maps.GetLength(1) && y >= 0 && y < maps.GetLength(0) && !maps[x,y]
+            && !closedList.Contains(nodeMap[y,x]))
+        {
+            
+            if (maps[y, curNode._x] && maps[curNode._y, x]) return;
+           
+            if (maps[y, curNode._x] || maps[curNode._y, x]) return;
+
+            Node neighbor = nodeMap[y, x];
+            uint moveCost = curNode._G + (uint)(((curNode._x - x) == 0 || (curNode._y - y) == 0) ? 10 : 14);
+
+            if (moveCost < neighbor._G || !openlist.Contains(neighbor))
+            {
+                neighbor._G = moveCost;
+                neighbor._H = (uint)(Mathf.Abs(neighbor._x - endNode._x) + Mathf.Abs(neighbor._y - endNode._y)) * 10;
+                neighbor._parent = curNode;
+
+                openlist.Add(neighbor);
+            }
+        }
+    }
+
+    private static Vector2Int ConvertPositiontoGrid()
+    {
+        return new Vector2Int();
+    }
+
+    private static void InitNodeMap(Node[,] nodeMap)
+    {
+
+    }
+}
