@@ -153,6 +153,18 @@ namespace Game
 
                 return true;
             }
+            else if (camRay.origin.y > 0 && camRay.direction.y < 0)
+            {
+                float t = camRay.origin.y / (-camRay.direction.y);
+                FixVector3 point = camRay.GetPoint(t);
+             
+                foreach (var unit in _selectedUnits)
+                {
+                    unit.MoveTo(point);
+                }
+                    
+                return true;
+            }
             else
             {
                 return false;
