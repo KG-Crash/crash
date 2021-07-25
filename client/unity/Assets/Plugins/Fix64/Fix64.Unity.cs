@@ -43,7 +43,7 @@ namespace FixMath.NET
 
         public static FixVector2 operator /(FixVector2 v1, Fix64 v2) => new FixVector2(v1.x / v2, v1.y / v2);
 
-        public static implicit operator UnityEngine.Vector2(FixVector2 vector3) => new UnityEngine.Vector2((float)vector3.x, (float)vector3.y);
+        public static implicit operator UnityEngine.Vector2(FixVector2 vector3) => new UnityEngine.Vector2(vector3.x, vector3.y);
 
         public static implicit operator FixVector2(UnityEngine.Vector3 vector3) => new FixVector2((Fix64)vector3.x, (Fix64)vector3.y);
 
@@ -69,23 +69,30 @@ namespace FixMath.NET
 
         public FixVector3(UnityEngine.Vector3 v)
         {
-            this.x = (Fix64)v.x;
-            this.y = (Fix64)v.y;
-            this.z = (Fix64)v.z;
+            this.x = v.x;
+            this.y = v.y;
+            this.z = v.z;
+        }
+
+        public FixVector3(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = Fix64.Zero;
         }
         
         public FixVector3(double x, double y)
         {
-            this.x = (Fix64)x;
-            this.y = (Fix64)y;
+            this.x = x;
+            this.y = y;
             this.z = Fix64.Zero;
         }
 
         public FixVector3(double x, double y, double z)
         {
-            this.x = (Fix64)x;
-            this.y = (Fix64)y;
-            this.z = (Fix64)z;
+            this.x = x;
+            this.y = y;
+            this.z = z;
         }
 
         public FixVector3(Fix64 x, Fix64 y)
@@ -140,7 +147,7 @@ namespace FixMath.NET
         
         public static FixVector3 operator /(FixVector3 v1, FixVector3 v2) => new FixVector3(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
 
-        public static implicit operator UnityEngine.Vector3(FixVector3 vector3) => new UnityEngine.Vector3((float)vector3.x, (float)vector3.y, (float)vector3.z);
+        public static implicit operator UnityEngine.Vector3(FixVector3 vector3) => new UnityEngine.Vector3(vector3.x, vector3.y, vector3.z);
 
         public static implicit operator FixVector3(UnityEngine.Vector3 vector3) => new FixVector3((Fix64)vector3.x, (Fix64)vector3.y, (Fix64)vector3.z);
 
@@ -153,8 +160,8 @@ namespace FixMath.NET
         public static FixVector3 Cross(FixVector3 a, FixVector3 b) =>
             new FixVector3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
 
-        public static FixVector3 One => new FixVector3(1, 1, 1);
-        public static FixVector3 Zero => new FixVector3(0, 0, 0);
+        public static FixVector3 One => new FixVector3(Fix64.One, Fix64.One, Fix64.One);
+        public static FixVector3 Zero => new FixVector3(Fix64.Zero, Fix64.Zero, Fix64.Zero);
     }
 
     public struct FixBounds2
@@ -165,7 +172,7 @@ namespace FixMath.NET
         public FixBounds2(FixVector2 center, FixVector2 size)
         {
             this.center = new FixVector2(center);
-            this.extents = new FixVector2(size / (Fix64)2);
+            this.extents = new FixVector2(size / 2);
         }
 
         public static bool Intersect(FixBounds2 b0, FixBounds2 b1)
