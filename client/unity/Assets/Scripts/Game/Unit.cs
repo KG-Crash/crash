@@ -398,6 +398,9 @@ namespace Game
 
         private Fix64 CalculateDamage(Unit unit)
         {
+#if DEBUG
+            return Fix64.MaxValue;
+#else
             var result = (Fix64)(damage - unit.armor);
 
             if (table.Type == UnitType.Explosive)
@@ -430,9 +433,6 @@ namespace Game
                 }
             }
 
-#if DEBUG
-            return Fix64.MaxValue;
-#else
             return result;
 #endif
         }
