@@ -224,7 +224,8 @@ namespace FixMath.NET
         }        
         public bool Contains(FixRect rect)
         {
-            return (rect.minX >= this.minX && rect.minY >= this.minY) && (rect.maxX <= this.maxX && rect.maxY <= this.maxY);
+            return (this.maxX >= rect.minX && this.minX <= rect.maxX &&
+                this.maxY >= rect.minY && this.minY <= rect.maxY);
         }
 
         public static implicit operator UnityEngine.Rect(FixRect rect) => new UnityEngine.Rect(rect.minX, rect.minY, rect.maxX, rect.maxY);
