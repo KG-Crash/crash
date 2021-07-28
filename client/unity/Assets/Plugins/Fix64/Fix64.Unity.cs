@@ -164,6 +164,75 @@ namespace FixMath.NET
         public static FixVector3 Zero => new FixVector3(Fix64.Zero, Fix64.Zero, Fix64.Zero);
     }
 
+    public struct FixRect
+    {
+        public Fix64 minX;
+        public Fix64 minY;
+        public Fix64 maxX;
+        public Fix64 maxY;
+        
+        public FixRect(FixRect r)
+		{
+            this.minX = r.minX;
+            this.minY = r.minY;
+            this.maxX = r.maxX;
+            this.maxY = r.maxY;
+        }
+        public FixRect(UnityEngine.Rect r)
+		{
+            this.minX = r.xMin;
+            this.minY = r.yMin;
+            this.maxX = r.xMax;
+            this.maxY = r.yMax;
+        }
+        public FixRect(FixVector2 minV, FixVector2 maxV)
+		{
+            this.minX = minV.x;
+            this.minY = minV.y;
+            this.maxX = maxV.x;
+            this.maxY = maxV.y;
+        }
+        public FixRect(FixVector3 minV, FixVector3 maxV)
+		{
+            this.minX = minV.x;
+            this.minY = minV.z;
+            this.maxX = maxV.x;
+            this.maxY = maxV.z;
+        }
+        public FixRect(double minX, double minY, double maxX, double maxY)
+		{
+            this.minX = minX;
+            this.minY = minY;
+            this.maxX = maxX;
+            this.maxY = maxY;
+        }
+        public FixRect(int minX, int minY, int maxX, int maxY)
+        {
+            this.minX = minX;
+            this.minY = minY;
+            this.maxX = maxX;
+            this.maxY = maxY;
+        }
+
+        public bool Contains(FixVector2 point)
+		{
+            return (point.x >= this.minX && point.x <= this.maxX) && (point.y >= this.minY && point.y <= this.maxY);
+		}
+        public bool Contains(FixVector3 point)
+        {
+            return (point.x >= this.minX && point.x <= this.maxX) && (point.z >= this.minY && point.z <= this.maxY);
+        }        
+        public bool Contains(FixRect rect)
+        {
+            return (rect.minX >= this.minX && rect.minY >= this.minY) && (rect.maxX <= this.maxX && rect.maxY <= this.maxY);
+        }
+
+        public static implicit operator UnityEngine.Rect(FixRect rect) => new UnityEngine.Rect(rect.minX, rect.minY, rect.maxX, rect.maxY);
+        public static implicit operator FixRect(UnityEngine.Rect rect) => new FixRect((Fix64)rect.xMin, (Fix64)rect.yMin, (Fix64)rect.xMax, (Fix64)rect.yMax);
+
+        public static FixRect Zero => new FixRect(Fix64.Zero, Fix64.Zero, Fix64.Zero, Fix64.Zero);
+    }
+
     public struct FixBounds2
     {
         public FixVector2 center;
