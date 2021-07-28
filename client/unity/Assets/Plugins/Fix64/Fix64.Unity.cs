@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace FixMath.NET
 {
@@ -166,10 +167,13 @@ namespace FixMath.NET
 
     public struct FixRect
     {
-        public Fix64 minX;
-        public Fix64 minY;
-        public Fix64 maxX;
-        public Fix64 maxY;
+        public Fix64 minX { get; set; }
+        public Fix64 minY { get; set; }
+        public Fix64 maxX { get; set; }
+        public Fix64 maxY { get; set; }
+        public Fix64 width => maxX - minX;
+        public Fix64 height => maxY - minY;
+        public bool empty => width == Fix64.Zero || height == Fix64.Zero;
         
         public FixRect(FixRect r)
 		{
@@ -185,34 +189,17 @@ namespace FixMath.NET
             this.maxX = r.xMax;
             this.maxY = r.yMax;
         }
-        public FixRect(FixVector2 minV, FixVector2 maxV)
-		{
-            this.minX = minV.x;
-            this.minY = minV.y;
-            this.maxX = maxV.x;
-            this.maxY = maxV.y;
-        }
-        public FixRect(FixVector3 minV, FixVector3 maxV)
-		{
-            this.minX = minV.x;
-            this.minY = minV.z;
-            this.maxX = maxV.x;
-            this.maxY = maxV.z;
-        }
-        public FixRect(double minX, double minY, double maxX, double maxY)
-		{
-            this.minX = minX;
-            this.minY = minY;
-            this.maxX = maxX;
-            this.maxY = maxY;
-        }
-        public FixRect(int minX, int minY, int maxX, int maxY)
+
+        public FixRect(Fix64 x, Fix64 y, Fix64 width, Fix64 height)
         {
-            this.minX = minX;
-            this.minY = minY;
-            this.maxX = maxX;
-            this.maxY = maxY;
+            this.minX = x;
+            this.minY = y;
+            this.maxX = x + width;
+            this.maxY = x + height;
         }
+
+        public FixRect(FixVector2 position, FixVector2 size) : this(position.x, position.y, size.x, size.y)
+        { }
 
         public bool Contains(FixVector2 point)
 		{
@@ -224,8 +211,14 @@ namespace FixMath.NET
         }        
         public bool Contains(FixRect rect)
         {
-            return (this.maxX >= rect.minX && this.minX <= rect.maxX &&
-                this.maxY >= rect.minY && this.minY <= rect.maxY);
+            var points = new[]
+            {
+                new FixVector2(this.minX, this.minY), // left  top
+                new FixVector2(this.maxX, this.minY), // right top
+                new FixVector2(this.minX, this.maxY), // left  bottom
+                new FixVector2(this.maxX, this.maxY), // right bottom
+            };
+            return points.Any(point => rect.Contains(point));
         }
 
         public static implicit operator UnityEngine.Rect(FixRect rect) => new UnityEngine.Rect(rect.minX, rect.minY, rect.maxX, rect.maxY);
