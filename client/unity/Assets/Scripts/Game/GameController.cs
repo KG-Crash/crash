@@ -175,7 +175,7 @@ namespace Game
         {                    
             foreach (var unit in _selectedUnits)
             {
-                unit.MoveTo(moveTargetUnit);
+                unit.OnlyMoveTo(moveTargetUnit);
             }
         }
 
