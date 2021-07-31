@@ -363,6 +363,9 @@ namespace Game
 
         public void MoveTo(Unit target, float stopDistance = 0.0f)
         {
+            if (target.Equals(this))
+                return;
+            
             _currentState = UnitState.Move;
             _target = target;
             _stopMoveDistance = stopDistance;
@@ -373,6 +376,9 @@ namespace Game
 
         public void AttackTo(Unit target)
         {
+            if (target.Equals(this))
+                return;
+        
             _watchEnemy = true;
             _target = target;
             if (ContainsRange(target.position))
