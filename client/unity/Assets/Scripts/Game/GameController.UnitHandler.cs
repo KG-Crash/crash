@@ -1,5 +1,5 @@
-﻿using FixMath.NET;
 ﻿using System.Linq;
+using FixMath.NET;
 
 namespace Game
 {
@@ -50,9 +50,6 @@ namespace Game
 
         public void OnClear(Unit unit)
         {
-            var player = unit.owner;
-            player.units.Delete(unit);
-
             DestroyImmediate(unit.gameObject);
         }
     }

@@ -502,17 +502,43 @@ namespace Game
             }
         }
 
+        private void SetFadeMaterialAndAlpha(float alpha)
+        {
+            for (int i = 0; i < _rendereres.Length; i++)
+            {
+                _rendereres[i].sharedMaterial = _deadMaterials[i];
+                var color = _deadMaterials[i].color;
+                color.a = alpha;
+                _deadMaterials[i].color = color;
+            }
+        }
+        
+        private void SetFadeAlpha(float alpha)
+        {
+            for (int i = 0; i < _rendereres.Length; i++)
+            {
+                var color = _deadMaterials[i].color;
+                color.a = alpha;
+                _deadMaterials[i].color = color;
+            }
+        }
+        
         private IEnumerator OnDisappearAnim()
         {
             var duration = 1.0f;
             var startTime = Time.time;
 
-            while (startTime + duration <= Time.time)
+            SetFadeMaterialAndAlpha(1.0f);
+
+            while (startTime + duration >= Time.time)
             {
-                var progress = (Time.time - startTime) / duration;
-                // 여기서 애니메이션 거시기
+                var alpha = 1.0f - (Time.time - startTime) / duration;
+                SetFadeAlpha(alpha);
+
                 yield return null;
             }
+
+            SetFadeAlpha(0.0f);
             
             listener?.OnClear(this);
         }
