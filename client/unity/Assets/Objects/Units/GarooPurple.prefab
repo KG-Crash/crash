@@ -151,6 +151,8 @@ MonoBehaviour:
   _unitID: 0
   _rendereres:
   - {fileID: 958655044301409254}
+  _deadMaterials:
+  - {fileID: 2100000, guid: b7b1d199b1634a54abf2f84641d95943, type: 2}
 --- !u!1001 &912794023911437030
 PrefabInstance:
   m_ObjectHideFlags: 0
