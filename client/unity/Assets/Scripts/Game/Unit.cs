@@ -30,6 +30,7 @@ namespace Game
             void OnOwnerChanged(Player before, Player after, Unit unit);
             void OnStartMove(Unit unit);
             void OnEndMove(Unit unit);
+            void OnClear(Unit unit);
         }
 
         public Shared.Table.Unit table { get; private set; }
@@ -494,10 +495,26 @@ namespace Game
                 case UnitState.Move:
                     break;
                 case UnitState.Dead:
+                    StartCoroutine(OnDisappearAnim());
                     break;
                 case UnitState.Idle:
                     break;
             }
+        }
+
+        private IEnumerator OnDisappearAnim()
+        {
+            var duration = 1.0f;
+            var startTime = Time.time;
+
+            while (startTime + duration <= Time.time)
+            {
+                var progress = (Time.time - startTime) / duration;
+                // 여기서 애니메이션 거시기
+                yield return null;
+            }
+            
+            listener?.OnClear(this);
         }
     }
 }

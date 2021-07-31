@@ -1,4 +1,5 @@
 ﻿using FixMath.NET;
+﻿using System.Linq;
 
 namespace Game
 {
@@ -45,6 +46,14 @@ namespace Game
         public void OnStop(Unit unit)
         {
             unit.animator.SetTrigger("Idle");
+        }
+
+        public void OnClear(Unit unit)
+        {
+            var player = unit.owner;
+            player.units.Delete(unit);
+
+            DestroyImmediate(unit.gameObject);
         }
     }
 }
