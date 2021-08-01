@@ -194,6 +194,7 @@ namespace Game
 
         [NonSerialized] private Bounds _totalBounds = new Bounds();
         [SerializeField] private Renderer[] _rendereres;
+        [SerializeField] private Material[] _deadMaterials;
 
         [NonSerialized] private UnitState _currentState;
         [NonSerialized] private bool _watchEnemy; // 이동중에 적군을 만나면 공격을 할지 말지
