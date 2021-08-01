@@ -1,6 +1,4 @@
 using FixMath.NET;
-using Game;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -120,6 +118,8 @@ public class WalkabilityTable
     public int rows { get; private set; }
     public int scale { get; private set; }
 
+    public static implicit operator bool[,](WalkabilityTable walkabilityTable) => walkabilityTable._walkability;
+
     public bool this[FixVector2 position]
     {
         get => _walkability[ToIndex(position.y), ToIndex(position.x)];
@@ -217,23 +217,28 @@ public class Map : MonoBehaviour
         }
 
         var threshold = 1.0f;
-        var top = 5.0f;
+        var half = new Vector3(1 / (float)(scale * 2), 0.1f, 1 / (float)(scale * 2));
         foreach (var collider in tiles.Select(x => x.gameObject.GetComponent<MeshCollider>()))
         {
             var min = collider.bounds.min;
             var max = collider.bounds.max;
 
-            var begin = (col: walkabilityTable.ToIndex((Fix64)min.x), row: walkabilityTable.ToIndex((Fix64)min.z));
-            var end = (col: walkabilityTable.ToIndex((Fix64)max.x), row: walkabilityTable.ToIndex((Fix64)max.z));
+            var begin = (col: walkabilityTable.ToIndex(min.x), row: walkabilityTable.ToIndex(min.z));
+            var end = (col: walkabilityTable.ToIndex(max.x), row: walkabilityTable.ToIndex(max.z));
             for (int row = begin.row; row <= end.row; row++)
             {
                 for (int col = begin.col; col <= end.col; col++)
                 {
-                    var margin = 1 / (float)(scale * 2);
-                    var ray = new Ray(new Vector3(col / (float)scale + margin, top, row / (float)scale + margin), Vector3.down);
+                    var center = new Vector3(col / (float)scale + half.x, threshold, row / (float)scale + half.z);
+                    var hits = Physics.BoxCastAll(center, half, Vector3.down).Where(x => x.collider == collider).ToArray();
+                    if (hits.Length == 0)
+                        continue;
 
-                    if (collider.Raycast(ray, out var hit, top * 2.0f) && hit.point.y < threshold)
-                        walkabilityTable[row, col] = true;
+                    var hit = hits.FirstOrDefault();
+                    if (hit.point.y > threshold)
+                        continue;
+
+                    walkabilityTable[row, col] = true;
                 }
             }
         }
@@ -246,103 +251,143 @@ public class Map : MonoBehaviour
 }
 
 
-public class Node
+public class AStar
 {
-    public Node(uint x, uint y) { _x = x; _y = y; }
-
-    //public bool _isBlocked { get; private set; }
-    public uint _x { get; private set; }
-    public uint _y { get; private set; }
-    public uint _G { get; set; } = 0;
-    public uint _H { get; set; } = 0;
-    public uint _F { get { return _G + _H; } }
-    public Node _parent { get; set; } = null;
-
-}
-public static class Astar
-{    
-    public static List<Node> GetRoot(FixVector3 beg, FixVector3 end, bool[,] maps, Node[,] nodeMap)
+    #region Node
+    private class Node
     {
-        List<Node> resultList;
-        List<Node> openList, closedList;
-        Node begNode, endNode, curNode;
+        public FixVector2 position { get; private set; }
+        public bool walkable { get; private set; }
+        public int G { get; set; } = 0;
+        public int H { get; set; } = 0;
+        public int F => G + H;
+        public Node parent { get; set; } = null;
 
-        begNode = nodeMap[(uint)beg.x, (uint)beg.z];
-        endNode = nodeMap[(uint)end.x, (uint)end.z];
-
-        openList = new List<Node>() { begNode };
-        closedList = new List<Node>();
-        resultList = new List<Node>();
-
-        while (openList.Count > 0)
+        public Node(FixVector2 position, bool walkable)
         {
-            curNode = openList[0];
-            foreach (var openNode in openList)
-                if (openNode._F <= curNode._F && openNode._H < curNode._H)
-                    curNode = openNode;
-
-            openList.Remove(curNode);
-            closedList.Add(curNode);
-
-            if (curNode == endNode) 
-            {
-                Node tempNode = endNode;
-                while (tempNode != begNode)
-                {
-                    resultList.Add(tempNode);
-                    tempNode = tempNode._parent;
-                }
-                resultList.Add(begNode);
-                resultList.Reverse();
-
-                return resultList;
-            }
-
-            AddOpenList(curNode._x + 1, curNode._y + 1, maps, openList, closedList, nodeMap, endNode, curNode);
-            AddOpenList(curNode._x - 1, curNode._y + 1, maps, openList, closedList, nodeMap, endNode, curNode);
-            AddOpenList(curNode._x - 1, curNode._y - 1, maps, openList, closedList, nodeMap, endNode, curNode);
-            AddOpenList(curNode._x + 1, curNode._y - 1, maps, openList, closedList, nodeMap, endNode, curNode);
-
-            AddOpenList(curNode._x, curNode._y + 1, maps, openList, closedList, nodeMap, endNode, curNode);
-            AddOpenList(curNode._x + 1, curNode._y, maps, openList, closedList, nodeMap, endNode, curNode);
-            AddOpenList(curNode._x, curNode._y - 1, maps, openList, closedList, nodeMap, endNode, curNode);
-            AddOpenList(curNode._x - 1, curNode._y, maps, openList, closedList, nodeMap, endNode, curNode);
+            this.position = position;
+            this.walkable = walkable;
         }
-
-        return null;
     }
+    #endregion
 
-    private static void AddOpenList(uint x, uint y, bool[,] maps, List<Node> openlist, List<Node> closedList, Node[,] nodeMap, Node endNode, Node curNode)
+    private readonly Node[,] _nodes; // [y,x]
+    public int rows { get; private set; }
+    public int cols { get; private set; }
+
+    private AStar(bool[,] maps)
     {
-        if (x >= 0 && x < maps.GetLength(1) && y >= 0 && y < maps.GetLength(0) && !maps[x,y]
-            && !closedList.Contains(nodeMap[y,x]))
+        rows = maps.GetLength(0);
+        cols = maps.GetLength(1);
+        
+        _nodes = new Node[rows, cols];
+        for (int row = 0; row < rows; row++)
         {
-            
-            if (maps[y, curNode._x] && maps[curNode._y, x]) return;
-           
-            if (maps[y, curNode._x] || maps[curNode._y, x]) return;
-
-            Node neighbor = nodeMap[y, x];
-            uint moveCost = curNode._G + (uint)(((curNode._x - x) == 0 || (curNode._y - y) == 0) ? 10 : 14);
-
-            if (moveCost < neighbor._G || !openlist.Contains(neighbor))
+            for (int col = 0; col < cols; col++)
             {
-                neighbor._G = moveCost;
-                neighbor._H = (uint)(Mathf.Abs(neighbor._x - endNode._x) + Mathf.Abs(neighbor._y - endNode._y)) * 10;
-                neighbor._parent = curNode;
-
-                openlist.Add(neighbor);
+                _nodes[row, col] = new Node(new FixVector2(new Fix64(col), new Fix64(row)), maps[row, col]);
             }
         }
     }
 
-    private static Vector2Int ConvertPositiontoGrid()
+    /// <summary>
+    /// 인접노드 가져옴
+    /// </summary>
+    /// <param name="from">시작점</param>
+    /// <returns></returns>
+    private List<Node> Nears(Node from)
     {
-        return new Vector2Int();
+        var nears = new List<Node>();
+
+        var isLeft = (from.position.x == Fix64.Zero);
+        if (!isLeft)
+            nears.Add(_nodes[from.position.y, from.position.x - 1]);
+
+        var isTop = (from.position.y == 0);
+        if (!isTop)
+            nears.Add(_nodes[from.position.y - 1, from.position.x]);
+
+        var isRight = (from.position.x == cols - 1);
+        if (!isRight)
+            nears.Add(_nodes[from.position.y, from.position.x + 1]);
+
+        var isBottom = (from.position.y == rows - 1);
+        if (!isBottom)
+            nears.Add(_nodes[from.position.y + 1, from.position.x]);
+
+        if (!isLeft && !isTop)
+            nears.Add(_nodes[from.position.y - 1, from.position.x - 1]);
+
+        if (!isRight && !isTop)
+            nears.Add(_nodes[from.position.y - 1, from.position.x + 1]);
+
+        if (!isLeft && !isBottom)
+            nears.Add(_nodes[from.position.y + 1, from.position.x - 1]);
+
+        if (!isRight && !isBottom)
+            nears.Add(_nodes[from.position.y + 1, from.position.x + 1]);
+
+        return nears.Where(x => x.walkable).ToList();
     }
 
-    private static void InitNodeMap(Node[,] nodeMap)
+    /// <summary>
+    /// 노드 기반으로 경로탐색
+    /// </summary>
+    /// <param name="begin">시작</param>
+    /// <param name="end">종료</param>
+    /// <returns></returns>
+    private Stack<Node> Find(Node begin, Node end)
     {
+        var result = new Stack<Node>();
+        var openedList = new List<Node>();
+        var closedList = new List<Node>();
 
+        openedList.Add(begin);
+        while (openedList.Count > 0 && closedList.Contains(end) == false)
+        {
+            var current = openedList.First();
+            openedList.Remove(current);
+            closedList.Add(current);
+
+            var nears = Nears(current)
+                .Where(x => closedList.Contains(x) == false)
+                .Where(x => openedList.Contains(x) == false)
+                .ToList();
+
+            foreach (var near in nears)
+            {
+                near.parent = current;
+                near.G = (near.position - current.position).sqrMagnitude;
+                near.H = (near.position - end.position).sqrMagnitude;
+            }
+
+            openedList.AddRange(nears);
+            openedList.Sort((x, y) => x.F.CompareTo(y.F)); // OrderBy보다 빠른듯
+        }
+
+        if (closedList.Contains(end) == false)
+            return result;
+
+        var tracked = end;
+        while (tracked != begin)
+        {
+            result.Push(tracked);
+            tracked = tracked.parent;
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// 경로 탐색
+    /// </summary>
+    /// <param name="maps">맵</param>
+    /// <param name="begin">시작점</param>
+    /// <param name="end">종료점</param>
+    /// <returns></returns>
+    public static List<FixVector2> Find(bool[,] maps, FixVector2 begin, FixVector2 end)
+    {
+        var astar = new AStar(maps);
+        var root = astar.Find(astar._nodes[begin.y, begin.x], astar._nodes[end.y, end.x]);
+        return root.Select(x => x.position).ToList();
     }
 }

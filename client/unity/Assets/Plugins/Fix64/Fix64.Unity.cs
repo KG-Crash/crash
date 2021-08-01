@@ -36,6 +36,10 @@ namespace FixMath.NET
 
         public Fix64 magnitude => (Fix64)Math.Sqrt((double)sqrMagnitude);
 
+        public static FixVector2 zero => new FixVector2(Fix64.Zero, Fix64.Zero);
+
+        public static FixVector2 one => new FixVector2(Fix64.One, Fix64.One);
+
         public static FixVector2 operator +(FixVector2 v1, FixVector2 v2) => new FixVector2(v1.x + v2.x, v1.y + v2.y);
         
         public static FixVector2 operator -(FixVector2 v1, FixVector2 v2) => new FixVector2(v1.x - v2.x, v1.y - v2.y);

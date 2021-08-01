@@ -155,8 +155,8 @@ namespace Game
             }
             else if (camRay.origin.y > 0 && camRay.direction.y < 0)
             {
-                float t = camRay.origin.y / (-camRay.direction.y);
-                FixVector3 point = camRay.GetPoint(t);
+                var t = camRay.origin.y / (-camRay.direction.y);
+                var point = camRay.GetPoint(t);
              
                 foreach (var unit in _selectedUnits)
                 {
