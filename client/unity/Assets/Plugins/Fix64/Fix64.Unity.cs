@@ -215,14 +215,34 @@ namespace FixMath.NET
         }        
         public bool Contains(FixRect rect)
         {
-            var points = new[]
             {
-                new FixVector2(this.minX, this.minY), // left  top
-                new FixVector2(this.maxX, this.minY), // right top
-                new FixVector2(this.minX, this.maxY), // left  bottom
-                new FixVector2(this.maxX, this.maxY), // right bottom
-            };
-            return points.Any(point => rect.Contains(point));
+                var points = new[]
+                {
+                    new FixVector2(this.minX, this.minY), // left  top
+                    new FixVector2(this.maxX, this.minY), // right top
+                    new FixVector2(this.minX, this.maxY), // left  bottom
+                    new FixVector2(this.maxX, this.maxY), // right bottom
+                };
+                
+                if (points.Any(point => rect.Contains(point)))
+                    return true;
+            }
+
+            {
+                var points = new[]
+                {
+                    new FixVector2(rect.minX, rect.minY), // left  top
+                    new FixVector2(rect.maxX, rect.minY), // right top
+                    new FixVector2(rect.minX, rect.maxY), // left  bottom
+                    new FixVector2(rect.maxX, rect.maxY), // right bottom
+                };
+
+                var self = this;
+                if (points.Any(point => self.Contains(point)))
+                    return true;
+            }
+
+            return false;
         }
 
         public static implicit operator UnityEngine.Rect(FixRect rect) => new UnityEngine.Rect(rect.minX, rect.minY, rect.maxX, rect.maxY);
