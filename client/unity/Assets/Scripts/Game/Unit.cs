@@ -2,6 +2,7 @@ using FixMath.NET;
 using Shared;
 using Shared.Table;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -250,7 +251,7 @@ namespace Game
             switch (_currentState)
             {
                 case UnitState.Idle:
-                    _target = SearchEnemy();
+                    _target = SearchEnemy(attackRange);
                     if (_target != null)
                         _currentState = UnitState.Attack;
                     break;
@@ -264,7 +265,7 @@ namespace Game
                     else if (_target == null)
                     {
                         // 어택땅
-                        _target = SearchEnemy();
+                        _target = SearchEnemy(attackRange);
                         if (_target != null)
                             _currentState = UnitState.Attack;
                         else
@@ -281,8 +282,7 @@ namespace Game
                 case UnitState.Attack:
                     if (ContainsRange(_target.position))
                     {
-                        Attack(_target);
-                        if (_target.IsDead)
+                        if (_target == null || _target.IsDead)
                         {
                             _target = null;
 
@@ -294,6 +294,10 @@ namespace Game
                             {
                                 _currentState = UnitState.Move;
                             }
+                        }
+                        else
+                        {
+                            Attack(_target);
                         }
                     }
                     else
@@ -334,11 +338,30 @@ namespace Game
             }
         }
 
-        private Unit SearchEnemy()
+        private Unit SearchEnemy(Fix64 searchRadius)
         {
-            // TODO : 내 시야 범위 안에 있는 유닛 찾아내기
-            // 섹터 개념 도입 후 실제 적용
-            return null;
+            // TODO : 섹터 적용 시, 유닛 리스트 가져오기 새로 짜야함.
+            var gameController = FindObjectOfType<GameController>();
+            var singleUnits = gameController.GetAllUnits().
+                Where(x => x._teamID != this._teamID).
+                OrderBy(x => (this.position - x.position).sqrMagnitude).
+                Take(1);
+
+            if (singleUnits.Count() == 0)
+            {
+                return null;
+            }
+
+            var unit = singleUnits.First();
+            
+            if ((this.position - unit.position).sqrMagnitude <= searchRadius * searchRadius)
+            {
+                return unit;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public void Stop()
@@ -459,7 +482,7 @@ namespace Game
             else
                 listener?.OnHeal(this, from, value);
 
-            if (_hp == Fix64.Zero)
+            if (_hp <= Fix64.Zero)
                 Die(from);
         }
 

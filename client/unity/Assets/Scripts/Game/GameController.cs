@@ -189,16 +189,18 @@ namespace Game
             }
         }
 
+        public IEnumerable<Unit> GetAllUnits()
+        {
+            return _allPlayerByTeam.players.SelectMany(x => x.Value).SelectMany(x => x.units).Select(x => x);
+        }
+
         public void UpdateUnitInFrustumPlane()
         {
             var uobj = UnityResources._instance.Get("objects");
             var selectedCamera = uobj.GetCamera();
             var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(selectedCamera);
             
-            _allUnitInFrustum = _allPlayerByTeam.players.
-                SelectMany(x => x.Value).
-                SelectMany(x => x.units).
-                Select(x => x).
+            _allUnitInFrustum = GetAllUnits().
                 Where(x => GeometryUtility.TestPlanesAABB(frustumPlanes, x.bounds)).ToList();
         }
 
