@@ -88,6 +88,14 @@ namespace Shared.Table
         public Ability Condition { get; set; }
     }
 
+    public class Projectile
+    {
+        [Key]
+        public int Id { get; set; }
+        public bool Targeting { get; set; }
+        public int Speed { get; set; }
+    }
+
     [Table("json/SampleAttribute.json")]
     public partial class TableSampleAttribute : BaseDict<string, SampleAttribute>
     { }
@@ -114,5 +122,9 @@ namespace Shared.Table
 
     [Table("json/Skill.json")]
     public partial class TableSkill : BaseDict<int, Skill>
+    { }
+
+    [Table("json/Projectile.json")]
+    public partial class TableProjectile : BaseDict<int, Projectile>
     { }
 }

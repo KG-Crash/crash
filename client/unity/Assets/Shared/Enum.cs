@@ -72,4 +72,12 @@ namespace Shared
         UPGRADE_ARMOR,
         UPGRADE_SPEED
     }
+
+    public enum ProjectileState
+    { 
+        Disable,
+        Shoot,
+        Move,
+        Hit,        
+    }
 }
