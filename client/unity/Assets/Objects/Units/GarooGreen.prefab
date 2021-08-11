@@ -57,6 +57,7 @@ MonoBehaviour:
   - {fileID: 337698830708193431}
   _deadMaterials:
   - {fileID: 2100000, guid: f2304244e2169dc40a270d3357b465c2, type: 2}
+  _projectileTable: {fileID: 11400000, guid: cc0c122d377e12141b81dcb0f6272455, type: 2}
 --- !u!1 &380659590001448223
 GameObject:
   m_ObjectHideFlags: 0

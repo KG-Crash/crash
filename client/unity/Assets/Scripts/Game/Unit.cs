@@ -196,6 +196,7 @@ namespace Game
         [NonSerialized] private Bounds _totalBounds = new Bounds();
         [SerializeField] private Renderer[] _rendereres;
         [SerializeField] private Material[] _deadMaterials;
+        [SerializeField] private ProjectileTable _projectileTable;
 
         [NonSerialized] private UnitState _currentState;
         [NonSerialized] private bool _watchEnemy; // 이동중에 적군을 만나면 공격을 할지 말지
@@ -203,12 +204,15 @@ namespace Game
         [NonSerialized] private float _stopMoveDistance;
         [NonSerialized] private FixVector3? _moveTargetPosition;
         [NonSerialized] private Unit _target;
+       
 
         public FixVector3 position { get; set; }
 
         public FixVector3? moveTargetPosition => _target?.position ?? _moveTargetPosition;
 
         public bool IsDead => _hp == Fix64.Zero;
+
+        
 
         [ContextMenu("Gather renderers")]
         private void OnRefreshRenderers()
@@ -280,6 +284,7 @@ namespace Game
                     break;
 
                 case UnitState.Attack:
+                    ProjectileFactory.GetNewProjectile(0, this, this.unitID, this._projectileTable);
                     if (ContainsRange(_target.position))
                     {
                         if (_target == null || _target.IsDead)
@@ -303,6 +308,7 @@ namespace Game
                     else
                     {
                         AttackTo(_target);
+                        
                     }
                     break;
             }
@@ -547,7 +553,7 @@ namespace Game
             }
         }
         
-        private IEnumerator OnDisappearAnim()
+        private IEnumerator<Unit> OnDisappearAnim()
         {
             var duration = 1.0f;
             var startTime = Time.time;
