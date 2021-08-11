@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2205315bd289e0f4a9626f5e8c93b55d, type: 3}
   m_Name: ProjectileTable
   m_EditorClassIdentifier: 
-  _projectileOrigin: []
+  _projectileOrigin:
+  - {fileID: 5910763253863656123, guid: 38ad2fca844a4b94fb1b3cbba2b54499, type: 3}
