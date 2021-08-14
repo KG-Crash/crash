@@ -88,7 +88,11 @@ namespace Game
             
             focusTransform.position += new Vector3(0, 0, CrashDevOption.cameraMoveDelta * Time.deltaTime);
         }
-        
+
+        public void OnScrollDelta(float onScrollDelta)
+        {
+        }
+
         public void OnScroll(float delta)
         {
             

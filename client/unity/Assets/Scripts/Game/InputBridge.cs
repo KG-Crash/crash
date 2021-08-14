@@ -18,6 +18,7 @@ namespace Game
         void OnDownKey();
         void OnLeftKey();
         void OnRightKey();
+        void OnScrollDelta(float onScrollDelta);
     }
 
     public class InputBridge : ScriptableObject
@@ -124,6 +125,14 @@ namespace Game
             foreach (var subscriber in _inputSubscribers)
             {
                 subscriber.OnRightKey();
+            }
+        }
+        
+        public void OnScrollDelta(float delta)
+        {
+            foreach (var subscriber in _inputSubscribers)
+            {
+                subscriber.OnScrollDelta(delta);
             }
         }
     }

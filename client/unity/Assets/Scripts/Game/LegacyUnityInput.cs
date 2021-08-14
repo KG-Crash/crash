@@ -65,6 +65,10 @@ namespace Game
                 inputBridge.OnRightKey();
             }
 
+            if (Input.mouseScrollDelta != Vector2.zero)
+            {
+                inputBridge.OnScrollDelta(Input.mouseScrollDelta.y);
+            }
         }
     }
 }
