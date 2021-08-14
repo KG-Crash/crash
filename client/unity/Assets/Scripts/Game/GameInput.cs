@@ -9,6 +9,7 @@ namespace Game
     {
         private GameController _controller;
         private GameUI _ui;
+        private Vector2 _lastPositionSS;
         
         private void Awake()
         {
@@ -25,12 +26,22 @@ namespace Game
 
         public void OnPressMainBtn(Vector2 positionSS)
         {
+            _lastPositionSS = positionSS;
         }
 
         public void OnDragMainBtn(Vector2 positionSS)
         {
+            var unityObject = UnityResources._instance.Get("objects");
+            var focusTransform = unityObject.GetFocus();
+            
+            var deltaSS = (positionSS - _lastPositionSS) * CrashDevOption.dragDelta;
+            focusTransform.position += new Vector3(deltaSS.y, 0, -deltaSS.x);
+
+            _lastPositionSS = positionSS;
         }
         public void OnReleaseMainBtn(Vector2 positionSS)
+        {            
+            _lastPositionSS = positionSS;
         }
 
         public void OnPressAltBtn(Vector2 positionSS)
@@ -76,6 +87,11 @@ namespace Game
             var focusTransform = unityObject.GetFocus();
             
             focusTransform.position += new Vector3(0, 0, CrashDevOption.cameraMoveDelta * Time.deltaTime);
+        }
+        
+        public void OnScroll(float delta)
+        {
+            
         }
     }
 }

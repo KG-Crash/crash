@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: CrashDevOption
   m_EditorClassIdentifier: 
   _cameraMoveDelta: 10
+  _dragDelta: 0.1
