@@ -27,6 +27,12 @@ namespace Game
             return _cameras[0];
         }
 
+        public Follower GetCameraFollower()
+        {
+            return _cameras[0].GetComponent<Follower>();   
+        }
+        
+
         public Transform GetFocus()
         {
             return _focus;

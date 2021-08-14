@@ -91,6 +91,10 @@ namespace Game
 
         public void OnScrollDelta(float onScrollDelta)
         {
+            var unityObject = UnityResources._instance.Get("objects");
+            var follower = unityObject.GetCameraFollower();
+
+            follower.offsetPosition += onScrollDelta * CrashDevOption.scrollDelta;
         }
 
         public void OnScroll(float delta)

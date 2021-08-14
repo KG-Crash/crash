@@ -16,14 +16,17 @@ namespace Game
         {
             get => CrashDevOption._instance._dragDelta;
         }
-        
+
+        public static float scrollDelta
+        {
+            get => CrashDevOption._instance._dragDelta;
+        }
+
         private static CrashDevOption _instance { get; set; }
 
-        [SerializeField]
-        public float _cameraMoveDelta = 10.0f;
-
-        [SerializeField]
-        public float _dragDelta = 0.1f;
+        [SerializeField] private float _cameraMoveDelta = 10.0f;
+        [SerializeField] private float _dragDelta = 0.1f;
+        [SerializeField] private float _scrollDelta = 0.1f;
 
         private void OnEnable()
         {

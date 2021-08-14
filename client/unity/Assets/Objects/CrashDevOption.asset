@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cameraMoveDelta: 10
   _dragDelta: 0.1
+  _scrollDelta: 0.1

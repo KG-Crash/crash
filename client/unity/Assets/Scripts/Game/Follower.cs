@@ -16,9 +16,21 @@ namespace Game
     {
         [SerializeField] private Transform _target;
         [SerializeField] private MoveKind _follow;
-        [SerializeField] private Vector3 _offset;
         [SerializeField] private MoveKind _switched;
 
+        [SerializeField] private AnimationCurve _offsetCurveX;
+        [SerializeField] private AnimationCurve _offsetCurveY;
+        [SerializeField] private AnimationCurve _offsetCurveZ;
+
+        [Range(0, 1)]
+        [SerializeField] private float _offsetPosition;
+        
+        public float offsetPosition
+        {
+            get => _offsetPosition;
+            set => _offsetPosition = Mathf.Clamp01(value);
+        }
+        
         public Transform target
         {
             get { return _target; }
@@ -37,20 +49,32 @@ namespace Game
             }
         }
 
+        private void OnEnable()
+        {
+            _offsetPosition = 1;
+        }
+
         [ContextMenu("Update")]
         private void Update()
         {
+            Vector3 offset = new Vector3(
+                    _offsetCurveX.Evaluate(_offsetPosition),
+                    _offsetCurveY.Evaluate(_offsetPosition),
+                    _offsetCurveZ.Evaluate(_offsetPosition)
+                );
+            Vector3 targetPosition = _target.position + offset;
+            
             switch (_follow)
             {
                 case MoveKind.Step:
-                    transform.position = _target.position + _offset;
+                    transform.position = targetPosition;
                     break;
                 case MoveKind.Lerp:
-                    transform.position = Vector3.Lerp(transform.position, _target.position, 0.1f) + _offset;
+                    transform.position = Vector3.Lerp(transform.position, targetPosition, 0.1f);
                     break;
             }
 
-            transform.LookAt(_target);
+            transform.LookAt(_target.position);
         }
     }
 }

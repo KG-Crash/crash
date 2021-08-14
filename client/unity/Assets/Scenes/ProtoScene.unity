@@ -1121,8 +1121,80 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _target: {fileID: 606488634}
   _follow: 0
-  _offset: {x: 5, y: 10, z: 0}
   _switched: 0
+  _offsetCurveX:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -0.0011244994
+      value: 3.500056
+      inSlope: 11.367826
+      outSlope: 1.4784902
+      tangentMode: 65
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.3597637
+    - serializedVersion: 3
+      time: 0.99969727
+      value: 4.979761
+      inSlope: 1.4784902
+      outSlope: 1.4784902
+      tangentMode: 5
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _offsetCurveY:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -0.012042109
+      value: 6.4802046
+      inSlope: 0
+      outSlope: 3.5108585
+      tangentMode: 65
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.99048483
+      value: 9.999935
+      inSlope: 3.5108585
+      outSlope: 0
+      tangentMode: 5
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _offsetCurveZ:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.49734882
+      value: 0.0008848057
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.9987008
+      value: 0.0032496762
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _offsetPosition: 1
 --- !u!1001 &785650622
 PrefabInstance:
   m_ObjectHideFlags: 0
