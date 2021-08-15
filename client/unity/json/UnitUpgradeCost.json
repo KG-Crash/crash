@@ -1,0 +1,42 @@
+{
+  "UPGRADE_1": {
+    "Time": 10000,
+    "Upgrade": "UPGRADE_1"
+  },
+  "UPGRADE_10": {
+    "Time": 3000,
+    "Upgrade": "UPGRADE_10"
+  },
+  "UPGRADE_2": {
+    "Time": 5000,
+    "Upgrade": "UPGRADE_2"
+  },
+  "UPGRADE_3": {
+    "Time": 10000,
+    "Upgrade": "UPGRADE_3"
+  },
+  "UPGRADE_4": {
+    "Time": 5000,
+    "Upgrade": "UPGRADE_4"
+  },
+  "UPGRADE_5": {
+    "Time": 5000,
+    "Upgrade": "UPGRADE_5"
+  },
+  "UPGRADE_6": {
+    "Time": 5000,
+    "Upgrade": "UPGRADE_6"
+  },
+  "UPGRADE_7": {
+    "Time": 5000,
+    "Upgrade": "UPGRADE_7"
+  },
+  "UPGRADE_8": {
+    "Time": 5000,
+    "Upgrade": "UPGRADE_8"
+  },
+  "UPGRADE_9": {
+    "Time": 5000,
+    "Upgrade": "UPGRADE_9"
+  }
+}

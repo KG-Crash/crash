@@ -62,13 +62,13 @@ namespace Shared.Table
         public bool Controllable { get; set; }
     }
 
-    public class UnitUpgradeAttribute
+    public class UnitUpgradeAbilityAttribute
     {
         [Key]
         public Ability Upgrade { get; set; }
     }
 
-    public class UnitUpgrade
+    public class UnitUpgradeAbility
     {
         [Key]
         public Ability Parent { get; set; }
@@ -92,8 +92,18 @@ namespace Shared.Table
     {
         [Key]
         public int Id { get; set; }
+        
         public bool Targeting { get; set; }
+        
         public int Speed { get; set; }
+    }
+
+    public class UnitUpgradeCost
+    {
+        [Key]
+        public Ability Upgrade { get; set; }
+        
+        public int Time { get; set; }
     }
 
     [Table("json/SampleAttribute.json")]
@@ -112,12 +122,12 @@ namespace Shared.Table
     public partial class TableUnit : BaseDict<int, Unit>
     { }
 
-    [Table("json/UnitUpgradeAttribute.json")]
-    public partial class TableUnitUpgradeAttribute : BaseDict<Ability, UnitUpgradeAttribute>
+    [Table("json/UnitUpgradeAbilityAttribute.json")]
+    public partial class TableUnitUpgradeAbilityAttribute : BaseDict<Ability, UnitUpgradeAbilityAttribute>
     { }
 
-    [Table("json/UnitUpgrade.json")]
-    public partial class TableUnitUpgrade : BaseDict<Ability, List<UnitUpgrade>>
+    [Table("json/UnitUpgradeAbility.json")]
+    public partial class TableUnitUpgradeAbility : BaseDict<Ability, List<UnitUpgradeAbility>>
     { }
 
     [Table("json/Skill.json")]
@@ -126,5 +136,9 @@ namespace Shared.Table
 
     [Table("json/Projectile.json")]
     public partial class TableProjectile : BaseDict<int, Projectile>
+    { }
+
+    [Table("json/UnitUpgradeCost.json")]
+    public partial class TableUnitUpgradeCost : BaseDict<Ability, UnitUpgradeCost>
     { }
 }
