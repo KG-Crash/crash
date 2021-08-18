@@ -41,7 +41,7 @@ namespace Game
         public Dictionary<StatType, int> AdditionalStat(uint unitID)
         {
             return Shared.Table.Table
-                    .From<TableUnitUpgrade>()
+                    .From<TableUnitUpgradeAbility>()
                     .Where(x => abilities.HasFlag(x.Key))
                     .SelectMany(x => x.Value)
                     .Where(x => x.Unit == unitID)
