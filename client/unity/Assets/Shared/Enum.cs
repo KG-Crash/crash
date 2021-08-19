@@ -2,6 +2,20 @@
 
 namespace Shared
 {
+    public enum ProjectileState
+    {
+        Disable,
+        Shoot,
+        Move,
+        Hit
+    }
+
+    public enum ProjectileType
+    {
+        Absolute,
+        Relative
+    }
+
     public enum UnitSize
     {
         Small,
@@ -71,13 +85,5 @@ namespace Shared
         UPGRADE_WEAPON,
         UPGRADE_ARMOR,
         UPGRADE_SPEED
-    }
-
-    public enum ProjectileState
-    { 
-        Disable,
-        Shoot,
-        Move,
-        Hit,        
     }
 }
