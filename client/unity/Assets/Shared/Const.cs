@@ -13,4 +13,11 @@ namespace Shared.Const
         public static readonly string InitStat = "캐릭터.스탯";
         public static readonly double MoveEpsilon = 0.001;
     }
+    
+    public static class Input
+    {
+        public static readonly double CameraMoveDelta = 10;
+        public static readonly double DragDelta = 0.1;
+        public static readonly double ScrollDelta = 0.1;
+    }
 }
