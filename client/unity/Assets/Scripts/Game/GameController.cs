@@ -3,6 +3,7 @@ using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Shared.Table;
 using UnityEngine;
 
 namespace Game
@@ -62,7 +63,8 @@ namespace Game
         }
 
         private void Update()
-        {            
+        {
+            UpdateUpgrade(UnityEngine.Time.time);
             UpdateUnitInFrustumPlane();
         }
 
@@ -234,6 +236,67 @@ namespace Game
         public void AppendCommand(IEnumerable<ICommand> commands)
         {
             ApplyCommand(commands);
+        }
+
+        private Dictionary<Ability, float> _upgradeStartTime = new Dictionary<Ability, float>();
+
+        public void StartUpgrade(Ability ability)
+        {
+            if (ability == Ability.NONE)
+            {
+                return;
+            }
+            
+            if (!_upgradeStartTime.ContainsKey(ability))
+            {
+                _upgradeStartTime.Add(ability, UnityEngine.Time.time);   
+                Debug.Log($"StartUpgrade({ability}), After {Table.From<TableUnitUpgradeCost>()[ability].Time}ms");
+            }
+        }
+
+        public void UpdateUpgrade(float time)
+        {
+            // 임시 테스트 코드
+            if (Input.GetKeyUp(KeyCode.Alpha1))
+                StartUpgrade(Ability.UPGRADE_1);
+            if (Input.GetKeyUp(KeyCode.Alpha2))
+                StartUpgrade(Ability.UPGRADE_2);
+            if (Input.GetKeyUp(KeyCode.Alpha3))
+                StartUpgrade(Ability.UPGRADE_3);
+            if (Input.GetKeyUp(KeyCode.Alpha4))
+                StartUpgrade(Ability.UPGRADE_4);
+            if (Input.GetKeyUp(KeyCode.Alpha5))
+                StartUpgrade(Ability.UPGRADE_5);
+            if (Input.GetKeyUp(KeyCode.Alpha6))
+                StartUpgrade(Ability.UPGRADE_6);
+            if (Input.GetKeyUp(KeyCode.Alpha7))
+                StartUpgrade(Ability.UPGRADE_7);
+            if (Input.GetKeyUp(KeyCode.Alpha8))
+                StartUpgrade(Ability.UPGRADE_8);
+            if (Input.GetKeyUp(KeyCode.Alpha9))
+                StartUpgrade(Ability.UPGRADE_9);
+            
+            List<Ability> completeList = new List<Ability>();
+            
+            foreach (var k in _upgradeStartTime.Keys)
+            {
+                if (_upgradeStartTime[k] + Table.From<TableUnitUpgradeCost>()[k].Time / 1000.0f < time)
+                {
+                    completeList.Add(k);
+                }
+            }
+
+            foreach (var ability in completeList)
+            {
+                _upgradeStartTime.Remove(ability);
+                _player.SetAbilityFlag(ability);
+                FinishUpgrade(ability);
+            }
+        }
+
+        public void FinishUpgrade(Ability ability)
+        {
+            Debug.Log($"FinishUpgrade({ability})");
         }
     }
 }
