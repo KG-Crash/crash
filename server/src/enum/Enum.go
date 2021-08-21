@@ -2,6 +2,18 @@
 
 package enum
 
+type _ProjectileState struct {
+	Disable uint32
+	Shoot   uint32
+	Move    uint32
+	Hit     uint32
+}
+
+type _ProjectileType struct {
+	Absolute uint32
+	Relative uint32
+}
+
 type _UnitSize struct {
 	Small  uint32
 	Medium uint32
@@ -66,6 +78,8 @@ type _Advanced struct {
 	UPGRADE_SPEED  uint32
 }
 
+var ProjectileState _ProjectileState
+var ProjectileType _ProjectileType
 var UnitSize _UnitSize
 var UnitState _UnitState
 var UnitType _UnitType
@@ -75,6 +89,18 @@ var Ability _Ability
 var Advanced _Advanced
 
 func init() {
+	ProjectileState = _ProjectileState{
+		Disable: 1,
+		Shoot:   2,
+		Move:    3,
+		Hit:     4,
+	}
+
+	ProjectileType = _ProjectileType{
+		Absolute: 1,
+		Relative: 2,
+	}
+
 	UnitSize = _UnitSize{
 		Small:  1,
 		Medium: 2,
