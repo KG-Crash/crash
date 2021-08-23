@@ -1,4 +1,5 @@
 using FixMath.NET;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -109,30 +110,56 @@ using UnityEngine;
 //    }
 //}
 
-public class WalkabilityTable
+public static class CellExtension
 {
-    private readonly List<(Vector3, Vector3)> _points = new List<(Vector3, Vector3)>();
-    private readonly bool[,] _walkability;
+    public static CellCollection.Cell Find(this CellCollection collection, Func<CellCollection.Cell, bool> predicate)
+    {
+        for (int row = 0; row < collection._cells.GetLength(0); row++)
+        {
+            for (int col = 0; col < collection._cells.GetLength(1); col++)
+            {
+                var cell = collection[row, col];
+                if (predicate(cell))
+                    return cell;
+            }
+        }
 
+        return null;
+    }
+}
+
+public class CellCollection
+{
+    public class Cell
+    {
+        public int row { get; set; }
+        public int col { get; set; }
+        public int? id { get; set; }
+        public bool walkable { get; set; }
+    }
+
+    private readonly List<(Vector3, Vector3)> _points = new List<(Vector3, Vector3)>();
+    
+    public Cell[,] _cells { get; private set; }
     public int cols { get; private set; }
     public int rows { get; private set; }
     public int scale { get; private set; }
 
-    public static implicit operator bool[,](WalkabilityTable walkabilityTable) => walkabilityTable._walkability;
+    public static implicit operator Cell[,](CellCollection walkabilityTable) => walkabilityTable._cells;
 
-    public bool this[FixVector2 position]
+    public Cell this[FixVector2 position]
     {
-        get => _walkability[ToIndex(position.y), ToIndex(position.x)];
-        set => _walkability[ToIndex(position.y), ToIndex(position.x)] = value;
+        get => _cells[ToIndex(position.y), ToIndex(position.x)];
+        set => _cells[ToIndex(position.y), ToIndex(position.x)] = value;
     }
 
-    public bool this[int row, int col]
+    public Cell this[int row, int col]
     {
-        get => _walkability[row, col];
-        set => _walkability[row, col] = value;
+        get => _cells[row, col];
+        set => _cells[row, col] = value;
     }
 
-    public WalkabilityTable(int width, int height, int scale)
+    public CellCollection(int width, int height, int scale)
     {
         this.cols = width * scale;
         this.rows = height * scale;
@@ -152,7 +179,22 @@ public class WalkabilityTable
             this._points.Add(points);
         }
 
-        _walkability = new bool[height * scale, width * scale];
+        var rows = height * scale;
+        var cols = width * scale;
+        _cells = new Cell[rows, cols];
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                _cells[row, col] = new Cell
+                {
+                    row = row,
+                    col = col,
+                    walkable = false,
+                    id = null
+                };
+            }
+        }
     }
 
     public void OnDrawGizmos()
@@ -169,8 +211,8 @@ public class WalkabilityTable
         {
             for (int col = 0; col < this.cols; col++)
             {
-                var walkability = this[row, col];
-                if (walkability == false)
+                var cell = this[row, col];
+                if (cell.walkable == false)
                     continue;
 
                 var area = new Rect(col / (float)this.scale, row / (float)this.scale, 1 / (float)scale, 1 / (float)scale);
@@ -181,6 +223,113 @@ public class WalkabilityTable
                 Gizmos.DrawLine(new Vector3(area.xMax, 0, area.yMin), new Vector3(area.xMax, 0, area.yMax));
             }
         }
+    }
+
+    public Cell Find(Func<Cell, bool> predicate)
+    {
+        for (int row = 0; row < _cells.GetLength(0); row++)
+        {
+            for (int col = 0; col < _cells.GetLength(1); col++)
+            {
+                var cell = this[row, col];
+                if (predicate(cell))
+                    return cell;
+            }
+        }
+
+        return null;
+    }
+
+    private void UpdateWalkability(IEnumerable<MeshCollider> colliders, float threshold)
+    {
+        var half = new Vector3(1 / (float)(scale * 2), 0.1f, 1 / (float)(scale * 2));
+        foreach (var collider in colliders)
+        {
+            var min = collider.bounds.min;
+            var max = collider.bounds.max;
+
+            var begin = (col: ToIndex(min.x), row: ToIndex(min.z));
+            var end = (col: ToIndex(max.x), row: ToIndex(max.z));
+            for (int row = begin.row; row <= end.row; row++)
+            {
+                for (int col = begin.col; col <= end.col; col++)
+                {
+                    var center = new Vector3(col / (float)scale + half.x, threshold, row / (float)scale + half.z);
+                    var hits = Physics.BoxCastAll(center, half, Vector3.down).Where(x => x.collider == collider).ToArray();
+                    if (hits.Length == 0)
+                        continue;
+
+                    var hit = hits.FirstOrDefault();
+                    if (hit.point.y > threshold)
+                        continue;
+
+                    _cells[row, col].walkable = true;
+                }
+            }
+        }
+    }
+
+    private IEnumerable<Cell> Nears(Cell cell)
+    {
+        var isLeftest = !(cell.row > 0);
+        if (!isLeftest && _cells[cell.row - 1, cell.col].walkable)
+            yield return _cells[cell.row - 1, cell.col];
+
+        var isRightest = !(cell.row < _cells.GetLength(0) - 1);
+        if (!isRightest && _cells[cell.row + 1, cell.col].walkable)
+            yield return _cells[cell.row + 1, cell.col];
+
+        var isTopest = !(cell.col > 0);
+        if (!isTopest && _cells[cell.row, cell.col - 1].walkable)
+            yield return _cells[cell.row, cell.col - 1];
+
+        var isBottomest = !(cell.col < _cells.GetLength(1) - 1);
+        if (!isBottomest && _cells[cell.row, cell.col + 1].walkable)
+            yield return _cells[cell.row, cell.col + 1];
+
+        yield break;
+    }
+
+    private void UpdateRegion()
+    {
+        var id = 0;
+        var hashSet = new HashSet<Cell>();
+        var queue = new Queue<Cell>();
+
+        while (true)
+        {
+            var first = this.Find(x => x.id == null && x.walkable);
+            if (first == null)
+                break;
+
+            queue.Enqueue(first);
+            hashSet.Add(first);
+
+            while (queue.Count > 0)
+            {
+                var pivot = queue.Dequeue();
+                pivot.id = id;
+
+                // 인접한 셀 인큐
+                foreach (var near in Nears(pivot))
+                {
+                    if (hashSet.Contains(near))
+                        continue;
+
+                    queue.Enqueue(near);
+                    hashSet.Add(near);
+                }
+            }
+
+            id++;
+            hashSet.Clear();
+        }
+    }
+
+    public void Update(IEnumerable<MeshCollider> colliders, float threshold)
+    {
+        UpdateWalkability(colliders, threshold);
+        UpdateRegion();
     }
 
     public int ToIndex(Fix64 value)
@@ -195,16 +344,16 @@ public class Map : MonoBehaviour
     public int height { get; private set; } = 168;
     public int scale { get; private set; } = 4;
     //public Sectors sectors { get; private set; }
-    public WalkabilityTable walkabilityTable { get; private set; }
+    public CellCollection cells { get; private set; }
 
     private void OnDrawGizmos()
     {
-        walkabilityTable?.OnDrawGizmos();
+        cells?.OnDrawGizmos();
     }
 
     public void Start()
     {
-        walkabilityTable = new WalkabilityTable(width, height, scale);
+        cells = new CellCollection(width, height, scale);
 
         //sectors = new Sectors(this, 2, 2);
         //var sector = sectors[new FixVector3(50, 10)];
@@ -216,32 +365,7 @@ public class Map : MonoBehaviour
             tile.gameObject.AddComponent<MeshCollider>();
         }
 
-        var threshold = 1.0f;
-        var half = new Vector3(1 / (float)(scale * 2), 0.1f, 1 / (float)(scale * 2));
-        foreach (var collider in tiles.Select(x => x.gameObject.GetComponent<MeshCollider>()))
-        {
-            var min = collider.bounds.min;
-            var max = collider.bounds.max;
-
-            var begin = (col: walkabilityTable.ToIndex(min.x), row: walkabilityTable.ToIndex(min.z));
-            var end = (col: walkabilityTable.ToIndex(max.x), row: walkabilityTable.ToIndex(max.z));
-            for (int row = begin.row; row <= end.row; row++)
-            {
-                for (int col = begin.col; col <= end.col; col++)
-                {
-                    var center = new Vector3(col / (float)scale + half.x, threshold, row / (float)scale + half.z);
-                    var hits = Physics.BoxCastAll(center, half, Vector3.down).Where(x => x.collider == collider).ToArray();
-                    if (hits.Length == 0)
-                        continue;
-
-                    var hit = hits.FirstOrDefault();
-                    if (hit.point.y > threshold)
-                        continue;
-
-                    walkabilityTable[row, col] = true;
-                }
-            }
-        }
+        cells.Update(tiles.Select(x => x.gameObject.GetComponent<MeshCollider>()), 1.0f);
     }
 
     public void Update()
