@@ -134,29 +134,29 @@ public class CellCollection
     {
         public int row { get; set; }
         public int col { get; set; }
-        public int? id { get; set; }
+        public int? region { get; set; }
         public bool walkable { get; set; }
     }
 
-    private readonly List<(Vector3, Vector3)> _points = new List<(Vector3, Vector3)>();
-    
-    public Cell[,] _cells { get; private set; }
+    public Cell[] _cells { get; private set; }
+    public Graph<Cell> cells { get; private set; } = new Graph<Cell>();
     public int cols { get; private set; }
     public int rows { get; private set; }
     public int scale { get; private set; }
+    public int numRegion { get; private set; }
 
-    public static implicit operator Cell[,](CellCollection walkabilityTable) => walkabilityTable._cells;
+    public static implicit operator Cell[](CellCollection walkabilityTable) => walkabilityTable._cells;
 
     public Cell this[FixVector2 position]
     {
-        get => _cells[ToIndex(position.y), ToIndex(position.x)];
-        set => _cells[ToIndex(position.y), ToIndex(position.x)] = value;
+        get => this[ToIndex(position.y), ToIndex(position.x)];
+        set => this[ToIndex(position.y), ToIndex(position.x)] = value;
     }
 
     public Cell this[int row, int col]
     {
-        get => _cells[row, col];
-        set => _cells[row, col] = value;
+        get => _cells[row * cols + col];
+        set => _cells[row * cols + col] = value;
     }
 
     public CellCollection(int width, int height, int scale)
@@ -165,55 +165,34 @@ public class CellCollection
         this.rows = height * scale;
         this.scale = scale;
 
-        for (int i = 0; i < height * scale; i++)
-        {
-            var pivot = i / (float)scale;
-            var points = (new Vector3(0, 0, pivot), new Vector3(width, 0, pivot));
-            this._points.Add(points);
-        }
-
-        for (int i = 0; i < width * scale; i++)
-        {
-            var pivot = i / (float)scale;
-            var points = (new Vector3(pivot, 0, 0), new Vector3(pivot, 0, height));
-            this._points.Add(points);
-        }
-
         var rows = height * scale;
         var cols = width * scale;
-        _cells = new Cell[rows, cols];
-        for (int row = 0; row < rows; row++)
+        _cells = new Cell[rows * cols];
+        for (int i = 0; i < rows * cols; i++)
         {
-            for (int col = 0; col < cols; col++)
+            var row = i / cols;
+            var col = i % cols;
+
+            _cells[cols * row + col] = new Cell
             {
-                _cells[row, col] = new Cell
-                {
-                    row = row,
-                    col = col,
-                    walkable = false,
-                    id = null
-                };
-            }
+                row = row,
+                col = col,
+                walkable = false,
+                region = null
+            };
         }
     }
 
-    public void OnDrawGizmos()
+    public void OnDrawCells()
     {
-        Gizmos.color = Color.red;
-        foreach (var (begin, end) in _points)
-        {
-            Gizmos.DrawLine(begin, end);
-        }
-
-
-        Gizmos.color = Color.green;
         for (int row = 0; row < this.rows; row++)
         {
             for (int col = 0; col < this.cols; col++)
             {
-                var cell = this[row, col];
-                if (cell.walkable == false)
-                    continue;
+                var region = this[row, col].region ?? (numRegion - 1);
+                var color = (0x00FFFFFF / (numRegion + 1)) * (region + 1);
+
+                Gizmos.color = new Color(((color & 0x00FF0000) >> 16) / (float)0xFF, ((color & 0x0000FF00) >> 8) / (float)0xFF, (color & 0x000000FF) / (float)0xFF);
 
                 var area = new Rect(col / (float)this.scale, row / (float)this.scale, 1 / (float)scale, 1 / (float)scale);
                 Gizmos.DrawLine(new Vector3(area.xMin, 0, area.yMin), new Vector3(area.xMax, 0, area.yMin));
@@ -221,6 +200,20 @@ public class CellCollection
 
                 Gizmos.DrawLine(new Vector3(area.xMin, 0, area.yMin), new Vector3(area.xMin, 0, area.yMax));
                 Gizmos.DrawLine(new Vector3(area.xMax, 0, area.yMin), new Vector3(area.xMax, 0, area.yMax));
+            }
+        }
+    }
+
+    public void OnDrawEdges()
+    {
+        Gizmos.color = Color.red;
+        foreach (var cell in _cells)
+        {
+            var begin = new Vector3((cell.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (cell.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
+            foreach (var edge in cells.nodes[cell].edges)
+            {
+                var end = new Vector3((edge.data.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (edge.data.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
+                Gizmos.DrawLine(begin, end);
             }
         }
     }
@@ -263,73 +256,150 @@ public class CellCollection
                     if (hit.point.y > threshold)
                         continue;
 
-                    _cells[row, col].walkable = true;
+                    this[row, col].walkable = true;
                 }
             }
         }
     }
 
-    private IEnumerable<Cell> Nears(Cell cell)
+    private IEnumerable<Cell> Nears(Cell cell, bool includeOpposite = true)
     {
         var isLeftest = !(cell.row > 0);
-        if (!isLeftest && _cells[cell.row - 1, cell.col].walkable)
-            yield return _cells[cell.row - 1, cell.col];
+        if (!isLeftest)
+            yield return this[cell.row - 1, cell.col];
 
-        var isRightest = !(cell.row < _cells.GetLength(0) - 1);
-        if (!isRightest && _cells[cell.row + 1, cell.col].walkable)
-            yield return _cells[cell.row + 1, cell.col];
+        var isRightest = !(cell.row < rows - 1);
+        if (!isRightest)
+            yield return this[cell.row + 1, cell.col];
 
         var isTopest = !(cell.col > 0);
-        if (!isTopest && _cells[cell.row, cell.col - 1].walkable)
-            yield return _cells[cell.row, cell.col - 1];
+        if (!isTopest)
+            yield return this[cell.row, cell.col - 1];
 
-        var isBottomest = !(cell.col < _cells.GetLength(1) - 1);
-        if (!isBottomest && _cells[cell.row, cell.col + 1].walkable)
-            yield return _cells[cell.row, cell.col + 1];
+        var isBottomest = !(cell.col < cols - 1);
+        if (!isBottomest)
+            yield return this[cell.row, cell.col + 1];
+
+        if (includeOpposite)
+        {
+            if (!isLeftest && !isTopest)
+                yield return this[cell.row - 1, cell.col - 1];
+
+            if (!isRightest && !isTopest)
+                yield return this[cell.row + 1, cell.col - 1];
+
+            if (!isLeftest && !isBottomest)
+                yield return this[cell.row - 1, cell.col + 1];
+
+            if (!isRightest && !isBottomest)
+                yield return this[cell.row + 1, cell.col + 1];
+        }
 
         yield break;
     }
 
-    private void UpdateRegion()
+    private void UpdateRegion(int rows, int cols)
     {
-        var id = 0;
-        var hashSet = new HashSet<Cell>();
-        var queue = new Queue<Cell>();
-
-        while (true)
+        var groups = _cells.GroupBy(x =>
         {
-            var first = this.Find(x => x.id == null && x.walkable);
-            if (first == null)
-                break;
+            var row = x.row / (this.rows / rows);
+            var col = x.col / (this.cols / cols);
 
-            queue.Enqueue(first);
-            hashSet.Add(first);
+            return row * cols + col;
+        }).ToDictionary(x => x.Key, x => x.ToList());
 
-            while (queue.Count > 0)
+        var region = 0;
+        foreach (var cells in groups.Values)
+        {
+            var hashCell = new HashSet<Cell>(cells);
+            var hashSet = new HashSet<Cell>();
+            var queue = new Queue<Cell>();
+            while (true)
             {
-                var pivot = queue.Dequeue();
-                pivot.id = id;
+                // region이 정해지지 않은 cell을 하나 추출
+                var first = cells.FirstOrDefault(x => x.region == null);
+                if (first == null)
+                    break;
 
-                // 인접한 셀 인큐
-                foreach (var near in Nears(pivot))
+                queue.Enqueue(first);
+                hashSet.Add(first);
+
+                while (queue.Count > 0)
                 {
-                    if (hashSet.Contains(near))
-                        continue;
+                    var pivot = queue.Dequeue();
+                    pivot.region = region;
 
+                    // 인접한 cell 중에 walkability가 같은 cell만 추출
+                    var nears = Nears(pivot).Where(x => 
+                    {
+                        if (hashCell.Contains(x) == false)
+                            return false;
+
+                        if (x.region != null)
+                            return false;
+
+                        if (x.walkable != pivot.walkable)
+                            return false;
+
+                        return true;
+                    });
+
+                    foreach (var near in nears)
+                    {
+                        if (hashSet.Contains(near))
+                            continue;
+
+                        queue.Enqueue(near);
+                        hashSet.Add(near);
+                    }
+                }
+
+                region++;
+            }
+        }
+
+        numRegion = region;
+    }
+
+    public Graph<Cell> CreateCellGraph()
+    {
+        var graph = new Graph<Cell>();
+        var queue = new Queue<Cell>();
+        var hashSet = new HashSet<Cell>();
+
+        var start = _cells.First();
+        queue.Enqueue(start);
+        hashSet.Add(start);
+
+        while (queue.Count > 0)
+        {
+            var pivot = queue.Dequeue();
+            var node = graph.nodes.Add(pivot);
+
+            var nears = Nears(pivot);
+            foreach (var near in nears)
+            {
+                var x = graph.nodes.Add(near);
+                x.edges.Add(node);
+                node.edges.Add(x);
+
+                if (hashSet.Contains(near) == false)
+                {
                     queue.Enqueue(near);
                     hashSet.Add(near);
                 }
             }
-
-            id++;
-            hashSet.Clear();
         }
+
+        return graph;
     }
 
     public void Update(IEnumerable<MeshCollider> colliders, float threshold)
     {
         UpdateWalkability(colliders, threshold);
-        UpdateRegion();
+        UpdateRegion(10, 10);
+
+        cells = CreateCellGraph();
     }
 
     public int ToIndex(Fix64 value)
@@ -346,9 +416,16 @@ public class Map : MonoBehaviour
     //public Sectors sectors { get; private set; }
     public CellCollection cells { get; private set; }
 
+    [SerializeField] public bool drawCells = false;
+    [SerializeField] public bool drawEdges = false;
+
     private void OnDrawGizmos()
     {
-        cells?.OnDrawGizmos();
+        if(drawCells)
+            cells?.OnDrawCells();
+
+        if (drawEdges)
+            cells?.OnDrawEdges();
     }
 
     public void Start()

@@ -1867,6 +1867,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1973897ad4e472447ad20cc0139fd844, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  drawCells: 0
+  drawEdges: 0
 --- !u!4 &1470605784 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4458472104174864, guid: 48986291d0154f8448d04d448fa98bbe, type: 3}
