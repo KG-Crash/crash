@@ -24,6 +24,8 @@ public class Graph<T>
 
         IEnumerator IEnumerable.GetEnumerator() => _nodes.Values.GetEnumerator();
 
+        public int Count => _nodes.Count;
+
         public Node this[T key] => _nodes[key];
 
         public Node Add(T value)

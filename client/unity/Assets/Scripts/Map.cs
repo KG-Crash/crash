@@ -126,24 +126,49 @@ public static class CellExtension
 
         return null;
     }
+
+    public static (int row, int col) Centroid(this List<CellCollection.Cell> cells)
+    {
+        ulong accumulatedArea = 0;
+        var centerX = 0;
+        var centerY = 0;
+
+        for (int i = 0, j = cells.Count - 1; i < cells.Count; j = i++)
+        {
+            var temp = cells[i].col * cells[j].row - cells[j].col * cells[i].row;
+            accumulatedArea += (ulong)temp;
+            centerX += (cells[i].col + cells[j].col) * temp;
+            centerY += (cells[i].row + cells[j].row) * temp;
+        }
+
+        accumulatedArea *= 3;
+        return ((int)(centerX / (float)accumulatedArea), (int)(centerY / (float)accumulatedArea));
+    }
 }
 
 public class CellCollection
 {
+    public class Region
+    { 
+        public int id { get; set; }
+        public bool walkable { get; set; }
+        public Cell centroid { get; set; }
+    }
+
     public class Cell
     {
         public int row { get; set; }
         public int col { get; set; }
-        public int? region { get; set; }
+        public Region? region { get; set; }
         public bool walkable { get; set; }
     }
 
     public Cell[] _cells { get; private set; }
     public Graph<Cell> cells { get; private set; } = new Graph<Cell>();
+    public Graph<Region> regions { get; private set; } = new Graph<Region>();
     public int cols { get; private set; }
     public int rows { get; private set; }
     public int scale { get; private set; }
-    public int numRegion { get; private set; }
 
     public static implicit operator Cell[](CellCollection walkabilityTable) => walkabilityTable._cells;
 
@@ -185,22 +210,18 @@ public class CellCollection
 
     public void OnDrawCells()
     {
-        for (int row = 0; row < this.rows; row++)
+        foreach (var cell in _cells)
         {
-            for (int col = 0; col < this.cols; col++)
-            {
-                var region = this[row, col].region ?? (numRegion - 1);
-                var color = (0x00FFFFFF / (numRegion + 1)) * (region + 1);
+            var color = (0x00FFFFFF / (regions.nodes.Count + 1)) * (cell.region.id + 1);
 
-                Gizmos.color = new Color(((color & 0x00FF0000) >> 16) / (float)0xFF, ((color & 0x0000FF00) >> 8) / (float)0xFF, (color & 0x000000FF) / (float)0xFF);
+            Gizmos.color = new Color(((color & 0x00FF0000) >> 16) / (float)0xFF, ((color & 0x0000FF00) >> 8) / (float)0xFF, (color & 0x000000FF) / (float)0xFF);
 
-                var area = new Rect(col / (float)this.scale, row / (float)this.scale, 1 / (float)scale, 1 / (float)scale);
-                Gizmos.DrawLine(new Vector3(area.xMin, 0, area.yMin), new Vector3(area.xMax, 0, area.yMin));
-                Gizmos.DrawLine(new Vector3(area.xMin, 0, area.yMax), new Vector3(area.xMax, 0, area.yMax));
+            var area = new Rect(cell.col / (float)this.scale, cell.row / (float)this.scale, 1 / (float)scale, 1 / (float)scale);
+            Gizmos.DrawLine(new Vector3(area.xMin, 0, area.yMin), new Vector3(area.xMax, 0, area.yMin));
+            Gizmos.DrawLine(new Vector3(area.xMin, 0, area.yMax), new Vector3(area.xMax, 0, area.yMax));
 
-                Gizmos.DrawLine(new Vector3(area.xMin, 0, area.yMin), new Vector3(area.xMin, 0, area.yMax));
-                Gizmos.DrawLine(new Vector3(area.xMax, 0, area.yMin), new Vector3(area.xMax, 0, area.yMax));
-            }
+            Gizmos.DrawLine(new Vector3(area.xMin, 0, area.yMin), new Vector3(area.xMin, 0, area.yMax));
+            Gizmos.DrawLine(new Vector3(area.xMax, 0, area.yMin), new Vector3(area.xMax, 0, area.yMax));
         }
     }
 
@@ -214,6 +235,23 @@ public class CellCollection
             {
                 var end = new Vector3((edge.data.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (edge.data.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
                 Gizmos.DrawLine(begin, end);
+            }
+        }
+    }
+
+    public void OnDrawRegionEdges()
+    {
+        foreach (var node in regions.nodes)
+        {
+            var begin = node.data.centroid;
+            var begin1 = new Vector3((begin.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (begin.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
+            foreach (var edge in node.edges)
+            {
+                var end = edge.data.centroid;
+                var end1 = new Vector3((end.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (end.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
+
+                Gizmos.color = (node.data.walkable && edge.data.walkable) ? Color.green : Color.red;
+                Gizmos.DrawLine(begin1, end1);
             }
         }
     }
@@ -233,7 +271,7 @@ public class CellCollection
         return null;
     }
 
-    private void UpdateWalkability(IEnumerable<MeshCollider> colliders, float threshold)
+    private Graph<Cell> UpdateWalkability(IEnumerable<MeshCollider> colliders, float threshold)
     {
         var half = new Vector3(1 / (float)(scale * 2), 0.1f, 1 / (float)(scale * 2));
         foreach (var collider in colliders)
@@ -260,6 +298,13 @@ public class CellCollection
                 }
             }
         }
+
+        var graph = new Graph<Cell>();
+        foreach (var cell in _cells)
+        {
+            graph.nodes.Add(cell);
+        }
+        return graph;
     }
 
     private IEnumerable<Cell> Nears(Cell cell, bool includeOpposite = true)
@@ -298,8 +343,9 @@ public class CellCollection
         yield break;
     }
 
-    private void UpdateRegion(int rows, int cols)
+    private Graph<Region> UpdateRegion(int rows, int cols)
     {
+        var regions = new Graph<Region>();
         var groups = _cells.GroupBy(x =>
         {
             var row = x.row / (this.rows / rows);
@@ -321,13 +367,15 @@ public class CellCollection
                 if (first == null)
                     break;
 
+                var node = regions.nodes.Add(new Region { id = region, walkable = first.walkable });
+
                 queue.Enqueue(first);
                 hashSet.Add(first);
 
                 while (queue.Count > 0)
                 {
                     var pivot = queue.Dequeue();
-                    pivot.region = region;
+                    pivot.region = node.data;
 
                     // 인접한 cell 중에 walkability가 같은 cell만 추출
                     var nears = Nears(pivot).Where(x => 
@@ -358,48 +406,56 @@ public class CellCollection
             }
         }
 
-        numRegion = region;
+        return regions;
     }
 
-    public Graph<Cell> CreateCellGraph()
+    public void UpdateCellGraph()
     {
-        var graph = new Graph<Cell>();
-        var queue = new Queue<Cell>();
-        var hashSet = new HashSet<Cell>();
-
-        var start = _cells.First();
-        queue.Enqueue(start);
-        hashSet.Add(start);
-
-        while (queue.Count > 0)
+        foreach (var node in cells.nodes)
         {
-            var pivot = queue.Dequeue();
-            var node = graph.nodes.Add(pivot);
-
-            var nears = Nears(pivot);
-            foreach (var near in nears)
+            foreach (var near in Nears(node.data))
             {
-                var x = graph.nodes.Add(near);
-                x.edges.Add(node);
-                node.edges.Add(x);
-
-                if (hashSet.Contains(near) == false)
-                {
-                    queue.Enqueue(near);
-                    hashSet.Add(near);
-                }
+                cells.nodes[near].edges.Add(node);
+                node.edges.Add(cells.nodes[near]);
             }
         }
+    }
 
-        return graph;
+    public void UpdateRegionGraph()
+    {
+        var cached = cells.nodes.GroupBy(x => x.data.region).ToDictionary(x => x.Key, x => x.ToList());
+        foreach (var node in regions.nodes)
+        {
+            // 인접한 region 연결
+            var relations = cached[node.data].SelectMany(x => x.edges).GroupBy(x => x.data.region).Select(x => x.Key).Except(new[] { node.data }).ToList();
+            foreach (var relation in relations)
+            {
+                node.edges.Add(regions.nodes[relation]);
+                regions.nodes[relation].edges.Add(node);
+            }
+
+            var row = 0;
+            var col = 0;
+            cached[node.data].ForEach(x =>
+            {
+                row += x.data.row;
+                col += x.data.col;
+            });
+
+            row = (int)(row / (float)cached[node.data].Count);
+            col = (int)(col / (float)cached[node.data].Count);
+
+            node.data.centroid = cached[node.data].OrderBy(x => Math.Pow(row - x.data.row, 2) + Math.Pow(col - x.data.col, 2)).First().data;
+        }
     }
 
     public void Update(IEnumerable<MeshCollider> colliders, float threshold)
     {
-        UpdateWalkability(colliders, threshold);
-        UpdateRegion(10, 10);
+        cells = UpdateWalkability(colliders, threshold);
+        regions = UpdateRegion(10, 10);
 
-        cells = CreateCellGraph();
+        UpdateCellGraph();
+        UpdateRegionGraph();
     }
 
     public int ToIndex(Fix64 value)
@@ -418,6 +474,7 @@ public class Map : MonoBehaviour
 
     [SerializeField] public bool drawCells = false;
     [SerializeField] public bool drawEdges = false;
+    [SerializeField] public bool drawRegionEdges = false;
 
     private void OnDrawGizmos()
     {
@@ -426,6 +483,9 @@ public class Map : MonoBehaviour
 
         if (drawEdges)
             cells?.OnDrawEdges();
+
+        if (drawRegionEdges)
+            cells?.OnDrawRegionEdges();
     }
 
     public void Start()
