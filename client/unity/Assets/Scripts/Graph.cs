@@ -1,9 +1,16 @@
-﻿using System;
+﻿using FixMath.NET;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-public class Graph<T>
+public interface IPathFindable
+{
+    public bool walkable { get; }
+    public FixVector3 position { get; }
+}
+
+public partial class Graph<T>
 {
     public class Node
     {
@@ -40,4 +47,65 @@ public class Graph<T>
     public NodeCollection nodes { get; private set; } = new NodeCollection();
 
     public Node Find(Func<Node, bool> predicate) => nodes.FirstOrDefault(predicate);
+}
+
+public partial class Graph<T> where T : IPathFindable
+{
+    private class AStarParams
+    {
+        public int G { get; set; } = 0;
+        public int H { get; set; } = 0;
+        public int F => G + H;
+        public Node parent { get; set; } = null;
+    }
+
+    private Dictionary<Node, AStarParams> _pathFindingParams;
+
+    public Stack<T> Find(T begin, T end)
+    {
+        if (_pathFindingParams == null)
+        {
+            _pathFindingParams = nodes.ToDictionary(x => x, x => new AStarParams());
+        }
+
+        var result = new Stack<T>();
+        var openedList = new List<Node>();
+        var closedList = new List<Node>();
+
+        openedList.Add(nodes[begin]);
+        while (openedList.Count > 0 && closedList.Contains(nodes[end]) == false)
+        {
+            var current = openedList.First();
+            openedList.Remove(current);
+            closedList.Add(current);
+
+            var nears = current.edges
+                .Where(x => x.data.walkable)
+                .Where(x => closedList.Contains(x) == false)
+                .Where(x => openedList.Contains(x) == false)
+                .ToList();
+
+            foreach (var near in nears)
+            {
+                var param = _pathFindingParams[near];
+                param.parent = current;
+                param.G = (near.data.position - current.data.position).sqrMagnitude;
+                param.H = (near.data.position - end.position).sqrMagnitude;
+            }
+
+            openedList.AddRange(nears);
+            openedList.Sort((x, y) => _pathFindingParams[x].F.CompareTo(_pathFindingParams[y].F)); // OrderBy보다 빠른듯
+        }
+
+        if (closedList.Contains(nodes[end]) == false)
+            return result;
+
+        var tracked = nodes[end];
+        while (tracked != nodes[begin])
+        {
+            result.Push(tracked.data);
+            tracked = _pathFindingParams[tracked].parent;
+        }
+        return result;
+    }
 }

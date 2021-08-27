@@ -110,67 +110,36 @@ using UnityEngine;
 //    }
 //}
 
-public static class CellExtension
+public class BlockCollection
 {
-    public static CellCollection.Cell Find(this CellCollection collection, Func<CellCollection.Cell, bool> predicate)
-    {
-        for (int row = 0; row < collection._cells.GetLength(0); row++)
-        {
-            for (int col = 0; col < collection._cells.GetLength(1); col++)
-            {
-                var cell = collection[row, col];
-                if (predicate(cell))
-                    return cell;
-            }
-        }
-
-        return null;
-    }
-
-    public static (int row, int col) Centroid(this List<CellCollection.Cell> cells)
-    {
-        ulong accumulatedArea = 0;
-        var centerX = 0;
-        var centerY = 0;
-
-        for (int i = 0, j = cells.Count - 1; i < cells.Count; j = i++)
-        {
-            var temp = cells[i].col * cells[j].row - cells[j].col * cells[i].row;
-            accumulatedArea += (ulong)temp;
-            centerX += (cells[i].col + cells[j].col) * temp;
-            centerY += (cells[i].row + cells[j].row) * temp;
-        }
-
-        accumulatedArea *= 3;
-        return ((int)(centerX / (float)accumulatedArea), (int)(centerY / (float)accumulatedArea));
-    }
-}
-
-public class CellCollection
-{
-    public class Region
+    public class Region : IPathFindable
     { 
         public int id { get; set; }
         public bool walkable { get; set; }
         public Cell centroid { get; set; }
+
+        public FixVector3 position => centroid.position;
     }
 
-    public class Cell
+    public class Cell : IPathFindable
     {
         public int row { get; set; }
         public int col { get; set; }
         public Region? region { get; set; }
         public bool walkable { get; set; }
+
+        public FixVector3 position => new FixVector3(col, row);
     }
 
-    public Cell[] _cells { get; private set; }
+    private readonly Cell[] _cells;
+
     public Graph<Cell> cells { get; private set; } = new Graph<Cell>();
     public Graph<Region> regions { get; private set; } = new Graph<Region>();
     public int cols { get; private set; }
     public int rows { get; private set; }
     public int scale { get; private set; }
 
-    public static implicit operator Cell[](CellCollection walkabilityTable) => walkabilityTable._cells;
+    public static implicit operator Cell[](BlockCollection walkabilityTable) => walkabilityTable._cells;
 
     public Cell this[FixVector2 position]
     {
@@ -184,7 +153,7 @@ public class CellCollection
         set => _cells[row * cols + col] = value;
     }
 
-    public CellCollection(int width, int height, int scale)
+    public BlockCollection(int width, int height, int scale)
     {
         this.cols = width * scale;
         this.rows = height * scale;
@@ -244,14 +213,14 @@ public class CellCollection
         foreach (var node in regions.nodes)
         {
             var begin = node.data.centroid;
-            var begin1 = new Vector3((begin.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (begin.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
+            var x1 = new Vector3((begin.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (begin.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
             foreach (var edge in node.edges)
             {
                 var end = edge.data.centroid;
-                var end1 = new Vector3((end.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (end.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
+                var x2 = new Vector3((end.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (end.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
 
                 Gizmos.color = (node.data.walkable && edge.data.walkable) ? Color.green : Color.red;
-                Gizmos.DrawLine(begin1, end1);
+                Gizmos.DrawLine(x1, x2);
             }
         }
     }
@@ -434,6 +403,7 @@ public class CellCollection
                 regions.nodes[relation].edges.Add(node);
             }
 
+            // 무게중심 계산
             var row = 0;
             var col = 0;
             cached[node.data].ForEach(x =>
@@ -469,28 +439,46 @@ public class Map : MonoBehaviour
     public int width { get; private set; } = 192;
     public int height { get; private set; } = 168;
     public int scale { get; private set; } = 4;
-    //public Sectors sectors { get; private set; }
-    public CellCollection cells { get; private set; }
+    public BlockCollection blocks { get; private set; }
+
+    // 테스트용
+    private List<BlockCollection.Region> _routes;
 
     [SerializeField] public bool drawCells = false;
     [SerializeField] public bool drawEdges = false;
     [SerializeField] public bool drawRegionEdges = false;
+    [SerializeField] public bool drawPathRoute = false;
 
     private void OnDrawGizmos()
     {
         if(drawCells)
-            cells?.OnDrawCells();
+            blocks?.OnDrawCells();
 
         if (drawEdges)
-            cells?.OnDrawEdges();
+            blocks?.OnDrawEdges();
 
         if (drawRegionEdges)
-            cells?.OnDrawRegionEdges();
+            blocks?.OnDrawRegionEdges();
+
+        if (drawPathRoute && _routes != null)
+        {
+            Gizmos.color = Color.red;
+            for (int i = 0; i < _routes.Count - 1; i++)
+            {
+                var begin = _routes[i];
+                var x1 = new Vector3((begin.centroid.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (begin.centroid.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
+                
+                var end = _routes[i + 1];
+                var x2 = new Vector3((end.centroid.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (end.centroid.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
+
+                Gizmos.DrawLine(x1, x2);
+            }
+        }
     }
 
     public void Start()
     {
-        cells = new CellCollection(width, height, scale);
+        blocks = new BlockCollection(width, height, scale);
 
         //sectors = new Sectors(this, 2, 2);
         //var sector = sectors[new FixVector3(50, 10)];
@@ -502,153 +490,22 @@ public class Map : MonoBehaviour
             tile.gameObject.AddComponent<MeshCollider>();
         }
 
-        cells.Update(tiles.Select(x => x.gameObject.GetComponent<MeshCollider>()), 1.0f);
+        blocks.Update(tiles.Select(x => x.gameObject.GetComponent<MeshCollider>()), 1.0f);
+
+        var sorted = blocks.cells.nodes.Where(x => x.data.walkable).OrderBy(x => x.data.row + x.data.col).ToList();
+        var start = sorted.First();
+        var end = sorted.Last();
+
+        var routes = blocks.regions.Find(start.data.region, end.data.region);
+        if (routes.Count > 0)
+        {
+            _routes = new List<BlockCollection.Region> { start.data.region };
+            _routes.AddRange(routes);
+        }
     }
 
     public void Update()
     {
         
-    }
-}
-
-
-public class AStar
-{
-    #region Node
-    private class Node
-    {
-        public FixVector2 position { get; private set; }
-        public bool walkable { get; private set; }
-        public int G { get; set; } = 0;
-        public int H { get; set; } = 0;
-        public int F => G + H;
-        public Node parent { get; set; } = null;
-
-        public Node(FixVector2 position, bool walkable)
-        {
-            this.position = position;
-            this.walkable = walkable;
-        }
-    }
-    #endregion
-
-    private readonly Node[,] _nodes; // [y,x]
-    public int rows { get; private set; }
-    public int cols { get; private set; }
-
-    private AStar(bool[,] maps)
-    {
-        rows = maps.GetLength(0);
-        cols = maps.GetLength(1);
-        
-        _nodes = new Node[rows, cols];
-        for (int row = 0; row < rows; row++)
-        {
-            for (int col = 0; col < cols; col++)
-            {
-                _nodes[row, col] = new Node(new FixVector2(new Fix64(col), new Fix64(row)), maps[row, col]);
-            }
-        }
-    }
-
-    /// <summary>
-    /// 인접노드 가져옴
-    /// </summary>
-    /// <param name="from">시작점</param>
-    /// <returns></returns>
-    private List<Node> Nears(Node from)
-    {
-        var nears = new List<Node>();
-
-        var isLeft = (from.position.x == Fix64.Zero);
-        if (!isLeft)
-            nears.Add(_nodes[from.position.y, from.position.x - 1]);
-
-        var isTop = (from.position.y == 0);
-        if (!isTop)
-            nears.Add(_nodes[from.position.y - 1, from.position.x]);
-
-        var isRight = (from.position.x == cols - 1);
-        if (!isRight)
-            nears.Add(_nodes[from.position.y, from.position.x + 1]);
-
-        var isBottom = (from.position.y == rows - 1);
-        if (!isBottom)
-            nears.Add(_nodes[from.position.y + 1, from.position.x]);
-
-        if (!isLeft && !isTop)
-            nears.Add(_nodes[from.position.y - 1, from.position.x - 1]);
-
-        if (!isRight && !isTop)
-            nears.Add(_nodes[from.position.y - 1, from.position.x + 1]);
-
-        if (!isLeft && !isBottom)
-            nears.Add(_nodes[from.position.y + 1, from.position.x - 1]);
-
-        if (!isRight && !isBottom)
-            nears.Add(_nodes[from.position.y + 1, from.position.x + 1]);
-
-        return nears.Where(x => x.walkable).ToList();
-    }
-
-    /// <summary>
-    /// 노드 기반으로 경로탐색
-    /// </summary>
-    /// <param name="begin">시작</param>
-    /// <param name="end">종료</param>
-    /// <returns></returns>
-    private Stack<Node> Find(Node begin, Node end)
-    {
-        var result = new Stack<Node>();
-        var openedList = new List<Node>();
-        var closedList = new List<Node>();
-
-        openedList.Add(begin);
-        while (openedList.Count > 0 && closedList.Contains(end) == false)
-        {
-            var current = openedList.First();
-            openedList.Remove(current);
-            closedList.Add(current);
-
-            var nears = Nears(current)
-                .Where(x => closedList.Contains(x) == false)
-                .Where(x => openedList.Contains(x) == false)
-                .ToList();
-
-            foreach (var near in nears)
-            {
-                near.parent = current;
-                near.G = (near.position - current.position).sqrMagnitude;
-                near.H = (near.position - end.position).sqrMagnitude;
-            }
-
-            openedList.AddRange(nears);
-            openedList.Sort((x, y) => x.F.CompareTo(y.F)); // OrderBy보다 빠른듯
-        }
-
-        if (closedList.Contains(end) == false)
-            return result;
-
-        var tracked = end;
-        while (tracked != begin)
-        {
-            result.Push(tracked);
-            tracked = tracked.parent;
-        }
-        return result;
-    }
-
-    /// <summary>
-    /// 경로 탐색
-    /// </summary>
-    /// <param name="maps">맵</param>
-    /// <param name="begin">시작점</param>
-    /// <param name="end">종료점</param>
-    /// <returns></returns>
-    public static List<FixVector2> Find(bool[,] maps, FixVector2 begin, FixVector2 end)
-    {
-        var astar = new AStar(maps);
-        var root = astar.Find(astar._nodes[begin.y, begin.x], astar._nodes[end.y, end.x]);
-        return root.Select(x => x.position).ToList();
     }
 }
