@@ -2,11 +2,11 @@ using UnityEngine;
 
 namespace Game
 {
-    public static class UnitFactory
+    public class UnitFactory : MonoBehaviour
     {
-        private static uint _sequence = 0;
+        private uint _sequence = 0;
         
-        public static Unit GetNewUnit(int unitOriginID, uint teamID, UnitTable unitTable, Unit.Listener listener)
+        public Unit GetNewUnit(int unitOriginID, uint teamID, UnitTable unitTable, Unit.Listener listener)
         {
             var unitOrigin = unitTable.GetOrigin(unitOriginID);
             var unit = Object.Instantiate(unitOrigin);

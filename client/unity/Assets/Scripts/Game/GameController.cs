@@ -16,8 +16,10 @@ namespace Game
         [NonSerialized] private Player _player;
         [NonSerialized] private List<Unit> _selectedUnits;
         [NonSerialized] private List<Unit> _allUnitInFrustum;
-        
+
+        [SerializeField] private UnitFactory _unitFactory;
         [SerializeField] private UnitTable _unitPrefabTable;
+        
         private void Awake()
         {
             Handler.Instance.Bind(this);
@@ -25,9 +27,9 @@ namespace Game
             // 임시 코드 지워야함
             var units = new Unit[]
             {
-                UnitFactory.GetNewUnit(0, 0, _unitPrefabTable, this),
-                UnitFactory.GetNewUnit(1, 0, _unitPrefabTable, this),
-                UnitFactory.GetNewUnit(2, 0, _unitPrefabTable, this)
+                _unitFactory.GetNewUnit(0, 0, _unitPrefabTable, this),
+                _unitFactory.GetNewUnit(1, 0, _unitPrefabTable, this),
+                _unitFactory.GetNewUnit(2, 0, _unitPrefabTable, this)
             };
 
             units[0].position = new Vector3(0, 0, -1.44f);
@@ -45,8 +47,8 @@ namespace Game
 
             var enemyUnits = new Unit[]
             {
-                UnitFactory.GetNewUnit(0, 1, _unitPrefabTable, this),
-                UnitFactory.GetNewUnit(1, 1, _unitPrefabTable, this),
+                _unitFactory.GetNewUnit(0, 1, _unitPrefabTable, this),
+                _unitFactory.GetNewUnit(1, 1, _unitPrefabTable, this),
             };
             
             enemyUnits[0].position = new Vector3(-1.44f * -1, 0, 0);
