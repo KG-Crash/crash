@@ -178,7 +178,11 @@ namespace Game
             }
         }
 
-
+        public KG.Map map
+        {
+            get => _map;
+            set => _map = value;
+        }
 
         public List<Skill> activeSkills => skills.Where(x => owner.abilities.HasFlag(x.Condition)).ToList();
 
@@ -188,6 +192,7 @@ namespace Game
         [SerializeField] private DateTime _lastAttackTime = DateTime.MinValue;
         [SerializeField] private Fix64 _hp;
         [SerializeField] private Player _owner;
+        [NonSerialized] private KG.Map _map;
         [NonSerialized] private Listener _listener;
 
         public Bounds bounds { get => _totalBounds; }
@@ -204,7 +209,7 @@ namespace Game
         [NonSerialized] private float _stopMoveDistance;
         [NonSerialized] private FixVector3? _moveTargetPosition;
         [NonSerialized] private Unit _target;
-       
+        
 
         public FixVector3 position { get; set; }
 
