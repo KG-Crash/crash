@@ -4,508 +4,302 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-//public class Sector : IEnumerable<Unit>
-//{ 
-//    public Sectors owner { get; private set; }
-//    public int index { get; private set; }
-//    public bool isLeft => index % owner.columns == 0;
-//    public bool isRight => index % owner.columns == owner.columns - 1;
-//    public bool isTop => index < owner.columns;
-//    public bool isBottom => index > owner.columns * (owner.rows - 1) - 1;
-//    public bool isLeftTop => isLeft && isTop;
-//    public bool isRightTop => isRight && isTop;
-//    public bool isLeftBottom => isLeft && isBottom;
-//    public bool isRightBottom => isRight && isBottom;
-//    public List<Sector> nears
-//    {
-//        get
-//        {
-//            var sectors = new List<Sector> { this };
-//            if (isLeft == false)
-//                sectors.Add(owner[index - 1]);
-
-//            if (isRight == false)
-//                sectors.Add(owner[index + 1]);
-
-//            if (isTop == false)
-//                sectors.Add(owner[index - owner.columns]);
-
-//            if (isBottom == false)
-//                sectors.Add(owner[index + owner.columns]);
-
-//            if (isLeft == false && isTop == false)
-//                sectors.Add(owner[index - owner.columns - 1]);
-
-//            if (isRight == false && isTop == false)
-//                sectors.Add(owner[index - owner.columns + 1]);
-
-//            if (isLeft == false && isBottom == false)
-//                sectors.Add(owner[index + owner.columns - 1]);
-
-//            if (isRight == false && isBottom == false)
-//                sectors.Add(owner[index + owner.columns + 1]);
-
-//            return sectors.Where(x => x != null).ToList();
-//        }
-//    }
-//    public List<Unit> units { get; private set; } = new List<Unit>();
-
-//    public Sector(Sectors owner, int index)
-//    {
-//        this.owner = owner;
-//        this.index = index;
-//    }
-
-//    public IEnumerator<Unit> GetEnumerator() => units.GetEnumerator();
-
-//    IEnumerator IEnumerable.GetEnumerator() => units.GetEnumerator();
-//}
-
-//public class Sectors : IEnumerable<Sector>
-//{
-//    private readonly List<Sector> _sectors = new List<Sector>();
-
-//    public Map owner { get; private set; }
-//    public int rows { get; private set; }
-//    public int columns { get; private set; }
-
-//    public Sector this[int index] => At(index);
-
-//    public IEnumerator<Sector> GetEnumerator() => _sectors.GetEnumerator();
-
-//    IEnumerator IEnumerable.GetEnumerator() => _sectors.GetEnumerator();
-
-//    public Sector this[FixVector3 position] => At(position);
-
-//    public Sectors(Map owner, int rows, int columns)
-//    {
-//        this.owner = owner;
-//        this.rows = rows;
-//        this.columns = columns;
-
-//        var count = this.rows * this.columns;
-//        for (int i = 0; i < count; i++)
-//            _sectors.Add(new Sector(this, i));
-//    }
-
-//    private int Index(FixVector3 position)
-//    {
-//        var col = (position.y / (new Fix64(owner.height) * owner.scale / new Fix64(rows)));
-//        var row = (position.x / (new Fix64(owner.width) * owner.scale / new Fix64(columns)));
-//        return columns * (int)col + (int)row;
-//    }
-
-//    public Sector At(int index)
-//    {
-//        if (index < 0 || index > _sectors.Count - 1)
-//            return null;
-
-//        return _sectors[index];
-//    }
-
-//    public Sector At(FixVector3 position)
-//    {
-//        var index = Index(position);
-//        return At(index);
-//    }
-//}
-
-public class BlockCollection
+namespace KG
 {
-    public class Region : IPathFindable
-    { 
-        public int id { get; set; }
-        public bool walkable { get; set; }
-        public Cell centroid { get; set; }
-
-        public FixVector3 position => centroid.position;
-    }
-
-    public class Cell : IPathFindable
+    public partial class Map : MonoBehaviour
     {
-        public int row { get; set; }
-        public int col { get; set; }
-        public Region? region { get; set; }
-        public bool walkable { get; set; }
-
-        public FixVector3 position => new FixVector3(col, row);
-    }
-
-    private readonly Cell[] _cells;
-
-    public Graph<Cell> cells { get; private set; } = new Graph<Cell>();
-    public Graph<Region> regions { get; private set; } = new Graph<Region>();
-    public int cols { get; private set; }
-    public int rows { get; private set; }
-    public int scale { get; private set; }
-
-    public static implicit operator Cell[](BlockCollection walkabilityTable) => walkabilityTable._cells;
-
-    public Cell this[FixVector2 position]
-    {
-        get => this[ToIndex(position.y), ToIndex(position.x)];
-        set => this[ToIndex(position.y), ToIndex(position.x)] = value;
-    }
-
-    public Cell this[int row, int col]
-    {
-        get => _cells[row * cols + col];
-        set => _cells[row * cols + col] = value;
-    }
-
-    public BlockCollection(int width, int height, int scale)
-    {
-        this.cols = width * scale;
-        this.rows = height * scale;
-        this.scale = scale;
-
-        var rows = height * scale;
-        var cols = width * scale;
-        _cells = new Cell[rows * cols];
-        for (int i = 0; i < rows * cols; i++)
+        #region Region
+        public class Region : IPathFindable
         {
-            var row = i / cols;
-            var col = i % cols;
+            public int id { get; set; }
+            public bool walkable { get; set; }
+            public Cell centroid { get; set; }
 
-            _cells[cols * row + col] = new Cell
-            {
-                row = row,
-                col = col,
-                walkable = false,
-                region = null
-            };
+            public FixVector3 position => centroid.position;
         }
-    }
+        #endregion
 
-    public void OnDrawCells()
-    {
-        foreach (var cell in _cells)
+        #region Cell
+        public class Cell : IPathFindable
         {
-            var color = (0x00FFFFFF / (regions.nodes.Count + 1)) * (cell.region.id + 1);
+            public int row { get; set; }
+            public int col { get; set; }
+            public Region? region { get; set; }
+            public bool walkable { get; set; }
 
-            Gizmos.color = new Color(((color & 0x00FF0000) >> 16) / (float)0xFF, ((color & 0x0000FF00) >> 8) / (float)0xFF, (color & 0x000000FF) / (float)0xFF);
-
-            var area = new Rect(cell.col / (float)this.scale, cell.row / (float)this.scale, 1 / (float)scale, 1 / (float)scale);
-            Gizmos.DrawLine(new Vector3(area.xMin, 0, area.yMin), new Vector3(area.xMax, 0, area.yMin));
-            Gizmos.DrawLine(new Vector3(area.xMin, 0, area.yMax), new Vector3(area.xMax, 0, area.yMax));
-
-            Gizmos.DrawLine(new Vector3(area.xMin, 0, area.yMin), new Vector3(area.xMin, 0, area.yMax));
-            Gizmos.DrawLine(new Vector3(area.xMax, 0, area.yMin), new Vector3(area.xMax, 0, area.yMax));
+            public FixVector3 position => new FixVector3(col, row);
         }
-    }
+        #endregion
 
-    public void OnDrawEdges()
-    {
-        Gizmos.color = Color.red;
-        foreach (var cell in _cells)
+        private readonly Cell[] _cells;
+        
+        public Graph<Cell> cells { get; private set; } = new Graph<Cell>();
+        public Graph<Region> regions { get; private set; } = new Graph<Region>();
+        public int cols { get; private set; }
+        public int rows { get; private set; }
+        public int width { get; private set; } = 192;
+        public int height { get; private set; } = 168;
+        public int scale { get; private set; } = 4;
+
+        public static implicit operator Cell[](Map map) => map._cells;
+
+        public Cell this[FixVector2 position]
         {
-            var begin = new Vector3((cell.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (cell.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
-            foreach (var edge in cells.nodes[cell].edges)
-            {
-                var end = new Vector3((edge.data.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (edge.data.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
-                Gizmos.DrawLine(begin, end);
-            }
-        }
-    }
-
-    public void OnDrawRegionEdges()
-    {
-        foreach (var node in regions.nodes)
-        {
-            var begin = node.data.centroid;
-            var x1 = new Vector3((begin.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (begin.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
-            foreach (var edge in node.edges)
-            {
-                var end = edge.data.centroid;
-                var x2 = new Vector3((end.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (end.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
-
-                Gizmos.color = (node.data.walkable && edge.data.walkable) ? Color.green : Color.red;
-                Gizmos.DrawLine(x1, x2);
-            }
-        }
-    }
-
-    public Cell Find(Func<Cell, bool> predicate)
-    {
-        for (int row = 0; row < _cells.GetLength(0); row++)
-        {
-            for (int col = 0; col < _cells.GetLength(1); col++)
-            {
-                var cell = this[row, col];
-                if (predicate(cell))
-                    return cell;
-            }
+            get => this[ToIndex(position.y), ToIndex(position.x)];
+            set => this[ToIndex(position.y), ToIndex(position.x)] = value;
         }
 
-        return null;
-    }
-
-    private Graph<Cell> UpdateWalkability(IEnumerable<MeshCollider> colliders, float threshold)
-    {
-        var half = new Vector3(1 / (float)(scale * 2), 0.1f, 1 / (float)(scale * 2));
-        foreach (var collider in colliders)
+        public Cell this[int row, int col]
         {
-            var min = collider.bounds.min;
-            var max = collider.bounds.max;
+            get => _cells[row * cols + col];
+            set => _cells[row * cols + col] = value;
+        }
 
-            var begin = (col: ToIndex(min.x), row: ToIndex(min.z));
-            var end = (col: ToIndex(max.x), row: ToIndex(max.z));
-            for (int row = begin.row; row <= end.row; row++)
+        private Graph<Cell> UpdateWalkability(IEnumerable<MeshCollider> colliders, float threshold)
+        {
+            var half = new Vector3(1 / (float)(scale * 2), 0.1f, 1 / (float)(scale * 2));
+            foreach (var collider in colliders)
             {
-                for (int col = begin.col; col <= end.col; col++)
+                var min = collider.bounds.min;
+                var max = collider.bounds.max;
+
+                var begin = (col: ToIndex(min.x), row: ToIndex(min.z));
+                var end = (col: ToIndex(max.x), row: ToIndex(max.z));
+                for (int row = begin.row; row <= end.row; row++)
                 {
-                    var center = new Vector3(col / (float)scale + half.x, threshold, row / (float)scale + half.z);
-                    var hits = Physics.BoxCastAll(center, half, Vector3.down).Where(x => x.collider == collider).ToArray();
-                    if (hits.Length == 0)
-                        continue;
-
-                    var hit = hits.FirstOrDefault();
-                    if (hit.point.y > threshold)
-                        continue;
-
-                    this[row, col].walkable = true;
-                }
-            }
-        }
-
-        var graph = new Graph<Cell>();
-        foreach (var cell in _cells)
-        {
-            graph.nodes.Add(cell);
-        }
-        return graph;
-    }
-
-    private IEnumerable<Cell> Nears(Cell cell, bool includeOpposite = true)
-    {
-        var isLeftest = !(cell.row > 0);
-        if (!isLeftest)
-            yield return this[cell.row - 1, cell.col];
-
-        var isRightest = !(cell.row < rows - 1);
-        if (!isRightest)
-            yield return this[cell.row + 1, cell.col];
-
-        var isTopest = !(cell.col > 0);
-        if (!isTopest)
-            yield return this[cell.row, cell.col - 1];
-
-        var isBottomest = !(cell.col < cols - 1);
-        if (!isBottomest)
-            yield return this[cell.row, cell.col + 1];
-
-        if (includeOpposite)
-        {
-            if (!isLeftest && !isTopest)
-                yield return this[cell.row - 1, cell.col - 1];
-
-            if (!isRightest && !isTopest)
-                yield return this[cell.row + 1, cell.col - 1];
-
-            if (!isLeftest && !isBottomest)
-                yield return this[cell.row - 1, cell.col + 1];
-
-            if (!isRightest && !isBottomest)
-                yield return this[cell.row + 1, cell.col + 1];
-        }
-
-        yield break;
-    }
-
-    private Graph<Region> UpdateRegion(int rows, int cols)
-    {
-        var regions = new Graph<Region>();
-        var groups = _cells.GroupBy(x =>
-        {
-            var row = x.row / (this.rows / rows);
-            var col = x.col / (this.cols / cols);
-
-            return row * cols + col;
-        }).ToDictionary(x => x.Key, x => x.ToList());
-
-        var region = 0;
-        foreach (var cells in groups.Values)
-        {
-            var hashCell = new HashSet<Cell>(cells);
-            var hashSet = new HashSet<Cell>();
-            var queue = new Queue<Cell>();
-            while (true)
-            {
-                // region이 정해지지 않은 cell을 하나 추출
-                var first = cells.FirstOrDefault(x => x.region == null);
-                if (first == null)
-                    break;
-
-                var node = regions.nodes.Add(new Region { id = region, walkable = first.walkable });
-
-                queue.Enqueue(first);
-                hashSet.Add(first);
-
-                while (queue.Count > 0)
-                {
-                    var pivot = queue.Dequeue();
-                    pivot.region = node.data;
-
-                    // 인접한 cell 중에 walkability가 같은 cell만 추출
-                    var nears = Nears(pivot).Where(x => 
+                    for (int col = begin.col; col <= end.col; col++)
                     {
-                        if (hashCell.Contains(x) == false)
-                            return false;
-
-                        if (x.region != null)
-                            return false;
-
-                        if (x.walkable != pivot.walkable)
-                            return false;
-
-                        return true;
-                    });
-
-                    foreach (var near in nears)
-                    {
-                        if (hashSet.Contains(near))
+                        var center = new Vector3(col / (float)scale + half.x, threshold, row / (float)scale + half.z);
+                        var hits = Physics.BoxCastAll(center, half, Vector3.down).Where(x => x.collider == collider).ToArray();
+                        if (hits.Length == 0)
                             continue;
 
-                        queue.Enqueue(near);
-                        hashSet.Add(near);
+                        var hit = hits.FirstOrDefault();
+                        if (hit.point.y > threshold)
+                            continue;
+
+                        this[row, col].walkable = true;
                     }
                 }
+            }
 
-                region++;
+            var graph = new Graph<Cell>();
+            foreach (var cell in _cells)
+            {
+                graph.Add(cell);
+            }
+            return graph;
+        }
+
+        private IEnumerable<Cell> Nears(Cell cell, bool includeOpposite = true)
+        {
+            var isLeftest = !(cell.row > 0);
+            if (!isLeftest)
+                yield return this[cell.row - 1, cell.col];
+
+            var isRightest = !(cell.row < rows - 1);
+            if (!isRightest)
+                yield return this[cell.row + 1, cell.col];
+
+            var isTopest = !(cell.col > 0);
+            if (!isTopest)
+                yield return this[cell.row, cell.col - 1];
+
+            var isBottomest = !(cell.col < cols - 1);
+            if (!isBottomest)
+                yield return this[cell.row, cell.col + 1];
+
+            if (includeOpposite)
+            {
+                if (!isLeftest && !isTopest)
+                    yield return this[cell.row - 1, cell.col - 1];
+
+                if (!isRightest && !isTopest)
+                    yield return this[cell.row + 1, cell.col - 1];
+
+                if (!isLeftest && !isBottomest)
+                    yield return this[cell.row - 1, cell.col + 1];
+
+                if (!isRightest && !isBottomest)
+                    yield return this[cell.row + 1, cell.col + 1];
+            }
+
+            yield break;
+        }
+
+        private Graph<Region> UpdateRegion(int rows, int cols)
+        {
+            var regions = new Graph<Region>();
+            var groups = _cells.GroupBy(x =>
+            {
+                var row = x.row / (this.rows / rows);
+                var col = x.col / (this.cols / cols);
+
+                return row * cols + col;
+            }).ToDictionary(x => x.Key, x => x.ToList());
+
+            var region = 0;
+            foreach (var cells in groups.Values)
+            {
+                var hashCell = new HashSet<Cell>(cells);
+                var hashSet = new HashSet<Cell>();
+                var queue = new Queue<Cell>();
+                while (true)
+                {
+                    // region이 정해지지 않은 cell을 하나 추출
+                    var first = cells.FirstOrDefault(x => x.region == null);
+                    if (first == null)
+                        break;
+
+                    var node = regions.Add(new Region { id = region, walkable = first.walkable });
+
+                    queue.Enqueue(first);
+                    hashSet.Add(first);
+
+                    while (queue.Count > 0)
+                    {
+                        var pivot = queue.Dequeue();
+                        pivot.region = node.data;
+
+                        // 인접한 cell 중에 walkability가 같은 cell만 추출
+                        var nears = Nears(pivot).Where(x =>
+                        {
+                            if (hashCell.Contains(x) == false)
+                                return false;
+
+                            if (x.region != null)
+                                return false;
+
+                            if (x.walkable != pivot.walkable)
+                                return false;
+
+                            return true;
+                        });
+
+                        foreach (var near in nears)
+                        {
+                            if (hashSet.Contains(near))
+                                continue;
+
+                            queue.Enqueue(near);
+                            hashSet.Add(near);
+                        }
+                    }
+
+                    region++;
+                }
+            }
+
+            return regions;
+        }
+
+        private void UpdateCellGraph()
+        {
+            foreach (var node in cells)
+            {
+                foreach (var near in Nears(node.data))
+                {
+                    cells[near].edges.Add(node);
+                    node.edges.Add(cells[near]);
+                }
             }
         }
 
-        return regions;
-    }
-
-    public void UpdateCellGraph()
-    {
-        foreach (var node in cells.nodes)
+        private void UpdateRegionGraph()
         {
-            foreach (var near in Nears(node.data))
+            var cached = cells.GroupBy(x => x.data.region).ToDictionary(x => x.Key, x => x.ToList());
+            foreach (var node in regions)
             {
-                cells.nodes[near].edges.Add(node);
-                node.edges.Add(cells.nodes[near]);
+                // 인접한 region 연결
+                var relations = cached[node.data].SelectMany(x => x.edges).GroupBy(x => x.data.region).Select(x => x.Key).Except(new[] { node.data }).ToList();
+                foreach (var relation in relations)
+                {
+                    node.edges.Add(regions[relation]);
+                    regions[relation].edges.Add(node);
+                }
+
+                // 무게중심 계산
+                var row = 0;
+                var col = 0;
+                cached[node.data].ForEach(x =>
+                {
+                    row += x.data.row;
+                    col += x.data.col;
+                });
+
+                row = (int)(row / (float)cached[node.data].Count);
+                col = (int)(col / (float)cached[node.data].Count);
+
+                node.data.centroid = cached[node.data].OrderBy(x => Math.Pow(row - x.data.row, 2) + Math.Pow(col - x.data.col, 2)).First().data;
             }
         }
-    }
 
-    public void UpdateRegionGraph()
-    {
-        var cached = cells.nodes.GroupBy(x => x.data.region).ToDictionary(x => x.Key, x => x.ToList());
-        foreach (var node in regions.nodes)
+        private int ToIndex(Fix64 value)
         {
-            // 인접한 region 연결
-            var relations = cached[node.data].SelectMany(x => x.edges).GroupBy(x => x.data.region).Select(x => x.Key).Except(new[] { node.data }).ToList();
-            foreach (var relation in relations)
-            {
-                node.edges.Add(regions.nodes[relation]);
-                regions.nodes[relation].edges.Add(node);
-            }
-
-            // 무게중심 계산
-            var row = 0;
-            var col = 0;
-            cached[node.data].ForEach(x =>
-            {
-                row += x.data.row;
-                col += x.data.col;
-            });
-
-            row = (int)(row / (float)cached[node.data].Count);
-            col = (int)(col / (float)cached[node.data].Count);
-
-            node.data.centroid = cached[node.data].OrderBy(x => Math.Pow(row - x.data.row, 2) + Math.Pow(col - x.data.col, 2)).First().data;
+            return (int)((float)value * this.scale);
         }
-    }
 
-    public void Update(IEnumerable<MeshCollider> colliders, float threshold)
-    {
-        cells = UpdateWalkability(colliders, threshold);
-        regions = UpdateRegion(10, 10);
-
-        UpdateCellGraph();
-        UpdateRegionGraph();
-    }
-
-    public int ToIndex(Fix64 value)
-    {
-        return (int)((float)value * this.scale);
-    }
-}
-
-public class Map : MonoBehaviour
-{
-    public int width { get; private set; } = 192;
-    public int height { get; private set; } = 168;
-    public int scale { get; private set; } = 4;
-    public BlockCollection blocks { get; private set; }
-
-    // 테스트용
-    private List<BlockCollection.Region> _routes;
-
-    [SerializeField] public bool drawCells = false;
-    [SerializeField] public bool drawEdges = false;
-    [SerializeField] public bool drawRegionEdges = false;
-    [SerializeField] public bool drawPathRoute = false;
-
-    private void OnDrawGizmos()
-    {
-        if(drawCells)
-            blocks?.OnDrawCells();
-
-        if (drawEdges)
-            blocks?.OnDrawEdges();
-
-        if (drawRegionEdges)
-            blocks?.OnDrawRegionEdges();
-
-        if (drawPathRoute && _routes != null)
+        public Map()
         {
-            Gizmos.color = Color.red;
-            for (int i = 0; i < _routes.Count - 1; i++)
-            {
-                var begin = _routes[i];
-                var x1 = new Vector3((begin.centroid.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (begin.centroid.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
-                
-                var end = _routes[i + 1];
-                var x2 = new Vector3((end.centroid.col / (float)this.scale) + (1 / (float)(this.scale * 2)), 0, (end.centroid.row / (float)this.scale) + (1 / (float)(this.scale * 2)));
+            this.cols = width * scale;
+            this.rows = height * scale;
+            this.scale = scale;
 
-                Gizmos.DrawLine(x1, x2);
+            var rows = height * scale;
+            var cols = width * scale;
+            _cells = new Cell[rows * cols];
+            for (int i = 0; i < rows * cols; i++)
+            {
+                var row = i / cols;
+                var col = i % cols;
+
+                _cells[cols * row + col] = new Cell
+                {
+                    row = row,
+                    col = col,
+                    walkable = false,
+                    region = null
+                };
             }
         }
-    }
 
-    public void Start()
-    {
-        blocks = new BlockCollection(width, height, scale);
-
-        //sectors = new Sectors(this, 2, 2);
-        //var sector = sectors[new FixVector3(50, 10)];
-        //var nears = sector?.nears;
-
-        var tiles = GetComponentsInChildren<Transform>().Except(new[] { this.GetComponent<Transform>() });
-        foreach (var tile in tiles)
+        public void Start()
         {
-            tile.gameObject.AddComponent<MeshCollider>();
+            Provisioning(1.0f);
+
+            // 길찾기 테스트 코드
+            var sorted = cells.Where(x => x.data.walkable).OrderBy(x => x.data.row + x.data.col).ToList();
+            var start = sorted.First();
+            var end = sorted.Last();
+
+            var routes = regions.Find(start.data.region, end.data.region);
+            if (routes.Count > 0)
+            {
+                _routes = new List<Region> { start.data.region };
+                _routes.AddRange(routes);
+            }
         }
 
-        blocks.Update(tiles.Select(x => x.gameObject.GetComponent<MeshCollider>()), 1.0f);
-
-        var sorted = blocks.cells.nodes.Where(x => x.data.walkable).OrderBy(x => x.data.row + x.data.col).ToList();
-        var start = sorted.First();
-        var end = sorted.Last();
-
-        var routes = blocks.regions.Find(start.data.region, end.data.region);
-        if (routes.Count > 0)
+        public void Update()
         {
-            _routes = new List<BlockCollection.Region> { start.data.region };
-            _routes.AddRange(routes);
-        }
-    }
 
-    public void Update()
-    {
-        
+        }
+
+        private void Provisioning(float threshold)
+        {
+            var tiles = GetComponentsInChildren<Transform>().Except(new[] { this.GetComponent<Transform>() });
+            foreach (var tile in tiles)
+            {
+                tile.gameObject.AddComponent<MeshCollider>();
+            }
+
+            var colliders = tiles.Select(x => x.gameObject.GetComponent<MeshCollider>());
+
+            cells = UpdateWalkability(colliders, threshold);
+            regions = UpdateRegion(10, 10);
+
+            UpdateCellGraph();
+            UpdateRegionGraph();
+        }
     }
 }
