@@ -1,4 +1,5 @@
 ﻿using FixMath.NET;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ namespace KG
     public interface IPathFindable
     {
         public bool walkable { get; }
-        public FixVector3 position { get; }
+        public FixVector2 position { get; }
     }
 
     public partial class Graph<T> : IEnumerable<Graph<T>.Node>, IReadOnlyCollection<Graph<T>.Node> where T : IPathFindable
@@ -56,14 +57,14 @@ namespace KG
             return (_nodes[value] = new Node(value));
         }
 
-        public Stack<T> Find(T begin, T end)
+        public List<T> Find(T begin, T end, Func<Node, bool> func = null)
         {
             if (_pathFindingParams == null)
             {
                 _pathFindingParams = _nodes.Values.ToDictionary(x => x, x => new AStarParams());
             }
 
-            var result = new Stack<T>();
+            var result = new List<T>();
             var openedList = new List<Node>();
             var closedList = new List<Node>();
 
@@ -77,19 +78,21 @@ namespace KG
                 var nears = current.edges
                     .Where(x => x.data.walkable)
                     .Where(x => closedList.Contains(x) == false)
-                    .Where(x => openedList.Contains(x) == false)
-                    .ToList();
+                    .Where(x => openedList.Contains(x) == false);
+
+                if (func != null)
+                    nears = nears.Where(x => func(x));
 
                 foreach (var near in nears)
                 {
                     var param = _pathFindingParams[near];
                     param.parent = current;
-                    param.G = (near.data.position - current.data.position).sqrMagnitude;
-                    param.H = (near.data.position - end.position).sqrMagnitude;
+                    param.G = (near.data.position - current.data.position).magnitude;
+                    param.H = (near.data.position - end.position).magnitude;
                 }
 
                 openedList.AddRange(nears);
-                openedList.Sort((x, y) => _pathFindingParams[x].F.CompareTo(_pathFindingParams[y].F)); // OrderBy보다 빠른듯
+                openedList = openedList.OrderBy(x => _pathFindingParams[x].F).ToList();
             }
 
             if (closedList.Contains(this[end]) == false)
@@ -98,9 +101,11 @@ namespace KG
             var tracked = this[end];
             while (tracked != this[begin])
             {
-                result.Push(tracked.data);
+                result.Add(tracked.data);
                 tracked = _pathFindingParams[tracked].parent;
             }
+            
+            result.Reverse();
             return result;
         }
     }

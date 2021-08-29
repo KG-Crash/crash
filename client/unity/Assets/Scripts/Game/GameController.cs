@@ -17,6 +17,7 @@ namespace Game
         [NonSerialized] private List<Unit> _selectedUnits;
         [NonSerialized] private List<Unit> _allUnitInFrustum;
 
+        [SerializeField] private KG.Map _map;
         [SerializeField] private UnitFactory _unitFactory;
         [SerializeField] private UnitTable _unitPrefabTable;
         
@@ -24,17 +25,21 @@ namespace Game
         {
             Handler.Instance.Bind(this);
 
+            var firstCell = _map.cells.FirstOrDefault(x => x.data.walkable);
+            if (firstCell == null)
+                return;
+
             // 임시 코드 지워야함
             var units = new Unit[]
             {
-                _unitFactory.GetNewUnit(0, 0, _unitPrefabTable, this),
-                _unitFactory.GetNewUnit(1, 0, _unitPrefabTable, this),
-                _unitFactory.GetNewUnit(2, 0, _unitPrefabTable, this)
+                _unitFactory.GetNewUnit(_map, 0, 0, _unitPrefabTable, this),
+                _unitFactory.GetNewUnit(_map, 1, 0, _unitPrefabTable, this),
+                _unitFactory.GetNewUnit(_map, 2, 0, _unitPrefabTable, this)
             };
 
-            units[0].position = new Vector3(0, 0, -1.44f);
-            units[1].position = new Vector3(0, 0, 0);
-            units[2].position = new Vector3(0, 0, +1.44f);
+            units[0].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
+            //units[1].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
+            //units[2].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
 
             _playerID = 0;
             _playerTeamID = 0;
@@ -45,17 +50,17 @@ namespace Game
             _allPlayerByTeam.players.Add(_playerTeamID, new List<Player>());
             _allPlayerByTeam.players[_playerTeamID].Add(_player);
 
-            var enemyUnits = new Unit[]
-            {
-                _unitFactory.GetNewUnit(0, 1, _unitPrefabTable, this),
-                _unitFactory.GetNewUnit(1, 1, _unitPrefabTable, this),
-            };
+            //var enemyUnits = new Unit[]
+            //{
+            //    _unitFactory.GetNewUnit(_map, 0, 1, _unitPrefabTable, this),
+            //    _unitFactory.GetNewUnit(_map, 1, 1, _unitPrefabTable, this),
+            //};
             
-            enemyUnits[0].position = new Vector3(-1.44f * -1, 0, 0);
-            enemyUnits[1].position = new Vector3(-1.44f * 2, 0, 0);
+            //enemyUnits[0].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
+            //enemyUnits[1].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
 
             var otherPlayer = new Player();
-            otherPlayer.units.AddRange(enemyUnits);
+            //otherPlayer.units.AddRange(enemyUnits);
             uint otherPlayerID = 1;
             _allPlayerByTeam.players.Add(otherPlayerID, new List<Player>());
             _allPlayerByTeam.players[otherPlayerID].Add(otherPlayer);
@@ -117,34 +122,6 @@ namespace Game
 
             _selectedUnits = selectedUnitList;
         }
-
-        public void MoveOrAttackTo(Vector2 positionSS, out bool move)
-        {
-            var uobj = UnityResources._instance.Get("objects");
-            var selectedCamera = uobj.GetCamera();
-
-            var ray = selectedCamera.ScreenPointToRay(positionSS);
-            var selectedUnit = UnityObjects.IntersectNearestUnit(ray, _allUnitInFrustum);
-            
-            if (selectedUnit != null)
-            {
-                if (selectedUnit.teamID == _playerTeamID)
-                {
-                    MoveSelectedUnitTo(selectedUnit);
-                    move = true;
-                }
-                else
-                {
-                    AttackSelectedUnitTo(selectedUnit);
-                    move = false;
-                }
-            }
-            else
-            {
-                MoveSelectedUnitTo(ray, selectedCamera.farClipPlane);
-                move = true;
-            }
-        }
         
         public bool MoveSelectedUnitTo(Ray camRay, float farClipPlane)
         {           
@@ -172,24 +149,6 @@ namespace Game
             else
             {
                 return false;
-            }
-        }
-
-        public void MoveSelectedUnitTo(Unit moveTargetUnit)
-        {                    
-            foreach (var unit in _selectedUnits)
-            {
-                unit.OnlyMoveTo(moveTargetUnit);
-            }
-        }
-
-        public void AttackSelectedUnitTo(Unit attackTargetUnit)
-        {
-            Debug.Log($"{attackTargetUnit.name}, {attackTargetUnit.teamID}");
-            
-            foreach (var unit in _selectedUnits)
-            {
-                unit.AttackTo(attackTargetUnit);
             }
         }
 

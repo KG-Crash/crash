@@ -50,7 +50,11 @@ namespace FixMath.NET
 
         public static implicit operator UnityEngine.Vector2(FixVector2 vector3) => new UnityEngine.Vector2(vector3.x, vector3.y);
 
-        public static implicit operator FixVector2(UnityEngine.Vector3 vector3) => new FixVector2((Fix64)vector3.x, (Fix64)vector3.y);
+        public static implicit operator FixVector2(UnityEngine.Vector3 vector3) => new FixVector2((Fix64)vector3.x, (Fix64)vector3.z);
+
+        public static implicit operator FixVector3(FixVector2 vector2) => new FixVector3(vector2.x, Fix64.Zero, vector2.y);
+
+        public static implicit operator UnityEngine.Vector3(FixVector2 vector2) => new UnityEngine.Vector3(vector2.x, 0.0f, vector2.y);
 
         public static FixVector2 Min(FixVector2 a, FixVector2 b) => new FixVector2(Fix64.Min(a.x, b.x), Fix64.Min(a.y, b.y));
         
@@ -114,6 +118,13 @@ namespace FixMath.NET
             this.z = z;
         }
 
+        public FixVector3(FixVector2 vector2)
+        {
+            this.x = vector2.x;
+            this.y = vector2.y;
+            this.z = Fix64.Zero;
+        }
+
         public FixVector2 xy => new FixVector2(this.x, this.y);
         public FixVector2 yx => new FixVector2(this.y, this.x);
         public FixVector2 yz => new FixVector2(this.y, this.z);
@@ -152,9 +163,15 @@ namespace FixMath.NET
         
         public static FixVector3 operator /(FixVector3 v1, FixVector3 v2) => new FixVector3(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
 
+        public static bool operator ==(FixVector3 v1, FixVector3 v2) => v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
+
+        public static bool operator !=(FixVector3 v1, FixVector3 v2) => !(v1 == v2);
+
         public static implicit operator UnityEngine.Vector3(FixVector3 vector3) => new UnityEngine.Vector3(vector3.x, vector3.y, vector3.z);
 
         public static implicit operator FixVector3(UnityEngine.Vector3 vector3) => new FixVector3((Fix64)vector3.x, (Fix64)vector3.y, (Fix64)vector3.z);
+
+        public static implicit operator FixVector2(FixVector3 vector3) => new FixVector2(vector3.x, vector3.z);
 
         public static FixVector3 Min(FixVector3 a, FixVector3 b) => new FixVector3(Fix64.Min(a.x, b.x), Fix64.Min(a.y, b.y), Fix64.Min(a.z, b.z));
         

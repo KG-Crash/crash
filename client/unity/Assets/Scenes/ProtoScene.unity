@@ -2460,6 +2460,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c43df401f384814d95399334f12a834, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _map: {fileID: 1442949749}
   _unitFactory: {fileID: 1122248849}
   _unitPrefabTable: {fileID: 11400000, guid: 90bd777a778c3ef40941d1163ecba028, type: 2}
 --- !u!114 &1122248848
@@ -2487,7 +2488,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd7dba43dc3440d7b4c39f288a04e953, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _map: {fileID: 1442949749}
 --- !u!1001 &1154649189
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3200,7 +3200,7 @@ GameObject:
   - component: {fileID: 1442949748}
   - component: {fileID: 1442949749}
   m_Layer: 0
-  m_Name: Tiles
+  m_Name: Map
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

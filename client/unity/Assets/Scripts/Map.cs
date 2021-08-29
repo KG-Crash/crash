@@ -1,4 +1,5 @@
 using FixMath.NET;
+using Game;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,23 +12,54 @@ namespace KG
         #region Region
         public class Region : IPathFindable
         {
-            public int id { get; set; }
-            public bool walkable { get; set; }
-            public Cell centroid { get; set; }
+            private readonly Map _map;
 
-            public FixVector3 position => centroid.position;
+            public int id { get; private set; }
+            public Cell centroid { get; set; }
+            public HashSet<Unit> units { get; private set; } = new HashSet<Unit>();
+
+            public FixVector2 position => centroid.position;
+            public bool walkable { get; private set; }
+
+            public Region(Map map, int id, bool walkable)
+            {
+                this._map = map;
+                this.id = id;
+                this.walkable = walkable;
+            }
         }
         #endregion
 
         #region Cell
         public class Cell : IPathFindable
         {
-            public int row { get; set; }
-            public int col { get; set; }
-            public Region? region { get; set; }
-            public bool walkable { get; set; }
+            private readonly Map _map;
 
-            public FixVector3 position => new FixVector3(col, row);
+            public int row { get; private set; }
+            public int col { get; private set; }
+            public Region region { get; set; }
+
+            public FixVector2 position => new FixVector2(new Fix64(col) / new Fix64(_map.scale), new Fix64(row) / new Fix64(_map.scale));
+            public FixVector2 center
+            {
+                get
+                {
+                    var position = this.position;
+                    return new FixVector3(position.x + halfSize, position.y + halfSize);
+                }
+            }
+            public bool walkable { get; private set; }
+
+            public Fix64 size => Fix64.One / new Fix64(_map.scale);
+            public Fix64 halfSize => size / (Fix64.One * 2);
+
+            public Cell(Map map, int row, int col, bool walkable)
+            {
+                this._map = map;
+                this.row = row;
+                this.col = col;
+                this.walkable = walkable;
+            }
         }
         #endregion
 
@@ -51,8 +83,22 @@ namespace KG
 
         public Cell this[int row, int col]
         {
-            get => _cells[row * cols + col];
-            set => _cells[row * cols + col] = value;
+            get
+            {
+                var index = row * cols + col;
+                if (index < 0 || index > _cells.Length - 1)
+                    return null;
+                
+                return _cells[index];
+            }
+            set
+            {
+                var index = row * cols + col;
+                if (index < 0 || index > _cells.Length - 1)
+                    return;
+
+                _cells[index] = value;
+            }
         }
 
         private Graph<Cell> UpdateWalkability(IEnumerable<MeshCollider> colliders, float threshold)
@@ -78,8 +124,17 @@ namespace KG
                         if (hit.point.y > threshold)
                             continue;
 
-                        this[row, col].walkable = true;
+                        this[row, col] = new Cell(this, row, col, true);
                     }
+                }
+            }
+
+            // 할당 안된 cell 할당
+            for (int row = 0; row < this.rows; row++)
+            {
+                for (int col = 0; col < this.cols; col++)
+                {
+                    this[row, col] ??= new Cell(this, row, col, false);
                 }
             }
 
@@ -151,7 +206,7 @@ namespace KG
                     if (first == null)
                         break;
 
-                    var node = regions.Add(new Region { id = region, walkable = first.walkable });
+                    var node = regions.Add(new Region(this, region, first.walkable));
 
                     queue.Enqueue(first);
                     hashSet.Add(first);
@@ -239,6 +294,23 @@ namespace KG
             return (int)((float)value * this.scale);
         }
 
+        private void Provisioning(float threshold)
+        {
+            var tiles = GetComponentsInChildren<Transform>().Except(new[] { this.GetComponent<Transform>() });
+            foreach (var tile in tiles)
+            {
+                tile.gameObject.AddComponent<MeshCollider>();
+            }
+
+            var colliders = tiles.Select(x => x.gameObject.GetComponent<MeshCollider>());
+
+            cells = UpdateWalkability(colliders, threshold);
+            regions = UpdateRegion(10, 10);
+
+            UpdateCellGraph();
+            UpdateRegionGraph();
+        }
+
         public Map()
         {
             this.cols = width * scale;
@@ -248,25 +320,15 @@ namespace KG
             var rows = height * scale;
             var cols = width * scale;
             _cells = new Cell[rows * cols];
-            for (int i = 0; i < rows * cols; i++)
-            {
-                var row = i / cols;
-                var col = i % cols;
+        }
 
-                _cells[cols * row + col] = new Cell
-                {
-                    row = row,
-                    col = col,
-                    walkable = false,
-                    region = null
-                };
-            }
+        private void Awake()
+        {
+            Provisioning(1.0f);
         }
 
         public void Start()
         {
-            Provisioning(1.0f);
-
             // 길찾기 테스트 코드
             var sorted = cells.Where(x => x.data.walkable).OrderBy(x => x.data.row + x.data.col).ToList();
             var start = sorted.First();
@@ -283,23 +345,6 @@ namespace KG
         public void Update()
         {
 
-        }
-
-        private void Provisioning(float threshold)
-        {
-            var tiles = GetComponentsInChildren<Transform>().Except(new[] { this.GetComponent<Transform>() });
-            foreach (var tile in tiles)
-            {
-                tile.gameObject.AddComponent<MeshCollider>();
-            }
-
-            var colliders = tiles.Select(x => x.gameObject.GetComponent<MeshCollider>());
-
-            cells = UpdateWalkability(colliders, threshold);
-            regions = UpdateRegion(10, 10);
-
-            UpdateCellGraph();
-            UpdateRegionGraph();
         }
     }
 }

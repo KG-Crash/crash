@@ -19,7 +19,7 @@ namespace Game
     {
         Renderer[] renderers { get; }
     }
-    
+
     public class Unit : MonoBehaviour, ISelectable, IRenderable
     {
         public interface Listener
@@ -36,7 +36,7 @@ namespace Game
 
         public Shared.Table.Unit table { get; private set; }
         public List<Shared.Table.Skill> skills { get; private set; }
-        
+
 
         [SerializeField] private int _unitOriginID;
         [SerializeField] private GameObject _highlighted;
@@ -59,7 +59,7 @@ namespace Game
         {
             get => _unitOriginID;
         }
-        
+
         public uint unitID
         {
             get => _unitID;
@@ -98,7 +98,7 @@ namespace Game
             }
         }
 
-        public Fix64 speed 
+        public Fix64 speed
         {
             get
             {
@@ -114,7 +114,7 @@ namespace Game
             }
         }
 
-        [SerializeField] public float _speed = 1.0f; 
+        [SerializeField] public float _speed = 1.0f;
         public int attackSpeed
         {
             get
@@ -128,7 +128,7 @@ namespace Game
                 return attackSpeed;
             }
         }
-        
+
         public int attackRange
         {
             get
@@ -184,6 +184,21 @@ namespace Game
             set => _map = value;
         }
 
+        private KG.Map.Region _region;
+        public KG.Map.Region region
+        {
+            get => _region;
+            set
+            {
+                if (_region == value)
+                    return;
+
+                _region?.units.Remove(this);
+                value?.units.Add(this);
+                _region = value;
+            }
+        }
+
         public List<Skill> activeSkills => skills.Where(x => owner.abilities.HasFlag(x.Condition)).ToList();
 
         [SerializeField] private uint _teamID;
@@ -204,9 +219,10 @@ namespace Game
         [SerializeField] private ProjectileTable _projectileTable;
 
         [NonSerialized] private UnitState _currentState;
-        [NonSerialized] private bool _watchEnemy; // 이동중에 적군을 만나면 공격을 할지 말지
         
         [NonSerialized] private float _stopMoveDistance;
+        [NonSerialized] private List<KG.Map.Region> _regionPath = new List<KG.Map.Region>();
+        [NonSerialized] private List<KG.Map.Cell> _cellPath = new List<KG.Map.Cell>();
         [NonSerialized] private FixVector3? _moveTargetPosition;
         [NonSerialized] private Unit _target;
         
@@ -235,8 +251,34 @@ namespace Game
             this._hp = this.maxhp;
         }
 
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            for (int i = 0; i < _cellPath.Count - 1; i++)
+            {
+                var begin = _cellPath[i];
+                var end = _cellPath[i + 1];
+                Gizmos.DrawLine(begin.position, end.position);
+            }
+        }
+
+        private void Start()
+        {
+            var end = _map.cells.OrderBy(x => x.data.row + x.data.col).LastOrDefault(x => x.data.walkable);
+            if (end == null)
+                return;
+
+            this.region = this.map[this.position]?.region;
+            MoveTo(end.data.position);
+        }
+
         private void Update()
         {
+            this.region = this.map[this.position]?.region;
+
+            // 길찾기 경로에서 현재 경로 제거
+            this._regionPath.Remove(this.region);
+
             _totalBounds = new Bounds();
             foreach (var renderer in _rendereres)
             {
@@ -266,86 +308,83 @@ namespace Game
                     break;
 
                 case UnitState.Move:
-                    if (_watchEnemy == false)
-                    {
-                        // 강제이동
+                    _target ??= SearchEnemy(attackRange);
+                    if (_target != null)
+                        _currentState = UnitState.Attack;
+                    else
                         DeltaMove((Fix64)Time.deltaTime);
-                    }
-                    else if (_target == null)
-                    {
-                        // 어택땅
-                        _target = SearchEnemy(attackRange);
-                        if (_target != null)
-                            _currentState = UnitState.Attack;
-                        else
-                            DeltaMove((Fix64)Time.deltaTime);
-                    }
-                    else
-                    {
-                        // 특정유닛 공격
-                        if (ContainsRange(_target.position))
-                            _currentState = UnitState.Attack;
-                    }
                     break;
 
-                case UnitState.Attack:
-                    ProjectileFactory.GetNewProjectile(0, this, this.unitID, this._projectileTable);
-                    if (ContainsRange(_target.position))
-                    {
-                        if (_target == null || _target.IsDead)
-                        {
-                            _target = null;
+                //case UnitState.Attack:
+                //    ProjectileFactory.GetNewProjectile(0, this, this.unitID, this._projectileTable);
+                //    if (ContainsRange(_target.position))
+                //    {
+                //        if (_target == null || _target.IsDead)
+                //        {
+                //            _target = null;
 
-                            if (_moveTargetPosition == null) // 상대도 죽였는데 이동할 곳도 없음
-                            {
-                                _currentState = UnitState.Idle;
-                            }
-                            else // 갈 곳이 있음 => 어택땅 상태임
-                            {
-                                _currentState = UnitState.Move;
-                            }
-                        }
-                        else
-                        {
-                            Attack(_target);
-                        }
-                    }
-                    else
-                    {
-                        AttackTo(_target);
+                //            if (_moveTargetPosition == null) // 상대도 죽였는데 이동할 곳도 없음
+                //            {
+                //                _currentState = UnitState.Idle;
+                //            }
+                //            else // 갈 곳이 있음 => 어택땅 상태임
+                //            {
+                //                _currentState = UnitState.Move;
+                //            }
+                //        }
+                //        else
+                //        {
+                //            Attack(_target);
+                //        }
+                //    }
+                //    else
+                //    {
+                //        AttackTo(_target);
                         
-                    }
-                    break;
+                //    }
+                //    break;
             }
         }
 
         private void DeltaMove(Fix64 delta)
         {
-            if (moveTargetPosition == null)
+            var dst = _cellPath.FirstOrDefault();
+            if (dst == null)
                 return;
 
-            var diff = (moveTargetPosition.Value - position);
+            var diff = new FixVector3(dst.position.x - position.x, Fix64.Zero, dst.position.y - position.z);
             var magnitude = diff.magnitude;
-            if (magnitude != Fix64.Zero)
+            var direction = FixVector3.Zero;
+            bool arrived;
+            if (magnitude == Fix64.Zero)
             {
-                var direction = diff / magnitude;
+                arrived = true;
+            }
+            else
+            {
+                direction = diff / magnitude;
 
                 // TODO : 이거는 나중에 동기화 때 처리해야 할 문제 (Time.deltaTime을 사용하지 않아야 함)
-                transform.LookAt(moveTargetPosition.Value);
+                transform.LookAt(new FixVector3(dst.position.x, this.transform.position.y, dst.position.y));
 
-                var arrived = magnitude < (speed * delta) || magnitude < (Fix64)_stopMoveDistance + (Fix64)Shared.Const.Character.MoveEpsilon;
-                if (arrived)
+                arrived = magnitude < (speed * delta) || magnitude < (Fix64)_stopMoveDistance + (Fix64)Shared.Const.Character.MoveEpsilon;
+            }
+
+            if (arrived)
+            {
+                _cellPath.Remove(dst);
+                if (_cellPath.Count == 0)
                 {
-                    Stop();
-                }
-                else
-                {
-                    position += (direction * speed * delta);
+                    if (_regionPath.Count == 0)
+                        Stop();
+                    else
+                        UpdateMovePath(this._moveTargetPosition.Value);
                 }
             }
             else
             {
-                Stop();
+                //position += FixVector3.Min(direction * speed * delta, diff);
+                position += (direction * speed * delta);
             }
         }
 
@@ -353,18 +392,16 @@ namespace Game
         {
             // TODO : 섹터 적용 시, 유닛 리스트 가져오기 새로 짜야함.
             var gameController = FindObjectOfType<GameController>();
-            var singleUnits = gameController.GetAllUnits().
+            var unit = GetNearUnits().
                 Where(x => x._teamID != this._teamID).
                 OrderBy(x => (this.position - x.position).sqrMagnitude).
-                Take(1);
+                FirstOrDefault();
 
-            if (singleUnits.Count() == 0)
+            if (unit == null)
             {
                 return null;
             }
 
-            var unit = singleUnits.First();
-            
             if ((this.position - unit.position).sqrMagnitude <= searchRadius * searchRadius)
             {
                 return unit;
@@ -380,6 +417,8 @@ namespace Game
             _currentState = UnitState.Idle;
             _moveTargetPosition = null;
             listener?.OnEndMove(this);
+
+            UnityEngine.Debug.Log("stop moving");
         }
 
         public void Selected(bool select)
@@ -387,50 +426,64 @@ namespace Game
             if (_highlighted) _highlighted.SetActive(select);
         }
 
+        private List<KG.Map.Region> GetAllowedRegions(KG.Map.Region start, KG.Map.Region end)
+        {
+            if (start == end)
+                return new List<KG.Map.Region> { start };
+
+            if (_map.regions[start].edges.Contains(_map.regions[end]) == false)
+                return new List<KG.Map.Region> { };
+
+            var src = new[] { start, end };
+            return src.Select(x => _map.regions[x]).SelectMany(x => x.edges)
+                .Where(x => x.edges.Contains(_map.regions[start]) && x.edges.Contains(_map.regions[end]))
+                .Select(x => x.data).Concat(src).Distinct().ToList();
+        }
+
+        private void UpdateMovePath(FixVector3 position, bool updateWithRegion = false)
+        {
+            try
+            {
+                var start = _map[this.position];
+                if (start == null)
+                    throw new Exception();
+
+                var end = _map[position];
+                if (end == null)
+                    throw new Exception();
+
+                if (updateWithRegion)
+                    _regionPath = _map.regions.Find(this.region, end.region);
+
+                var next = _regionPath.First().centroid;
+                if (_regionPath.Count < 2)
+                {
+                    UnityEngine.Debug.Log("set final position");
+                    next = end;
+                }
+                
+                var allowed = GetAllowedRegions(start.region, next.region);
+                _cellPath = _map.cells.Find(start, next);
+                UnityEngine.Debug.Log($"update detail route. remained regions : {_regionPath.Count}");
+
+                _moveTargetPosition = position;
+            }
+            catch
+            {
+                _cellPath.Clear();
+            }
+        }
+
         public void MoveTo(FixVector3 position)
         {
+            UpdateMovePath(position, true);
+
             _currentState = UnitState.Move;
             _target = null;
             _moveTargetPosition = position;
             _stopMoveDistance = 0.0f;
 
             listener?.OnStartMove(this);
-        }
-
-        public void OnlyMoveTo(Unit target, float stopDistance = 0.0f)
-        {
-            _watchEnemy = false;
-            MoveTo(target, stopDistance);
-        }
-
-        public void MoveTo(Unit target, float stopDistance = 0.0f)
-        {
-            _currentState = UnitState.Move;
-            _target = target;
-            _stopMoveDistance = stopDistance;
-            _moveTargetPosition = null;
-
-            listener?.OnStartMove(this);
-        }
-
-        public void AttackTo(Unit target)
-        {
-            _watchEnemy = true;
-            _target = target;
-            if (ContainsRange(target.position))
-            {
-                _currentState = UnitState.Attack;
-            }
-            else
-            {
-                MoveTo(target, attackRange);
-            }
-        }
-
-        public void AttackTo(FixVector3 position)
-        {
-            _watchEnemy = true;
-            MoveTo(position);
         }
 
         public bool ContainsRange(FixVector3 target)
@@ -576,6 +629,18 @@ namespace Game
             SetFadeAlpha(0.0f);
             
             listener?.OnClear(this);
+        }
+
+        private IEnumerable<Unit> GetNearUnits()
+        {
+            if (this.region == null)
+                return null;
+
+
+            var nodes = new List<KG.Map.Region> { this.region };
+            nodes.AddRange(this._map.regions[this.region].edges.Select(x => x.data));
+
+            return nodes.SelectMany(x => x.units);
         }
     }
 }
