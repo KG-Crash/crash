@@ -5,12 +5,9 @@ namespace KG
 {
     public partial class Map
     {
-        private List<Region> _routes; // 테스트용
-
         [SerializeField] public bool drawCells = false;
         [SerializeField] public bool drawEdges = false;
         [SerializeField] public bool drawRegionEdges = false;
-        [SerializeField] public bool drawPathRoute = false;
 
         private void OnDrawCells()
         {
@@ -77,23 +74,6 @@ namespace KG
 
             if (drawRegionEdges)
                 OnDrawRegionEdges();
-
-            var size = 1 / (float)scale;
-            var half = size / 2.0f;
-            if (drawPathRoute && _routes != null)
-            {
-                Gizmos.color = Color.red;
-                for (int i = 0; i < _routes.Count - 1; i++)
-                {
-                    var begin = _routes[i];
-                    var x1 = new Vector3(begin.centroid.center.x, 0, begin.centroid.center.y);
-
-                    var end = _routes[i + 1];
-                    var x2 = new Vector3(end.centroid.center.x, 0, end.centroid.center.y);
-
-                    Gizmos.DrawLine(x1, x2);
-                }
-            }
         }
     }
 }

@@ -253,7 +253,7 @@ namespace Game
 
         private void OnDrawGizmos()
         {
-            Gizmos.color = Color.red;
+            Gizmos.color = Color.blue;
             for (int i = 0; i < _cellPath.Count - 1; i++)
             {
                 var begin = _cellPath[i];
@@ -463,7 +463,7 @@ namespace Game
                 }
                 
                 var allowed = GetAllowedRegions(start.region, next.region);
-                _cellPath = _map.cells.Find(start, next);
+                _cellPath = _map.cells.Find(start, next, node => allowed.Any(x => x == node.data.region));
                 UnityEngine.Debug.Log($"update detail route. remained regions : {_regionPath.Count}");
 
                 _moveTargetPosition = position;

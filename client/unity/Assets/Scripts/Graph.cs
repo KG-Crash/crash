@@ -30,9 +30,9 @@ namespace KG
         #region Path finding parameter
         private class AStarParams
         {
-            public int G { get; set; } = 0;
-            public int H { get; set; } = 0;
-            public int F => G + H;
+            public Fix64 G { get; set; } = Fix64.Zero;
+            public Fix64 H { get; set; } = Fix64.Zero;
+            public Fix64 F => G + H;
             public Node parent { get; set; } = null;
         }
         #endregion
@@ -87,8 +87,8 @@ namespace KG
                 {
                     var param = _pathFindingParams[near];
                     param.parent = current;
-                    param.G = (near.data.position - current.data.position).magnitude;
-                    param.H = (near.data.position - end.position).magnitude;
+                    param.G = (near.data.position - current.data.position).sqrMagnitude;
+                    param.H = (near.data.position - end.position).sqrMagnitude;
                 }
 
                 openedList.AddRange(nears);

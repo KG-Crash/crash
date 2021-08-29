@@ -45,7 +45,7 @@ namespace KG
                 get
                 {
                     var position = this.position;
-                    return new FixVector3(position.x + halfSize, position.y + halfSize);
+                    return new FixVector2(position.x + halfSize, position.y + halfSize);
                 }
             }
             public bool walkable { get; private set; }
@@ -329,17 +329,7 @@ namespace KG
 
         public void Start()
         {
-            // 길찾기 테스트 코드
-            var sorted = cells.Where(x => x.data.walkable).OrderBy(x => x.data.row + x.data.col).ToList();
-            var start = sorted.First();
-            var end = sorted.Last();
 
-            var routes = regions.Find(start.data.region, end.data.region);
-            if (routes.Count > 0)
-            {
-                _routes = new List<Region> { start.data.region };
-                _routes.AddRange(routes);
-            }
         }
 
         public void Update()
