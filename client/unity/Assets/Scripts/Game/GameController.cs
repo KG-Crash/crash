@@ -41,6 +41,12 @@ namespace Game
             //units[1].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
             //units[2].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
 
+            var end = _map.cells.OrderBy(x => x.data.row + x.data.col).LastOrDefault(x => x.data.walkable);
+            if (end == null)
+                return;
+
+            units[0].MoveTo(end.data.position);
+
             _playerID = 0;
             _playerTeamID = 0;
             _player = new Player();
@@ -50,17 +56,17 @@ namespace Game
             _allPlayerByTeam.players.Add(_playerTeamID, new List<Player>());
             _allPlayerByTeam.players[_playerTeamID].Add(_player);
 
-            //var enemyUnits = new Unit[]
-            //{
-            //    _unitFactory.GetNewUnit(_map, 0, 1, _unitPrefabTable, this),
-            //    _unitFactory.GetNewUnit(_map, 1, 1, _unitPrefabTable, this),
-            //};
-            
-            //enemyUnits[0].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
+            var enemyUnits = new Unit[]
+            {
+                _unitFactory.GetNewUnit(_map, 0, 1, _unitPrefabTable, this),
+                //_unitFactory.GetNewUnit(_map, 1, 1, _unitPrefabTable, this),
+            };
+
+            enemyUnits[0].position = new Vector3(104.59f, 0, 53.28f);
             //enemyUnits[1].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
 
             var otherPlayer = new Player();
-            //otherPlayer.units.AddRange(enemyUnits);
+            otherPlayer.units.AddRange(enemyUnits);
             uint otherPlayerID = 1;
             _allPlayerByTeam.players.Add(otherPlayerID, new List<Player>());
             _allPlayerByTeam.players[otherPlayerID].Add(otherPlayer);
