@@ -60,6 +60,10 @@ namespace Shared.Table
         public UnitType Type { get; set; }
         
         public bool Controllable { get; set; }
+        
+        public int Width { get; set; }
+        
+        public int Height { get; set; }
     }
 
     public class UnitUpgradeAbilityAttribute

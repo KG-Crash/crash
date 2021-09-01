@@ -241,6 +241,11 @@ namespace Game
             }
         }
 
+        public FixVector2 size => new FixVector2(new Fix64(this.table.Width) / new Fix64(10000), new Fix64(this.table.Height) / new Fix64(10000));
+
+        public FixRect collisionBox => GetCollisionBox(this.position);
+        public IEnumerable<KG.Map.Cell> collisionCells => GetCollisionCells(this.position);
+
         public bool IsDead => _hp == Fix64.Zero;
 
         
@@ -261,6 +266,44 @@ namespace Game
             this._hp = this.maxhp;
         }
 
+        private FixRect GetCollisionBox(FixVector2 position)
+        {
+            var size = this.size;
+            var half = size / new Fix64(2);
+            return new FixRect(position.x - half.x, position.y - half.y, size.x, size.y);
+        }
+
+        private IEnumerable<KG.Map.Cell> GetCollisionCells(FixVector2 position)
+        {
+            var collisionBox = GetCollisionBox(position);
+            var min = new FixVector2(collisionBox.minX, collisionBox.minY);
+            var max = new FixVector2(collisionBox.maxX, collisionBox.maxY);
+
+            var cells = new List<KG.Map.Cell>();
+            var begin = this.map[min];
+            if (begin == null)
+                yield break;
+
+            var end = this.map[max];
+            if (end == null)
+                yield break;
+
+            for (int row = begin.row; row <= end.row; row++)
+            {
+                for (int col = begin.col; col <= end.col; col++)
+                {
+                    yield return this.map[row, col];
+                }
+            }
+
+            yield break;
+        }
+
+        public bool IsWalkable(KG.Map.Cell cell)
+        {
+            return GetCollisionCells(cell.position).All(x => x.walkable);
+        }
+
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.blue;
@@ -269,6 +312,24 @@ namespace Game
                 var begin = _cellPath[i];
                 var end = _cellPath[i + 1];
                 Gizmos.DrawLine(begin.position, end.position);
+            }
+
+            //var area = this.collisionBox;
+            //Gizmos.DrawLine(new Vector3(area.minX, 0, area.minY), new Vector3(area.maxX, 0, area.minY));
+            //Gizmos.DrawLine(new Vector3(area.minX, 0, area.maxY), new Vector3(area.maxX, 0, area.maxY));
+            //Gizmos.DrawLine(new Vector3(area.minX, 0, area.minY), new Vector3(area.minX, 0, area.maxY));
+            //Gizmos.DrawLine(new Vector3(area.maxX, 0, area.minY), new Vector3(area.maxX, 0, area.maxY));
+
+            //Gizmos.color = Color.red;
+            var cells = this.collisionCells;
+            foreach (var cell in cells)
+            {
+                var cellBox = new FixRect(cell.position.x, cell.position.y, cell.size, cell.size);
+
+                Gizmos.DrawLine(new Vector3(cellBox.minX, 0, cellBox.minY), new Vector3(cellBox.maxX, 0, cellBox.minY));
+                Gizmos.DrawLine(new Vector3(cellBox.minX, 0, cellBox.maxY), new Vector3(cellBox.maxX, 0, cellBox.maxY));
+                Gizmos.DrawLine(new Vector3(cellBox.minX, 0, cellBox.minY), new Vector3(cellBox.minX, 0, cellBox.maxY));
+                Gizmos.DrawLine(new Vector3(cellBox.maxX, 0, cellBox.minY), new Vector3(cellBox.maxX, 0, cellBox.maxY));
             }
         }
 
@@ -455,7 +516,14 @@ namespace Game
                 }
                 
                 var allowed = GetAllowedRegions(start.region, next.region);
-                _cellPath = _map.cells.Find(start, next, node => allowed.Any(x => x == node.data.region));
+                var collisionList = this.collisionCells;
+                _cellPath = _map.cells.Find(start, next, node => 
+                {
+                    if (allowed.Any(x => x == node.data.region) == false)
+                        return false;
+
+                    return IsWalkable(node.data);
+                });
                 UnityEngine.Debug.Log($"update detail route. remained regions : {_regionPath.Count}");
 
                 _destination = position;

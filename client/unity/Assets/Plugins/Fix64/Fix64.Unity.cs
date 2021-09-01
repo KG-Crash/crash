@@ -216,7 +216,7 @@ namespace FixMath.NET
             this.minX = x;
             this.minY = y;
             this.maxX = x + width;
-            this.maxY = x + height;
+            this.maxY = y + height;
         }
 
         public FixRect(FixVector2 position, FixVector2 size) : this(position.x, position.y, size.x, size.y)

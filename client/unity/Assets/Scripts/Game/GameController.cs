@@ -20,6 +20,10 @@ namespace Game
         [SerializeField] private KG.Map _map;
         [SerializeField] private UnitFactory _unitFactory;
         [SerializeField] private UnitTable _unitPrefabTable;
+
+        [Header("Debug")]
+        public Transform spawnMine;
+        public Transform spawnEnemy;
         
         private void Awake()
         {
@@ -33,11 +37,11 @@ namespace Game
             var units = new Unit[]
             {
                 _unitFactory.GetNewUnit(_map, 0, 0, _unitPrefabTable, this),
-                _unitFactory.GetNewUnit(_map, 1, 0, _unitPrefabTable, this),
-                _unitFactory.GetNewUnit(_map, 2, 0, _unitPrefabTable, this)
+                //_unitFactory.GetNewUnit(_map, 1, 0, _unitPrefabTable, this),
+                //_unitFactory.GetNewUnit(_map, 2, 0, _unitPrefabTable, this)
             };
 
-            units[0].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
+            units[0].position = spawnMine.position;
             //units[1].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
             //units[2].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
 
@@ -62,7 +66,7 @@ namespace Game
                 //_unitFactory.GetNewUnit(_map, 1, 1, _unitPrefabTable, this),
             };
 
-            enemyUnits[0].position = new Vector3(104.59f, 0, 53.28f);
+            enemyUnits[0].position = spawnEnemy.position;
             //enemyUnits[1].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
 
             var otherPlayer = new Player();

@@ -1480,6 +1480,36 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4458472104174864, guid: 48986291d0154f8448d04d448fa98bbe, type: 3}
   m_PrefabInstance: {fileID: 617822564}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &685684698
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 685684699}
+  m_Layer: 0
+  m_Name: Spawn(enemy)
+  m_TagString: Untagged
+  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &685684699
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 685684698}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 114.76417, y: 0, z: 47.36992}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &721993099
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2376,6 +2406,36 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4458472104174864, guid: 48986291d0154f8448d04d448fa98bbe, type: 3}
   m_PrefabInstance: {fileID: 1057280797}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1074358149
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1074358150}
+  m_Layer: 0
+  m_Name: Spawn(mine)
+  m_TagString: Untagged
+  m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1074358150
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1074358149}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 16.81, y: 0, z: 9.47}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1122248842
 GameObject:
   m_ObjectHideFlags: 0
@@ -2463,6 +2523,8 @@ MonoBehaviour:
   _map: {fileID: 1442949749}
   _unitFactory: {fileID: 1122248849}
   _unitPrefabTable: {fileID: 11400000, guid: 90bd777a778c3ef40941d1163ecba028, type: 2}
+  spawnMine: {fileID: 1074358150}
+  spawnEnemy: {fileID: 685684699}
 --- !u!114 &1122248848
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3280,7 +3342,6 @@ MonoBehaviour:
   drawCells: 0
   drawEdges: 0
   drawRegionEdges: 0
-  drawPathRoute: 0
 --- !u!4 &1470605784 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4458472104174864, guid: 48986291d0154f8448d04d448fa98bbe, type: 3}
