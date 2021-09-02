@@ -10,6 +10,7 @@ namespace Game
         {
             var unitOrigin = unitTable.GetOrigin(unitOriginID);
             var unit = Object.Instantiate(unitOrigin);
+            unit.unitOriginID = unitOriginID;
             unit.unitID = _sequence++;
             unit.teamID = teamID;
             unit.listener = listener;

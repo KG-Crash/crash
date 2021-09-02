@@ -34,8 +34,8 @@ namespace Game
             void OnClear(Unit unit);
         }
 
-        public Shared.Table.Unit table { get; private set; }
-        public List<Shared.Table.Skill> skills { get; private set; }
+        public Shared.Table.Unit table => Table.From<TableUnit>()[this._unitOriginID];
+        public List<Shared.Table.Skill> skills => Table.From<TableSkill>().Values.Where(x => x.Unit == this.unitOriginID).ToList();
 
 
         [SerializeField] private int _unitOriginID;
@@ -58,6 +58,7 @@ namespace Game
         public int unitOriginID
         {
             get => _unitOriginID;
+            set => _unitOriginID = value;
         }
 
         public uint unitID
@@ -261,8 +262,6 @@ namespace Game
             // TODO : 제거해야함 테스트코드임
             this.owner = new Player();
             this.owner.SetAbilityFlag(Ability.UPGRADE_4 | Ability.UPGRADE_10);
-            this.table = Table.From<TableUnit>()[this._unitOriginID];
-            this.skills = Table.From<TableSkill>().Values.Where(x => x.Unit == this.unitOriginID).ToList();
             this._hp = this.maxhp;
         }
 
@@ -504,6 +503,12 @@ namespace Game
                 var end = _map[position];
                 if (end == null)
                     throw new Exception();
+
+                if (this.table.Flyable)
+                {
+                    _cellPath = new List<KG.Map.Cell> { end };
+                    return;
+                }
 
                 if (updateWithRegion)
                     _regionPath = _map.regions.Find(this.region, end.region);

@@ -37,19 +37,20 @@ namespace Game
             var units = new Unit[]
             {
                 _unitFactory.GetNewUnit(_map, 0, 0, _unitPrefabTable, this),
-                //_unitFactory.GetNewUnit(_map, 1, 0, _unitPrefabTable, this),
-                //_unitFactory.GetNewUnit(_map, 2, 0, _unitPrefabTable, this)
+                _unitFactory.GetNewUnit(_map, 1, 0, _unitPrefabTable, this),
+                _unitFactory.GetNewUnit(_map, 2, 0, _unitPrefabTable, this)
             };
 
             units[0].position = spawnMine.position;
-            //units[1].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
-            //units[2].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
+            units[1].position = spawnMine.position;
+            units[2].position = spawnMine.position;
 
             var end = _map.cells.OrderBy(x => x.data.row + x.data.col).LastOrDefault(x => x.data.walkable);
             if (end == null)
                 return;
 
             units[0].MoveTo(end.data.position);
+            units[2].MoveTo(end.data.position);
 
             _playerID = 0;
             _playerTeamID = 0;
