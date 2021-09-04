@@ -5,12 +5,12 @@ namespace Game
 {
     public partial class GameController : Player.IPlayerListener 
     {
-        public void AttackTargetChanged(int playerID, int targetPlayerID)
+        public void AttackTargetChanged(uint playerID, uint? targetPlayerID)
         {
             Debug.Log($"PlayerLevelChanged({playerID}, {targetPlayerID})");
         }
 
-        public void PlayerLevelChanged(int playerID, int level)
+        public void PlayerLevelChanged(uint playerID, uint level)
         {
             Debug.Log($"PlayerLevelChanged({playerID}, {level})");
         }

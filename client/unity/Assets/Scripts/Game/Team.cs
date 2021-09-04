@@ -59,8 +59,8 @@ namespace Game
         public interface IPlayerListener
         {
             void FinishUpgrade(Ability ability);
-            void AttackTargetChanged(int playerId, int? targetPlayerID);
-            void PlayerLevelChanged(int playerID, int level);
+            void AttackTargetChanged(uint playerId, uint? targetPlayerID);
+            void PlayerLevelChanged(uint playerID, uint level);
         }
         
         public uint playerID { get; private set; }
@@ -167,6 +167,11 @@ namespace Game
                 SetAbilityFlag(ability);
                 listener?.FinishUpgrade(ability);
             }
+        }
+
+        public void SetTarget(uint? targetPlayerID)
+        {
+            listener?.AttackTargetChanged(playerID, targetPlayerID);
         }
     }
     #endregion
