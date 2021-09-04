@@ -78,6 +78,18 @@ namespace Game
             }
         }
 
+        public uint _exp = 0;
+        public uint exp
+        {
+            get => _exp;
+            set
+            {
+                /*레벨에 맞는 exp 체크 후 거시기 하면 업*/
+                _exp = value;
+            }
+        }
+        public int level { get; set; }
+
         public IPlayerListener listener { get; private set; }
         
         #region Upgrade
