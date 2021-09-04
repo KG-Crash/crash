@@ -66,6 +66,8 @@ namespace Shared.Table
         public int Height { get; set; }
         
         public bool Flyable { get; set; }
+        
+        public int KillScore { get; set; }
     }
 
     public class UnitUpgradeAbilityAttribute
