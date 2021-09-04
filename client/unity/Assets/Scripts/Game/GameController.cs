@@ -17,6 +17,8 @@ namespace Game
         [NonSerialized] private List<Unit> _selectedUnits;
         [NonSerialized] private List<Unit> _allUnitInFrustum;
 
+        [SerializeField] private Transform _focusTransform;
+        
         [SerializeField] private KG.Map _map;
         [SerializeField] private UnitFactory _unitFactory;
         [SerializeField] private UnitTable _unitPrefabTable;
@@ -24,6 +26,55 @@ namespace Game
         [Header("Debug")]
         public Transform spawnMine;
         public Transform spawnEnemy;
+        
+        private static uint playerIDStepper = 0;
+
+        private Player AddNewPlayer(uint teamID, int spawnIndex)
+        {
+            var newPlayer = new Player(playerIDStepper++, teamID, this);
+            _allPlayerByTeam.AddPlayer(teamID, newPlayer);
+            newPlayer.spawnIndex = spawnIndex;
+            
+            return newPlayer;
+        }
+
+        private Unit SpawnUnitToPlayerStart(int spawnUnitOriginID, Player ownPlayer)
+        {
+            var newUnit = _unitFactory.GetNewUnit(_map, spawnUnitOriginID, ownPlayer.teamID, _unitPrefabTable, this);
+            ownPlayer.units.Add(newUnit);
+            newUnit.position = _map.GetSpawnPosition(ownPlayer.spawnIndex);
+
+            return newUnit;
+        }
+
+        /*
+         * 유닛 스폰 및 해당 맵의 첫번째 처리 루틴,
+         * 지금은 임시 코드가 들어감.
+         */
+        private void OnLoadScene()
+        {   
+            _allPlayerByTeam = new Team();
+            
+            var player = AddNewPlayer(0, 0);
+            
+            SpawnUnitToPlayerStart(0, player);
+            SpawnUnitToPlayerStart(1, player);
+            SpawnUnitToPlayerStart(2, player);
+
+            var otherPlayer = AddNewPlayer(1, 1);
+            
+            SpawnUnitToPlayerStart(0, otherPlayer);
+            SpawnUnitToPlayerStart(1, otherPlayer);
+
+            _player = player;
+
+            if (_player.units.Any())
+            {
+                var sum = _player.units.Aggregate(FixVector3.Zero, (acc, x) => acc + x.position);
+                var lookPosition = sum / _player.units.Count();
+                _focusTransform.position = lookPosition;
+            }
+        }
         
         private void Awake()
         {

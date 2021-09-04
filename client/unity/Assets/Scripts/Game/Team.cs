@@ -3,6 +3,7 @@ using Shared.Table;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Game
 {
@@ -10,6 +11,45 @@ namespace Game
     public class Team
     {
         public Dictionary<uint, List<Player>> players { get; private set; } = new Dictionary<uint, List<Player>>();
+
+        public void AddPlayer(uint teamID, Player player)
+        {
+            List<Player> playerList = null;
+            
+            if (players.ContainsKey(teamID))
+            {
+                playerList = players[teamID];
+
+                if (playerList == null)
+                {
+                    playerList = new List<Player>();
+                    players[teamID] = playerList;
+                }
+            }
+            else
+            {                    
+                playerList = new List<Player>();
+                players.Add(teamID, playerList);
+            }
+            
+            playerList.Add(player);
+        }
+
+        public Player GetPlayer(int playerID)
+        {
+            var finedPlayer = players.
+                SelectMany(x => x.Value).
+                FirstOrDefault(x => x.playerID == playerID);
+
+            if (finedPlayer == default(Player))
+            {
+                return null;                    
+            }
+            else
+            {
+                return finedPlayer;
+            }
+        }
     }
     #endregion
 

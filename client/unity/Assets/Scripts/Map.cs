@@ -8,7 +8,17 @@ using UnityEngine;
 namespace KG
 {
     public partial class Map : MonoBehaviour
-    {
+    {    
+        public Vector2Int[] spawnTilePositions;
+
+        public FixVector3 GetSpawnPosition(int index)
+        {
+            var tilePos = spawnTilePositions[index];
+            var cellCenter = this[tilePos.x, tilePos.y].center;
+            
+            return new FixVector3(cellCenter.x, this.transform.position.y, cellCenter.y);
+        }
+
         #region Region
         public class Region : IPathFindable
         {
@@ -73,6 +83,7 @@ namespace KG
         public int height { get; private set; } = 168;
         public int scale { get; private set; } = 4;
 
+        
         public static implicit operator Cell[](Map map) => map._cells;
 
         public Cell this[FixVector2 position]
