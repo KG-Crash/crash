@@ -8,7 +8,7 @@ namespace Game
         public void OnDead(Unit unit, Unit from)
         {
             if (from)
-                from.owner.exp += unit.killScore;
+                from.owner.exp += (uint)unit.killScore;
             
             unit.animator.SetTrigger("Dead");
         }
