@@ -28,53 +28,8 @@ namespace Game
         private void Awake()
         {
             Handler.Instance.Bind(this);
-
-            var firstCell = _map.cells.FirstOrDefault(x => x.data.walkable);
-            if (firstCell == null)
-                return;
-
-            // 임시 코드 지워야함
-            var units = new Unit[]
-            {
-                _unitFactory.GetNewUnit(_map, 0, 0, _unitPrefabTable, this),
-                _unitFactory.GetNewUnit(_map, 1, 0, _unitPrefabTable, this),
-                _unitFactory.GetNewUnit(_map, 2, 0, _unitPrefabTable, this)
-            };
-
-            units[0].position = spawnMine.position;
-            units[1].position = spawnMine.position;
-            units[2].position = spawnMine.position;
-
-            var end = _map.cells.OrderBy(x => x.data.row + x.data.col).LastOrDefault(x => x.data.walkable);
-            if (end == null)
-                return;
-
-            units[0].MoveTo(end.data.position);
-            units[2].MoveTo(end.data.position);
-
-            _playerID = 0;
-            _playerTeamID = 0;
-            _player = new Player();
-            _player.units.AddRange(units);
-
-            _allPlayerByTeam = new Team();
-            _allPlayerByTeam.players.Add(_playerTeamID, new List<Player>());
-            _allPlayerByTeam.players[_playerTeamID].Add(_player);
-
-            var enemyUnits = new Unit[]
-            {
-                _unitFactory.GetNewUnit(_map, 0, 1, _unitPrefabTable, this),
-                //_unitFactory.GetNewUnit(_map, 1, 1, _unitPrefabTable, this),
-            };
-
-            enemyUnits[0].position = spawnEnemy.position;
-            //enemyUnits[1].position = new Vector3(firstCell.data.position.x, 0, firstCell.data.position.y);
-
-            var otherPlayer = new Player();
-            otherPlayer.units.AddRange(enemyUnits);
-            uint otherPlayerID = 1;
-            _allPlayerByTeam.players.Add(otherPlayerID, new List<Player>());
-            _allPlayerByTeam.players[otherPlayerID].Add(otherPlayer);
+            
+            OnLoadScene();
             
             _selectedUnits = new List<Unit>();
             _allUnitInFrustum = new List<Unit>();
