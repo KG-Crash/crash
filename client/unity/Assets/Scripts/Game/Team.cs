@@ -52,14 +52,14 @@ namespace Game
         }
     }
     #endregion
-
+    
     #region Player
     public class Player
     {
         public interface IPlayerListener
         {
             void FinishUpgrade(Ability ability);
-            void AttackTargetChanged(int playerId, int targetPlayerID);
+            void AttackTargetChanged(int playerId, int? targetPlayerID);
             void PlayerLevelChanged(int playerID, int level);
         }
         
