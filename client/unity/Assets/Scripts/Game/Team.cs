@@ -35,7 +35,7 @@ namespace Game
             playerList.Add(player);
         }
 
-        public Player GetPlayer(int playerID)
+        public Player GetPlayer(uint playerID)
         {
             var finedPlayer = players.
                 SelectMany(x => x.Value).
@@ -67,6 +67,17 @@ namespace Game
         public uint teamID { get; private set; }
         public int spawnIndex { get; set; }
         
+        private uint? _targetPlayerID = null;
+        public uint? targetPlayerID
+        {
+            get => _targetPlayerID;
+            set
+            {
+                _targetPlayerID = value;
+                listener?.AttackTargetChanged(playerID, _targetPlayerID);
+            }
+        }
+
         public IPlayerListener listener { get; private set; }
         
         #region Upgrade
@@ -167,11 +178,6 @@ namespace Game
                 SetAbilityFlag(ability);
                 listener?.FinishUpgrade(ability);
             }
-        }
-
-        public void SetTarget(uint? targetPlayerID)
-        {
-            listener?.AttackTargetChanged(playerID, targetPlayerID);
         }
     }
     #endregion
