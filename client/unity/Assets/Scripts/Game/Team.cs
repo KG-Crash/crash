@@ -16,6 +16,19 @@ namespace Game
     #region Player
     public class Player
     {
+        public interface IPlayerListener
+        {
+            void FinishUpgrade(Ability ability);
+            void AttackTargetChanged(int playerId, int targetPlayerID);
+            void PlayerLevelChanged(int playerID, int level);
+        }
+        
+        public uint playerID { get; private set; }
+        public uint teamID { get; private set; }
+        public int spawnIndex { get; set; }
+        
+        public IPlayerListener listener { get; private set; }
+        
         #region Upgrade
         /// <summary>
         /// 업그레이드 상태
@@ -33,9 +46,12 @@ namespace Game
         /// </summary>
         public UnitCollection units;
 
-        public Player()
+        public Player(uint playerID, uint teamID, IPlayerListener listener)
         {
             units = new UnitCollection(this);
+            this.listener = listener;
+            this.playerID = playerID;
+            this.teamID = teamID;
         }
 
         public Dictionary<StatType, int> AdditionalStat(uint unitID)
@@ -54,6 +70,63 @@ namespace Game
         {
             abilities |= ability;
             return abilities;
+        }
+        
+        private Dictionary<Ability, float> _upgradeStartTime = new Dictionary<Ability, float>();
+
+        public void StartUpgrade(Ability ability)
+        {
+            if (ability == Ability.NONE)
+            {
+                return;
+            }
+            
+            if (!_upgradeStartTime.ContainsKey(ability))
+            {
+                _upgradeStartTime.Add(ability, UnityEngine.Time.time);   
+                Debug.Log($"StartUpgrade({ability}), After {Table.From<TableUnitUpgradeCost>()[ability].Time}ms");
+            }
+        }
+
+        public void UpdateUpgrade(float time)
+        {
+            // 임시 테스트 코드
+            if (Input.GetKeyUp(KeyCode.Alpha1))
+                StartUpgrade(Ability.UPGRADE_1);
+            if (Input.GetKeyUp(KeyCode.Alpha2))
+                StartUpgrade(Ability.UPGRADE_2);
+            if (Input.GetKeyUp(KeyCode.Alpha3))
+                StartUpgrade(Ability.UPGRADE_3);
+            if (Input.GetKeyUp(KeyCode.Alpha4))
+                StartUpgrade(Ability.UPGRADE_4);
+            if (Input.GetKeyUp(KeyCode.Alpha5))
+                StartUpgrade(Ability.UPGRADE_5);
+            if (Input.GetKeyUp(KeyCode.Alpha6))
+                StartUpgrade(Ability.UPGRADE_6);
+            if (Input.GetKeyUp(KeyCode.Alpha7))
+                StartUpgrade(Ability.UPGRADE_7);
+            if (Input.GetKeyUp(KeyCode.Alpha8))
+                StartUpgrade(Ability.UPGRADE_8);
+            if (Input.GetKeyUp(KeyCode.Alpha9))
+                StartUpgrade(Ability.UPGRADE_9);
+            // 임시 테스트 코드
+            
+            List<Ability> completeList = new List<Ability>();
+            
+            foreach (var k in _upgradeStartTime.Keys)
+            {
+                if (_upgradeStartTime[k] + Table.From<TableUnitUpgradeCost>()[k].Time / 1000.0f < time)
+                {
+                    completeList.Add(k);
+                }
+            }
+
+            foreach (var ability in completeList)
+            {
+                _upgradeStartTime.Remove(ability);
+                SetAbilityFlag(ability);
+                listener?.FinishUpgrade(ability);
+            }
         }
     }
     #endregion

@@ -82,7 +82,7 @@ namespace Game
 
         private void Update()
         {
-            UpdateUpgrade(UnityEngine.Time.time);
+            _player.UpdateUpgrade(UnityEngine.Time.time);
             UpdateUnitInFrustumPlane();
         }
 
