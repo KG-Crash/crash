@@ -58,9 +58,9 @@ namespace Game
     {
         public interface IPlayerListener
         {
-            void FinishUpgrade(Ability ability);
-            void AttackTargetChanged(uint playerId, uint? targetPlayerID);
-            void PlayerLevelChanged(uint playerID, uint level);
+            void OnFinishUpgrade(Ability ability);
+            void OnAttackTargetChanged(uint playerId, uint? targetPlayerID);
+            void OnPlayerLevelChanged(uint playerID, uint level);
         }
         
         public uint playerID { get; private set; }
@@ -74,7 +74,7 @@ namespace Game
             set
             {
                 _targetPlayerID = value;
-                listener?.AttackTargetChanged(playerID, _targetPlayerID);
+                listener?.OnAttackTargetChanged(playerID, _targetPlayerID);
             }
         }
 
@@ -105,7 +105,7 @@ namespace Game
             set
             {
                 _level = value;
-                listener?.PlayerLevelChanged(playerID, _level);
+                listener?.OnPlayerLevelChanged(playerID, _level);
             }
         }
 
@@ -186,7 +186,7 @@ namespace Game
             {
                 _upgradeStartTime.Remove(ability);
                 SetAbilityFlag(ability);
-                listener?.FinishUpgrade(ability);
+                listener?.OnFinishUpgrade(ability);
             }
         }
     }

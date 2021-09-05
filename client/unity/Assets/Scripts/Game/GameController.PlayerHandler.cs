@@ -37,7 +37,7 @@ namespace Game
             }
         }
         
-        public void AttackTargetChanged(uint playerID, uint? targetPlayerID)
+        public void OnAttackTargetChanged(uint playerID, uint? targetPlayerID)
         {
             var player = GetPlayer(playerID);
 
@@ -60,14 +60,14 @@ namespace Game
             }
         }
 
-        public void PlayerLevelChanged(uint playerID, uint level)
+        public void OnPlayerLevelChanged(uint playerID, uint level)
         {
-            Debug.Log($"PlayerLevelChanged({playerID}, {level})");
+            Debug.Log($"OnPlayerLevelChanged({playerID}, {level})");
         }
 
-        public void FinishUpgrade(Ability ability)
+        public void OnFinishUpgrade(Ability ability)
         {
-            Debug.Log($"FinishUpgrade({ability})");
+            Debug.Log($"OnFinishUpgrade({ability})");
         }
     }
 }
