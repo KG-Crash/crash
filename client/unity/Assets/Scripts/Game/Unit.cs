@@ -382,7 +382,8 @@ namespace Game
                     break;
 
                 case UnitState.Attack:
-                    if (_target.position == null)
+
+                    if (_target == null)
                     {
                         DeltaMove((Fix64)Time.deltaTime);
                         break;
@@ -516,13 +517,9 @@ namespace Game
                 if (updateWithRegion)
                     _regionPath = _map.regions.Find(this.region, end.region);
 
-                var next = _regionPath.First().centroid;
-                if (_regionPath.Count < 2)
-                {
-                    UnityEngine.Debug.Log("set final position");
-                    next = end;
-                }
-                
+                var next = _regionPath.Count < 2 ?
+                    end : _regionPath.First().centroid;
+
                 var allowed = GetAllowedRegions(start.region, next.region);
                 var collisionList = this.collisionCells;
                 _cellPath = _map.cells.Find(start, next, node => 
