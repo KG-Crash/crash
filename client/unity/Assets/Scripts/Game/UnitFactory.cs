@@ -6,14 +6,12 @@ namespace Game
     {
         private uint _sequence = 0;
         
-        public Unit GetNewUnit(KG.Map map, int unitOriginID, UnitTable unitTable, Unit.Listener listener)
+        public Unit GetNewUnit(int unitOriginID, UnitTable unitTable, KG.Map map, Player owner, Unit.Listener listener)
         {
             var unitOrigin = unitTable.GetOrigin(unitOriginID);
             var unit = Object.Instantiate(unitOrigin);
-            unit.unitOriginID = unitOriginID;
-            unit.unitID = _sequence++;
-            unit.listener = listener;
-            unit.map = map;
+            unit.Init(_sequence++, map, owner, listener);
+            unit.SetMaxHP();
             return unit;
         }
     }

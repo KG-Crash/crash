@@ -46,7 +46,7 @@ namespace Game
 
         private Unit SpawnUnitToPlayerStart(int spawnUnitOriginID, Player ownPlayer)
         {
-            var newUnit = _unitFactory.GetNewUnit(_map, spawnUnitOriginID, _unitPrefabTable, this);
+            var newUnit = _unitFactory.GetNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this);
             ownPlayer.units.Add(newUnit);
             newUnit.position = _map.GetSpawnPosition(ownPlayer.spawnIndex);
 

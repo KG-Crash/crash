@@ -263,11 +263,6 @@ namespace Game
             _rendereres = GetComponentsInChildren<Renderer>();
         }
 
-        public Unit()
-        {
-            this._hp = this.maxhp;
-        }
-
         private FixRect GetCollisionBox(FixVector2 position)
         {
             var size = this.size;
@@ -335,9 +330,17 @@ namespace Game
             }
         }
 
-        private void Start()
+        public void Init(uint unitID, KG.Map map, Player owner, Unit.Listener listener)
         {
-            
+            this.unitID = unitID;
+            this._map = map;
+            this._owner = owner;
+            this._listener = listener;
+        }
+
+        public void SetMaxHP()
+        {
+            _hp = maxhp;
         }
 
         private void Update()
@@ -463,7 +466,7 @@ namespace Game
             // TODO : 섹터 적용 시, 유닛 리스트 가져오기 새로 짜야함.
             var gameController = FindObjectOfType<GameController>();
             return GetNearUnits().
-                Where(x => x.teamID != this.teamID).
+                Where(x => !x.IsDead && x.teamID != this.teamID).
                 OrderBy(x => (this.position - x.position).sqrMagnitude).
                 FirstOrDefault(x => (this.position - x.position).sqrMagnitude <= searchRadius * searchRadius);
         }
