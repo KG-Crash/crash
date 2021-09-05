@@ -54,8 +54,7 @@ namespace Game
                 var targetPosition = _map.GetSpawnPosition(targetPlayer.spawnIndex);
                 foreach (var unit in player.units)
                 {
-                    // 어택땅 필요함;
-                    // unit.AttackTo(targetPosition);
+                    unit.MoveTo(targetPosition);
                 }
             }
         }
