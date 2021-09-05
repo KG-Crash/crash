@@ -84,11 +84,30 @@ namespace Game
             get => _exp;
             set
             {
-                /*레벨에 맞는 exp 체크 후 거시기 하면 업*/
                 _exp = value;
+
+                var levelExpTable = Table.From<TableLevelExp>();
+                
+                if (levelExpTable.ContainsKey((int)_level + 1))
+                {
+                    if ((int)_exp >= levelExpTable[(int)_level + 1].Exp)
+                    {
+                        level = _level + 1;
+                    }
+                }
             }
         }
-        public int level { get; set; }
+
+        private uint _level = 1;
+        public uint level
+        {
+            get => _level;
+            set
+            {
+                _level = value;
+                listener?.PlayerLevelChanged(playerID, _level);
+            }
+        }
 
         public IPlayerListener listener { get; private set; }
         
