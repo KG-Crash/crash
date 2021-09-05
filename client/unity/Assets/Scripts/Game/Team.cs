@@ -153,27 +153,6 @@ namespace Game
 
         public void UpdateUpgrade(float time)
         {
-            // 임시 테스트 코드
-            if (Input.GetKeyUp(KeyCode.Alpha1))
-                StartUpgrade(Ability.UPGRADE_1);
-            if (Input.GetKeyUp(KeyCode.Alpha2))
-                StartUpgrade(Ability.UPGRADE_2);
-            if (Input.GetKeyUp(KeyCode.Alpha3))
-                StartUpgrade(Ability.UPGRADE_3);
-            if (Input.GetKeyUp(KeyCode.Alpha4))
-                StartUpgrade(Ability.UPGRADE_4);
-            if (Input.GetKeyUp(KeyCode.Alpha5))
-                StartUpgrade(Ability.UPGRADE_5);
-            if (Input.GetKeyUp(KeyCode.Alpha6))
-                StartUpgrade(Ability.UPGRADE_6);
-            if (Input.GetKeyUp(KeyCode.Alpha7))
-                StartUpgrade(Ability.UPGRADE_7);
-            if (Input.GetKeyUp(KeyCode.Alpha8))
-                StartUpgrade(Ability.UPGRADE_8);
-            if (Input.GetKeyUp(KeyCode.Alpha9))
-                StartUpgrade(Ability.UPGRADE_9);
-            // 임시 테스트 코드
-            
             List<Ability> completeList = new List<Ability>();
             
             foreach (var k in _upgradeStartTime.Keys)

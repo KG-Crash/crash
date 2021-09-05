@@ -30,6 +30,11 @@ namespace Game
         
         private static uint playerIDStepper = 0;
 
+        public Player GetPlayer(uint playerID)
+        {
+            return _allPlayerByTeam.GetPlayer(playerID);
+        }
+        
         private Player AddNewPlayer(uint teamID, int spawnIndex)
         {
             var newPlayer = new Player(playerIDStepper++, teamID, this);
@@ -41,7 +46,7 @@ namespace Game
 
         private Unit SpawnUnitToPlayerStart(int spawnUnitOriginID, Player ownPlayer)
         {
-            var newUnit = _unitFactory.GetNewUnit(_map, spawnUnitOriginID, ownPlayer.teamID, _unitPrefabTable, this);
+            var newUnit = _unitFactory.GetNewUnit(_map, spawnUnitOriginID, _unitPrefabTable, this);
             ownPlayer.units.Add(newUnit);
             newUnit.position = _map.GetSpawnPosition(ownPlayer.spawnIndex);
 
@@ -89,6 +94,7 @@ namespace Game
 
         private void Update()
         {
+            UpdateForDebug();
             _player.UpdateUpgrade(UnityEngine.Time.time);
             UpdateUnitInFrustumPlane();
         }
@@ -216,6 +222,5 @@ namespace Game
         {
             ApplyCommand(commands);
         }
-
     }
 }

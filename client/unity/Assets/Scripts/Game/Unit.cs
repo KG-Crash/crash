@@ -43,10 +43,13 @@ namespace Game
         [SerializeField] public Animator animator;
         [SerializeField] private Rigidbody _rigidbody;
 
+        public uint playerID
+        {
+            get => owner.playerID;
+        }
         public uint teamID
         {
-            get => _teamID;
-            set => _teamID = value;
+            get => owner.teamID;
         }
 
         public bool selectable
@@ -162,6 +165,11 @@ namespace Game
             get => _hp;
         }
 
+        public int killScore
+        {
+            get => table.KillScore;
+        }
+
         public Listener listener
         {
             get => _listener;
@@ -248,8 +256,6 @@ namespace Game
         public IEnumerable<KG.Map.Cell> collisionCells => GetCollisionCells(this.position);
 
         public bool IsDead => _hp == Fix64.Zero;
-
-        
 
         [ContextMenu("Gather renderers")]
         private void OnRefreshRenderers()
@@ -459,7 +465,7 @@ namespace Game
             // TODO : 섹터 적용 시, 유닛 리스트 가져오기 새로 짜야함.
             var gameController = FindObjectOfType<GameController>();
             return GetNearUnits().
-                Where(x => x._teamID != this._teamID).
+                Where(x => x.teamID != this.teamID).
                 OrderBy(x => (this.position - x.position).sqrMagnitude).
                 FirstOrDefault(x => (this.position - x.position).sqrMagnitude <= searchRadius * searchRadius);
         }
