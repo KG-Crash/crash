@@ -6,6 +6,14 @@ using System.Collections.Generic;
 
 namespace Shared.Table
 {
+    public class LevelExp
+    {
+        [Key]
+        public int Level { get; set; }
+        
+        public int Exp { get; set; }
+    }
+
     public class SampleAttribute
     {
         [Key]
@@ -113,6 +121,10 @@ namespace Shared.Table
         
         public int Time { get; set; }
     }
+
+    [Table("json/LevelExp.json")]
+    public partial class TableLevelExp : BaseDict<int, LevelExp>
+    { }
 
     [Table("json/SampleAttribute.json")]
     public partial class TableSampleAttribute : BaseDict<string, SampleAttribute>
