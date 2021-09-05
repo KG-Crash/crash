@@ -265,9 +265,6 @@ namespace Game
 
         public Unit()
         {
-            // TODO : 제거해야함 테스트코드임
-            this.owner = new Player();
-            this.owner.SetAbilityFlag(Ability.UPGRADE_4 | Ability.UPGRADE_10);
             this._hp = this.maxhp;
         }
 
