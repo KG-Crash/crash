@@ -234,6 +234,10 @@ namespace Game
         [NonSerialized] private List<KG.Map.Cell> _cellPath = new List<KG.Map.Cell>();
         [NonSerialized] private FixVector3? _destination;
         [NonSerialized] private Unit _target;
+        
+        // 다른 유닛과 부딪힌 횟수
+        [NonSerialized] private int _blocked;
+        [NonSerialized] private DateTime? _blockedTime;
 
 
         private FixVector3 _position;
@@ -418,6 +422,9 @@ namespace Game
 
         private void DeltaMove(Fix64 delta)
         {
+            if (_blockedTime != null && (DateTime.Now - _blockedTime.Value).TotalSeconds < 1)
+                return;
+
             var dst = _cellPath.FirstOrDefault();
             if (dst == null)
             {
@@ -456,8 +463,30 @@ namespace Game
             }
             else
             {
-                //position += FixVector3.Min(direction * speed * delta, diff);
+                var old = new FixVector3(position);
                 position += (direction * speed * delta);
+                var collisionUnit = GetNearUnits().FirstOrDefault(x => x.collisionBox.Contains(this.collisionBox));
+                if (collisionUnit != null)
+                {
+                    _blocked++;
+                    if (_blocked > 2)
+                    {
+                        UpdateMovePath(this._destination.Value, units: new List<Unit> { collisionUnit });
+                        _blocked = 0;
+                        _blockedTime = null;
+                    }
+                    else
+                    {
+                        _blockedTime = DateTime.Now;
+                    }
+
+                    position = old;
+                }
+                else
+                {
+                    _blocked = 0;
+                    _blockedTime = null;
+                }
             }
         }
 
@@ -499,7 +528,7 @@ namespace Game
                 .Select(x => x.data).Concat(src).Distinct().ToList();
         }
 
-        private void UpdateMovePath(FixVector3 position, bool updateWithRegion = false)
+        private void UpdateMovePath(FixVector3 position, bool updateWithRegion = false, List<Unit> units = null)
         {
             try
             {
@@ -525,9 +554,21 @@ namespace Game
 
                 var allowed = GetAllowedRegions(start.region, next.region);
                 var collisionList = this.collisionCells;
+
+                // 정지 상태인 유닛들도 충돌 조건에 포함한다.
+                // 이동중인 유닛은 포함하지 않음
+                // 공격중인 유닛은 어케 처리해야할지...
+                var stopUnits = GetNearUnits().Where(x => x._currentState == UnitState.Idle);
+                if (units != null)
+                    stopUnits.Concat(units).Distinct();
+
+                var collisionBoxes = stopUnits.Select(x => x.collisionBox).ToList();
                 _cellPath = _map.cells.Find(start, next, node => 
                 {
                     if (allowed.Any(x => x == node.data.region) == false)
+                        return false;
+
+                    if (collisionBoxes.Any(x => x.Contains(this.collisionBox)))
                         return false;
 
                     return IsWalkable(node.data);
