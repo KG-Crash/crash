@@ -574,18 +574,16 @@ namespace Game
                 var collisionBoxes = stopUnits.Select(x => x.collisionBox).ToList();
                 if (collisionBoxes.Any(x => x.Contains(end.collisionBox)))
                 {
-                    end = _map.cells.GroupBy(x => x.data.region).FirstOrDefault(x => x.Key == end.region).Where(x =>
+                    end = end.Near(x =>
                     {
-                        if (IsWalkable(x.data) == false)
+                        if (IsWalkable(x) == false)
                             return false;
 
-                        if (collisionBoxes.Any(y => y.Contains(GetCollisionBox(x.data.center, _map.cellSize))))
+                        if (collisionBoxes.Any(y => y.Contains(GetCollisionBox(x.center, _map.cellSize))))
                             return false;
 
                         return true;
-                    }).OrderBy(x => (end.center - x.data.center).sqrMagnitude)
-                    .Select(x => x.data)
-                    .FirstOrDefault();
+                    }, Fix64.One * 3);
 
                     if(end == null)
                         return;

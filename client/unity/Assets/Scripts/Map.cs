@@ -71,6 +71,35 @@ namespace KG
                 this.col = col;
                 this.walkable = walkable;
             }
+
+            public Cell Near(Func<Cell, bool> func, Fix64? limit = null)
+            {
+                var queue = new Queue<Cell>();
+                var hashSet = new HashSet<Cell>();
+                queue.Enqueue(this);
+                hashSet.Add(this);
+
+                while (queue.Count > 0)
+                {
+                    var pivot = queue.Dequeue();
+                    if (func(pivot))
+                        return pivot;
+
+                    foreach (var x in _map.cells[pivot].edges)
+                    {
+                        if (hashSet.Contains(x.data))
+                            continue;
+
+                        if (limit != null && (pivot.center - x.data.center).magnitude > limit.Value)
+                            continue;
+
+                        queue.Enqueue(x.data);
+                        hashSet.Add(x.data);
+                    }
+                }
+
+                return null;
+            }
         }
         #endregion
 
