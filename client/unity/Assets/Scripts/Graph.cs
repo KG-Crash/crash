@@ -66,18 +66,18 @@ namespace KG
 
             var result = new List<T>();
             var openedList = new List<Node>();
-            var closedList = new List<Node>();
+            var closedSet = new HashSet<Node>();
 
             openedList.Add(this[begin]);
-            while (openedList.Count > 0 && closedList.Contains(this[end]) == false)
+            while (openedList.Count > 0 && closedSet.Contains(this[end]) == false)
             {
                 var current = openedList.First();
                 openedList.Remove(current);
-                closedList.Add(current);
+                closedSet.Add(current);
 
                 var nears = current.edges
                     .Where(x => x.data.walkable)
-                    .Where(x => closedList.Contains(x) == false)
+                    .Where(x => closedSet.Contains(x) == false)
                     .Where(x => openedList.Contains(x) == false);
 
                 if (func != null)
@@ -92,10 +92,10 @@ namespace KG
                 }
 
                 openedList.AddRange(nears);
-                openedList = openedList.OrderBy(x => _pathFindingParams[x].F).ToList();
+                openedList = openedList.Distinct().OrderBy(x => _pathFindingParams[x].F).ToList();
             }
 
-            if (closedList.Contains(this[end]) == false)
+            if (closedSet.Contains(this[end]) == false)
                 return result;
 
             var tracked = this[end];

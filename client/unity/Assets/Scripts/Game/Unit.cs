@@ -274,6 +274,15 @@ namespace Game
             return new FixRect(position.x - half.x, position.y - half.y, size.x, size.y);
         }
 
+        private FixRect GetCollisionBox(FixVector2 position, Fix64 padding)
+        {
+            var collisionBox = GetCollisionBox(position);
+            if (padding == Fix64.Zero)
+                return collisionBox;
+
+            return collisionBox.Padding(padding);
+        }
+
         private IEnumerable<KG.Map.Cell> GetCollisionCells(FixVector2 position)
         {
             var collisionBox = GetCollisionBox(position);
@@ -563,15 +572,40 @@ namespace Game
                     stopUnits.Concat(units).Distinct();
 
                 var collisionBoxes = stopUnits.Select(x => x.collisionBox).ToList();
+                if (collisionBoxes.Any(x => x.Contains(end.collisionBox)))
+                {
+                    end = _map.cells.GroupBy(x => x.data.region).FirstOrDefault(x => x.Key == end.region).Where(x =>
+                    {
+                        if (IsWalkable(x.data) == false)
+                            return false;
+
+                        if (collisionBoxes.Any(y => y.Contains(GetCollisionBox(x.data.center, _map.cellSize))))
+                            return false;
+
+                        return true;
+                    }).OrderBy(x => (end.center - x.data.center).sqrMagnitude)
+                    .Select(x => x.data)
+                    .FirstOrDefault();
+
+                    if(end == null)
+                        return;
+
+                    UpdateMovePath(end.center, true, units);
+                    return;
+                }
+
                 _cellPath = _map.cells.Find(start, next, node => 
                 {
                     if (allowed.Any(x => x == node.data.region) == false)
                         return false;
 
-                    if (collisionBoxes.Any(x => x.Contains(this.collisionBox)))
+                    if (IsWalkable(node.data) == false)
                         return false;
 
-                    return IsWalkable(node.data);
+                    if (collisionBoxes.Any(x => x.Contains(GetCollisionBox(node.data.center, _map.cellSize))))
+                        return false;
+
+                    return true;
                 });
                 UnityEngine.Debug.Log($"update detail route. remained regions : {_regionPath.Count}");
 
@@ -746,7 +780,7 @@ namespace Game
             var nodes = new List<KG.Map.Region> { this.region };
             nodes.AddRange(this._map.regions[this.region].edges.Select(x => x.data));
 
-            return nodes.SelectMany(x => x.units);
+            return nodes.SelectMany(x => x.units).Except(new[] { this });
         }
     }
 }

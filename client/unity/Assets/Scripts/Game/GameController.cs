@@ -74,8 +74,8 @@ namespace Game
             var player = AddNewPlayer(0, 0);
             
             SpawnUnitToPlayerStart(0, player);
-            SpawnUnitToPlayerStart(1, player);
-            SpawnUnitToPlayerStart(2, player);
+            //SpawnUnitToPlayerStart(1, player);
+            //SpawnUnitToPlayerStart(2, player);
 
             var otherPlayer = AddNewPlayer(1, 1);
             

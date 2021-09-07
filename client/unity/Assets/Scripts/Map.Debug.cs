@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace KG
@@ -74,6 +76,15 @@ namespace KG
 
             if (drawRegionEdges)
                 OnDrawRegionEdges();
+
+            foreach (var (position, i) in spawnTilePositions.Select((x, i) => (x, i)))
+            {
+                var cell = this[position.y, position.x];
+                if (cell == null)
+                    continue;
+
+                Handles.Label(cell.center, $"{i}");
+            }
         }
     }
 }

@@ -201,7 +201,7 @@ namespace FixMath.NET
         public Fix64 width => maxX - minX;
         public Fix64 height => maxY - minY;
         public bool empty => width == Fix64.Zero || height == Fix64.Zero;
-        
+
         public FixRect(FixRect r)
 		{
             this.minX = r.minX;
@@ -267,6 +267,8 @@ namespace FixMath.NET
 
             return false;
         }
+
+        public FixRect Padding(Fix64 value) => new FixRect(minX - value, minY - value, width + (value * Fix64.One * 2), height + (value * Fix64.One * 2));
 
         public static implicit operator UnityEngine.Rect(FixRect rect) => new UnityEngine.Rect(rect.minX, rect.minY, rect.maxX, rect.maxY);
         public static implicit operator FixRect(UnityEngine.Rect rect) => new FixRect((Fix64)rect.xMin, (Fix64)rect.yMin, (Fix64)rect.xMax, (Fix64)rect.yMax);

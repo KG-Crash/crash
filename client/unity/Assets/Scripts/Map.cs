@@ -60,8 +60,9 @@ namespace KG
             }
             public bool walkable { get; private set; }
 
-            public Fix64 size => Fix64.One / new Fix64(_map.scale);
+            public Fix64 size => _map.cellSize;
             public Fix64 halfSize => size / (Fix64.One * 2);
+            public FixRect collisionBox => new FixRect(position, new FixVector2(size, size));
 
             public Cell(Map map, int row, int col, bool walkable)
             {
@@ -82,8 +83,10 @@ namespace KG
         public int width { get; private set; } = 192;
         public int height { get; private set; } = 168;
         public int scale { get; private set; } = 4;
+        public Fix64 cellSize => Fix64.One / new Fix64(scale);
 
-        
+
+
         public static implicit operator Cell[](Map map) => map._cells;
 
         public Cell this[FixVector2 position]

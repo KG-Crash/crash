@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Shared;
 using UnityEngine;
 
@@ -52,10 +53,11 @@ namespace Game
             {
                 var targetPlayer = GetPlayer(targetPlayerID.Value);
                 var targetPosition = _map.GetSpawnPosition(targetPlayer.spawnIndex);
-                foreach (var unit in player.units)
-                {
-                    unit.MoveTo(targetPosition);
-                }
+                player.units.OrderBy(x => x.unitID).FirstOrDefault().MoveTo(targetPosition);
+                //foreach (var unit in player.units)
+                //{
+                //    unit.MoveTo(targetPosition);
+                //}
             }
         }
 

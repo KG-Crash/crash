@@ -2520,6 +2520,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c43df401f384814d95399334f12a834, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spawnMine: {fileID: 0}
+  spawnEnemy: {fileID: 0}
+  _spawnUnitOriginID: 0
+  _spawnPlayerID: 0
   _focusTransform: {fileID: 606488634}
   _map: {fileID: 1442949749}
   _unitFactory: {fileID: 1122248849}
@@ -3343,7 +3347,7 @@ MonoBehaviour:
   drawRegionEdges: 0
   spawnTilePositions:
   - {x: 32, y: 32}
-  - {x: 64, y: 64}
+  - {x: 112, y: 102}
 --- !u!4 &1470605784 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4458472104174864, guid: 48986291d0154f8448d04d448fa98bbe, type: 3}
