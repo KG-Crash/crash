@@ -24,10 +24,6 @@ namespace Game
         [SerializeField] private UnitFactory _unitFactory;
         [SerializeField] private UnitTable _unitPrefabTable;
 
-        [Header("Debug")]
-        public Transform spawnMine;
-        public Transform spawnEnemy;
-        
         private static uint playerIDStepper = 0;
 
         public Player GetPlayer(uint playerID)
@@ -44,13 +40,27 @@ namespace Game
             return newPlayer;
         }
 
-        private Unit SpawnUnitToPlayerStart(int spawnUnitOriginID, Player ownPlayer)
+        public Unit SpawnUnitToPlayerStart(int spawnUnitOriginID, Player ownPlayer)
         {
             var newUnit = _unitFactory.GetNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this);
             ownPlayer.units.Add(newUnit);
             newUnit.position = _map.GetSpawnPosition(ownPlayer.spawnIndex);
 
             return newUnit;
+        }
+
+        public Unit SpawnUnitToPosition(int spawnUnitOriginID, Player ownPlayer, FixVector3 position)
+        {
+            var newUnit = _unitFactory.GetNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this);
+            ownPlayer.units.Add(newUnit);
+            newUnit.position = position;
+
+            return newUnit;
+        }
+
+        public Unit SpawnUnitToPosition(int spawnUnitOriginID, uint playerID, FixVector3 position)
+        {
+            return SpawnUnitToPosition(spawnUnitOriginID, GetPlayer(playerID), position);
         }
 
         /*

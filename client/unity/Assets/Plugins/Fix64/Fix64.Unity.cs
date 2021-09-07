@@ -184,6 +184,12 @@ namespace FixMath.NET
 
         public static FixVector3 One => new FixVector3(Fix64.One, Fix64.One, Fix64.One);
         public static FixVector3 Zero => new FixVector3(Fix64.Zero, Fix64.Zero, Fix64.Zero);
+        public static FixVector3 Up => new FixVector3(Fix64.Zero, Fix64.One, Fix64.Zero);
+        public static FixVector3 Down => new FixVector3(Fix64.Zero, -Fix64.One, Fix64.Zero);
+        public static FixVector3 Right => new FixVector3(Fix64.One, Fix64.Zero, Fix64.Zero);
+        public static FixVector3 Left => new FixVector3(-Fix64.One, Fix64.Zero, Fix64.Zero);
+        public static FixVector3 Forward => new FixVector3(Fix64.Zero, Fix64.Zero, Fix64.One);
+        public static FixVector3 Backword => new FixVector3(Fix64.Zero, Fix64.Zero, -Fix64.One);
     }
 
     public struct FixRect

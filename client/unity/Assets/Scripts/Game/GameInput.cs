@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using FixMath.NET;
 using UnityEngine;
 
 namespace Game
@@ -56,6 +57,9 @@ namespace Game
 
         public void OnReleaseAltBtn(Vector2 positionSS)
         {
+            var positionWS = _controller.ScreenPositionToWorldPosition(positionSS);
+
+            _controller.SpawnUnitToPosition(_controller._spawnUnitOriginID, _controller._spawnPlayerID, positionWS);
         }
 
         public void OnUpKey()
