@@ -12,7 +12,7 @@ namespace KG
         public FixVector2 position { get; }
     }
 
-    public partial class Graph<T> : IEnumerable<Graph<T>.Node>, IReadOnlyCollection<Graph<T>.Node> where T : IPathFindable
+    public partial class Graph<T> : IEnumerable<Graph<T>.Node>, IReadOnlyCollection<Graph<T>.Node> where T : class, IPathFindable
     {
         #region Node
         public class Node
@@ -107,6 +107,36 @@ namespace KG
             
             result.Reverse();
             return result;
+        }
+
+        public T Round(T pivot, Func<T, bool> callback, Func<T, T, bool> callbackVisit = null)
+        {
+            var queue = new Queue<T>();
+            var visit = new HashSet<T>();
+
+            queue.Enqueue(pivot);
+            visit.Add(pivot);
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                if (callback(current))
+                    return current;
+
+                foreach (var near in _nodes[current].edges.Select(x => x.data))
+                {
+                    if (visit.Contains(near))
+                        continue;
+
+                    if (callbackVisit != null && callbackVisit(current, near) == false)
+                        continue;
+
+                    queue.Enqueue(near);
+                    visit.Add(near);
+                }
+            }
+
+            return null;
         }
     }
 }

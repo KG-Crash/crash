@@ -74,31 +74,16 @@ namespace KG
 
             public Cell Near(Func<Cell, bool> func, Fix64? limit = null)
             {
-                var queue = new Queue<Cell>();
-                var hashSet = new HashSet<Cell>();
-                queue.Enqueue(this);
-                hashSet.Add(this);
-
-                while (queue.Count > 0)
+                return _map.cells.Round(this, func, (pivot, x) =>
                 {
-                    var pivot = queue.Dequeue();
-                    if (func(pivot))
-                        return pivot;
+                    if (limit == null)
+                        return true;
 
-                    foreach (var x in _map.cells[pivot].edges)
-                    {
-                        if (hashSet.Contains(x.data))
-                            continue;
+                    if ((pivot.center - x.center).magnitude < limit.Value)
+                        return true;
 
-                        if (limit != null && (pivot.center - x.data.center).magnitude > limit.Value)
-                            continue;
-
-                        queue.Enqueue(x.data);
-                        hashSet.Add(x.data);
-                    }
-                }
-
-                return null;
+                    return false;
+                });
             }
         }
         #endregion
