@@ -55,5 +55,12 @@ namespace Game
         {
             DestroyImmediate(unit.gameObject);
         }
+
+        public void OnFireProjectile(Unit me, Unit you, int projectileOriginID)
+		{
+            var projectile = _projectilePool.GetProjectile(projectileOriginID, me, you);
+            fireHistory.Add(projectile.projectileID, you);
+            me.animator.SetTrigger("Attack");
+		}
     }
 }

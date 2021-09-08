@@ -32,6 +32,7 @@ namespace Game
             void OnStartMove(Unit unit);
             void OnEndMove(Unit unit);
             void OnClear(Unit unit);
+            void OnFireProjectile(Unit me, Unit you, int projectileOriginID);
         }
 
         public Shared.Table.Unit table => Table.From<TableUnit>()[this._unitOriginID];
@@ -411,8 +412,7 @@ namespace Game
                         DeltaMove((Fix64)Time.deltaTime);
                         break;
                     }
-
-                    ProjectileFactory.GetNewProjectile(0, this, this.unitID, this._projectileTable);
+                  
                     if (_target?.IsDead ?? true)
                     {
                         _target = null;
@@ -695,8 +695,16 @@ namespace Game
                 return false;
 
             var damage = CalculateDamage(unit);
-            unit.AddHP(-damage, this);
-            listener?.OnAttack(this, unit, damage);
+
+            if (this.attackRange < 3)
+            {
+                unit.AddHP(-damage, this);
+                listener?.OnAttack(this, unit, damage);
+            }
+            else
+                listener?.OnFireProjectile(this, unit, 0);
+
+            
             _lastAttackTime = DateTime.Now;
 
             transform.LookAt(unit.position);
