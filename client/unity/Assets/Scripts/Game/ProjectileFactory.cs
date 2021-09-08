@@ -6,14 +6,17 @@ namespace Game
 {
     public static class ProjectileFactory
     {
-        public static Projectile GetNewProjectile(int projectileOriginID, Unit ownerUnit, uint ownerUnitID, ProjectileTable projectileTable)
+        private static uint _sequence = 0;
+
+        public static Projectile CreateNewProjectile(int projectileOriginID, ProjectileTable projectileTable, Projectile.Listener listener)
         {
             var projectileOrigin = projectileTable.GetOrigin(projectileOriginID);
             var projectile = Object.Instantiate(projectileOrigin);
-            projectile.transform.position = ownerUnit.position;
-            projectile.ownerUnitID = ownerUnitID;
-            Debug.Log("bullet create");
+            projectile.projectileID = _sequence++;
+            projectile.listener = listener;
+            projectile.Disable();
             return projectile;
         }
+
     }
 }

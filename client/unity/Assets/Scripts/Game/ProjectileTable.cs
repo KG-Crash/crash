@@ -7,6 +7,10 @@ namespace Game
     public class ProjectileTable : ScriptableObject
     {
         [SerializeField] private Projectile[] _projectileOrigin;
+        public Projectile[] projectileOrigin
+		{
+            get => _projectileOrigin; 
+		}
 
         public Projectile GetOrigin(int projectileOriginID)
         {

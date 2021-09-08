@@ -17,12 +17,16 @@ namespace Game
         [NonSerialized] private Player _player;
         [NonSerialized] private List<Unit> _selectedUnits;
         [NonSerialized] private List<Unit> _allUnitInFrustum;
+        [NonSerialized] private ProjectilePool _projectilePool;
 
+        [SerializeField] private Transform _poolOffset; 
         [SerializeField] private Transform _focusTransform;
         
         [SerializeField] private KG.Map _map;
         [SerializeField] private UnitFactory _unitFactory;
         [SerializeField] private UnitTable _unitPrefabTable;
+        [SerializeField] private ProjectileTable _projectilehPrefabTable;
+       
 
         private static uint playerIDStepper = 0;
 
