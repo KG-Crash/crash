@@ -1380,6 +1380,36 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4458472104174864, guid: 48986291d0154f8448d04d448fa98bbe, type: 3}
   m_PrefabInstance: {fileID: 576515223}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &598182161
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 598182162}
+  m_Layer: 0
+  m_Name: Pool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &598182162
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 598182161}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &606488633
 GameObject:
   m_ObjectHideFlags: 0
@@ -2520,14 +2550,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c43df401f384814d95399334f12a834, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnMine: {fileID: 0}
-  spawnEnemy: {fileID: 0}
-  _spawnUnitOriginID: 0
-  _spawnPlayerID: 0
-  _focusTransform: {fileID: 606488634}
+  _poolOffset: {fileID: 598182162}
   _map: {fileID: 1442949749}
   _unitFactory: {fileID: 1122248849}
   _unitPrefabTable: {fileID: 11400000, guid: 90bd777a778c3ef40941d1163ecba028, type: 2}
+  _projectilehPrefabTable: {fileID: 11400000, guid: cc0c122d377e12141b81dcb0f6272455, type: 2}
+  spawnMine: {fileID: 1074358150}
+  spawnEnemy: {fileID: 685684699}
 --- !u!114 &1122248848
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3345,9 +3374,6 @@ MonoBehaviour:
   drawCells: 0
   drawEdges: 0
   drawRegionEdges: 0
-  spawnTilePositions:
-  - {x: 32, y: 32}
-  - {x: 112, y: 102}
 --- !u!4 &1470605784 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4458472104174864, guid: 48986291d0154f8448d04d448fa98bbe, type: 3}
