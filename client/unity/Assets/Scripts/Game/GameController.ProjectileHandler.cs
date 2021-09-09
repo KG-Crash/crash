@@ -14,7 +14,7 @@ namespace Game
             {
                 if (!fireHistory[projectile.projectileID].IsDead)
                 {
-                    var damage = this._unitPrefabTable.GetOrigin(owner.unitOriginID).damage;
+                    var damage = owner.damage;
                     fireHistory[projectile.projectileID].AddHP(-damage, owner);
                 }                
                 _projectilePool.ReturnProjectile(projectile);
