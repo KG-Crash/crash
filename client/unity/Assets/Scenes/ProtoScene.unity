@@ -2550,13 +2550,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c43df401f384814d95399334f12a834, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spawnMine: {fileID: 0}
+  spawnEnemy: {fileID: 0}
+  _spawnUnitOriginID: 0
+  _spawnPlayerID: 0
   _poolOffset: {fileID: 598182162}
+  _focusTransform: {fileID: 0}
   _map: {fileID: 1442949749}
   _unitFactory: {fileID: 1122248849}
   _unitPrefabTable: {fileID: 11400000, guid: 90bd777a778c3ef40941d1163ecba028, type: 2}
   _projectilehPrefabTable: {fileID: 11400000, guid: cc0c122d377e12141b81dcb0f6272455, type: 2}
-  spawnMine: {fileID: 1074358150}
-  spawnEnemy: {fileID: 685684699}
 --- !u!114 &1122248848
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3374,6 +3377,9 @@ MonoBehaviour:
   drawCells: 0
   drawEdges: 0
   drawRegionEdges: 0
+  spawnTilePositions:
+  - {x: 32, y: 32}
+  - {x: 112, y: 102}
 --- !u!4 &1470605784 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4458472104174864, guid: 48986291d0154f8448d04d448fa98bbe, type: 3}

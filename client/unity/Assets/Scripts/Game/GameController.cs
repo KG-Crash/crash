@@ -101,7 +101,7 @@ namespace Game
             Handler.Instance.Bind(this);
             
             OnLoadScene();
-            
+            _projectilePool = new ProjectilePool(_projectilehPrefabTable, 15, this, _poolOffset);
             _selectedUnits = new List<Unit>();
             _allUnitInFrustum = new List<Unit>();
         }
