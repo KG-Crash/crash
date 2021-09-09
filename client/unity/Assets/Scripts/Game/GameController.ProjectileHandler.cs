@@ -8,14 +8,14 @@ namespace Game
     {
         public Dictionary<uint, Unit> fireHistory { get; set; } = new Dictionary<uint, Unit>();
         // Start is called before the first frame update
-        public void OnProjectileReach(Unit owner, Projectile projectile)
+        public void OnProjectileReach(Projectile projectile)
         {
             if (fireHistory.ContainsKey(projectile.projectileID))
             {
-                if (!fireHistory[projectile.projectileID].IsDead)
+                if (!fireHistory[projectile.projectileID].IsDead || projectile.owner != null)
                 {
-                    var damage = owner.damage;
-                    fireHistory[projectile.projectileID].AddHP(-damage, owner);
+                    var damage = projectile.owner.damage;
+                    fireHistory[projectile.projectileID].AddHP(-damage, projectile.owner);
                 }                
                 _projectilePool.ReturnProjectile(projectile);
                 fireHistory.Remove(projectile.projectileID);

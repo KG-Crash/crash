@@ -12,7 +12,7 @@ namespace Game
     {
         public interface Listener
         {
-            void OnProjectileReach(Unit owner, Projectile projectile);
+            void OnProjectileReach(Projectile projectile);
         }
 
         [SerializeField] private int _projectileOriginID; 
@@ -121,7 +121,7 @@ namespace Game
                     break;
 
                 case ProjectileState.Hit:
-                    listener?.OnProjectileReach(owner, this);
+                    listener?.OnProjectileReach(this);
                     break;
             }
         }
