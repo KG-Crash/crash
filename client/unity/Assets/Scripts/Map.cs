@@ -8,17 +8,7 @@ using UnityEngine;
 namespace KG
 {
     public partial class Map : MonoBehaviour
-    {    
-        public Vector2Int[] spawnTilePositions;
-
-        public FixVector3 GetSpawnPosition(int index)
-        {
-            var tilePos = spawnTilePositions[index];
-            var cellCenter = this[tilePos.x, tilePos.y].center;
-            
-            return new FixVector3(cellCenter.x, this.transform.position.y, cellCenter.y);
-        }
-
+    {
         #region Region
         public class Region : IPathFindable
         {

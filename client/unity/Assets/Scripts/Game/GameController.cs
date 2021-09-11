@@ -30,6 +30,13 @@ namespace Game
 
         private static uint playerIDStepper = 0;
 
+        [SerializeField] private Transform[] _spawnPositions;
+        
+        public FixVector3 GetSpawnPosition(int index)
+        {
+            return _spawnPositions[index].position;
+        }
+
         public Player GetPlayer(uint playerID)
         {
             return _allPlayerByTeam.GetPlayer(playerID);
@@ -48,7 +55,7 @@ namespace Game
         {
             var newUnit = _unitFactory.GetNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this);
             ownPlayer.units.Add(newUnit);
-            newUnit.position = _map.GetSpawnPosition(ownPlayer.spawnIndex);
+            newUnit.position = GetSpawnPosition(ownPlayer.spawnIndex);
 
             return newUnit;
         }

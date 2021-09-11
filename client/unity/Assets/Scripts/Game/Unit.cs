@@ -501,8 +501,6 @@ namespace Game
 
         private Unit SearchEnemy(Fix64 searchRadius)
         {
-            // TODO : 섹터 적용 시, 유닛 리스트 가져오기 새로 짜야함.
-            var gameController = FindObjectOfType<GameController>();
             return GetNearUnits().
                 Where(x => !x.IsDead && x.teamID != this.teamID).
                 OrderBy(x => (this.position - x.position).sqrMagnitude).
