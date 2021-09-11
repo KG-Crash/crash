@@ -3,6 +3,7 @@ using System.Linq;
 
 namespace FixMath.NET
 {
+    [System.Serializable]
     public struct FixVector2
     {
         public Fix64 x;
@@ -63,6 +64,7 @@ namespace FixMath.NET
         public static Fix64 Dot(FixVector2 a, FixVector2 b) => a.x * b.x + a.y * b.y;
     }
     
+    [System.Serializable]
     public struct FixVector3
     {
         public Fix64 x;
@@ -275,7 +277,8 @@ namespace FixMath.NET
 
         public static FixRect Zero => new FixRect(Fix64.Zero, Fix64.Zero, Fix64.Zero, Fix64.Zero);
     }
-
+    
+    [System.Serializable]
     public struct FixBounds2
     {
         public FixVector2 center;
@@ -305,6 +308,7 @@ namespace FixMath.NET
         }
     }
     
+    [System.Serializable]
     public struct FixBounds3
     {
         public FixVector3 center;
