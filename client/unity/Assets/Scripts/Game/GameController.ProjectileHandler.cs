@@ -10,6 +10,9 @@ namespace Game
         // Start is called before the first frame update
         public void OnProjectileReach(Projectile projectile)
         {
+            if (projectile.currentState != Shared.ProjectileState.Hit)
+                return;
+
             if (fireHistory.ContainsKey(projectile.projectileID))
             {
                 if (!fireHistory[projectile.projectileID].IsDead || projectile.owner != null)

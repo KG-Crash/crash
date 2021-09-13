@@ -75,6 +75,13 @@ namespace Game
             set => _target = value;
         }
 
+        public ProjectileState currentState
+        {
+            get => _currentState;
+            set => _currentState = value;
+
+        }
+
         public FixVector3? moveTarget
         {
             get
@@ -96,7 +103,7 @@ namespace Game
         private void Awake()
         {
             this.table = Table.From<TableProjectile>()[this._projectileOriginID];
-            _currentState = ProjectileState.Shoot;
+            currentState = ProjectileState.Shoot;
         }
 
         // Update is called once per frame
@@ -109,7 +116,7 @@ namespace Game
 
         private void Action()
         {
-            switch (_currentState)
+            switch (currentState)
             {
                 case ProjectileState.Disable:
                     break;
@@ -127,7 +134,7 @@ namespace Game
         }
         public void Disable()
         {
-            _currentState = ProjectileState.Disable;
+            currentState = ProjectileState.Disable;
             target = null;
             owner = null;
             moveTarget = null;
@@ -136,11 +143,11 @@ namespace Game
         public void Shoot()
         {
             moveTarget = target.position;
-            _currentState = ProjectileState.Move;            
+            currentState = ProjectileState.Move;            
         }
         public void Hit()
         {
-            _currentState = ProjectileState.Hit;
+            currentState = ProjectileState.Hit;
         }
 
         private void DeltaMove(Fix64 delta)
