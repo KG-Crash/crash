@@ -46,5 +46,21 @@
     "Speed": 5,
     "Type": "Concussive",
     "Width": 13500
+  },
+  "3": {
+    "Armor": 0,
+    "AttackRange": 30,
+    "AttackSpeed": 1000,
+    "Controllable": true,
+    "Damage": 15,
+    "Flyable": false,
+    "Height": 12000,
+    "Hp": 150,
+    "Id": 3,
+    "KillScore": 10000,
+    "Size": "Medium",
+    "Speed": 5,
+    "Type": "Explosive",
+    "Width": 13500
   }
 }
