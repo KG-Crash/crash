@@ -122,7 +122,7 @@ namespace KG
         private Graph<Cell> UpdateWalkability(IEnumerable<MeshCollider> colliders, float threshold)
         {
             var half = new Vector3(1 / (float)(scale * 2), 0.1f, 1 / (float)(scale * 2));
-            foreach (var collider in colliders)
+            foreach (var collider in colliders.OrderByDescending(x => x.bounds.max.y))
             {
                 var min = collider.bounds.min;
                 var max = collider.bounds.max;
@@ -133,16 +133,14 @@ namespace KG
                 {
                     for (int col = begin.col; col <= end.col; col++)
                     {
-                        var center = new Vector3(col / (float)scale + half.x, threshold, row / (float)scale + half.z);
+                        var center = new Vector3(col / (float)scale + half.x, 100.0f, row / (float)scale + half.z);
                         var hits = Physics.BoxCastAll(center, half, Vector3.down).Where(x => x.collider == collider).ToArray();
                         if (hits.Length == 0)
                             continue;
 
                         var hit = hits.FirstOrDefault();
-                        if (hit.point.y > threshold)
-                            continue;
-
-                        this[row, col] = new Cell(this, row, col, true);
+                        if (this[row, col] == null)
+                            this[row, col] = new Cell(this, row, col, hit.point.y < threshold);
                     }
                 }
             }

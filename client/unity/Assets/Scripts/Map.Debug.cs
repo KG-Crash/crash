@@ -19,6 +19,9 @@ namespace KG
             var size = 1 / (float)scale;
             foreach (var node in cells)
             {
+                if (node.data.walkable == false)
+                    continue;
+
                 var color = (0x00FFFFFF / (regions.Count + 1)) * (node.data.region.id + 1);
 
                 Gizmos.color = new Color(((color & 0x00FF0000) >> 16) / (float)0xFF, ((color & 0x0000FF00) >> 8) / (float)0xFF, (color & 0x000000FF) / (float)0xFF);
