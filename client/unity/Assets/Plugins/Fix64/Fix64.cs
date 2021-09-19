@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
 using UnityEngine;
 
 namespace FixMath.NET
@@ -12,7 +13,7 @@ namespace FixMath.NET
     public partial struct Fix64 : IEquatable<Fix64>, IComparable<Fix64>
     {
         [UnityEngine.SerializeField]
-        private readonly long m_rawValue;
+        private long m_rawValue;
 
         // Precision of this type is 2^-32, that is 2,3283064365386962890625E-10
         public static readonly decimal Precision = (decimal)(new Fix64(1L));//0.00000000023283064365386962890625m;
@@ -985,6 +986,20 @@ namespace FixMath.NET
         {
             // Up to 10 decimal places
             return ((decimal)this).ToString("0.##########");
+        }
+        
+        public static bool TryParse(string str, out Fix64 num)
+        {
+            if (Decimal.TryParse(str, out var dec))
+            {
+                num = dec;
+                return true;
+            }
+            else
+            {
+                num = Fix64.Zero;
+                return false;
+            }
         }
 
         public static Fix64 FromRaw(long rawValue)
