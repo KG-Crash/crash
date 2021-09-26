@@ -99,6 +99,11 @@ namespace KG
             set => this[ToIndex(position.y), ToIndex(position.x)] = value;
         }
 
+        public int Flatten(int row, int col)
+        {
+            return row * cols + col;
+        }
+        
         public Cell this[int row, int col]
         {
             get
@@ -352,5 +357,62 @@ namespace KG
         {
 
         }
+
+        #region Precompute
+        
+        [SerializeField] public float _threshold = 1.0f;
+        [SerializeField, HideInInspector] public bool[] _walkability;
+
+        [ContextMenu("Update Walkability")]
+        public void OnUpdateWalkability()
+        {
+#if UNITY_EDITOR
+            UnityEditor.Undo.RecordObject(this, "Update Walkability");
+            UpdateWalkability();
+            UnityEditor.EditorUtility.SetDirty(this);
+#endif
+        }
+
+        private void UpdateWalkability()
+        {
+            this.rows = height * scale;
+            this.cols = width * scale;
+            this.scale = scale;
+            _walkability = Enumerable.Repeat(true, rows * cols).ToArray();
+
+            var tiles = GetComponentsInChildren<Transform>().Except(new[] {this.GetComponent<Transform>()});
+            foreach (var tile in tiles)
+            {
+                tile.gameObject.AddComponent<MeshCollider>();
+            }
+
+            var colliders = tiles.Select(x => x.gameObject.GetComponent<MeshCollider>()).ToArray();
+
+            var half = new Vector3(1 / (float) (scale * 2), 0.1f, 1 / (float) (scale * 2));
+            foreach (var collider in colliders.OrderByDescending(x => x.bounds.max.y))
+            {
+                var min = collider.bounds.min;
+                var max = collider.bounds.max;
+
+                var begin = (col: ToIndex(min.x), row: ToIndex(min.z));
+                var end = (col: ToIndex(max.x), row: ToIndex(max.z));
+                for (int row = begin.row; row <= end.row; row++)
+                {
+                    for (int col = begin.col; col <= end.col; col++)
+                    {
+                        var center = new Vector3(col / (float) scale + half.x, 100.0f, row / (float) scale + half.z);
+                        var hits = Physics.BoxCastAll(center, half, Vector3.down).Where(x => x.collider == collider).ToArray();
+                        if (hits.Length == 0)
+                            continue;
+
+                        var hit = hits.FirstOrDefault();
+                        var index = Flatten(row, col);
+                        _walkability[index] = hit.point.y < _threshold;
+                    }
+                }
+            }
+        }
+
+        #endregion
     }
 }
