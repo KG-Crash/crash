@@ -124,43 +124,22 @@ namespace KG
             }
         }
 
-        private Graph<Cell> UpdateWalkability(IEnumerable<MeshCollider> colliders, float threshold)
+        private void CreateCells(int rows, int cols)
         {
-            var half = new Vector3(1 / (float)(scale * 2), 0.1f, 1 / (float)(scale * 2));
-            foreach (var collider in colliders.OrderByDescending(x => x.bounds.max.y))
+            for (int row = 0; row < rows; row++)
             {
-                var min = collider.bounds.min;
-                var max = collider.bounds.max;
-
-                var begin = (col: ToIndex(min.x), row: ToIndex(min.z));
-                var end = (col: ToIndex(max.x), row: ToIndex(max.z));
-                for (int row = begin.row; row <= end.row; row++)
+                for (int col = 0; col < cols; col++)
                 {
-                    for (int col = begin.col; col <= end.col; col++)
-                    {
-                        var center = new Vector3(col / (float)scale + half.x, 100.0f, row / (float)scale + half.z);
-                        var hits = Physics.BoxCastAll(center, half, Vector3.down).Where(x => x.collider == collider).ToArray();
-                        if (hits.Length == 0)
-                            continue;
-
-                        var hit = hits.FirstOrDefault();
-                        if (this[row, col] == null)
-                            this[row, col] = new Cell(this, row, col, hit.point.y < threshold);
-                    }
+                    var i = Flatten(row, col);
+                    _cells[i] = new Cell(this, row, col, _walkability[i]);
                 }
             }
-
-            // 할당 안된 cell 할당
-            for (int row = 0; row < this.rows; row++)
-            {
-                for (int col = 0; col < this.cols; col++)
-                {
-                    this[row, col] ??= new Cell(this, row, col, false);
-                }
-            }
-
+        }
+        
+        private static Graph<Cell> CreateCellGraph(Cell[] cells)
+        {
             var graph = new Graph<Cell>();
-            foreach (var cell in _cells)
+            foreach(var cell in cells)
             {
                 graph.Add(cell);
             }
@@ -314,18 +293,11 @@ namespace KG
         {
             return (int)((float)value * this.scale);
         }
-
-        private void Provisioning(float threshold)
+        
+        private void Provisioning()
         {
-            var tiles = GetComponentsInChildren<Transform>().Except(new[] { this.GetComponent<Transform>() });
-            foreach (var tile in tiles)
-            {
-                tile.gameObject.AddComponent<MeshCollider>();
-            }
-
-            var colliders = tiles.Select(x => x.gameObject.GetComponent<MeshCollider>());
-
-            cells = UpdateWalkability(colliders, threshold);
+            CreateCells(rows, cols);
+            cells = CreateCellGraph(_cells);
             regions = UpdateRegion(10, 10);
 
             UpdateCellGraph();
@@ -345,7 +317,7 @@ namespace KG
 
         private void Awake()
         {
-            Provisioning(1.0f);
+            Provisioning();
         }
 
         public void Start()
