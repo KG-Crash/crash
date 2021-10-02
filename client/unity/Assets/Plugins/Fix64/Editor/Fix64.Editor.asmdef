@@ -1,0 +1,16 @@
+{
+    "name": "Fix64.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:0f07eb72f4fc40045b2fffec3eeb3b08"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
