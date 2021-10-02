@@ -108,7 +108,6 @@ namespace Editor
             if (!_reorderableLists.ContainsKey(property.propertyPath) || _reorderableLists[property.propertyPath].index > _reorderableLists[property.propertyPath].count - 1)
             {
                 _reorderableLists[property.propertyPath] = NewReorderableList(myDataList.serializedObject, myDataList);
-                Debug.Log($"{myDataList.propertyPath}, {myDataList.arrayElementType}"); 
             }
             return _reorderableLists[property.propertyPath].GetHeight();
         }
