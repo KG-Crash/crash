@@ -12,8 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fae440fcf6a40e88c2f9862d2e39d3d, type: 3}
   m_Name: UnitTable
   m_EditorClassIdentifier: 
-  _unitOrigin:
-  - {fileID: 851905332659639214, guid: 6ef7c3f23c8082946968fde58409ed3d, type: 3}
-  - {fileID: 380659589329096579, guid: 1568f81805975be429be84b9f1566a3f, type: 3}
-  - {fileID: 912794023963841166, guid: 1722e2f39a700844fb0e9a5ebbabe3cb, type: 3}
-  - {fileID: 4719784662740972590, guid: f78b703145552cc448287df07c764de8, type: 3}
+  _unitOriginDict:
+    _pairs:
+    - _key: 0
+      _value: {fileID: 851905332659639214, guid: 6ef7c3f23c8082946968fde58409ed3d, type: 3}
+    - _key: 1
+      _value: {fileID: 380659589329096579, guid: 1568f81805975be429be84b9f1566a3f, type: 3}
+    - _key: 2
+      _value: {fileID: 912794023963841166, guid: 1722e2f39a700844fb0e9a5ebbabe3cb, type: 3}
+    - _key: 3
+      _value: {fileID: 4719784662740972590, guid: f78b703145552cc448287df07c764de8, type: 3}
