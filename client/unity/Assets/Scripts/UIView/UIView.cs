@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class UIAttribute : System.Attribute
@@ -15,8 +16,7 @@ public class UIAttribute : System.Attribute
 
 public abstract class UIView : MonoBehaviour
 {
-    private string _resource = string.Empty;
-    private static Stack<UIView> _uiViewStack = new Stack<UIView>();
+    private static readonly Stack<UIView> _uiViewStack = new Stack<UIView>();
 
     public UIView()
     { }
@@ -33,17 +33,38 @@ public abstract class UIView : MonoBehaviour
         
     }
 
-    public static void Show<T>() where T : UIView
+    public virtual async Task OnLoad()
+    { }
+
+    public virtual async Task OnClosed()
+    { }
+
+    public static async Task Show<T>(bool hideBackView = false) where T : UIView
     {
         var x = UIPool.Get<T>();
         x.gameObject.SetActive(true);
 
+        if (hideBackView && _uiViewStack.Count > 0)
+        {
+            var backView = _uiViewStack.Peek();
+            backView?.gameObject.SetActive(false);
+        }
+
+        await x.OnLoad();
         _uiViewStack.Push(x);
     }
 
-    public static void Close()
+    public static async Task Close()
     {
         var x = _uiViewStack.Pop();
+        
+        await x.OnClosed();
         x.gameObject.SetActive(false);
+
+        if (_uiViewStack.Count > 0)
+        {
+            var backView = _uiViewStack.Peek();
+            backView?.gameObject.SetActive(true);
+        }
     }
 }
