@@ -52,7 +52,7 @@ namespace Network
                 _channel = await _bootstrap.ConnectAsync(ip, port);
                 return true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 //Dispatcher.Instance.Dispatch(() => OnConnectFailed?.Invoke());
                 return false;
