@@ -15,7 +15,7 @@ namespace Game
 
             if (fireHistory.ContainsKey(projectile.projectileID))
             {
-                if (!fireHistory[projectile.projectileID].IsDead || projectile.owner != null)
+                if (!fireHistory[projectile.projectileID].IsDead && projectile.owner != null)
                 {
                     var damage = projectile.owner.damage;
                     fireHistory[projectile.projectileID].AddHP(-damage, projectile.owner);

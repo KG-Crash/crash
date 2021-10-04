@@ -226,7 +226,6 @@ namespace Game
         [NonSerialized] private Bounds _totalBounds = new Bounds();
         [SerializeField] private Renderer[] _rendereres;
         [SerializeField] private Material[] _deadMaterials;
-        [SerializeField] private ProjectileTable _projectileTable;
 
         [NonSerialized] private UnitState _currentState;
         
