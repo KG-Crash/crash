@@ -1,5 +1,6 @@
 using Network;
 using Protocol.Request;
+using System.Threading.Tasks;
 
 [UI("LobbyView")]
 public class LobbyView : UIView
@@ -16,8 +17,13 @@ public class LobbyView : UIView
         base.Update();
     }
 
-    public async void OnConnect()
+    public async void OnCreateGameRoom()
     {
-        
+        await Client.Instance.Send(new CreateRoom { });
+    }
+
+    public override async Task OnLoad()
+    {
+        await Client.Instance.Send(new RoomList { });
     }
 }

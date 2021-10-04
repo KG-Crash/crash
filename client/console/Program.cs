@@ -141,10 +141,9 @@ namespace console
         {
             var controller = new Controller();
 
-            if (await Client.Instance.Connect("221.151.189.92", 8000))
+            if (await Client.Instance.Connect("localhost", 8000))
             {
-                await Client.Instance.Send(new CreateRoom { });
-                await Client.Instance.Send(new JoinRoom { Id = "hello" });
+                await Client.Instance.Send(new RoomList { });
             }
 
             Console.ReadLine();

@@ -2,8 +2,8 @@ using Network;
 using Protocol.Request;
 using System.Threading.Tasks;
 
-[UI("IntroView")]
-public class IntroView : UIView
+[UI("GameRoomView")]
+public class GameRoomView : UIView
 {
     // Start is called before the first frame update
     public override void Start()
@@ -19,14 +19,9 @@ public class IntroView : UIView
 
     public override async Task OnLoad()
     {
-        await Client.Instance.Disconnect();
-    }
-
-    public async void OnConnect()
-    {
-        if (await Client.Instance.Connect("localhost", 8000))
+        await Client.Instance.Send(new Chat 
         {
-            await UIView.Show<LobbyView>(hideBackView: true);
-        }
+            Message = "¾È³ç" 
+        });
     }
 }
