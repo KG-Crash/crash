@@ -38,12 +38,20 @@ namespace Game
         public Shared.Table.Unit table => Table.From<TableUnit>()[this._unitOriginID];
         public List<Shared.Table.Skill> skills => Table.From<TableSkill>().Values.Where(x => x.Unit == this.unitOriginID).ToList();
 
-
         [SerializeField] private int _unitOriginID;
         [SerializeField] private GameObject _highlighted;
         [SerializeField] public Animator animator;
-        [SerializeField] private Rigidbody _rigidbody;
 
+        public GameObject highlighted
+        {
+            get => _highlighted;
+            set 
+            {
+                _highlighted = value;
+                _highlighted.transform.SetParent(transform);
+            }
+        }
+        
         public uint playerID
         {
             get => owner.playerID;
@@ -226,7 +234,20 @@ namespace Game
         [NonSerialized] private Bounds _totalBounds = new Bounds();
         [SerializeField] private Renderer[] _rendereres;
         [SerializeField] private Material[] _deadMaterials;
+        [SerializeField] private int _maxAttackAnimCount;
 
+        public int maxAttackAnimCount
+        {
+            get => _maxAttackAnimCount;
+            set => _maxAttackAnimCount = value;
+        }
+
+        public Material[] deadMaterials
+        {
+            get => _deadMaterials;
+            set => _deadMaterials = value;
+        }
+        
         [NonSerialized] private UnitState _currentState;
         
         [NonSerialized] private float _stopMoveDistance;
@@ -261,8 +282,13 @@ namespace Game
 
         public bool IsDead => _hp == Fix64.Zero;
 
+        public void Awake()
+        {
+            animator.SetInteger("MaxAttack", _maxAttackAnimCount);
+        }
+
         [ContextMenu("Gather renderers")]
-        private void OnRefreshRenderers()
+        public void OnRefreshRenderers()
         {
             _rendereres = GetComponentsInChildren<Renderer>();
         }

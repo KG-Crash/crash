@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using FixMath.NET;
+using UnityEngine;
 
 namespace Game
 {
@@ -20,6 +21,9 @@ namespace Game
 
         public void OnAttack(Unit me, Unit you, Fix64 damage)
         {
+            var maxAttackCount = me.animator.GetInteger("MaxAttack");
+            var randAttackIndex = Random.Range(0, maxAttackCount);
+            me.animator.SetInteger("AttackIndex", randAttackIndex);
             me.animator.SetTrigger("Attack");
         }
 
