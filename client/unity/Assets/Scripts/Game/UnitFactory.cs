@@ -8,7 +8,7 @@ namespace Game
         
         public Unit GetNewUnit(int unitOriginID, UnitTable unitTable, KG.Map map, Player owner, Unit.Listener listener)
         {
-            var unitOrigin = unitTable.GetOrigin(unitOriginID);
+            var unitOrigin = unitTable.GetOriginUnit(unitOriginID);
             var unit = Object.Instantiate(unitOrigin);
             unit.Init(_sequence++, map, owner, listener);
             unit.SetMaxHP();
