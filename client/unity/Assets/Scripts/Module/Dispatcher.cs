@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using Network;
 
 namespace Module
 {
-    public class Dispatcher : MonoBehaviour
+    public class Dispatcher : MonoBehaviour, IDispatchable
     {
         private static Dispatcher _ist = null;
         private readonly Queue<Action> _queue = new Queue<Action>();

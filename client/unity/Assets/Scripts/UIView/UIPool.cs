@@ -8,7 +8,7 @@ public class UIPool : MonoBehaviour
 {
     public static UIPool ist { get; private set; }
 
-    private Dictionary<Type, GameObject> _pool = new Dictionary<Type, GameObject>();
+    private readonly Dictionary<Type, GameObject> _pool = new Dictionary<Type, GameObject>();
 
     // Start is called before the first frame update
     void Start()

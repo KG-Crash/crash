@@ -15,11 +15,19 @@ namespace Network
     public class FlatBufferEventAttribute : Attribute
     { }
 
+
+    public interface IDispatchable
+    {
+        public void Dispatch(Action action);
+    }
+
+
     public class Handler : SimpleChannelInboundHandler<IByteBuffer>
     {
         private static readonly Lazy<Handler> _ist = new Lazy<Handler>(() => new Handler());
         public static Handler Instance => _ist.Value;
 
+        private IDispatchable _dispatcher;
         private readonly Dictionary<Identity, Delegate> _allocators = new Dictionary<Identity, Delegate>();
         private readonly Dictionary<Identity, Func<IProtocol, Task<bool>>> _bindedEvents = new Dictionary<Identity, Func<IProtocol, Task<bool>>>();
 
@@ -37,7 +45,11 @@ namespace Network
 
                 var bytes = new byte[msg.ReadableBytes];
                 msg.ReadBytes(bytes);
-                callback.Invoke(allocator.DynamicInvoke(bytes) as IProtocol);
+
+                if (_dispatcher != null)
+                    _dispatcher.Dispatch(() => callback.Invoke(allocator.DynamicInvoke(bytes) as IProtocol));
+                else
+                    callback.Invoke(allocator.DynamicInvoke(bytes) as IProtocol);
             }
             catch (Exception e)
             {
@@ -45,8 +57,10 @@ namespace Network
             }
         }
 
-        public void Bind<T>(T t) where T : class
+        public static void Bind<T>(T t, IDispatchable dispatcher = null) where T : class
         {
+            _ist.Value._dispatcher = dispatcher;
+
             var methods = typeof(T).GetMethods().Where(x =>
             {
                 if (x.GetCustomAttribute<FlatBufferEventAttribute>() == null)
@@ -74,11 +88,11 @@ namespace Network
                     var instance = Activator.CreateInstance(protocolType) as IProtocol;
 
                     var allocator = protocolType.GetMethod("Deserialize").CreateDelegate(typeof(Func<,>).MakeGenericType(typeof(byte[]), protocolType));
-                    _allocators.Add((Identity)instance.Identity, allocator);
+                    _ist.Value._allocators.Add((Identity)instance.Identity, allocator);
 
                     var delegateType = Expression.GetDelegateType(parameters.Select(x => x.ParameterType).Concat(new[] { method.ReturnType }).ToArray());
                     var createdDelegate = method.CreateDelegate(delegateType, t);
-                    _bindedEvents.Add((Identity)instance.Identity, new Func<IProtocol, Task<bool>>((protocol) =>
+                    _ist.Value._bindedEvents.Add((Identity)instance.Identity, new Func<IProtocol, Task<bool>>((protocol) =>
                     {
                         return createdDelegate.DynamicInvoke(Convert.ChangeType(protocol, protocolType)) as Task<bool>;
                     }));

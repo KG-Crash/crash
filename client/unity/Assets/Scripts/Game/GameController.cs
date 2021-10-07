@@ -1,10 +1,10 @@
+using FixMath.NET;
+using Module;
 using Network;
 using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using FixMath.NET;
-using Shared.Table;
 using UnityEngine;
 
 namespace Game
@@ -105,7 +105,7 @@ namespace Game
         
         private void Awake()
         {
-            Handler.Instance.Bind(this);
+            Handler.Bind(this, Dispatcher.Instance);
             
             OnLoadScene();
             _projectilePool = new ProjectilePool(_projectilehPrefabTable, 15, this, _poolOffset);
