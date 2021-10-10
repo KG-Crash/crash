@@ -33,8 +33,6 @@ namespace KG
             {
                 var item = Instantiate(prefab, _layoutGroup.transform);
                 listener.OnCreated(enumerator.Current, item);
-
-                enumerator.MoveNext();
             }
         }
     }

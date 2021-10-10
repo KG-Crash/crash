@@ -39,7 +39,7 @@ public abstract class UIView : MonoBehaviour
     public virtual async Task OnClosed()
     { }
 
-    public static async Task Show<T>(bool hideBackView = false) where T : UIView
+    public static async Task<T> Show<T>(bool hideBackView = false) where T : UIView
     {
         var x = UIPool.Get<T>();
         x.gameObject.SetActive(true);
@@ -52,6 +52,8 @@ public abstract class UIView : MonoBehaviour
 
         _uiViewStack.Push(x);
         await x.OnLoad();
+
+        return x;
     }
 
     public static T Get<T>() where T : UIView

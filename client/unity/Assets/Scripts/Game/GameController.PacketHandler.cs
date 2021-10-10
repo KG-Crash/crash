@@ -33,6 +33,36 @@ namespace Game
         }
     }
 
+    public class UserListListener : KG.ScrollView.IListener<string>
+    {
+        private readonly JoinRoom _response;
+
+        public UserListListener(JoinRoom response)
+        {
+            _response = response;
+        }
+
+        public void OnCreated(string data, UIBehaviour item)
+        {
+            var text = item.GetComponent<Text>();
+            text.text = data;
+
+            var mine = (data == _response.User);
+            if (mine)
+                text.color = UnityEngine.Color.blue;
+        }
+
+        public void OnDestroyed(UIBehaviour item)
+        {
+            
+        }
+
+        public IEnumerator<string> OnRefresh()
+        {
+            return _response.Users.GetEnumerator();
+        }
+    }
+
     public partial class GameController
     {
         [FlatBufferEvent]
@@ -45,7 +75,8 @@ namespace Game
         [FlatBufferEvent]
         public async Task<bool> OnJoinRoom(JoinRoom response)
         {
-            await UIView.Show<GameRoomView>(hideBackView: true);
+            var view = await UIView.Show<GameRoomView>(hideBackView: true);
+            view.userNameList.Refresh(new UserListListener(response));
             return true;
         }
 

@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 [UI("GameRoomView")]
 public class GameRoomView : UIView
 {
+    public KG.ScrollView userNameList;
+
     // Start is called before the first frame update
     public override void Start()
     {
