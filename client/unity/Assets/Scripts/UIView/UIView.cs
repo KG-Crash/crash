@@ -50,8 +50,13 @@ public abstract class UIView : MonoBehaviour
             backView?.gameObject.SetActive(false);
         }
 
-        await x.OnLoad();
         _uiViewStack.Push(x);
+        await x.OnLoad();
+    }
+
+    public static T Get<T>() where T : UIView
+    {
+        return _uiViewStack.FirstOrDefault(x => x.GetType() == typeof(T)) as T;
     }
 
     public static async Task Close()

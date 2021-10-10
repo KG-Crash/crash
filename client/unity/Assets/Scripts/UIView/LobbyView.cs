@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 public class LobbyView : UIView
 {
     // Start is called before the first frame update
+    public KG.ScrollView gameRoomList;
+
     public override void Start()
     {
         base.Start();

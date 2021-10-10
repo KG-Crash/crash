@@ -18,7 +18,7 @@ namespace Network
 
     public interface IDispatchable
     {
-        public void Dispatch(Action action);
+        void Dispatch(Action action);
     }
 
 

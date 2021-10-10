@@ -11,7 +11,7 @@ public class Controller
 
     public Controller()
     {
-        Handler.Instance.Bind(this);
+        Handler.Bind(this);
     }
 
     [FlatBufferEvent]
