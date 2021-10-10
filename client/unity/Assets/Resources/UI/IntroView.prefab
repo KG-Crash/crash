@@ -124,13 +124,13 @@ MonoBehaviour:
       - m_Target: {fileID: 580368163389173547}
         m_TargetAssemblyTypeName: IntroView, Client
         m_MethodName: OnConnect
-        m_Mode: 1
+        m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: 221.151.189.92:8000
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!1 &3906953985127291288

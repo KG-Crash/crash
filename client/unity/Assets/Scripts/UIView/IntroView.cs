@@ -22,9 +22,10 @@ public class IntroView : UIView
         await Client.Instance.Disconnect();
     }
 
-    public async void OnConnect()
+    public async void OnConnect(string endpoint = "localhost:8000")
     {
-        if (await Client.Instance.Connect("localhost", 8000))
+        var pair = endpoint.Split(':');
+        if (await Client.Instance.Connect(pair[0], int.Parse(pair[1])))
         {
             await UIView.Show<LobbyView>(hideBackView: true);
         }
