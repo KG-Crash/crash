@@ -68,7 +68,7 @@ namespace Network
             _channel = null;
         }
 
-        public async Task Send(IProtocol protocol)
+        public static async Task Send(IProtocol protocol)
         {
             using (var mstream = new MemoryStream())
             {
@@ -79,7 +79,7 @@ namespace Network
                     bwriter.Flush();
 
                     var bytes = mstream.ToArray();
-                    await _channel?.WriteAndFlushAsync(Unpooled.Buffer().WriteBytes(bytes));
+                    await Instance._channel?.WriteAndFlushAsync(Unpooled.Buffer().WriteBytes(bytes));
                 }
             }
         }

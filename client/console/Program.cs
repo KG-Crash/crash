@@ -34,14 +34,14 @@ public class Controller
 
         if (response.User == this.Id)
         {
-            await Client.Instance.Send(new Protocol.Request.Chat
+            await Client.Send(new Protocol.Request.Chat
             {
                 Message = "ㅆ1발ㅋㅋ"
             });
         }
         else
         {
-            await Client.Instance.Send(new Protocol.Request.Whisper
+            await Client.Send(new Protocol.Request.Whisper
             {
                 User = response.User,
                 Message = "ㅆ1발련 ㅋㅋ"
@@ -49,10 +49,10 @@ public class Controller
         }
 
         // 내가 방장이면 오자마자 바로강퇴시킴
-        await Client.Instance.Send(new Protocol.Request.KickRoom
-        { 
-            User = response.User
-        });
+        //await Client.Send(new Protocol.Request.KickRoom
+        //{ 
+        //    User = response.User
+        //});
 
         return true;
     }
@@ -89,14 +89,14 @@ public class Controller
 
         if (response.Rooms.Count > 0)
         {
-            await Client.Instance.Send(new Protocol.Request.JoinRoom
+            await Client.Send(new Protocol.Request.JoinRoom
             {
                 Id = response.Rooms.First()
             });
         }
         else
         {
-            await Client.Instance.Send(new Protocol.Request.CreateRoom { });
+            await Client.Send(new Protocol.Request.CreateRoom { });
         }
 
         return true;
@@ -143,7 +143,7 @@ namespace console
 
             if (await Client.Instance.Connect("localhost", 8000))
             {
-                await Client.Instance.Send(new RoomList { });
+                await Client.Send(new RoomList { });
             }
 
             Console.ReadLine();

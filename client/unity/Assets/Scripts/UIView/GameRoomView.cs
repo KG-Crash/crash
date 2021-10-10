@@ -19,7 +19,7 @@ public class GameRoomView : UIView
 
     public override async Task OnLoad()
     {
-        await Client.Instance.Send(new Chat 
+        await Client.Send(new Chat 
         {
             Message = "¾È³ç" 
         });

@@ -18,6 +18,8 @@ namespace Game
 
         public void OnCreated(string data, UIBehaviour item)
         {
+            item.GetComponent<GameRoomButton>().RoomId = data;
+
             var button = item.GetComponent<Button>();
             button.GetComponentInChildren<Text>().text = data;
         }
@@ -60,6 +62,13 @@ namespace Game
         public async Task<bool> OnChat(Chat response)
         {
             UnityEngine.Debug.Log(response.Message);
+            return true;
+        }
+
+        [FlatBufferEvent]
+        public async Task<bool> OnWhisper(Whisper response)
+        {
+            UnityEngine.Debug.Log($"{response.User} : {response.Message}");
             return true;
         }
     }

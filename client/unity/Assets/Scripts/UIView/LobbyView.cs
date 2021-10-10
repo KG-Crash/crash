@@ -21,11 +21,11 @@ public class LobbyView : UIView
 
     public async void OnCreateGameRoom()
     {
-        await Client.Instance.Send(new CreateRoom { });
+        await Client.Send(new CreateRoom { });
     }
 
     public override async Task OnLoad()
     {
-        await Client.Instance.Send(new RoomList { });
+        await Client.Send(new RoomList { });
     }
 }
