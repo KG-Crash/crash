@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fad2f76db64196a0278d750e7ca4ae, type: 3}
+  m_Name: UnitExportTable
+  m_EditorClassIdentifier: 
+  _projectConfig:
+    _unitPrefabDir: {fileID: 102900000, guid: 2900a5147bd0f2843a72459114b95744, type: 3}
+    _unitMaterialDir: {fileID: 102900000, guid: e30993eca73a5834e8f12a4b460d518a, type: 3}
+    _unitHightPrefab: {fileID: 258039223105654411, guid: dffb995ac7f40f7489fd1a6ef1de7c6a, type: 3}
+    _unitTable: {fileID: 11400000, guid: 90bd777a778c3ef40941d1163ecba028, type: 2}
+  _resourceConfigs:
+  - _desc: Polygonal Aliens Pack
+    _skip: 0
+    _rootDir: {fileID: 102900000, guid: 4ae3b2fb1417b78408ff7c84bc004b2e, type: 3}
+    _assetDirFirst: 1
+    _useAnimController: 1
+    _excludeChildDirs:
+    - Scenes
+    _sourceControllerSubPath: Animators
+    _sourcePrefabParentSubPath: Prefabs
+    _noneUniformPrefabDirs: 0
+    _excludePrefixForMap: 0
+    _prefabToAnim:
+      _pairs: []
+    _crashSourceController: {fileID: 9100000, guid: 3b58bfffeae1d864682c3ebc45ae1ed6, type: 2}
+  - _desc: Low Poly Animated Animals(Skip)
+    _skip: 1
+    _rootDir: {fileID: 102900000, guid: bfbb4b090c5dc2540a052874596f5014, type: 3}
+    _assetDirFirst: 0
+    _useAnimController: 0
+    _excludeChildDirs: []
+    _sourceControllerSubPath: 
+    _sourcePrefabParentSubPath: 
+    _noneUniformPrefabDirs: 0
+    _excludePrefixForMap: 0
+    _prefabToAnim:
+      _pairs: []
+    _crashSourceController: {fileID: 0}
+  - _desc: Low Poly Animated Dinos(Skip)
+    _skip: 1
+    _rootDir: {fileID: 102900000, guid: bfbb4b090c5dc2540a052874596f5014, type: 3}
+    _assetDirFirst: 0
+    _useAnimController: 0
+    _excludeChildDirs: []
+    _sourceControllerSubPath: 
+    _sourcePrefabParentSubPath: 
+    _noneUniformPrefabDirs: 0
+    _excludePrefixForMap: 0
+    _prefabToAnim:
+      _pairs: []
+    _crashSourceController: {fileID: 0}
+  - _desc: Toon_RTS_Orcs
+    _skip: 0
+    _rootDir: {fileID: 102900000, guid: 9394a291efdf5ce4bbba21a7102d1b1c, type: 3}
+    _assetDirFirst: 0
+    _useAnimController: 0
+    _excludeChildDirs: []
+    _sourceControllerSubPath: animation
+    _sourcePrefabParentSubPath: prefabs
+    _noneUniformPrefabDirs: 0
+    _excludePrefixForMap: 0
+    _prefabToAnim:
+      _pairs:
+      - _key: Cavalry_Light
+        _value: Cavalry
+      - _key: Cavalry_Heavy
+        _value: Cavalry
+      - _key: Cavalry_Shaman
+        _value: Cavalry_Mage
+      - _key: Shaman
+        _value: Mage
+      - _key: Heavy_Infantry
+        _value: Infantry
+      - _key: Light_Infantry
+        _value: Infantry
+    _crashSourceController: {fileID: 9100000, guid: 3b58bfffeae1d864682c3ebc45ae1ed6, type: 2}
+  - _desc: "TT_RTS_Standard(\uC791\uC5C5\uC548\uB428)"
+    _skip: 1
+    _rootDir: {fileID: 102900000, guid: f3a41d30ab1ad1c4489457836bb8001a, type: 3}
+    _assetDirFirst: 0
+    _useAnimController: 0
+    _excludeChildDirs: []
+    _sourceControllerSubPath: animation
+    _sourcePrefabParentSubPath: prefabs
+    _noneUniformPrefabDirs: 1
+    _excludePrefixForMap: 0
+    _prefabToAnim:
+      _pairs: []
+    _crashSourceController: {fileID: 0}
