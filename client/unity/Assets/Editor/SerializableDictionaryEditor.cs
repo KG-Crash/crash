@@ -10,7 +10,35 @@ public class UnityDictionaryDrawer : PropertyDrawer
 {
     private Dictionary<string, ReorderableList> _reorderableLists = new Dictionary<string, ReorderableList>();
 
-    private static void AddKeyEmptyValuePair(ReorderableList list, DictKeyValue keyType)
+    private static DictKeyValue GetTypeOfObject(string obj)
+    {
+        if (obj == "int")
+        {
+            return DictKeyValue.Integer;
+        }
+        else if (obj == "long")
+        {
+            return DictKeyValue.Long;
+        }
+        else if (obj == "float")
+        {
+            return DictKeyValue.Float;
+        }
+        else if (obj == "double")
+        {
+            return DictKeyValue.Double;
+        }
+        else if (obj == "string")
+        {
+            return DictKeyValue.String;
+        }
+        else
+        {
+            return DictKeyValue.Undef;
+        }
+    }
+    
+    private static void AddKeyEmptyValuePair(ReorderableList list)
     {
         var property = list.serializedProperty;
         var index = property.arraySize;
@@ -18,6 +46,9 @@ public class UnityDictionaryDrawer : PropertyDrawer
         var element = property.GetArrayElementAtIndex(index);
         var elementKey = element.FindPropertyRelative("_key");
 
+        var targetKey = elementKey.type;
+        var keyType = GetTypeOfObject(targetKey);
+        
         switch (keyType)
         {
             case DictKeyValue.Integer:
@@ -64,9 +95,22 @@ public class UnityDictionaryDrawer : PropertyDrawer
 
                 elementKey.doubleValue = maxDoubleValue + 1;
                 break;
+            case DictKeyValue.String:
+                var startKey = "key";
+                for (int i = 0; i < property.arraySize; i++)
+                {
+                    var e = property.GetArrayElementAtIndex(i);
+                    var keyStrValue = e.FindPropertyRelative("_key");
+                    if (keyStrValue.stringValue == startKey)
+                    {
+                        startKey += "_";
+                    }
+                }
+
+                elementKey.stringValue = startKey;
+                break;
             default:
                 throw new NotImplementedException();
-                break;
         }
 
         property.serializedObject.ApplyModifiedProperties();
@@ -74,10 +118,12 @@ public class UnityDictionaryDrawer : PropertyDrawer
 
     private enum DictKeyValue
     {
+        Undef,
         Integer,
         Long,
         Float,
         Double,
+        String,
         RefObject
     }
 
@@ -86,8 +132,7 @@ public class UnityDictionaryDrawer : PropertyDrawer
         var reorder = new ReorderableList(serializedObject, property);
         reorder.onAddCallback = list =>
         {
-            var dictKeyType = DictKeyValue.Long;
-            AddKeyEmptyValuePair(list, dictKeyType);
+            AddKeyEmptyValuePair(list);
         };
         reorder.elementHeight = 20.0f * 2;
         reorder.drawElementCallback = (rect, index, active, focused) =>
