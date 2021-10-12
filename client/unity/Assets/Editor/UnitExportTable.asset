@@ -27,8 +27,8 @@ MonoBehaviour:
     - Scenes
     _sourceControllerSubPath: Animators
     _sourcePrefabParentSubPath: Prefabs
-    _noneUniformPrefabDirs: 0
     _excludePrefixForMap: 0
+    _sharedMaterial: 0
     _prefabToAnim:
       _pairs: []
     _crashSourceController: {fileID: 9100000, guid: 3b58bfffeae1d864682c3ebc45ae1ed6, type: 2}
@@ -40,8 +40,8 @@ MonoBehaviour:
     _excludeChildDirs: []
     _sourceControllerSubPath: 
     _sourcePrefabParentSubPath: 
-    _noneUniformPrefabDirs: 0
     _excludePrefixForMap: 0
+    _sharedMaterial: 0
     _prefabToAnim:
       _pairs: []
     _crashSourceController: {fileID: 0}
@@ -53,8 +53,8 @@ MonoBehaviour:
     _excludeChildDirs: []
     _sourceControllerSubPath: 
     _sourcePrefabParentSubPath: 
-    _noneUniformPrefabDirs: 0
     _excludePrefixForMap: 0
+    _sharedMaterial: 0
     _prefabToAnim:
       _pairs: []
     _crashSourceController: {fileID: 0}
@@ -66,8 +66,8 @@ MonoBehaviour:
     _excludeChildDirs: []
     _sourceControllerSubPath: animation
     _sourcePrefabParentSubPath: prefabs
-    _noneUniformPrefabDirs: 0
-    _excludePrefixForMap: 0
+    _excludePrefixForMap: 1
+    _sharedMaterial: 1
     _prefabToAnim:
       _pairs:
       - _key: Cavalry_Light
@@ -83,16 +83,66 @@ MonoBehaviour:
       - _key: Light_Infantry
         _value: Infantry
     _crashSourceController: {fileID: 9100000, guid: 3b58bfffeae1d864682c3ebc45ae1ed6, type: 2}
-  - _desc: "TT_RTS_Standard(\uC791\uC5C5\uC548\uB428)"
-    _skip: 1
+  - _desc: TT_RTS_Standard
+    _skip: 0
     _rootDir: {fileID: 102900000, guid: f3a41d30ab1ad1c4489457836bb8001a, type: 3}
     _assetDirFirst: 0
     _useAnimController: 0
     _excludeChildDirs: []
     _sourceControllerSubPath: animation
     _sourcePrefabParentSubPath: prefabs
-    _noneUniformPrefabDirs: 1
-    _excludePrefixForMap: 0
+    _excludePrefixForMap: 1
+    _sharedMaterial: 1
     _prefabToAnim:
-      _pairs: []
-    _crashSourceController: {fileID: 0}
+      _pairs:
+      - _key: Archer
+        _value: animation_infantry/Archer
+      - _key: Commander
+        _value: animation_infantry/Shield
+      - _key: Crossbowman
+        _value: animation_infantry/Crossbow
+      - _key: Halberdier
+        _value: animation_infantry/Polearm
+      - _key: Heavy_Cavalry
+        _value: animation_cavalry/cavalry_shield
+      - _key: Heavy_Infantry
+        _value: animation_infantry/Shield
+      - _key: HeavySwordman
+        _value: animation_infantry/TwoHanded
+      - _key: HighPriest
+        _value: animation_infantry/Staff
+      - _key: King
+        _value: animation_infantry/Shield
+      - _key: Light_Cavalry
+        _value: animation_cavalry/cavalry
+      - _key: Light_Infantry
+        _value: animation_infantry/Shield
+      - _key: Mage
+        _value: animation_infantry/Staff
+      - _key: Mounted_King
+        _value: animation_cavalry/cavalry_shield
+      - _key: Mounted_Knight
+        _value: animation_cavalry/cavalry_spear_A
+      - _key: Mounted_Mage
+        _value: animation_cavalry/cavalry_staff
+      - _key: Mounted_Paladin
+        _value: animation_cavalry/cavalry
+      - _key: Mounted_Priest
+        _value: animation_cavalry/cavalry_staff
+      - _key: Mounted_Scout
+        _value: animation_cavalry/cavalry_archer
+      - _key: Paladin
+        _value: animation_infantry/TwoHanded
+      - _key: Peasant
+        _value: animation_infantry/Shield
+      - _key: Priest
+        _value: animation_infantry/Staff
+      - _key: Scout
+        _value: animation_infantry/Archer
+      - _key: Settler
+        _value: animation_machines/Cart
+      - _key: Spearman
+        _value: animation_infantry/Spear
+      - _key: Swordman
+        _value: animation_infantry/Shield
+    _crashSourceController: {fileID: 9100000, guid: 3b58bfffeae1d864682c3ebc45ae1ed6, type: 2}
