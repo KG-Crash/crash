@@ -611,9 +611,8 @@ public class UnitExportTableEditor : Editor
                 }
             }
             
-            AssetDatabase.ImportAsset(unitTableAssetPath);
-            AssetDatabase.ImportAsset(destUnitPrefabPath);
-            AssetDatabase.ImportAsset(destUnitMaterialPath);
+            EditorUtility.SetDirty(projectConfigs._unitTable);
+            AssetDatabase.SaveAssets();
         }
     }
 }
