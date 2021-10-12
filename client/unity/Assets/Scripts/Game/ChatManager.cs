@@ -92,7 +92,7 @@ namespace Game
 		{
             List<string> commandList = new List<string>();
 
-            var methods = typeof(ChitSet).GetMethods().Where(x =>
+            var methods = typeof(GameController).GetMethods().Where(x =>
             {
                 if (x.GetCustomAttribute<BuildCommandAttribute>() == null)
                     return false;
@@ -123,7 +123,7 @@ namespace Game
         {
             List<MethodInfo> methodList = new List<MethodInfo>();
 
-            var methods = typeof(ChitSet).GetMethods().Where(x =>
+            var methods = typeof(GameController).GetMethods().Where(x =>
             {
                 if (x.GetCustomAttribute<BuildCommandAttribute>() == null)
                     return false;
