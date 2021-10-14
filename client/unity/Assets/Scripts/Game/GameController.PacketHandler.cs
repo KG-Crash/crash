@@ -66,6 +66,13 @@ namespace Game
     public partial class GameController
     {
         [FlatBufferEvent]
+        public async Task<bool> OnLogin(Login response)
+        {
+            Client.Instance.id = response.Id;
+            return true;
+        }
+
+        [FlatBufferEvent]
         public async Task<bool> OnCreateRoom(CreateRoom response)
         {
             await UIView.Show<GameRoomView>(hideBackView: true);
@@ -75,7 +82,9 @@ namespace Game
         [FlatBufferEvent]
         public async Task<bool> OnJoinRoom(JoinRoom response)
         {
-            var view = await UIView.Show<GameRoomView>(hideBackView: true);
+            var isMine = (response.User == Client.Instance.id);
+
+            var view = isMine ? await UIView.Show<GameRoomView>(hideBackView: true) : UIView.Get<GameRoomView>();
             view.userNameList.Refresh(new UserListListener(response));
             return true;
         }
