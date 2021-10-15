@@ -95,7 +95,7 @@ namespace Game
 				return msg;
 
 			methodInfo.Invoke(null, new object[] { parameter.ToArray() });
-			msg = methodInfo.GetCustomAttribute<BuildCommandAttribute>().command + " Chit enable";
+			msg = methodInfo.GetCustomAttribute<BuildCommandAttribute>().command + " Cheat enable";
 			return msg;
 		}
 

@@ -25,7 +25,6 @@ namespace Game
 			{
 				Debug.Log("빠른생산 target player : " + player);
 			}
-			
 		}
 
 		[BuildCommand("power overwhelming")]
