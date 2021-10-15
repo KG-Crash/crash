@@ -78,7 +78,7 @@ namespace Game
 				Regex regex = new Regex("(?<command>" + command + ")" + @"\s*(?<param>.+\d)\s*");
 				Match match = regex.Match(msg);
 
-				if (!match.Groups["command"].ToString().Equals("")) // ÇØ´ç Ä¿¸Çµå°¡ ÀÖÀ¸¸é
+				if (!match.Groups["command"].ToString().Equals("")) // í•´ë‹¹ ì»¤ë§¨ë“œê°€ ìžˆìœ¼ë©´
 				{
 					methodInfo = method;
 					foreach (var param in match.Groups["param"].ToString().Split())
