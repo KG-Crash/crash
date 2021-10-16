@@ -64,38 +64,18 @@ namespace Game
 
         public void OnUpKey()
         {
-            var unityObject = UnityResources._instance.Get("objects");
-            var focusTransform = unityObject.GetFocus();
-            var cameraMoveDelta = (float)Shared.Const.Input.CameraMoveDelta;
-
-            focusTransform.position -= new Vector3(cameraMoveDelta * Time.deltaTime, 0, 0);
         }
 
         public void OnDownKey()
         {
-            var unityObject = UnityResources._instance.Get("objects");
-            var focusTransform = unityObject.GetFocus();
-            var cameraMoveDelta = (float)Shared.Const.Input.CameraMoveDelta;
-
-            focusTransform.position += new Vector3(cameraMoveDelta * Time.deltaTime, 0, 0);
         }
 
         public void OnLeftKey()
         {
-            var unityObject = UnityResources._instance.Get("objects");
-            var focusTransform = unityObject.GetFocus();
-            var cameraMoveDelta = (float)Shared.Const.Input.CameraMoveDelta;
-
-            focusTransform.position -= new Vector3(0, 0, cameraMoveDelta * Time.deltaTime);
         }
 
         public void OnRightKey()
         {
-            var unityObject = UnityResources._instance.Get("objects");
-            var focusTransform = unityObject.GetFocus();
-            var cameraMoveDelta = (float)Shared.Const.Input.CameraMoveDelta;
-            
-            focusTransform.position += new Vector3(0, 0, cameraMoveDelta * Time.deltaTime);
         }
 
         public void OnScrollDelta(float onScrollDelta)
@@ -103,7 +83,7 @@ namespace Game
             var unityObject = UnityResources._instance.Get("objects");
             var follower = unityObject.GetCameraFollower();
 
-            follower.offsetPosition += onScrollDelta *  (float)Shared.Const.Input.ScrollDelta;
+            follower.offsetPosition -= onScrollDelta * (float)Shared.Const.Input.ScrollDelta;
         }
 
         public void OnScroll(float delta)

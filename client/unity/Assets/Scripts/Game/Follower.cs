@@ -18,6 +18,8 @@ namespace Game
         [SerializeField] private MoveKind _follow;
         [SerializeField] private MoveKind _switched;
 
+        [SerializeField] private Vector3 _minDistance;
+        [SerializeField] private Vector3 _maxDistance;
         [SerializeField] private AnimationCurve _offsetCurveX;
         [SerializeField] private AnimationCurve _offsetCurveY;
         [SerializeField] private AnimationCurve _offsetCurveZ;
@@ -58,9 +60,9 @@ namespace Game
         private void Update()
         {
             Vector3 offset = new Vector3(
-                    _offsetCurveX.Evaluate(_offsetPosition),
-                    _offsetCurveY.Evaluate(_offsetPosition),
-                    _offsetCurveZ.Evaluate(_offsetPosition)
+                    Mathf.Lerp(_minDistance.x, _maxDistance.x, _offsetCurveX.Evaluate(_offsetPosition)),
+                    Mathf.Lerp(_minDistance.y, _maxDistance.y, _offsetCurveY.Evaluate(_offsetPosition)),
+                    Mathf.Lerp(_minDistance.z, _maxDistance.z, _offsetCurveZ.Evaluate(_offsetPosition))
                 );
             Vector3 targetPosition = _target.position + offset;
             
