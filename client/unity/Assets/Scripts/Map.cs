@@ -350,7 +350,7 @@ namespace KG
             this.rows = height * scale;
             this.cols = width * scale;
             this.scale = scale;
-            _walkability = Enumerable.Repeat(true, rows * cols).ToArray();
+            _walkability = Enumerable.Repeat(false, rows * cols).ToArray();
 
             var tiles = GetComponentsInChildren<Transform>().Except(new[] {this.GetComponent<Transform>()});
             foreach (var tile in tiles)
