@@ -22,13 +22,11 @@ namespace Game
             _unitOriginDict[unitOriginID] = unit;
         }
 
-        public int AddNewUnit(Unit unit)
+        public int GetNewKey()
         {
-            var nextKey = _unitOriginDict.Count > 0 ? _unitOriginDict.Keys.Max() + 1: 0;
-            _unitOriginDict[nextKey] = unit;
-            return unit.unitOriginID = nextKey;
+            return _unitOriginDict.Count > 0 ? _unitOriginDict.Keys.Max() + 1: 0;
         }
-
+        
         public void RemoveKey(int unitOriginID)
         {
             _unitOriginDict.Remove(unitOriginID);

@@ -355,7 +355,7 @@ public class UnitExportTableEditor : Editor
         }
     }
 
-    public static void SetUnitInHierarchy(GameObject instance, AnimatorOverrideController overrideController,
+    public static void SetUnitInHierarchy(GameObject instance, int originID, AnimatorOverrideController overrideController,
         int maxAttackCount, MaterialContext materialContext, GameObject hightlightPrefab)
     {
         var animator = instance.GetOrAddComponent<Animator>();
@@ -388,6 +388,7 @@ public class UnitExportTableEditor : Editor
         }
 
         unit.deadMaterials = deadMaterials.ToArray();
+        unit.unitOriginID = originID;
     }
 
     public class MaterialContext
@@ -445,7 +446,7 @@ public class UnitExportTableEditor : Editor
             unitPathToID = unitTable.GetEnumerable().ToDictionary(x => AssetDatabase.GetAssetPath(x.Value), x => x.Key);
         }
 
-        public void InstantiateAndSave(string sourcePrefabPath, string fileName, Action<GameObject> setUnitInHierarchy)
+        public void InstantiateAndSave(string sourcePrefabPath, string fileName, Action<GameObject, int> setUnitInHierarchy)
         {
             var newPrefabAssetPath = $"{prefabParentPath}/{fileName}";
             var newObjectInHierarchy = UnityObjectUtil.LoadAndInstantiate<GameObject>(sourcePrefabPath);
@@ -454,21 +455,22 @@ public class UnitExportTableEditor : Editor
                 return;
             }
 
-            setUnitInHierarchy.Invoke(newObjectInHierarchy);
+            var id = (int) 0;
+            if (unitPathToID.ContainsKey(newPrefabAssetPath))
+            {
+                id = unitPathToID[newPrefabAssetPath];
+            }
+            else
+            {
+                id = unitTable.GetNewKey();
+            }
+
+            setUnitInHierarchy.Invoke(newObjectInHierarchy, id);
             var newUnitPrefabGO = PrefabUtility.SaveAsPrefabAsset(newObjectInHierarchy, newPrefabAssetPath);
             DestroyImmediate(newObjectInHierarchy);
 
             var newUnit = newUnitPrefabGO.GetComponent<Unit>();
-            if (unitPathToID.ContainsKey(newPrefabAssetPath))
-            {
-                var id = unitPathToID[newPrefabAssetPath];
-                unitTable.SetOriginUnit(id, newUnit);
-            }
-            else
-            {
-                var key = unitTable.AddNewUnit(newUnit);
-                unitPathToID.Add(newPrefabAssetPath, key);
-            }
+            unitTable.SetOriginUnit(id, newUnit);
         }
     }
 
@@ -537,9 +539,9 @@ public class UnitExportTableEditor : Editor
                             var fileName = sourcePrefabPath.GetLastPath();
 
                             prefabContext.InstantiateAndSave(sourcePrefabPath, fileName,
-                                o =>
+                                (o, id) =>
                                 {
-                                    SetUnitInHierarchy(o, overrideController, maxAttackCount, materialContext,
+                                    SetUnitInHierarchy(o, id, overrideController, maxAttackCount, materialContext,
                                         projectConfigs._unitHightPrefab);
                                 });
                         }
@@ -602,9 +604,9 @@ public class UnitExportTableEditor : Editor
                         var maxAttackCount = GetSameNameClipCount(sourceAnimClips, "Attack");
                         
                         prefabContext.InstantiateAndSave(prefabPath, prefabFilePath,
-                            o =>
+                            (o, id) =>
                             { 
-                                SetUnitInHierarchy(o, overrideController, maxAttackCount, materialContext,
+                                SetUnitInHierarchy(o, id, overrideController, maxAttackCount, materialContext,
                                     projectConfigs._unitHightPrefab);
                             });
                     }
