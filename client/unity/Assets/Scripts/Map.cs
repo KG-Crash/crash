@@ -353,12 +353,22 @@ namespace KG
             this.rows = height * scale;
             this.cols = width * scale;
             this.scale = scale;
-            _walkability = Enumerable.Repeat(false, rows * cols).ToArray();
+            var maxCollideHeights = Enumerable.Repeat(float.PositiveInfinity, rows * cols).ToArray();
 
             var tiles = GetComponentsInChildren<Transform>().Except(new[] {this.GetComponent<Transform>()});
             foreach (var tile in tiles)
             {
-                tile.gameObject.AddComponent<MeshCollider>();
+                if (tile.gameObject.GetComponent<MeshCollider>() == null)
+                {
+                    tile.gameObject.AddComponent<MeshCollider>();   
+                }
+                else
+                {
+                    var components = tile.gameObject.GetComponents<MeshCollider>();
+                
+                    for (int i = 1; i < components.Length; i++)
+                        DestroyImmediate(components[i]);
+                }
             }
 
             var colliders = tiles.Select(x => x.gameObject.GetComponent<MeshCollider>()).ToArray();
@@ -382,10 +392,21 @@ namespace KG
 
                         var hit = hits.FirstOrDefault();
                         var index = Flatten(row, col);
-                        _walkability[index] = hit.point.y < _threshold;
+                        if (float.IsPositiveInfinity(maxCollideHeights[index]))
+                        {
+                            maxCollideHeights[index] = hit.point.y;
+                        }
+                        else
+                        {
+                            maxCollideHeights[index] = Mathf.Max(maxCollideHeights[index], hit.point.y);
+                        }
+                        
+                        Debug.Log($"[{row},{col}]={hit.point.y}, maxCollideHeights[index]={maxCollideHeights[index]}");
                     }
                 }
             }
+
+            _walkability = maxCollideHeights.Select(x => x <= _threshold).ToArray();
         }
 
         #endregion
