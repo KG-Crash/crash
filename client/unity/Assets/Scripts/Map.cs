@@ -78,12 +78,12 @@ namespace KG
         }
         #endregion
 
-        private readonly Cell[] _cells;
+        private Cell[] _cells;
         
         public Graph<Cell> cells { get; private set; } = new Graph<Cell>();
         public Graph<Region> regions { get; private set; } = new Graph<Region>();
-        public int cols { get; private set; }
-        public int rows { get; private set; }
+        public int cols => width * scale;
+        public int rows => height * scale;
         [field: SerializeField]
         public int width { get; private set; } = 192;
         [field: SerializeField]
@@ -129,6 +129,8 @@ namespace KG
 
         private void CreateCells(int rows, int cols)
         {
+            _cells = new Cell[rows * cols];
+            
             for (int row = 0; row < rows; row++)
             {
                 for (int col = 0; col < cols; col++)
@@ -306,18 +308,7 @@ namespace KG
             UpdateCellGraph();
             UpdateRegionGraph();
         }
-
-        public Map()
-        {
-            this.cols = width * scale;
-            this.rows = height * scale;
-            this.scale = scale;
-
-            var rows = height * scale;
-            var cols = width * scale;
-            _cells = new Cell[rows * cols];
-        }
-
+        
         private void Awake()
         {
             Provisioning();
@@ -350,9 +341,6 @@ namespace KG
 
         private void UpdateWalkability()
         {
-            this.rows = height * scale;
-            this.cols = width * scale;
-            this.scale = scale;
             var maxCollideHeights = Enumerable.Repeat(float.PositiveInfinity, rows * cols).ToArray();
 
             var tiles = GetComponentsInChildren<Transform>().Except(new[] {this.GetComponent<Transform>()});
@@ -400,8 +388,6 @@ namespace KG
                         {
                             maxCollideHeights[index] = Mathf.Max(maxCollideHeights[index], hit.point.y);
                         }
-                        
-                        Debug.Log($"[{row},{col}]={hit.point.y}, maxCollideHeights[index]={maxCollideHeights[index]}");
                     }
                 }
             }
