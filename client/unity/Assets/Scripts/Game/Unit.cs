@@ -440,13 +440,16 @@ namespace Game
                   
                     if (_target?.IsDead ?? true)
                     {
-                        _target = null;
+                        _target = SearchEnemy(attackRange);
 
-                        if (_destination != null)
-                            UpdateMovePath(_destination.Value);
+                        if (_target == null)
+                        {
+                            if (_destination != null)
+                                UpdateMovePath(_destination.Value);
 
-                        DeltaMove((Fix64)Time.deltaTime);
-                        break;
+                            DeltaMove((Fix64)Time.deltaTime);
+                            break;
+                        }
                     }
 
                     Attack(_target);
