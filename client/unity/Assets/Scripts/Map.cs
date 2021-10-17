@@ -84,8 +84,11 @@ namespace KG
         public Graph<Region> regions { get; private set; } = new Graph<Region>();
         public int cols { get; private set; }
         public int rows { get; private set; }
+        [field: SerializeField]
         public int width { get; private set; } = 192;
+        [field: SerializeField]
         public int height { get; private set; } = 168;
+        [field: SerializeField]
         public int scale { get; private set; } = 4;
         public Fix64 cellSize => Fix64.One / new Fix64(scale);
 
