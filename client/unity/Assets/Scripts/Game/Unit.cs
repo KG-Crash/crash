@@ -169,6 +169,11 @@ namespace Game
             }
         }
 
+        public Fix64 visibleRange
+        {
+            get => table.VisibleRange;
+        }
+
         public Fix64 hp
         {
             get => _hp;
@@ -407,13 +412,13 @@ namespace Game
             switch (_currentState)
             {
                 case UnitState.Idle:
-                    _target = SearchEnemy(attackRange); // 근거리 유닛이면 공격대상을 못찾나?
+                    _target = SearchEnemy(visibleRange); // 근거리 유닛이면 공격대상을 못찾나?
                     if (_target != null)
                         _currentState = UnitState.Attack;
                     break;
 
                 case UnitState.Move:
-                    _target ??= SearchEnemy(attackRange);
+                    _target ??= SearchEnemy(visibleRange);
                     if (_target != null)
                     {
                         UpdateMovePath(_target.position);
@@ -440,7 +445,7 @@ namespace Game
                   
                     if (_target?.IsDead ?? true)
                     {
-                        _target = SearchEnemy(attackRange);
+                        _target = SearchEnemy(visibleRange);
 
                         if (_target == null)
                         {

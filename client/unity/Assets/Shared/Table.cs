@@ -57,6 +57,8 @@ namespace Shared.Table
         
         public int Armor { get; set; }
         
+        public int VisibleRange { get; set; }
+        
         public int AttackRange { get; set; }
         
         public int AttackSpeed { get; set; }

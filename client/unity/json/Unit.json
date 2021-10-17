@@ -13,6 +13,7 @@
     "Size": "Small",
     "Speed": 5,
     "Type": "Normal",
+    "VisibleRange": 15,
     "Width": 13500
   },
   "1": {
@@ -29,6 +30,7 @@
     "Size": "Medium",
     "Speed": 5,
     "Type": "Explosive",
+    "VisibleRange": 15,
     "Width": 13500
   },
   "2": {
@@ -45,6 +47,7 @@
     "Size": "Large",
     "Speed": 5,
     "Type": "Concussive",
+    "VisibleRange": 15,
     "Width": 13500
   },
   "3": {
@@ -61,6 +64,7 @@
     "Size": "Medium",
     "Speed": 5,
     "Type": "Explosive",
+    "VisibleRange": 35,
     "Width": 13500
   }
 }
