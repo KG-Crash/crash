@@ -13,7 +13,7 @@ public static class Fix64EditorUtil
         
         EditorGUI.BeginChangeCheck();
         
-        var fix64 = Fix64TextField(remainRect, Fix64.FromRaw(value));
+        var fix64 = Fix64TextField(remainRect, property, Fix64.FromRaw(value));
 
         if (EditorGUI.EndChangeCheck())
         {
@@ -23,9 +23,9 @@ public static class Fix64EditorUtil
         return fix64;
     }
     
-    public static Fix64 Fix64TextField(Rect remainRect, Fix64 fix64)
+    public static Fix64 Fix64TextField(Rect remainRect, SerializedProperty property, Fix64 fix64)
     {
-        var str = EditorGUI.DelayedTextField(remainRect, fix64.ToString());
+        var str = EditorGUI.DelayedTextField(remainRect, property.name, fix64.ToString());
         if (Fix64.TryParse(str, out var new64))
         {
             return new64;
