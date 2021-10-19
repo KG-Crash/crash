@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 public class GameRoomView : UIView
 {
     public KG.ScrollView userNameList;
+    public KG.ScrollView chatLogList;
 
     // Start is called before the first frame update
     public override void Start()

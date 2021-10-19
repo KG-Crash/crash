@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using Network;
+using Protocol.Request;
 
 namespace Game
 {
@@ -32,7 +34,7 @@ namespace Game
 				SendMessage();
 		}
 
-		public void SendMessage()
+		public async void SendMessage()
 		{
 			if (_input.text.Equals(" ") || _input.text.Equals(""))
 				return;
@@ -48,7 +50,13 @@ namespace Game
 				resultMsg = CheatManager.ParseMessage(msg);
 
 			if (msg.Equals(resultMsg))
+			{
+				//await Client.Send(new Chat
+				//{
+				//	Message = msg
+				//});	
 				RecvMessage(resultMsg);
+			}
 			else
 			{
 				Debug.Log(resultMsg);

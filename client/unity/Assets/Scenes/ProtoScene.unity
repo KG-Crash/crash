@@ -4041,6 +4041,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06a55c2f743565848a5037e60c90eb31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _useCheat: 1
   _chatLog: {fileID: 1612677424}
   _input: {fileID: 781797551}
   _scrollRect: {fileID: 1940785040}
