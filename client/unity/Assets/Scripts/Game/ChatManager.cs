@@ -11,6 +11,8 @@ namespace Game
 {
 	public class ChatManager : MonoBehaviour
 	{
+		[SerializeField] public bool _useCheat;
+
 		[SerializeField] private Text _chatLog;
 		[SerializeField] private InputField _input;
 		[SerializeField] private ScrollRect _scrollRect;
@@ -41,7 +43,9 @@ namespace Game
 			_input.ActivateInputField();
 			_input.text = "";
 
-			resultMsg = CheatManager.ParseMessage(msg);
+			resultMsg = msg;			
+			if(_useCheat)
+				resultMsg = CheatManager.ParseMessage(msg);
 
 			if (msg.Equals(resultMsg))
 				RecvMessage(resultMsg);
