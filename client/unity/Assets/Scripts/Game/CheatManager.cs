@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using System.Linq;
+using UnityEngine;
 
 namespace Game
 {
@@ -12,21 +13,28 @@ namespace Game
         static public string ParseMessage(string msg)
         {
             MethodInfo methodInfo = null;
-            List<int> parameter = new List<int>();
+            List<object> paramList = new List<object>();
 
             foreach (var method in GetCommandMethodInfos())
             {
                 String command = method.GetCustomAttribute<BuildCommandAttribute>().command;
 
-                Regex regex = new Regex("(?<command>" + command + ")" + @"\s*(?<param>.+\d)\s*");
+                Regex regex = new Regex("(?<command>" + command + ")" + @"\s*(?<param>.*)\s*");
                 Match match = regex.Match(msg);
 
-                if (!match.Groups["command"].ToString().Equals("")) // 해당 커맨드가 있으면
+                if (!match.Groups["command"].ToString().Equals(""))
                 {
                     methodInfo = method;
-                    foreach (var param in match.Groups["param"].ToString().Split())
+                    var paramInfos = methodInfo.GetParameters();
+                    object[] matchParams = match.Groups["param"].ToString().Split();
+
+                    if (paramInfos.Length != matchParams.Length)
+                        return msg;
+
+                    for (int i = 0; i < paramInfos.Length; i++)
                     {
-                        parameter.Add(int.Parse(param));
+                        var convertedParam = Convert.ChangeType(matchParams[i], paramInfos[i].ParameterType);
+                        paramList.Add(convertedParam);
                     }
                 }
             }
@@ -34,10 +42,10 @@ namespace Game
             if (methodInfo == null)
                 return msg;
 
-            if (parameter.Count < 1)
+            if (paramList.Count < 1)
                 return msg;
 
-            methodInfo.Invoke(null, new object[] { parameter.ToArray() });
+            methodInfo.Invoke(null, paramList.ToArray());
             msg = methodInfo.GetCustomAttribute<BuildCommandAttribute>().command + " Cheat enable";
             return msg;
         }
@@ -53,15 +61,7 @@ namespace Game
                 if (x.ReturnType != typeof(void))
                     return false;
 
-                var parameters = x.GetParameters();
-                if (parameters.Length != 1)
-                    return false;
-
-                if (parameters[0].ParameterType.GetTypeInfo() != typeof(int[]))
-                    return false;
-
                 return true;
-
             });
 
             foreach (var method in methods)
@@ -84,15 +84,7 @@ namespace Game
                 if (x.ReturnType != typeof(void))
                     return false;
 
-                var parameters = x.GetParameters();
-                if (parameters.Length != 1)
-                    return false;
-
-                if (parameters[0].ParameterType.GetTypeInfo() != typeof(int[]))
-                    return false;
-
                 return true;
-
             });
 
             return methods.ToList();
