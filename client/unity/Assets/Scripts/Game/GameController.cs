@@ -11,6 +11,13 @@ namespace Game
 {
     public partial class GameController : MonoBehaviour
     {
+        public const int FPS = 60;
+        public const int TPS = 8;
+        public static Fix64 TimeDelta => Fix64.One / new Fix64(FPS);
+        public static Fix64 TurnRate => Fix64.One / new Fix64(8);
+        public int Frame { get; private set; }
+        private Protocol.Request.ActionQueue _actionQueue = new Protocol.Request.ActionQueue();
+
         [NonSerialized] private int _playerID;
         [NonSerialized] private uint _playerTeamID;
         [NonSerialized] private Team _allPlayerByTeam;
@@ -31,7 +38,8 @@ namespace Game
         private static uint playerIDStepper = 0;
 
         [SerializeField] private Transform[] _spawnPositions;
-        
+
+
         public FixVector3 GetSpawnPosition(int index)
         {
             return _spawnPositions[index].position;
@@ -113,11 +121,22 @@ namespace Game
             _allUnitInFrustum = new List<Unit>();
         }
 
+        private void Start()
+        {
+            Application.targetFrameRate = FPS;
+        }
+
         private void Update()
         {
             UpdateForDebug();
             _player.UpdateUpgrade(UnityEngine.Time.time);
             UpdateUnitInFrustumPlane();
+
+            if (Frame++ >= TPS)
+            {
+                OnTurnChanged();
+                Frame = 0;
+            }
         }
 
         private void OnDestroy()
@@ -126,7 +145,19 @@ namespace Game
         }
 
         private Vector3[] frustumPoints = new Vector3[8];
-        private Plane[] frustumPlanes = new Plane[6]; 
+        private Plane[] frustumPlanes = new Plane[6];
+
+        private void OnTurnChanged()
+        {
+            // 서버에 ActionQueue 보냄
+            _actionQueue.Actions.Clear();
+        }
+
+        public void EnqueueAction(Protocol.Request.Action action)
+        {
+            action.Frame = Frame;
+            _actionQueue.Actions.Add(action);
+        }
         
         public void UpdateDragRect(Rect rect)
         {

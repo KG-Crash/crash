@@ -425,21 +425,21 @@ namespace Game
                         _currentState = UnitState.Attack;
                     }
                     else
-                        DeltaMove((Fix64)Time.deltaTime);
+                        DeltaMove(GameController.TimeDelta);
                     break;
 
                 case UnitState.Attack:
 
                     if (_target == null)
                     {
-                        DeltaMove((Fix64)Time.deltaTime);
+                        DeltaMove(GameController.TimeDelta);
                         break;
                     }
 
                     if (ContainsRange(_target.position) == false)
                     {
                         _target = null;
-                        DeltaMove((Fix64)Time.deltaTime);
+                        DeltaMove(GameController.TimeDelta);
                         break;
                     }
                   
@@ -452,7 +452,7 @@ namespace Game
                             if (_destination != null)
                                 UpdateMovePath(_destination.Value);
 
-                            DeltaMove((Fix64)Time.deltaTime);
+                            DeltaMove(GameController.TimeDelta);
                             break;
                         }
                     }

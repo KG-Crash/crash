@@ -51,3 +51,15 @@ table Whisper {
 	message: string;
 	error: uint32;
 }
+
+table Action {
+	user: string;
+	frame: int;
+	id: int;
+	positionX: int;
+	positionY: int;
+}
+
+table ActionQueue {
+	actions: [Action];
+}

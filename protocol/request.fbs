@@ -28,3 +28,14 @@ table Whisper {
 	user: string;
 	message: string;
 }
+
+table Action {
+	id: int;
+	frame: int;
+	positionX: int;
+	positionY: int;
+}
+
+table ActionQueue {
+	actions: [Action];
+}

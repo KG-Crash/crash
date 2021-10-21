@@ -11,7 +11,9 @@ namespace Protocol.Request
         KICK_ROOM,
         ROOM_LIST,
         CHAT,
-        WHISPER
+        WHISPER,
+        ACTION,
+        ACTION_QUEUE
     }
 
     public class CreateRoom : IProtocol
@@ -249,6 +251,83 @@ namespace Protocol.Request
         public static Whisper Deserialize(byte[] bytes)
         {
             return new Whisper(FlatBuffer.Request.Whisper.GetRootAsWhisper(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class Action : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Request.Identity.ACTION;
+
+        public int Id { get; set; }
+        public int Frame { get; set; }
+        public int PositionX { get; set; }
+        public int PositionY { get; set; }
+
+        public Action()
+        { }
+
+        public Action(FlatBuffer.Request.Action obj)
+        {
+            this.Id = obj.Id;
+            this.Frame = obj.Frame;
+            this.PositionX = obj.PositionX;
+            this.PositionY = obj.PositionY;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Request.Action> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _id = this.Id;
+            var _frame = this.Frame;
+            var _positionX = this.PositionX;
+            var _positionY = this.PositionY;
+
+            return FlatBuffer.Request.Action.CreateAction(builder, _id, _frame, _positionX, _positionY);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Action Deserialize(byte[] bytes)
+        {
+            return new Action(FlatBuffer.Request.Action.GetRootAsAction(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class ActionQueue : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Request.Identity.ACTION_QUEUE;
+
+        public List<Action> Actions { get; set; }
+
+        public ActionQueue()
+        { }
+
+        public ActionQueue(FlatBuffer.Request.ActionQueue obj)
+        {
+            this.Actions = Enumerable.Range(0, obj.ActionsLength).Select(x => new Action(obj.Actions(x).Value)).ToList();
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Request.ActionQueue> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _actions = FlatBuffer.Request.ActionQueue.CreateActionsVector(builder, this.Actions.Select(x => x.ToFlatBuffer(builder)).ToArray());
+
+            return FlatBuffer.Request.ActionQueue.CreateActionQueue(builder, _actions);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static ActionQueue Deserialize(byte[] bytes)
+        {
+            return new ActionQueue(FlatBuffer.Request.ActionQueue.GetRootAsActionQueue(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 }

@@ -14,7 +14,9 @@ namespace Protocol.Response
         DESTROYED_ROOM,
         ROOM_LIST,
         CHAT,
-        WHISPER
+        WHISPER,
+        ACTION,
+        ACTION_QUEUE
     }
 
     public class Login : IProtocol
@@ -390,6 +392,86 @@ namespace Protocol.Response
         public static Whisper Deserialize(byte[] bytes)
         {
             return new Whisper(FlatBuffer.Response.Whisper.GetRootAsWhisper(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class Action : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.ACTION;
+
+        public string User { get; set; }
+        public int Frame { get; set; }
+        public int Id { get; set; }
+        public int PositionX { get; set; }
+        public int PositionY { get; set; }
+
+        public Action()
+        { }
+
+        public Action(FlatBuffer.Response.Action obj)
+        {
+            this.User = obj.User;
+            this.Frame = obj.Frame;
+            this.Id = obj.Id;
+            this.PositionX = obj.PositionX;
+            this.PositionY = obj.PositionY;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.Action> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _user = builder.CreateString(this.User);
+            var _frame = this.Frame;
+            var _id = this.Id;
+            var _positionX = this.PositionX;
+            var _positionY = this.PositionY;
+
+            return FlatBuffer.Response.Action.CreateAction(builder, _user, _frame, _id, _positionX, _positionY);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Action Deserialize(byte[] bytes)
+        {
+            return new Action(FlatBuffer.Response.Action.GetRootAsAction(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class ActionQueue : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.ACTION_QUEUE;
+
+        public List<Action> Actions { get; set; }
+
+        public ActionQueue()
+        { }
+
+        public ActionQueue(FlatBuffer.Response.ActionQueue obj)
+        {
+            this.Actions = Enumerable.Range(0, obj.ActionsLength).Select(x => new Action(obj.Actions(x).Value)).ToList();
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.ActionQueue> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _actions = FlatBuffer.Response.ActionQueue.CreateActionsVector(builder, this.Actions.Select(x => x.ToFlatBuffer(builder)).ToArray());
+
+            return FlatBuffer.Response.ActionQueue.CreateActionQueue(builder, _actions);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static ActionQueue Deserialize(byte[] bytes)
+        {
+            return new ActionQueue(FlatBuffer.Response.ActionQueue.GetRootAsActionQueue(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 }

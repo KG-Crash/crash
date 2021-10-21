@@ -124,7 +124,7 @@ namespace Game
                     break;
 
                 case ProjectileState.Move:
-                    DeltaMove((Fix64)Time.deltaTime);
+                    DeltaMove(GameController.TimeDelta);
                     break;
 
                 case ProjectileState.Hit:

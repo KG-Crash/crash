@@ -55,6 +55,14 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &Whisper{}
 		return x.Deserialize(payload)
 
+	case ACTION:
+		x := &Action{}
+		return x.Deserialize(payload)
+
+	case ACTION_QUEUE:
+		x := &ActionQueue{}
+		return x.Deserialize(payload)
+
 	}
 
 	return nil
@@ -91,6 +99,12 @@ func Text(p protocol.Protocol) string {
 
 	case *Whisper:
 		return "WHISPER"
+
+	case *Action:
+		return "ACTION"
+
+	case *ActionQueue:
+		return "ACTION_QUEUE"
 	}
 	return ""
 }
@@ -106,6 +120,8 @@ const (
 	ROOM_LIST
 	CHAT
 	WHISPER
+	ACTION
+	ACTION_QUEUE
 )
 
 type Login struct {
@@ -529,5 +545,111 @@ func (obj *Whisper) Serialize() []byte {
 
 func (obj *Whisper) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsWhisper(bytes, 0)
+	return obj.parse(root)
+}
+
+type Action struct {
+	User      string
+	Frame     int32
+	Id        int32
+	PositionX int32
+	PositionY int32
+}
+
+func (obj *Action) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_user := builder.CreateString(obj.User)
+
+	source.ActionStart(builder)
+	source.ActionAddUser(builder, _user)
+	source.ActionAddFrame(builder, obj.Frame)
+	source.ActionAddId(builder, obj.Id)
+	source.ActionAddPositionX(builder, obj.PositionX)
+	source.ActionAddPositionY(builder, obj.PositionY)
+
+	return source.ActionEnd(builder)
+}
+
+func (obj *Action) parse(x *source.Action) *Action {
+	obj.User = string(x.User())
+	obj.Frame = x.Frame()
+	obj.Id = x.Id()
+	obj.PositionX = x.PositionX()
+	obj.PositionY = x.PositionY()
+
+	return obj
+}
+
+func (obj *Action) Identity() int {
+	return ACTION
+}
+
+func (obj *Action) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *Action) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsAction(bytes, 0)
+	return obj.parse(root)
+}
+
+type ActionQueue struct {
+	Actions []Action
+}
+
+func (obj *ActionQueue) actions(builder *flatbuffers.Builder, actions []Action) flatbuffers.UOffsetT {
+	_size := len(actions)
+	offsets := make([]flatbuffers.UOffsetT, _size)
+	for i, x := range actions {
+		offsets[_size-i-1] = x.create(builder)
+	}
+
+	builder.StartVector(4, _size, 4)
+	for _, offset := range offsets {
+		builder.PrependUOffsetT(offset)
+	}
+	return builder.EndVector(_size)
+}
+
+func (obj *ActionQueue) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_actions := obj.actions(builder, obj.Actions)
+
+	source.ActionQueueStart(builder)
+	source.ActionQueueAddActions(builder, _actions)
+
+	return source.ActionQueueEnd(builder)
+}
+
+func (obj *ActionQueue) parse(x *source.ActionQueue) *ActionQueue {
+
+	_sizeActions := x.ActionsLength()
+	obj.Actions = make([]Action, _sizeActions)
+	for i := 0; i < _sizeActions; i++ {
+		_action := &source.Action{}
+		x.Actions(_action, i)
+
+		action := Action{}
+		action.parse(_action)
+		obj.Actions = append(obj.Actions, action)
+	}
+
+	return obj
+}
+
+func (obj *ActionQueue) Identity() int {
+	return ACTION_QUEUE
+}
+
+func (obj *ActionQueue) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *ActionQueue) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsActionQueue(bytes, 0)
 	return obj.parse(root)
 }
