@@ -28,6 +28,11 @@ namespace KG
             if(listener == null)
                 throw new System.Exception("지랄 니은");
 
+            foreach (Transform item in _layoutGroup.transform)
+            {
+                GameObject.Destroy(item.gameObject);
+            }
+
             var enumerator = listener.OnRefresh();
             while (enumerator.MoveNext())
             {

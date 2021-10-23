@@ -27,4 +27,9 @@ public class GameRoomView : UIView
             Message = "¾È³ç" 
         });
     }
+
+    public async void OnExit()
+    {
+        await Client.Send(new LeaveRoom());
+    }
 }

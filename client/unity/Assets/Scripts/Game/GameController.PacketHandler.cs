@@ -114,7 +114,7 @@ namespace Game
         {
             var isMine = (response.User == Client.Instance.id);
 
-            var view = isMine ? await UIView.Show<GameRoomView>(hideBackView: true) : UIView.Get<GameRoomView>();
+            var view = isMine ? await UIView.Show<GameRoomView>() : UIView.Get<GameRoomView>();
             view.userNameList.Refresh(new UserListListener(response));
             return true;
         }
@@ -139,6 +139,23 @@ namespace Game
         public async Task<bool> OnWhisper(Whisper response)
         {
             UnityEngine.Debug.Log($"{response.User} : {response.Message}");
+            return true;
+        }
+
+        [FlatBufferEvent]
+        public async Task<bool> OnLeaveRoom(LeaveRoom response)
+        {
+            var isMine = (response.User == Client.Instance.id);
+
+            if (isMine)
+            {
+                await UIView.Close();
+            }
+            else
+            {
+                UnityEngine.Debug.Log($"{response.User} 가 나감.");
+            }
+
             return true;
         }
     }
