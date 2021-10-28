@@ -4,6 +4,7 @@ using Game;
 using KG;
 using UnityEditor.Animations;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Object = UnityEngine.Object;
 
 [Serializable]
@@ -17,6 +18,8 @@ public class ResourceConfig
     [SerializeField] public string[] _excludeChildDirs;
     [SerializeField] public string _sourceControllerSubPath;
     [SerializeField] public string _sourcePrefabParentSubPath;
+    [SerializeField] public string _includeClipPostfix;
+    [SerializeField] public string _excludeClipPostfix;
     // [SerializeField] public bool _noneUniformPrefabDirs;
     [SerializeField] public bool _excludePrefixForMap;
     [SerializeField] public bool _sharedMaterial;

@@ -176,14 +176,22 @@ public class UnitExportTableEditor : Editor
 
     #region Util
 
-    public static AnimationClip FindClip(AnimationClip[] clips, string name, string postNumber)
+    public static AnimationClip FindClip(AnimationClip[] clips, string name, string postNumber, string includeSubName, string excludeSubName)
     {
         var splitted = name.Split('_');
         clips = Array.FindAll(clips, clip =>
         {
             foreach (var name in splitted)
+            {
                 if (clip.name.ContainsInsensitive(name))
-                    return true;
+                {
+                    if ((!string.IsNullOrEmpty(excludeSubName) && clip.name.EndsWith(excludeSubName)) && 
+                        (string.IsNullOrEmpty(includeSubName) || !clip.name.EndsWith(includeSubName)))
+                        return false;
+                 
+                    return true;   
+                }   
+            }
             return false;
         });
 
@@ -247,10 +255,9 @@ public class UnitExportTableEditor : Editor
     }
 
     public static AnimatorOverrideController CreateOverrideController(AnimatorController originController,
-        AnimationClip[] sourceAnimClips)
+        AnimationClip[] sourceAnimClips, string includeSubName, string excludeSubName)
     {
-        var overrideController = new AnimatorOverrideController();
-        overrideController.runtimeAnimatorController = originController;
+        var overrideController = new AnimatorOverrideController {runtimeAnimatorController = originController};
 
         var list = new List<KeyValuePair<AnimationClip, AnimationClip>>();
         overrideController.GetOverrides(list);
@@ -274,7 +281,7 @@ public class UnitExportTableEditor : Editor
             var sourceClip = list[j].Key;
             var uniqueClipName = uniqueClipStrs[j];
             var (sourceLastName, sourceNumberString) = uniqueClipName.GetLastNameAndNumber();
-            var destClip = FindClip(sourceAnimClips, sourceLastName, sourceNumberString);
+            var destClip = FindClip(sourceAnimClips, sourceLastName, sourceNumberString, includeSubName, excludeSubName);
 
             list[j] = new KeyValuePair<AnimationClip, AnimationClip>(sourceClip, destClip);
         }
@@ -355,18 +362,15 @@ public class UnitExportTableEditor : Editor
         }
     }
 
-    public static void SetUnitInHierarchy(GameObject instance, int originID, AnimatorOverrideController overrideController,
+    public static void SetUnitInHierarchy(GameObject instance, int originID,
         int maxAttackCount, MaterialContext materialContext, GameObject hightlightPrefab)
     {
-        var animator = instance.GetOrAddComponent<Animator>();
-        animator.runtimeAnimatorController = overrideController;
-
         var unit = instance.AddComponent<Unit>();
         var highlightGO =
             (GameObject) PrefabUtility.InstantiatePrefab(hightlightPrefab);
         unit.highlighted = highlightGO;
         unit.maxAttackAnimCount = maxAttackCount;
-        unit.animator = animator;
+        unit.animator = instance.GetOrAddComponent<Animator>();;
         unit.OnRefreshRenderers();
 
         List<Material> deadMaterials = new List<Material>();
@@ -391,6 +395,13 @@ public class UnitExportTableEditor : Editor
         unit.unitOriginID = originID;
     }
 
+    public static void SetUnitInAsset(GameObject unitPrefab, AnimatorOverrideController overrideController)
+    {
+        var animator = unitPrefab.GetOrAddComponent<Animator>();
+        animator.runtimeAnimatorController = overrideController;
+        animator.applyRootMotion = false;
+    }
+
     public class MaterialContext
     {
         public string materialParentPath { get; set; }
@@ -412,7 +423,6 @@ public class UnitExportTableEditor : Editor
                     : originMaterialPath;
                 var newMaterialPath = $"{materialParentPath}/{originMaterialName}";
 
-                Debug.Log($"newMaterialPath:{newMaterialPath}");
                 AssetDatabase.CreateAsset(newMaterial, newMaterialPath);
                 newMaterial = AssetDatabase.LoadAssetAtPath<Material>(newMaterialPath);
                 
@@ -424,7 +434,7 @@ public class UnitExportTableEditor : Editor
                 var newDeadMaterialPath = $"{materialParentPath}/{deadMaterialName}";
                 var newDeadMaterial = new Material(originMaterial);
                 newDeadMaterial.SetOpaqueToTransparent();
-                Debug.Log($"newDeadMaterialPath:{newDeadMaterialPath}");
+
                 AssetDatabase.CreateAsset(newDeadMaterial, newDeadMaterialPath);
                 newDeadMaterial = AssetDatabase.LoadAssetAtPath<Material>(newDeadMaterialPath);
 
@@ -446,12 +456,13 @@ public class UnitExportTableEditor : Editor
             unitPathToID = unitTable.GetEnumerable().ToDictionary(x => AssetDatabase.GetAssetPath(x.Value), x => x.Key);
         }
 
-        public void InstantiateAndSave(string sourcePrefabPath, string fileName, Action<GameObject, int> setUnitInHierarchy)
+        public void InstantiateAndSave(string sourcePrefabPath, string fileName, Action<GameObject, int> setUnitInHierarchy, Action<GameObject> setUnitInAsset)
         {
             var newPrefabAssetPath = $"{prefabParentPath}/{fileName}";
             var newObjectInHierarchy = UnityObjectUtil.LoadAndInstantiate<GameObject>(sourcePrefabPath);
             if (newObjectInHierarchy == null)
             {
+                Debug.LogError("newObjectInHierarchy == null");
                 return;
             }
 
@@ -466,8 +477,11 @@ public class UnitExportTableEditor : Editor
             }
 
             setUnitInHierarchy.Invoke(newObjectInHierarchy, id);
+            
             var newUnitPrefabGO = PrefabUtility.SaveAsPrefabAsset(newObjectInHierarchy, newPrefabAssetPath);
             DestroyImmediate(newObjectInHierarchy);
+            
+            setUnitInAsset.Invoke(newUnitPrefabGO);
 
             var newUnit = newUnitPrefabGO.GetComponent<Unit>();
             unitTable.SetOriginUnit(id, newUnit);
@@ -500,8 +514,7 @@ public class UnitExportTableEditor : Editor
 
                 var rootAssetPath = AssetDatabase.GetAssetPath(resConfig._rootDir);
                 var childAssetPaths = Directory.GetDirectories(rootAssetPath).Select(s => s.Replace("\\", "/"));
-
-
+                
                 if (resConfig._assetDirFirst)
                 {
                     foreach (var assetPath in childAssetPaths)
@@ -528,7 +541,7 @@ public class UnitExportTableEditor : Editor
                             resConfig._sourceControllerSubPath.GetControllerFormatPath(assetPath, partialAssetPath);
                         var sourceAnimClips = GetAnimationClips(resConfig._useAnimController, animParentPath);
                         var overrideController =
-                            CreateOverrideController(resConfig._crashSourceController, sourceAnimClips);
+                            CreateOverrideController(resConfig._crashSourceController, sourceAnimClips, resConfig._includeClipPostfix, resConfig._excludeClipPostfix);
                         var newOverrideController = CreateAssetAndLoad(overrideController,
                             prefabContext.prefabParentPath, partialAssetPath, overrideControllerExt);
                         var maxAttackCount = GetSameNameClipCount(sourceAnimClips, "Attack");
@@ -541,8 +554,12 @@ public class UnitExportTableEditor : Editor
                             prefabContext.InstantiateAndSave(sourcePrefabPath, fileName,
                                 (o, id) =>
                                 {
-                                    SetUnitInHierarchy(o, id, overrideController, maxAttackCount, materialContext,
+                                    SetUnitInHierarchy(o, id, maxAttackCount, materialContext,
                                         projectConfigs._unitHightPrefab);
+                                }, 
+                                o =>
+                                {
+                                    SetUnitInAsset(o, newOverrideController);
                                 });
                         }
                     }
@@ -598,7 +615,7 @@ public class UnitExportTableEditor : Editor
                         var assetControllerPath = animParentPath.GetClipFormatPath(prefabToAnimName);
                         var sourceAnimClips = GetAnimationClips(resConfig._useAnimController, assetControllerPath);
                         var overrideController =
-                            CreateOverrideController(resConfig._crashSourceController, sourceAnimClips);
+                            CreateOverrideController(resConfig._crashSourceController, sourceAnimClips, resConfig._includeClipPostfix, resConfig._excludeClipPostfix);
                         var newOverrideController = CreateAssetAndLoad(overrideController,
                             prefabContext.prefabParentPath, prefabFileName, overrideControllerExt);
                         var maxAttackCount = GetSameNameClipCount(sourceAnimClips, "Attack");
@@ -606,8 +623,12 @@ public class UnitExportTableEditor : Editor
                         prefabContext.InstantiateAndSave(prefabPath, prefabFilePath,
                             (o, id) =>
                             { 
-                                SetUnitInHierarchy(o, id, overrideController, maxAttackCount, materialContext,
+                                SetUnitInHierarchy(o, id, maxAttackCount, materialContext,
                                     projectConfigs._unitHightPrefab);
+                            }, 
+                            o =>
+                            {
+                                SetUnitInAsset(o, newOverrideController);
                             });
                     }
                 }
