@@ -22,11 +22,10 @@ namespace Game
             {
                 var targetPlayer = GetPlayer(targetPlayerID.Value);
                 var targetPosition = GetSpawnPosition(targetPlayer.spawnIndex);
-                player.units.OrderBy(x => x.unitID).FirstOrDefault().MoveTo(targetPosition);
-                //foreach (var unit in player.units)
-                //{
-                //    unit.MoveTo(targetPosition);
-                //}
+                foreach (var unit in player.units)
+                {
+                    unit.MoveTo(targetPosition);
+                }
             }
         }
 

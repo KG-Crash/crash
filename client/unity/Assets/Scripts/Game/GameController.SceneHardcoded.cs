@@ -39,13 +39,15 @@ namespace Game
         {   
             _allPlayerByTeam = new Team();
             
-            var player1 = AddPlayerAndUnit(true, 0, 3, 1, 2);
-            var player2 = AddPlayerAndUnit(true, 1, 3, 1, 2);
-            var player3 = AddPlayerAndUnit(true, 2, 3, 1, 2);
+            var unitTypes = new int[1] { 0 }; 
             
-            var player4 = AddPlayerAndUnit(false, 3, 3, 1, 2);
-            var player5 = AddPlayerAndUnit(false, 4, 3, 1, 2);
-            var player6 = AddPlayerAndUnit(false, 5, 3, 1, 2);
+            var player1 = AddPlayerAndUnit(true, 0, unitTypes);
+            var player2 = AddPlayerAndUnit(true, 1, unitTypes);
+            var player3 = AddPlayerAndUnit(true, 2, unitTypes);
+            
+            var player4 = AddPlayerAndUnit(false, 3, unitTypes);
+            var player5 = AddPlayerAndUnit(false, 4, unitTypes);
+            var player6 = AddPlayerAndUnit(false, 5, unitTypes);
 
             player1.targetPlayerID = player4.playerID;
             player2.targetPlayerID = player5.playerID;
@@ -58,9 +60,9 @@ namespace Game
             MoveCameraToUnitPos(player1);
         }
 
-        private Player AddPlayerAndUnit(bool home, int playerID, params int[] unitTypes)
+        private Player AddPlayerAndUnit(bool home, int spawnIndex, params int[] unitTypes)
         {
-            var player = AddNewPlayer(home? (uint)0: 1, playerID);
+            var player = AddNewPlayer(home? (uint)0: 1, spawnIndex);
 
             foreach (var unitType in unitTypes)
             {

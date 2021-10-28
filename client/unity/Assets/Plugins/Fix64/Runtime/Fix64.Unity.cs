@@ -62,6 +62,11 @@ namespace FixMath.NET
         public static FixVector2 Max(FixVector2 a, FixVector2 b) => new FixVector2(Fix64.Max(a.x, b.x), Fix64.Max(a.y, b.y));
 
         public static Fix64 Dot(FixVector2 a, FixVector2 b) => a.x * b.x + a.y * b.y;
+
+        public override string ToString()
+        {
+            return $"{nameof(FixVector2)}({x.ToString()}, {y.ToString()})";
+        }
     }
     
     [System.Serializable]
@@ -192,6 +197,11 @@ namespace FixMath.NET
         public static FixVector3 Left => new FixVector3(-Fix64.One, Fix64.Zero, Fix64.Zero);
         public static FixVector3 Forward => new FixVector3(Fix64.Zero, Fix64.Zero, Fix64.One);
         public static FixVector3 Backword => new FixVector3(Fix64.Zero, Fix64.Zero, -Fix64.One);
+        
+        public override string ToString()
+        {
+            return $"{nameof(FixVector3)}({x.ToString()}, {y.ToString()}, {z.ToString()})";
+        }
     }
 
     public struct FixRect
