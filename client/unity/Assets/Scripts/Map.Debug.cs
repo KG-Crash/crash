@@ -7,7 +7,7 @@ namespace KG
 {
     public partial class Map
     {
-        [SerializeField] public bool drawCells = false;
+        [SerializeField, Header("Debug")] public bool drawCells = false;
         [SerializeField] public bool drawEdges = false;
         [SerializeField] public bool drawRegionEdges = false;
 

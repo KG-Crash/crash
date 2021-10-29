@@ -27,6 +27,11 @@ namespace KG
                 this.id = id;
                 this.walkable = walkable;
             }
+
+            public override string ToString()
+            {
+                return $"{base.ToString()}({id},{walkable})";
+            }
         }
         #endregion
 
@@ -75,6 +80,11 @@ namespace KG
                     return false;
                 });
             }
+
+            public override string ToString()
+            {
+                return $"{base.ToString()}({row},{col},{walkable})";
+            }
         }
         #endregion
 
@@ -82,17 +92,21 @@ namespace KG
         
         public Graph<Cell> cells { get; private set; } = new Graph<Cell>();
         public Graph<Region> regions { get; private set; } = new Graph<Region>();
+        
         public int cols => width * scale;
         public int rows => height * scale;
-        [field: SerializeField]
+        [field: Header("Properties"),SerializeField]
         public int width { get; private set; } = 192;
         [field: SerializeField]
         public int height { get; private set; } = 168;
         [field: SerializeField]
         public int scale { get; private set; } = 4;
+
+        [field: SerializeField] 
+        public int regionColDivider { get; private set; } = 10;
+        [field: SerializeField] 
+        public int regionRowDivider { get; private set; } = 10;
         public Fix64 cellSize => Fix64.One / new Fix64(scale);
-
-
 
         public static implicit operator Cell[](Map map) => map._cells;
 
@@ -303,7 +317,7 @@ namespace KG
         {
             CreateCells(rows, cols);
             cells = CreateCellGraph(_cells);
-            regions = UpdateRegion(10, 10);
+            regions = UpdateRegion(regionRowDivider, regionColDivider);
 
             UpdateCellGraph();
             UpdateRegionGraph();
@@ -380,6 +394,10 @@ namespace KG
 
                         var hit = hits.FirstOrDefault();
                         var index = Flatten(row, col);
+                        
+                        if (index < 0 || rows * cols <= index)
+                            continue;
+                        
                         if (float.IsPositiveInfinity(maxCollideHeights[index]))
                         {
                             maxCollideHeights[index] = hit.point.y;

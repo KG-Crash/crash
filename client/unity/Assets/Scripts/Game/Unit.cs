@@ -372,6 +372,10 @@ namespace Game
                 Gizmos.DrawLine(new Vector3(cellBox.minX, 0, cellBox.minY), new Vector3(cellBox.minX, 0, cellBox.maxY));
                 Gizmos.DrawLine(new Vector3(cellBox.maxX, 0, cellBox.minY), new Vector3(cellBox.maxX, 0, cellBox.maxY));
             }
+            
+#if UNITY_EDITOR
+            UnityEditor.Handles.Label(transform.position, $"id:{unitID}");
+#endif
         }
 
         public void Init(uint unitID, KG.Map map, Player owner, Unit.Listener listener)
@@ -570,11 +574,11 @@ namespace Game
             {
                 var start = _map[this.position];
                 if (start == null)
-                    throw new Exception();
+                    throw new Exception("start = _map[this.position] == null");
 
                 var end = _map[position];
                 if (end == null)
-                    throw new Exception();
+                    throw new Exception("end = _map[position] == null");
 
                 if (this.table.Flyable)
                 {
@@ -632,13 +636,17 @@ namespace Game
 
                     return true;
                 });
-                UnityEngine.Debug.Log($"update detail route. remained regions : {_regionPath.Count}");
+                
+                if (_cellPath.Count == 0)
+                    throw new Exception("_cellPath.Count == 0");
+                
+                UnityEngine.Debug.Log($"update detail route. unitID: {unitID}, _cellPath.Count: {_cellPath.Count}, _regionPath.Count: {_regionPath.Count}");
 
                 _destination = position;
             }
             catch(Exception e)
             {
-                UnityEngine.Debug.LogError(e.Message);
+                UnityEngine.Debug.LogError($"exception: {e.Message}, unitID: {unitID}");
                 _cellPath.Clear();
             }
         }
