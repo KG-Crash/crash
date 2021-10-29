@@ -21,6 +21,12 @@ namespace FixMath.NET
             this.y = (Fix64)v.y;
         }
         
+        public FixVector2(int x, int y)
+        {
+            this.x = (Fix64)x;
+            this.y = (Fix64)y;
+        }
+        
         public FixVector2(double x, double y)
         {
             this.x = (Fix64)x;
@@ -36,6 +42,8 @@ namespace FixMath.NET
         public Fix64 sqrMagnitude => (this.x * this.x) + (this.y * this.y);
 
         public Fix64 magnitude => (Fix64)Math.Sqrt((double)sqrMagnitude);
+
+        public FixVector2 yx => new FixVector2(y, x);
 
         public static FixVector2 zero => new FixVector2(Fix64.Zero, Fix64.Zero);
 
