@@ -26,6 +26,8 @@ namespace Game
         [NonSerialized] private List<Unit> _allUnitInFrustum;
         [NonSerialized] private ProjectilePool _projectilePool;
 
+        [Header("Miscellaneous")]
+
         [SerializeField] private Transform _poolOffset; 
         [SerializeField] private Transform _focusTransform;
         
@@ -34,16 +36,7 @@ namespace Game
         [SerializeField] private UnitTable _unitPrefabTable;
         [SerializeField] private ProjectileTable _projectilehPrefabTable;
        
-
         private static uint playerIDStepper = 0;
-
-        [SerializeField] private Transform[] _spawnPositions;
-
-
-        public FixVector3 GetSpawnPosition(int index)
-        {
-            return _spawnPositions[index].position;
-        }
 
         public Player GetPlayer(uint playerID)
         {

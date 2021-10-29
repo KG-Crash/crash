@@ -380,10 +380,6 @@ namespace Game
             this._map = map;
             this._owner = owner;
             this._listener = listener;
-        }
-
-        public void SetMaxHP()
-        {
             _hp = maxhp;
         }
 

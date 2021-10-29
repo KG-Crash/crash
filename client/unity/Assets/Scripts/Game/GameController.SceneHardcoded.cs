@@ -6,9 +6,18 @@ namespace Game
 {
     public partial class GameController
     {
+        [Header("Unit Spawn")] 
+        [SerializeField] private Transform _unitParent;
+        [SerializeField] private Transform[] _spawnPositions;
+
+        public FixVector3 GetSpawnPosition(int index)
+        {
+            return _spawnPositions[index].position;
+        }
+        
         public Unit SpawnUnitToPlayerStart(int spawnUnitOriginID, Player ownPlayer)
         {
-            var newUnit = _unitFactory.GetNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this);
+            var newUnit = _unitFactory.CreateNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this, _unitParent);
             ownPlayer.units.Add(newUnit);
             newUnit.position = GetSpawnPosition(ownPlayer.spawnIndex);
 
@@ -17,7 +26,7 @@ namespace Game
 
         public Unit SpawnUnitToPosition(int spawnUnitOriginID, Player ownPlayer, FixVector3 position)
         {
-            var newUnit = _unitFactory.GetNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this);
+            var newUnit = _unitFactory.CreateNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this, _unitParent);
             ownPlayer.units.Add(newUnit);
             newUnit.position = position;
 
