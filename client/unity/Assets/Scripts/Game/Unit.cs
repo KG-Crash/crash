@@ -568,6 +568,11 @@ namespace Game
                 .Select(x => x.data).Concat(src).Distinct().ToList();
         }
 
+        private static Map.Cell WalkableCell(Unit unit, Map.Region region)
+        {
+            return region.centroid.Near(cell => unit.IsWalkable(cell) && cell.region == region);
+        }
+        
         private void UpdateMovePath(FixVector3 position, bool updateWithRegion = false, List<Unit> units = null)
         {
             try
@@ -589,8 +594,9 @@ namespace Game
                 if (updateWithRegion)
                     _regionPath = _map.regions.Find(this.region, end.region);
 
-                var next = _regionPath.Count < 2 ?
-                    end : _regionPath.First().centroid;
+                var next = _regionPath.Count < 2? end: WalkableCell(this, _regionPath.First());
+                if (!IsWalkable(next))
+                    throw new Exception($"next({next}) is not walkable");
 
                 var allowed = GetAllowedRegions(start.region, next.region);
                 var collisionList = this.collisionCells;
@@ -602,15 +608,15 @@ namespace Game
                 if (units != null)
                     stopUnits.Concat(units).Distinct();
 
-                var collisionBoxes = stopUnits.Select(x => x.collisionBox).ToList();
-                if (collisionBoxes.Any(x => x.Contains(end.collisionBox)))
+                var unitCollideBoxes = stopUnits.Select(x => x.collisionBox).ToList();
+                if (unitCollideBoxes.Any(x => x.Contains(end.collisionBox)))
                 {
                     end = end.Near(x =>
                     {
                         if (IsWalkable(x) == false)
                             return false;
 
-                        if (collisionBoxes.Any(y => y.Contains(GetCollisionBox(x.center, _map.cellSize))))
+                        if (unitCollideBoxes.Any(y => y.Contains(GetCollisionBox(x.center, _map.cellSize))))
                             return false;
 
                         return true;
@@ -630,8 +636,8 @@ namespace Game
 
                     if (IsWalkable(node.data) == false)
                         return false;
-
-                    if (collisionBoxes.Any(x => x.Contains(GetCollisionBox(node.data.center, _map.cellSize))))
+                    
+                    if (unitCollideBoxes.Any(x => x.Contains(GetCollisionBox(node.data.center, _map.cellSize))))
                         return false;
 
                     return true;
@@ -822,6 +828,11 @@ namespace Game
             nodes.AddRange(this._map.regions[this.region].edges.Select(x => x.data));
 
             return nodes.SelectMany(x => x.units).Except(new[] { this });
+        }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}({nameof(unitID)}={unitID}, {nameof(unitOriginID)}={unitOriginID})";
         }
     }
 }
