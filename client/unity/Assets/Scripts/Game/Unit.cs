@@ -432,9 +432,14 @@ namespace Game
                 case UnitState.Attack:
 
                     if (_target == null)
-                    {
-                        DeltaMove(GameController.TimeDelta);
-                        break;
+                    {                        
+                        _target = SearchEnemy(visibleRange);
+
+                        if (_target == null)
+                        {
+                            DeltaMove(GameController.TimeDelta);
+                            break;                            
+                        }
                     }
 
                     if (ContainsRange(_target.position) == false)
