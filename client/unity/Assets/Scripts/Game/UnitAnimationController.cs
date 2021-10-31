@@ -57,7 +57,7 @@ namespace Game
         {
             base.OnStateUpdate(animator, stateInfo, layerIndex);
             
-            if (!dieAnimExecuted && stateInfo.IsName("Die") && stateInfo.normalizedTime >= 1.0f)
+            if (!dieAnimExecuted && stateInfo.IsName("Die_Death") && stateInfo.normalizedTime >= 1.0f)
             {
                 animator.gameObject.SendMessageUpwards("OnAnimEnd", UnitState.Dead);
                 dieAnimExecuted = true;
