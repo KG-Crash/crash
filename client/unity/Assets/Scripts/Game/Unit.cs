@@ -412,55 +412,45 @@ namespace Game
         {
             switch (_currentState)
             {
+                /*
+                 * 아무 행동도 하지 않음. 대기하다가 공격할 상대 있으면 이동
+                 */
                 case UnitState.Idle:
-                    _target = SearchEnemy(visibleRange); // 근거리 유닛이면 공격대상을 못찾나?
-                    if (_target != null)
-                        _currentState = UnitState.Attack;
-                    break;
-
-                case UnitState.Move:
-                    _target ??= SearchEnemy(visibleRange);
+                    _target = SearchEnemy(visibleRange);
                     if (_target != null)
                     {
-                        UpdateMovePath(_target.position);
+                        _currentState = UnitState.Attack;
+                        UpdateMovePath(_target.position, true);
+                    }
+                    break;
+
+                /*
+                 * 이동 중에는 공격 범위에 적이 있으면 공격, 아니면 그대로 고
+                 */
+                case UnitState.Move:
+                    _target ??= SearchEnemy(attackRange);
+                    if (_target != null)
+                    {
                         _currentState = UnitState.Attack;
                     }
                     else
                         DeltaMove(GameController.TimeDelta);
                     break;
 
+                /*
+                 * 1. 타겟이 없으면 찾기
+                 * 2. 타겟이 없거나 범위에 들어와 있지 않으면 다른 상태 전이
+                 * 3. 타겟이 있고 범위에 있으면 공격
+                 */
                 case UnitState.Attack:
+                    if (_target == null || _target.IsDead)
+                        _target = SearchEnemy(attackRange);
 
-                    if (_target == null)
-                    {                        
-                        _target = SearchEnemy(visibleRange);
-
-                        if (_target == null)
-                        {
-                            DeltaMove(GameController.TimeDelta);
-                            break;                            
-                        }
-                    }
-
-                    if (ContainsRange(_target.position) == false)
+                    if (_target == null || ContainsRange(_target.position) == false)
                     {
+                        _currentState = _destination != null? UnitState.Move: UnitState.Idle;
                         _target = null;
-                        DeltaMove(GameController.TimeDelta);
                         break;
-                    }
-                  
-                    if (_target?.IsDead ?? true)
-                    {
-                        _target = SearchEnemy(visibleRange);
-
-                        if (_target == null)
-                        {
-                            if (_destination != null)
-                                UpdateMovePath(_destination.Value);
-
-                            DeltaMove(GameController.TimeDelta);
-                            break;
-                        }
                     }
 
                     Attack(_target);
