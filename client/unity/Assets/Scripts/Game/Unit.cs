@@ -375,7 +375,10 @@ namespace Game
             }
             
 #if UNITY_EDITOR
-            UnityEditor.Handles.Label(transform.position, $"id:{unitID}");
+            if (_destination != null)
+                UnityEditor.Handles.Label(transform.position, $"{unitID},{hp},{_currentState},{position.ToString("0.##", true)} -> {_destination?.ToString("0.##", true)}");
+            else
+                UnityEditor.Handles.Label(transform.position, $"{unitID},{hp},{_currentState},{position.ToString("0.##", true)}");
 #endif
         }
 
