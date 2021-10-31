@@ -115,11 +115,6 @@ namespace KG
             get => this[ToIndex(position.y), ToIndex(position.x)];
             set => this[ToIndex(position.y), ToIndex(position.x)] = value;
         }
-
-        public int Flatten(int row, int col)
-        {
-            return row * cols + col;
-        }
         
         public Cell this[int row, int col]
         {
@@ -139,6 +134,23 @@ namespace KG
 
                 _cells[index] = value;
             }
+        }
+
+        public IEnumerable<Unit> GetRegionUnits(FixRect rectPosition)
+        {
+            HashSet<Region> rectRegions = new HashSet<Region>();
+            rectRegions.Clear();
+
+            var cell = this[rectPosition.minX, rectPosition.maxY];
+            if (cell != null) rectRegions.Add(cell.region);
+            cell = this[rectPosition.maxX, rectPosition.minY];
+            if (cell != null) rectRegions.Add(cell.region);
+            cell = this[rectPosition.maxX, rectPosition.maxY];
+            if (cell != null) rectRegions.Add(cell.region);
+            cell = this[rectPosition.minX, rectPosition.minY];
+            if (cell != null) rectRegions.Add(cell.region);
+            
+            return rectRegions.SelectMany(region => region.units);
         }
 
         private void CreateCells(int rows, int cols)
@@ -351,6 +363,11 @@ namespace KG
             UpdateWalkability();
             UnityEditor.EditorUtility.SetDirty(this);
 #endif
+        }
+
+        public int Flatten(int row, int col)
+        {
+            return row * cols + col;
         }
 
         private void UpdateWalkability()

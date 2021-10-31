@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FixMath.NET;
+using KG;
 using UnityEngine;
 
 namespace Game
@@ -45,7 +47,7 @@ namespace Game
                 }
             }
             
-            public static void PlaceUnit(TemporalPlaceContext ctx, Unit unit, FixVector3 centerPosition)
+            public static void PlaceUnit(KG.Map map, TemporalPlaceContext ctx, Unit unit, FixVector3 centerPosition)
             {
                 var pos = centerPosition;
                 
@@ -55,14 +57,27 @@ namespace Game
                     var rect = unit.GetCollisionBox(pos);
                     var noneCollided = true;
 
-                    for (int i = ctx._placedUnits.Count - 1; i >= 0; i--)
+                    foreach (var collideUnit in map.GetRegionUnits(rect))
                     {
-                        if (ctx._placedUnits[i].collisionBox.Contains(rect))
+                        if (collideUnit.collisionBox.Contains(rect))
                         {
-                            noneCollided = false;
-                            break;
+                            if (collideUnit.collisionBox.Contains(rect))
+                            {
+                                noneCollided = false;
+                                break;
+                            }
                         }
                     }
+                    
+                    if (noneCollided)
+                        foreach(var placedUnit in Enumerable.Reverse(ctx._placedUnits))
+                        {
+                            if (placedUnit.collisionBox.Contains(rect))
+                            {
+                                noneCollided = false;
+                                break;
+                            }
+                        }
 
                     if (noneCollided)
                         break;
@@ -84,7 +99,7 @@ namespace Game
         {
             var newUnit = _unitFactory.CreateNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this, _unitParent);
             ownPlayer.units.Add(newUnit);
-            TemporalPlaceContext.PlaceUnit(context, newUnit, GetSpawnPosition(ownPlayer.spawnIndex));
+            TemporalPlaceContext.PlaceUnit(_map, context, newUnit, GetSpawnPosition(ownPlayer.spawnIndex));
 
             return newUnit;
         }
@@ -93,7 +108,7 @@ namespace Game
         {
             var newUnit = _unitFactory.CreateNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this, _unitParent);
             ownPlayer.units.Add(newUnit);
-            TemporalPlaceContext.PlaceUnit(context, newUnit, centerPosition);
+            TemporalPlaceContext.PlaceUnit(_map, context, newUnit, centerPosition);
 
             return newUnit;
         }
