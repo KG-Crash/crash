@@ -299,14 +299,14 @@ namespace Game
             _rendereres = GetComponentsInChildren<Renderer>();
         }
 
-        private FixRect GetCollisionBox(FixVector2 position)
+        public FixRect GetCollisionBox(FixVector2 position)
         {
             var size = this.size;
             var half = size / new Fix64(2);
             return new FixRect(position.x - half.x, position.y - half.y, size.x, size.y);
         }
 
-        private FixRect GetCollisionBox(FixVector2 position, Fix64 padding)
+        public FixRect GetCollisionBox(FixVector2 position, Fix64 padding)
         {
             var collisionBox = GetCollisionBox(position);
             if (padding == Fix64.Zero)

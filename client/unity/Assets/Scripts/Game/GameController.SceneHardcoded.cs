@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using FixMath.NET;
 using UnityEngine;
@@ -6,37 +7,103 @@ namespace Game
 {
     public partial class GameController
     {
+        #region 유닛 스폰 필드
+        
         [Header("Unit Spawn")] 
         [SerializeField] private Transform _unitParent;
         [SerializeField] private Transform[] _spawnPositions;
 
+        #endregion 유닛 스폰 필드
+        
+        #region 유닛 스폰 로직
+        
+        public class TemporalPlaceContext
+        {
+            public static readonly Fix64 _radiusinc = 1;
+            public static readonly Fix64 _radianmax = Fix64.Pi * 2;
+            public static readonly Fix64 _radianinc = _radianmax / (10);
+            
+            public Fix64 _radius = Fix64.Zero;
+            public Fix64 _radian = _radianmax;
+            public List<Unit> _placedUnits = new List<Unit>();
+
+            public FixVector3 GetOffset()
+            {
+                return new FixVector3(Fix64.Cos(_radian), 0, Fix64.Sin(_radian)) * _radius;
+            }
+
+            public void IncreaseOffset()
+            {
+                if (_radian >= _radianmax)
+                {
+                    _radius += _radiusinc;
+                    _radian = Fix64.Zero;
+                }
+                else
+                {
+                    _radian += _radianinc;
+                }
+            }
+            
+            public static void PlaceUnit(TemporalPlaceContext ctx, Unit unit, FixVector3 centerPosition)
+            {
+                var pos = centerPosition;
+                
+                while (true)
+                {
+                    pos = centerPosition + ctx.GetOffset();
+                    var rect = unit.GetCollisionBox(pos);
+                    var noneCollided = true;
+
+                    for (int i = ctx._placedUnits.Count - 1; i >= 0; i--)
+                    {
+                        if (ctx._placedUnits[i].collisionBox.Contains(rect))
+                        {
+                            noneCollided = false;
+                            break;
+                        }
+                    }
+
+                    if (noneCollided)
+                        break;
+                    
+                    ctx.IncreaseOffset();
+                }
+                
+                unit.position = pos;
+                ctx._placedUnits.Add(unit);
+            }
+        }
+        
         public FixVector3 GetSpawnPosition(int index)
         {
             return _spawnPositions[index].position;
         }
         
-        public Unit SpawnUnitToPlayerStart(int spawnUnitOriginID, Player ownPlayer)
+        public Unit SpawnUnitToPlayerStart(int spawnUnitOriginID, Player ownPlayer, TemporalPlaceContext context)
         {
             var newUnit = _unitFactory.CreateNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this, _unitParent);
             ownPlayer.units.Add(newUnit);
-            newUnit.position = GetSpawnPosition(ownPlayer.spawnIndex);
+            TemporalPlaceContext.PlaceUnit(context, newUnit, GetSpawnPosition(ownPlayer.spawnIndex));
 
             return newUnit;
         }
 
-        public Unit SpawnUnitToPosition(int spawnUnitOriginID, Player ownPlayer, FixVector3 position)
+        public Unit SpawnUnitToPosition(int spawnUnitOriginID, Player ownPlayer, FixVector3 centerPosition, TemporalPlaceContext context)
         {
             var newUnit = _unitFactory.CreateNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this, _unitParent);
             ownPlayer.units.Add(newUnit);
-            newUnit.position = position;
+            TemporalPlaceContext.PlaceUnit(context, newUnit, centerPosition);
 
             return newUnit;
         }
 
-        public Unit SpawnUnitToPosition(int spawnUnitOriginID, uint playerID, FixVector3 position)
+        public Unit SpawnUnitToPosition(int spawnUnitOriginID, uint playerID, FixVector3 centerPosition, TemporalPlaceContext context)
         {
-            return SpawnUnitToPosition(spawnUnitOriginID, GetPlayer(playerID), position);
+            return SpawnUnitToPosition(spawnUnitOriginID, GetPlayer(playerID), centerPosition, context);
         }
+
+        #endregion 유닛 스폰 로직 
         
         #region 유닛 스폰 하드코드
         
@@ -47,16 +114,15 @@ namespace Game
         private void OnLoadScene()
         {   
             _allPlayerByTeam = new Team();
+            var placeContext = new TemporalPlaceContext();
             
-            var unitTypes = new int[1] { 0 }; 
+            var player1 = AddPlayerAndUnit(true,  0, new[] {  0,  1,  2,  3,  3 });
+            var player2 = AddPlayerAndUnit(true,  1, new[] {  0,  1,  2,  3,  3 });
+            var player3 = AddPlayerAndUnit(true,  2, new[] {  0,  1,  2,  3,  3 });
             
-            var player1 = AddPlayerAndUnit(true, 0, unitTypes);
-            var player2 = AddPlayerAndUnit(true, 1, unitTypes);
-            var player3 = AddPlayerAndUnit(true, 2, unitTypes);
-            
-            var player4 = AddPlayerAndUnit(false, 3, unitTypes);
-            var player5 = AddPlayerAndUnit(false, 4, unitTypes);
-            var player6 = AddPlayerAndUnit(false, 5, unitTypes);
+            var player4 = AddPlayerAndUnit(false, 3, new[] {  0,  1,  2,  3,  3 });
+            var player5 = AddPlayerAndUnit(false, 4, new[] {  0,  1,  2,  3,  3 });
+            var player6 = AddPlayerAndUnit(false, 5, new[] {  0,  1,  2,  3,  3 });
 
             player1.targetPlayerID = player4.playerID;
             player2.targetPlayerID = player5.playerID;
@@ -72,10 +138,11 @@ namespace Game
         private Player AddPlayerAndUnit(bool home, int spawnIndex, params int[] unitTypes)
         {
             var player = AddNewPlayer(home? (uint)0: 1, spawnIndex);
+            var ctx = new TemporalPlaceContext();
 
             foreach (var unitType in unitTypes)
             {
-                SpawnUnitToPlayerStart(unitType, player);
+                SpawnUnitToPlayerStart(unitType, player, ctx);
             }
             
             return player;
