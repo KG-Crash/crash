@@ -286,7 +286,7 @@ namespace Game
         public FixRect collisionBox => GetCollisionBox(this.position);
         public IEnumerable<KG.Map.Cell> collisionCells => GetCollisionCells(this.position);
 
-        public bool IsDead => _hp == Fix64.Zero;
+        public bool IsDead => _currentState == UnitState.Dead || _hp == Fix64.Zero;
 
         public void Awake()
         {
@@ -503,7 +503,7 @@ namespace Game
             {
                 var old = new FixVector3(position);
                 position += (direction * speed * delta);
-                var collisionUnit = GetNearUnits().FirstOrDefault(x => x.collisionBox.Contains(this.collisionBox));
+                var collisionUnit = GetNearUnits().FirstOrDefault(x => !x.IsDead && x.collisionBox.Contains(this.collisionBox));
                 if (collisionUnit != null)
                 {
                     _blocked++;
