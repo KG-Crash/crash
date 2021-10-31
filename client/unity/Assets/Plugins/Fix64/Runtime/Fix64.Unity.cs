@@ -75,6 +75,11 @@ namespace FixMath.NET
         {
             return $"{nameof(FixVector2)}({x.ToString()}, {y.ToString()})";
         }
+        public string ToString(string format, bool abbr = false)
+        {
+            var prefix = !abbr ? nameof(FixVector2) : "FV2";
+            return $"{prefix}({x.ToString(format)}, {y.ToString(format)})";
+        }
     }
     
     [System.Serializable]
@@ -209,6 +214,11 @@ namespace FixMath.NET
         public override string ToString()
         {
             return $"{nameof(FixVector3)}({x.ToString()}, {y.ToString()}, {z.ToString()})";
+        }
+        public string ToString(string format, bool abbr = false)
+        {
+            var prefix = !abbr ? nameof(FixVector2) : "FV3";
+            return $"{prefix}({x.ToString(format)}, {y.ToString(format)}, {z.ToString(format)})";
         }
     }
 

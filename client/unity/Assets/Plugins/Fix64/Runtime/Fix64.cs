@@ -987,6 +987,11 @@ namespace FixMath.NET
             // Up to 10 decimal places
             return ((decimal)this).ToString("0.##########");
         }
+
+        public string ToString(string format)
+        {
+            return ((decimal)this).ToString(format);
+        }
         
         public static bool TryParse(string str, out Fix64 num)
         {

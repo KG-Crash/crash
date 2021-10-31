@@ -189,6 +189,11 @@ namespace Game
                 listener?.OnFinishUpgrade(ability);
             }
         }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}(playerID={playerID}, teamID={teamID})";
+        }
     }
     #endregion
 
