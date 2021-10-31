@@ -8,6 +8,8 @@ public class MapEditor : Editor
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
+        
+        EditorGUILayout.Space();
 
         var map = (KG.Map)target;
 

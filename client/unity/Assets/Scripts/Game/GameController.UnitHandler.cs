@@ -16,7 +16,7 @@ namespace Game
 
         public void OnOwnerChanged(Player before, Player after, Unit unit)
         {
-
+            Debug.Log($"OnOwnerChanged({before}, {after}, {unit})");
         }
 
         public void OnAttack(Unit me, Unit you, Fix64 damage)

@@ -7,9 +7,6 @@ namespace Game
     public partial class GameController 
     {
         [Header("Debug")]
-        public Transform spawnMine;
-        public Transform spawnEnemy;
-
         public int _spawnUnitOriginID = 0;
         public uint _spawnPlayerID = 0;
         
