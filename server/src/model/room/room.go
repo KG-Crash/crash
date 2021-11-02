@@ -6,10 +6,16 @@ import (
 	"log"
 	"msg"
 	"protocol/response"
+	"sort"
 	"time"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
+
+type teamCapPair struct {
+	team  int
+	count int
+}
 
 type RoomConfig struct {
 	Team  []int32
@@ -58,6 +64,8 @@ func (state *Actor) selects() *actor.PIDSet {
 
 func (state *Actor) sendStateResponse(ctx actor.Context, fn func(users map[int][]msg.UserState, master msg.UserState) interface{}) {
 
+	// TODO 클로저때문에 팀 현황이 제대로 반영되지 않음
+
 	users := map[int][]msg.UserState{}
 	var master *msg.UserState = nil
 	gathered := 0
@@ -93,9 +101,21 @@ func (state *Actor) sendStateResponse(ctx actor.Context, fn func(users map[int][
 }
 
 func (state *Actor) placeable() (int, error) {
-	for i, capacity := range state.config.Team {
-		if state.users[i].Len() < int(capacity) {
-			return i, nil
+	sorted := []int{}
+	for team := range state.config.Team {
+		sorted = append(sorted, team)
+	}
+
+	sort.Slice(sorted, func(i, j int) bool {
+		return state.users[i].Len() < state.users[j].Len()
+	})
+
+	for _, team := range sorted {
+		current := state.users[team].Len()
+		capacity := state.config.Team[team]
+
+		if current < int(capacity) {
+			return team, nil
 		}
 	}
 
@@ -116,6 +136,26 @@ func (state *Actor) placed(user *actor.PID) (int, error) {
 func (state *Actor) contains(pid *actor.PID) bool {
 	users := state.selects()
 	return users.Contains(pid)
+}
+
+func (state *Actor) playable() bool {
+	users := state.selects()
+
+	if state.playing {
+		return false
+	}
+
+	// 두명 이상 있어야함
+	if users.Len() < 2 {
+		return false
+	}
+
+	// 1명 이상 참여한 팀이 2개 이상 있어야함
+	availables := map[int]int{}
+	for team, pidSet := range state.users {
+		availables[team] = pidSet.Len()
+	}
+	return len(availables) >= 2
 }
 
 func (state *Actor) Receive(ctx actor.Context) {
@@ -202,7 +242,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 			})
 		} else {
 
-			future := ctx.RequestFuture(master, &msg.RequestGetUserState{}, time.Second)
+			future := ctx.RequestFuture(master, &msg.RequestGetUserState{}, time.Hour)
 			ctx.AwaitFuture(future, func(res interface{}, err error) {
 				if err != nil {
 					return
@@ -230,7 +270,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 		from := x.From
 		to := x.To
 
-		future := ctx.RequestFuture(x.To, &msg.RequestGetUserState{}, time.Second)
+		future := ctx.RequestFuture(x.To, &msg.RequestGetUserState{}, time.Hour)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
 			if err != nil {
 				return
@@ -271,7 +311,8 @@ func (state *Actor) Receive(ctx actor.Context) {
 			return
 		}
 
-		if state.playing {
+		// TODO 예외처리
+		if !state.playable() {
 			return
 		}
 

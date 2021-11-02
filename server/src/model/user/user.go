@@ -40,7 +40,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 
 		future := ctx.RequestFuture(ctx.Parent(), &msg.RequestGetRoom{
 			ID: x.Id,
-		}, time.Second)
+		}, time.Hour)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
 			x := res.(*msg.ResponseGetRoom)
 			future := ctx.RequestFuture(x.Room, &msg.RequestEnterRoom{
@@ -73,7 +73,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		})
 
 	case *request.RoomList:
-		future := ctx.RequestFuture(ctx.Parent(), &msg.RequestGetRoomList{}, time.Second)
+		future := ctx.RequestFuture(ctx.Parent(), &msg.RequestGetRoomList{}, time.Hour)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
 
 			x := res.(*msg.ResponseGetRoomList)
@@ -131,7 +131,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			ID:    state.ID,
 			Title: x.Title,
 			Teams: x.Teams,
-		}, time.Second)
+		}, time.Hour)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
 			x := res.(*msg.ResponseCreateRoom)
 			state.Room = x.Room
@@ -155,7 +155,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		message := x.Message
 		future := ctx.RequestFuture(ctx.Parent(), &msg.RequestGetUser{
 			ID: to,
-		}, time.Second)
+		}, time.Hour)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
 			if err != nil {
 				// TODO: 귓속말 예외
@@ -179,7 +179,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 
 		future := ctx.RequestFuture(ctx.Parent(), &msg.RequestGetUser{
 			ID: x.User,
-		}, time.Second)
+		}, time.Hour)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
 			if err != nil {
 				return

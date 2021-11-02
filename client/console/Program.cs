@@ -66,17 +66,18 @@ public class Controller
 
         if (response.Master == this.Id)
         {
-            //await Client.Send(new Protocol.Request.Whisper
-            //{
-            //    User = response.User,
-            //    Message = "님 그냥 강퇴시킬게요"
-            //});
+#if CASE_KICK
+            await Client.Send(new Protocol.Request.Whisper
+            {
+                User = response.User,
+                Message = "님 그냥 강퇴시킬게요"
+            });
 
-            //await Client.Send(new Protocol.Request.KickRoom
-            //{
-            //    User = response.User
-            //});
-
+            await Client.Send(new Protocol.Request.KickRoom
+            {
+                User = response.User
+            });
+#elif CASE_SWITCH_MASTER
 
             await Client.Send(new Protocol.Request.Whisper
             {
@@ -86,6 +87,16 @@ public class Controller
 
             await Client.Send(new Protocol.Request.LeaveRoom
             { });
+#else
+            await Client.Send(new Protocol.Request.Whisper
+            {
+                User = response.User,
+                Message = "게임 시작 할게요"
+            });
+
+            await Client.Send(new Protocol.Request.GameStart
+            { });
+#endif
         }
 
         return true;
