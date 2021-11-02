@@ -6,8 +6,8 @@ namespace Game
 {
     public partial class GameController : Projectile.Listener
     {
-        public Dictionary<uint, Unit> fireHistory { get; set; } = new Dictionary<uint, Unit>();
-        // Start is called before the first frame update
+        public Dictionary<uint, Unit> fireHistory { get; set; } = new Dictionary<uint, Unit>(); // <projectileID, targetUnit>
+
         public void OnProjectileReach(Projectile projectile)
         {
             if (projectile.currentState != Shared.ProjectileState.Hit)
@@ -15,9 +15,9 @@ namespace Game
 
             if (fireHistory.ContainsKey(projectile.projectileID))
             {
-                if (!fireHistory[projectile.projectileID].IsDead && projectile.owner != null)
+                if (!fireHistory[projectile.projectileID].IsDead)
                 {
-                    var damage = projectile.owner.damage;
+                    var damage = projectile.damage;
                     fireHistory[projectile.projectileID].AddHP(-damage, projectile.owner);
                 }                
                 _projectilePool.ReturnProjectile(projectile);

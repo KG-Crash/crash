@@ -63,6 +63,7 @@ namespace Game
             projectile.position = owner.position;
             projectile.owner = owner;
             projectile.target = target;
+            projectile.damage = owner.damage;
             projectile.Shoot();  
         }
         private void ClearProjectile(Projectile projectile)

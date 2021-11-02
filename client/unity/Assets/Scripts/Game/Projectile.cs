@@ -18,13 +18,9 @@ namespace Game
         [SerializeField] private int _projectileOriginID; 
         [SerializeField] private uint _projectileID;
 
-        //[SerializeField] public Animator _animator;
-        //[SerializeField] private Rigidbody _rigidbody;
-        //[SerializeField] private Bounds _bounds = new Bounds();
-        //[SerializeField] private Renderer[] _renderers;
-
         [SerializeField] private ProjectileState _currentState;
         [NonSerialized] private FixVector3? _moveTarget;
+        [SerializeField] private Fix64 _damage;
 
         [NonSerialized] private Unit? _target;
         [SerializeField] private Unit? _owner;
@@ -45,6 +41,13 @@ namespace Game
             get => _projectileID;
             set => _projectileID = value;
         }
+
+        public Fix64 damage 
+        { 
+            get => _damage;
+            set => _damage = value;
+        }
+
         public Fix64 speed
         {
             get
@@ -106,7 +109,6 @@ namespace Game
             currentState = ProjectileState.Shoot;
         }
 
-        // Update is called once per frame
         private void Update()
         {
             Action(); 
