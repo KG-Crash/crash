@@ -80,6 +80,8 @@ namespace Shared.Table
         public int KillScore { get; set; }
         
         public int ProjectileID { get; set; }
+        
+        public AttackType AttackType { get; set; }
     }
 
     public class UnitUpgradeAbilityAttribute
