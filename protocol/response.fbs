@@ -75,3 +75,5 @@ table Action {
 table ActionQueue {
 	actions: [Action];
 }
+
+table GameStart {}

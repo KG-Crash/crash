@@ -13,7 +13,8 @@ namespace Protocol.Request
         CHAT,
         WHISPER,
         ACTION,
-        ACTION_QUEUE
+        ACTION_QUEUE,
+        GAME_START
     }
 
     public class CreateRoom : IProtocol
@@ -332,6 +333,39 @@ namespace Protocol.Request
         public static ActionQueue Deserialize(byte[] bytes)
         {
             return new ActionQueue(FlatBuffer.Request.ActionQueue.GetRootAsActionQueue(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class GameStart : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Request.Identity.GAME_START;
+
+        
+
+        public GameStart()
+        { }
+
+        public GameStart(FlatBuffer.Request.GameStart obj)
+        {
+            
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Request.GameStart> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            FlatBuffer.Request.GameStart.StartGameStart(builder);
+            return FlatBuffer.Request.GameStart.EndGameStart(builder);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static GameStart Deserialize(byte[] bytes)
+        {
+            return new GameStart(FlatBuffer.Request.GameStart.GetRootAsGameStart(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 }

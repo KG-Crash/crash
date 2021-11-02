@@ -83,8 +83,8 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 
 			count := x.Rooms.Len()
 			if count > 0 {
-				for _, room := range x.Rooms.Values() {
-					future := ctx.RequestFuture(room, &msg.RequestGetRoomState{}, time.Hour)
+				x.Rooms.ForEach(func(i int, pid *actor.PID) {
+					future := ctx.RequestFuture(pid, &msg.RequestGetRoomState{}, time.Hour)
 					ctx.AwaitFuture(future, func(res interface{}, err error) {
 
 						x := res.(*msg.ResponseGetRoomState)
@@ -97,7 +97,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 							ctx.Send(ctx.Self(), result)
 						}
 					})
-				}
+				})
 			} else {
 				ctx.Send(ctx.Self(), result)
 			}
@@ -205,6 +205,13 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			User: ctx.Self(),
 			UID:  state.ID,
 		})
+
+	case *request.GameStart:
+		if state.Room == nil {
+			return
+		}
+
+		ctx.Send(state.Room, &msg.GameStart{})
 	}
 }
 

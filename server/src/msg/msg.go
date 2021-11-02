@@ -115,6 +115,8 @@ type Kicked struct {
 	Error string
 }
 
+type GameStart struct{}
+
 /*
 	user messages
 */

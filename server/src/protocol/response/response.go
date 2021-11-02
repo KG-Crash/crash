@@ -71,6 +71,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &ActionQueue{}
 		return x.Deserialize(payload)
 
+	case GAME_START:
+		x := &GameStart{}
+		return x.Deserialize(payload)
+
 	}
 
 	return nil
@@ -119,6 +123,9 @@ func Text(p protocol.Protocol) string {
 
 	case *ActionQueue:
 		return "ACTION_QUEUE"
+
+	case *GameStart:
+		return "GAME_START"
 	}
 	return ""
 }
@@ -138,6 +145,7 @@ const (
 	WHISPER
 	ACTION
 	ACTION_QUEUE
+	GAME_START
 )
 
 type Room struct {
@@ -760,5 +768,36 @@ func (obj *ActionQueue) Serialize() []byte {
 
 func (obj *ActionQueue) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsActionQueue(bytes, 0)
+	return obj.parse(root)
+}
+
+type GameStart struct {
+}
+
+func (obj *GameStart) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+
+	source.GameStartStart(builder)
+
+	return source.GameStartEnd(builder)
+}
+
+func (obj *GameStart) parse(x *source.GameStart) *GameStart {
+
+	return obj
+}
+
+func (obj *GameStart) Identity() int {
+	return GAME_START
+}
+
+func (obj *GameStart) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *GameStart) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsGameStart(bytes, 0)
 	return obj.parse(root)
 }

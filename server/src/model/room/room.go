@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"msg"
+	"protocol/response"
 	"time"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
@@ -16,18 +17,20 @@ type RoomConfig struct {
 }
 
 type Actor struct {
-	id     string
-	users  map[int]*actor.PIDSet
-	config RoomConfig
-	master *actor.PID
+	id      string
+	users   map[int]*actor.PIDSet
+	playing bool
+	config  RoomConfig
+	master  *actor.PID
 }
 
 func New(id string, master *actor.PID, config RoomConfig) *Actor {
 	result := &Actor{
-		id:     id,
-		users:  make(map[int]*actor.PIDSet),
-		config: config,
-		master: master,
+		id:      id,
+		users:   make(map[int]*actor.PIDSet),
+		playing: false,
+		config:  config,
+		master:  master,
 	}
 
 	for i := 0; i < len(config.Team); i++ {
@@ -42,12 +45,12 @@ func New(id string, master *actor.PID, config RoomConfig) *Actor {
 	return result
 }
 
-func (state *Actor) selectUsers() *actor.PIDSet {
+func (state *Actor) selects() *actor.PIDSet {
 	result := actor.NewPIDSet()
 	for _, userSet := range state.users {
-		for _, user := range userSet.Values() {
-			result.Add(user)
-		}
+		userSet.ForEach(func(i int, pid *actor.PID) {
+			result.Add(pid)
+		})
 	}
 
 	return result
@@ -58,14 +61,13 @@ func (state *Actor) sendStateResponse(ctx actor.Context, fn func(users map[int][
 	users := map[int][]msg.UserState{}
 	var master *msg.UserState = nil
 	gathered := 0
-	requests := state.selectUsers().Len()
-	for teamId, actorSet := range state.users {
+	requests := state.selects().Len()
+	for teamId, pidSet := range state.users {
 		users[teamId] = []msg.UserState{}
 
-		for _, actor := range actorSet.Values() {
-
+		pidSet.ForEach(func(i int, pid *actor.PID) {
 			// 각각의 유저들의 정보를 요청
-			future := ctx.RequestFuture(actor, &msg.RequestGetUserState{}, time.Hour)
+			future := ctx.RequestFuture(pid, &msg.RequestGetUserState{}, time.Hour)
 			ctx.AwaitFuture(future, func(res interface{}, err error) {
 				if err != nil {
 					log.Fatalf("Failed to handle, message : %#v.", ctx.Message())
@@ -86,7 +88,7 @@ func (state *Actor) sendStateResponse(ctx actor.Context, fn func(users map[int][
 					ctx.Respond(fn(users, *master))
 				}
 			})
-		}
+		})
 	}
 }
 
@@ -111,6 +113,11 @@ func (state *Actor) placed(user *actor.PID) (int, error) {
 	return 0, errors.New(msg)
 }
 
+func (state *Actor) contains(pid *actor.PID) bool {
+	users := state.selects()
+	return users.Contains(pid)
+}
+
 func (state *Actor) Receive(ctx actor.Context) {
 	switch x := ctx.Message().(type) {
 	case *msg.RequestGetRoomState:
@@ -131,7 +138,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 		})
 
 	case *msg.RequestEnterRoom:
-		users := state.selectUsers()
+		users := state.selects()
 		if users.Contains(x.Sender) {
 			return
 		}
@@ -159,8 +166,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 		})
 
 	case *msg.Leave:
-		users := state.selectUsers()
-		if !users.Contains(x.User) {
+		if !state.contains(x.User) {
 			return
 		}
 
@@ -173,6 +179,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 		ctx.Send(x.User, &msg.LeftSelf{})
 
 		var master *actor.PID
+		users := state.selects()
 		if users.Empty() { // 남은 인원 0명인 경우
 			ctx.Send(ctx.Parent(), &msg.DestroyRoom{
 				ID: state.id,
@@ -190,10 +197,9 @@ func (state *Actor) Receive(ctx actor.Context) {
 			UID:  x.UID,
 		}
 		if master == nil {
-
-			for _, actor := range users.Values() {
-				ctx.Send(actor, result)
-			}
+			users.ForEach(func(i int, pid *actor.PID) {
+				ctx.Send(pid, result)
+			})
 		} else {
 
 			future := ctx.RequestFuture(master, &msg.RequestGetUserState{}, time.Second)
@@ -205,20 +211,20 @@ func (state *Actor) Receive(ctx actor.Context) {
 				x := res.(*msg.ResponseGetUserState)
 				result.NewMaster = &x.State
 
-				for _, actor := range users.Values() {
-					ctx.Send(actor, result)
-				}
+				users.ForEach(func(i int, pid *actor.PID) {
+					ctx.Send(pid, result)
+				})
 			})
 		}
 
 	case *msg.Chat:
-		users := state.selectUsers()
-		for _, actor := range users.Values() {
-			ctx.Send(actor, &msg.ReceiveChat{
+		users := state.selects()
+		users.ForEach(func(i int, pid *actor.PID) {
+			ctx.Send(pid, &msg.ReceiveChat{
 				User:    x.User,
 				Message: x.Message,
 			})
-		}
+		})
 
 	case *msg.Kick:
 		from := x.From
@@ -231,7 +237,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 			}
 
 			x := res.(*msg.ResponseGetUserState)
-			users := state.selectUsers()
+			users := state.selects()
 			if state.master != from {
 				return
 			}
@@ -243,12 +249,35 @@ func (state *Actor) Receive(ctx actor.Context) {
 			users.Remove(to)
 			ctx.Send(to, &msg.Kicked{})
 
-			for _, user := range users.Values() {
-				ctx.Send(user, &msg.Left{
+			users.ForEach(func(i int, pid *actor.PID) {
+				ctx.Send(pid, &msg.Left{
 					User: to,
 					UID:  x.State.ID,
 				})
-			}
+			})
+		})
+
+	case *msg.GameStart:
+		sender := ctx.Sender()
+		users := state.selects()
+
+		// TODO 에러처리
+		if !users.Contains(sender) {
+			return
+		}
+
+		// TODO 예외처리
+		if state.master != sender {
+			return
+		}
+
+		if state.playing {
+			return
+		}
+
+		state.playing = true
+		users.ForEach(func(i int, pid *actor.PID) {
+			ctx.Send(pid, &response.GameStart{})
 		})
 	}
 }
