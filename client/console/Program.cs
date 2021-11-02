@@ -139,7 +139,7 @@ public class Controller
         {
             await Client.Send(new Protocol.Request.EnterRoom
             {
-                Id = response.Rooms.First()
+                Id = response.Rooms.First().Id
             });
         }
         else
@@ -149,7 +149,7 @@ public class Controller
                 Title = "my game room title",
                 Teams = new System.Collections.Generic.List<int>
                 {
-                    int.MaxValue, int.MaxValue, int.MaxValue // 2 vs 2
+                    2, 2 // 2 vs 2
                 }
             });
         }

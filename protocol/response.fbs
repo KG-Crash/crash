@@ -1,5 +1,10 @@
 namespace FlatBuffer.Response;
 
+table Room {
+	id: string;
+	title: string;
+}
+
 table Login {
 	id: string;
 	error: uint32;
@@ -42,7 +47,7 @@ table DestroyedRoom {
 }
 
 table RoomList {
-	rooms: [string];
+	rooms: [Room];
 	error: uint32;
 }
 

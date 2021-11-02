@@ -77,8 +77,8 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
 
 			x := res.(*msg.ResponseGetRoomList)
-			response := &response.RoomList{
-				Rooms: []string{},
+			result := &response.RoomList{
+				Rooms: []response.Room{},
 			}
 
 			count := x.Rooms.Len()
@@ -87,18 +87,19 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 					future := ctx.RequestFuture(room, &msg.RequestGetRoomState{}, time.Hour)
 					ctx.AwaitFuture(future, func(res interface{}, err error) {
 
-						switch x := res.(type) {
-						case *msg.ResponseGetRoomState:
-							response.Rooms = append(response.Rooms, x.State.Title)
+						x := res.(*msg.ResponseGetRoomState)
+						result.Rooms = append(result.Rooms, response.Room{
+							Id:    x.State.ID,
+							Title: x.State.Title,
+						})
 
-							if len(response.Rooms) == count {
-								ctx.Send(ctx.Self(), response)
-							}
+						if len(result.Rooms) == count {
+							ctx.Send(ctx.Self(), result)
 						}
 					})
 				}
 			} else {
-				ctx.Send(ctx.Self(), response)
+				ctx.Send(ctx.Self(), result)
 			}
 		})
 

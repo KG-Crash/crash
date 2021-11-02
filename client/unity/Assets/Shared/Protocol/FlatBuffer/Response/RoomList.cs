@@ -19,7 +19,7 @@ public struct RoomList : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public RoomList __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public string Rooms(int j) { int o = __p.__offset(4); return o != 0 ? __p.__string(__p.__vector(o) + j * 4) : null; }
+  public FlatBuffer.Response.Room? Rooms(int j) { int o = __p.__offset(4); return o != 0 ? (FlatBuffer.Response.Room?)(new FlatBuffer.Response.Room()).__assign(__p.__indirect(__p.__vector(o) + j * 4), __p.bb) : null; }
   public int RoomsLength { get { int o = __p.__offset(4); return o != 0 ? __p.__vector_len(o) : 0; } }
   public uint Error { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
 
@@ -34,8 +34,8 @@ public struct RoomList : IFlatbufferObject
 
   public static void StartRoomList(FlatBufferBuilder builder) { builder.StartTable(2); }
   public static void AddRooms(FlatBufferBuilder builder, VectorOffset roomsOffset) { builder.AddOffset(0, roomsOffset.Value, 0); }
-  public static VectorOffset CreateRoomsVector(FlatBufferBuilder builder, StringOffset[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
-  public static VectorOffset CreateRoomsVectorBlock(FlatBufferBuilder builder, StringOffset[] data) { builder.StartVector(4, data.Length, 4); builder.Add(data); return builder.EndVector(); }
+  public static VectorOffset CreateRoomsVector(FlatBufferBuilder builder, Offset<FlatBuffer.Response.Room>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
+  public static VectorOffset CreateRoomsVectorBlock(FlatBufferBuilder builder, Offset<FlatBuffer.Response.Room>[] data) { builder.StartVector(4, data.Length, 4); builder.Add(data); return builder.EndVector(); }
   public static void StartRoomsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
   public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(1, error, 0); }
   public static Offset<FlatBuffer.Response.RoomList> EndRoomList(FlatBufferBuilder builder) {

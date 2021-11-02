@@ -26,13 +26,16 @@ func (rcv *RoomList) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *RoomList) Rooms(j int) []byte {
+func (rcv *RoomList) Rooms(obj *Room, j int) bool {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
-		a := rcv._tab.Vector(o)
-		return rcv._tab.ByteVector(a + flatbuffers.UOffsetT(j*4))
+		x := rcv._tab.Vector(o)
+		x += flatbuffers.UOffsetT(j) * 4
+		x = rcv._tab.Indirect(x)
+		obj.Init(rcv._tab.Bytes, x)
+		return true
 	}
-	return nil
+	return false
 }
 
 func (rcv *RoomList) RoomsLength() int {

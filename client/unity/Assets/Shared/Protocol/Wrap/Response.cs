@@ -5,6 +5,7 @@ namespace Protocol.Response
 {
     public enum Identity
     {
+        ROOM,
         LOGIN,
         CREATE_ROOM,
         USER,
@@ -18,6 +19,43 @@ namespace Protocol.Response
         WHISPER,
         ACTION,
         ACTION_QUEUE
+    }
+
+    public class Room : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.ROOM;
+
+        public string Id { get; set; }
+        public string Title { get; set; }
+
+        public Room()
+        { }
+
+        public Room(FlatBuffer.Response.Room obj)
+        {
+            this.Id = obj.Id;
+            this.Title = obj.Title;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.Room> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _id = builder.CreateString(this.Id);
+            var _title = builder.CreateString(this.Title);
+
+            return FlatBuffer.Response.Room.CreateRoom(builder, _id, _title);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Room Deserialize(byte[] bytes)
+        {
+            return new Room(FlatBuffer.Response.Room.GetRootAsRoom(new FlatBuffers.ByteBuffer(bytes)));
+        }
     }
 
     public class Login : IProtocol
@@ -323,7 +361,7 @@ namespace Protocol.Response
     {
         public uint Identity => (uint)Protocol.Response.Identity.ROOM_LIST;
 
-        public List<string> Rooms { get; set; }
+        public List<Room> Rooms { get; set; }
         public uint Error { get; set; }
 
         public RoomList()
@@ -331,13 +369,13 @@ namespace Protocol.Response
 
         public RoomList(FlatBuffer.Response.RoomList obj)
         {
-            this.Rooms = Enumerable.Range(0, obj.RoomsLength).Select(x => obj.Rooms(x)).ToList();
+            this.Rooms = Enumerable.Range(0, obj.RoomsLength).Select(x => new Room(obj.Rooms(x).Value)).ToList();
             this.Error = obj.Error;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.RoomList> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _rooms = FlatBuffer.Response.RoomList.CreateRoomsVector(builder, this.Rooms.Select(x => builder.CreateString(x)).ToArray());
+            var _rooms = FlatBuffer.Response.RoomList.CreateRoomsVector(builder, this.Rooms.Select(x => x.ToFlatBuffer(builder)).ToArray());
             var _error = this.Error;
 
             return FlatBuffer.Response.RoomList.CreateRoomList(builder, _rooms, _error);

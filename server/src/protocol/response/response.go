@@ -15,6 +15,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 
 	payload := bytes[offset : offset+int(size)]
 	switch identity {
+	case ROOM:
+		x := &Room{}
+		return x.Deserialize(payload)
+
 	case LOGIN:
 		x := &Login{}
 		return x.Deserialize(payload)
@@ -74,6 +78,9 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 
 func Text(p protocol.Protocol) string {
 	switch p.(type) {
+	case *Room:
+		return "ROOM"
+
 	case *Login:
 		return "LOGIN"
 
@@ -117,7 +124,8 @@ func Text(p protocol.Protocol) string {
 }
 
 const (
-	LOGIN = iota
+	ROOM = iota
+	LOGIN
 	CREATE_ROOM
 	USER
 	ENTER_ROOM
@@ -131,6 +139,45 @@ const (
 	ACTION
 	ACTION_QUEUE
 )
+
+type Room struct {
+	Id    string
+	Title string
+}
+
+func (obj *Room) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_id := builder.CreateString(obj.Id)
+	_title := builder.CreateString(obj.Title)
+
+	source.RoomStart(builder)
+	source.RoomAddId(builder, _id)
+	source.RoomAddTitle(builder, _title)
+
+	return source.RoomEnd(builder)
+}
+
+func (obj *Room) parse(x *source.Room) *Room {
+	obj.Id = string(x.Id())
+	obj.Title = string(x.Title())
+
+	return obj
+}
+
+func (obj *Room) Identity() int {
+	return ROOM
+}
+
+func (obj *Room) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *Room) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsRoom(bytes, 0)
+	return obj.parse(root)
+}
 
 type Login struct {
 	Id    string
@@ -463,15 +510,15 @@ func (obj *DestroyedRoom) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type RoomList struct {
-	Rooms []string
+	Rooms []Room
 	Error uint32
 }
 
-func (obj *RoomList) rooms(builder *flatbuffers.Builder, rooms []string) flatbuffers.UOffsetT {
+func (obj *RoomList) rooms(builder *flatbuffers.Builder, rooms []Room) flatbuffers.UOffsetT {
 	_size := len(rooms)
 	offsets := make([]flatbuffers.UOffsetT, _size)
 	for i, x := range rooms {
-		offsets[_size-i-1] = builder.CreateString(x)
+		offsets[_size-i-1] = x.create(builder)
 	}
 
 	builder.StartVector(4, _size, 4)
@@ -493,9 +540,14 @@ func (obj *RoomList) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 
 func (obj *RoomList) parse(x *source.RoomList) *RoomList {
 
-	obj.Rooms = []string{}
+	obj.Rooms = []Room{}
 	for i := 0; i < x.RoomsLength(); i++ {
-		obj.Rooms = append(obj.Rooms, string(x.Rooms(i)))
+		_room := &source.Room{}
+		x.Rooms(_room, i)
+
+		room := Room{}
+		room.parse(_room)
+		obj.Rooms = append(obj.Rooms, room)
 	}
 	obj.Error = x.Error()
 
