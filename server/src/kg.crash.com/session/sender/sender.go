@@ -1,27 +1,25 @@
-package network
+package sender
 
 import (
 	"encoding/binary"
-	"msg"
 	"net"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
-type SenderActor struct {
+type Actor struct {
 	net.Conn
 }
 
-func NewSenderActor() *SenderActor {
-	return &SenderActor{}
+func New(conn net.Conn) *Actor {
+	return &Actor{
+		Conn: conn,
+	}
 }
 
-func (state *SenderActor) Receive(context actor.Context) {
+func (state *Actor) Receive(context actor.Context) {
 	switch x := context.Message().(type) {
-	case *msg.SetConnection:
-		state.Conn = x.Conn
-
-	case *msg.Write:
+	case *Send:
 		serialized := x.Protocol.Serialize()
 		size := uint32(len(serialized))
 

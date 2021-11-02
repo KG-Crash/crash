@@ -25,34 +25,68 @@ public class Controller
     }
 
     [FlatBufferEvent]
-    public async Task<bool> OnJoinRoom(Protocol.Response.JoinRoom response)
+    public async Task<bool> OnCreateRoom(Protocol.Response.CreateRoom response)
+    {
+        Console.WriteLine($"게임룸을 생성하여 입장하였음");
+        return true;
+    }
+
+    [FlatBufferEvent]
+    public async Task<bool> OnEnterRoom(Protocol.Response.EnterRoom response)
     {
         if (response.Error > 0)
             return false;
 
-        this.IsMaster = response.Master;
-
         if (response.User == this.Id)
         {
-            await Client.Send(new Protocol.Request.Chat
-            {
-                Message = "ㅆ1발ㅋㅋ"
-            });
+            Console.WriteLine($"방에 입장함");
         }
         else
         {
+            Console.WriteLine($"{response.User}님이 입장하였음");
+        }
+
+
+        // 참여 인원 출력
+        Console.WriteLine("참여 인원");
+        foreach (var x in response.Users.GroupBy(x => x.Team).Select(x => x))
+        {
+            Console.WriteLine($"{x.Key}팀");
+
+            foreach (var user in x)
+            {
+                Console.WriteLine(user.Id);
+            }
+        }
+
+        await Client.Send(new Protocol.Request.Chat
+        {
+            Message = "하이요"
+        });
+
+        if (response.Master == this.Id)
+        {
+            //await Client.Send(new Protocol.Request.Whisper
+            //{
+            //    User = response.User,
+            //    Message = "님 그냥 강퇴시킬게요"
+            //});
+
+            //await Client.Send(new Protocol.Request.KickRoom
+            //{
+            //    User = response.User
+            //});
+
+
             await Client.Send(new Protocol.Request.Whisper
             {
                 User = response.User,
-                Message = "ㅆ1발련 ㅋㅋ"
+                Message = "님 그냥 저 나가볼게요"
             });
-        }
 
-        // 내가 방장이면 오자마자 바로강퇴시킴
-        //await Client.Send(new Protocol.Request.KickRoom
-        //{ 
-        //    User = response.User
-        //});
+            await Client.Send(new Protocol.Request.LeaveRoom
+            { });
+        }
 
         return true;
     }
@@ -63,7 +97,21 @@ public class Controller
         if (response.Error > 0)
             return false;
 
-        Console.WriteLine($"{response.User}가 나갔음.");
+        if (response.User == this.Id)
+        {
+            Console.WriteLine("내가 방을 나감");
+        }
+        else
+        {
+            Console.WriteLine($"{response.User}가 퇴장");
+        }
+
+        // 방장 변경됨
+        if (string.IsNullOrEmpty(response.NewMaster) == false)
+        {
+            Console.WriteLine($"{response.NewMaster}님이 새로운 방장이 됨");
+        }
+
         return true;
     }
 
@@ -89,16 +137,23 @@ public class Controller
 
         if (response.Rooms.Count > 0)
         {
-            await Client.Send(new Protocol.Request.JoinRoom
+            await Client.Send(new Protocol.Request.EnterRoom
             {
                 Id = response.Rooms.First()
             });
         }
         else
         {
-            await Client.Send(new Protocol.Request.CreateRoom { });
+            await Client.Send(new Protocol.Request.CreateRoom 
+            {
+                Title = "my game room title",
+                Teams = new System.Collections.Generic.List<int>
+                {
+                    int.MaxValue, int.MaxValue, int.MaxValue // 2 vs 2
+                }
+            });
         }
-
+        
         return true;
     }
 
@@ -118,7 +173,16 @@ public class Controller
         if (response.Error > 0)
             return false;
 
-        Console.WriteLine($"{response.User}로부터 다음의 귓속말을 받음 : {response.Message}");
+        var received = (response.To == this.Id);
+        if (received)
+        {
+            Console.WriteLine($"{response.From} >> {response.Message}");
+        }
+        else
+        {
+            Console.WriteLine($"{response.To} << {response.Message}");
+        }
+
         return true;
     }
 

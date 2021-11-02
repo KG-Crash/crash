@@ -4,73 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"model"
-	"msg"
-	"net"
-	"network"
-	"protocol"
-	"protocol/request"
+	"os"
+	"os/signal"
 
-	console "github.com/AsynkronIT/goconsole"
+	"model/game"
+
 	"github.com/AsynkronIT/protoactor-go/actor"
 	"github.com/go-redis/redis"
 )
-
-var game *actor.PID
-
-func OnReceived(context actor.Context, id string, protocol protocol.Protocol) {
-	switch x := protocol.(type) {
-	case *request.CreateRoom:
-		context.Send(game, &msg.SpawnRoom{
-			Master: context.Self(),
-			UserId: id,
-		})
-
-	case *request.JoinRoom:
-		context.Send(game, &msg.JoinRoom{
-			User:   context.Self(),
-			UserId: id,
-			RoomId: x.Id,
-		})
-
-	case *request.LeaveRoom: // game > user > room
-		context.Send(context.Self(), &msg.LeaveRoom{
-			UserId: id,
-			User:   context.Self(),
-		})
-
-	case *request.RoomList:
-		context.Send(game, &msg.RoomList{
-			User: context.Self(),
-		})
-
-	case *request.Chat:
-		context.Send(context.Self(), &msg.Chat{
-			UserId:  id,
-			Message: x.Message,
-		})
-
-	case *request.Whisper:
-		context.Send(game, &msg.Whisper{
-			From:    id,
-			To:      x.User,
-			Message: x.Message,
-		})
-
-	case *request.KickRoom:
-		context.Send(context.Self(), &msg.Kick{
-			From: id,
-			To:   x.User,
-		})
-	}
-}
-
-func OnAccepted(context actor.Context, conn net.Conn) {
-	context.Send(game, &msg.SpawnUser{
-		Conn:       conn,
-		OnReceived: OnReceived,
-	})
-}
 
 func main() {
 	ctx := context.Background()
@@ -86,17 +27,12 @@ func main() {
 
 	system := actor.NewActorSystem()
 
-	game = system.Root.Spawn(actor.PropsFromProducer(func() actor.Actor {
-		return model.NewGame()
+	system.Root.Spawn(actor.PropsFromProducer(func() actor.Actor {
+		return game.New(Configuration.Port)
 	}))
 
-	acceptor := system.Root.Spawn(actor.PropsFromProducer(func() actor.Actor {
-		return &network.AcceptorActor{}
-	}))
-	system.Root.Send(acceptor, &msg.BindAcceptor{
-		OnAccepted: OnAccepted,
-	})
-
-	system.Root.Send(acceptor, &msg.Listen{Port: Configuration.Port})
-	_, _ = console.ReadLine()
+	// Subscribe to signal to finish interaction
+	finish := make(chan os.Signal, 1)
+	signal.Notify(finish, os.Interrupt, os.Kill)
+	<-finish
 }

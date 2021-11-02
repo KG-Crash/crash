@@ -6,27 +6,27 @@ import (
 	flatbuffers "github.com/google/flatbuffers/go"
 )
 
-type JoinRoom struct {
+type EnterRoom struct {
 	_tab flatbuffers.Table
 }
 
-func GetRootAsJoinRoom(buf []byte, offset flatbuffers.UOffsetT) *JoinRoom {
+func GetRootAsEnterRoom(buf []byte, offset flatbuffers.UOffsetT) *EnterRoom {
 	n := flatbuffers.GetUOffsetT(buf[offset:])
-	x := &JoinRoom{}
+	x := &EnterRoom{}
 	x.Init(buf, n+offset)
 	return x
 }
 
-func (rcv *JoinRoom) Init(buf []byte, i flatbuffers.UOffsetT) {
+func (rcv *EnterRoom) Init(buf []byte, i flatbuffers.UOffsetT) {
 	rcv._tab.Bytes = buf
 	rcv._tab.Pos = i
 }
 
-func (rcv *JoinRoom) Table() flatbuffers.Table {
+func (rcv *EnterRoom) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *JoinRoom) Id() []byte {
+func (rcv *EnterRoom) Id() []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
 		return rcv._tab.ByteVector(o + rcv._tab.Pos)
@@ -34,12 +34,12 @@ func (rcv *JoinRoom) Id() []byte {
 	return nil
 }
 
-func JoinRoomStart(builder *flatbuffers.Builder) {
+func EnterRoomStart(builder *flatbuffers.Builder) {
 	builder.StartObject(1)
 }
-func JoinRoomAddId(builder *flatbuffers.Builder, id flatbuffers.UOffsetT) {
+func EnterRoomAddId(builder *flatbuffers.Builder, id flatbuffers.UOffsetT) {
 	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(id), 0)
 }
-func JoinRoomEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+func EnterRoomEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()
 }

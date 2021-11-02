@@ -1,6 +1,7 @@
 ﻿using Network;
 using Protocol.Response;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -35,9 +36,9 @@ namespace Game
 
     public class UserListListener : KG.ScrollView.IListener<string>
     {
-        private readonly JoinRoom _response;
+        private readonly EnterRoom _response;
 
-        public UserListListener(JoinRoom response)
+        public UserListListener(EnterRoom response)
         {
             _response = response;
         }
@@ -59,7 +60,7 @@ namespace Game
 
         public IEnumerator<string> OnRefresh()
         {
-            return _response.Users.GetEnumerator();
+            return _response.Users.Select(x => x.Id).GetEnumerator();
         }
     }
 
@@ -110,7 +111,7 @@ namespace Game
         }
 
         [FlatBufferEvent]
-        public async Task<bool> OnJoinRoom(JoinRoom response)
+        public async Task<bool> OnEnterRoom(EnterRoom response)
         {
             var isMine = (response.User == Client.Instance.id);
 
@@ -138,7 +139,14 @@ namespace Game
         [FlatBufferEvent]
         public async Task<bool> OnWhisper(Whisper response)
         {
-            UnityEngine.Debug.Log($"{response.User} : {response.Message}");
+            if (Client.Instance.id == response.From)
+            {
+                UnityEngine.Debug.Log($"{response.To} << {response.Message}");
+            }
+            else
+            {
+                UnityEngine.Debug.Log($"{response.From} >> {response.Message}");
+            }
             return true;
         }
 

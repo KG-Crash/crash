@@ -23,8 +23,12 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &CreateRoom{}
 		return x.Deserialize(payload)
 
-	case JOIN_ROOM:
-		x := &JoinRoom{}
+	case USER:
+		x := &User{}
+		return x.Deserialize(payload)
+
+	case ENTER_ROOM:
+		x := &EnterRoom{}
 		return x.Deserialize(payload)
 
 	case LEAVE_ROOM:
@@ -76,8 +80,11 @@ func Text(p protocol.Protocol) string {
 	case *CreateRoom:
 		return "CREATE_ROOM"
 
-	case *JoinRoom:
-		return "JOIN_ROOM"
+	case *User:
+		return "USER"
+
+	case *EnterRoom:
+		return "ENTER_ROOM"
 
 	case *LeaveRoom:
 		return "LEAVE_ROOM"
@@ -112,7 +119,8 @@ func Text(p protocol.Protocol) string {
 const (
 	LOGIN = iota
 	CREATE_ROOM
-	JOIN_ROOM
+	USER
+	ENTER_ROOM
 	LEAVE_ROOM
 	KICK_ROOM
 	KICKED_ROOM
@@ -200,18 +208,56 @@ func (obj *CreateRoom) Deserialize(bytes []byte) protocol.Protocol {
 	return obj.parse(root)
 }
 
-type JoinRoom struct {
+type User struct {
+	Id   string
+	Team int32
+}
+
+func (obj *User) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_id := builder.CreateString(obj.Id)
+
+	source.UserStart(builder)
+	source.UserAddId(builder, _id)
+	source.UserAddTeam(builder, obj.Team)
+
+	return source.UserEnd(builder)
+}
+
+func (obj *User) parse(x *source.User) *User {
+	obj.Id = string(x.Id())
+	obj.Team = x.Team()
+
+	return obj
+}
+
+func (obj *User) Identity() int {
+	return USER
+}
+
+func (obj *User) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *User) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsUser(bytes, 0)
+	return obj.parse(root)
+}
+
+type EnterRoom struct {
 	User   string
-	Users  []string
-	Master bool
+	Users  []User
+	Master string
 	Error  uint32
 }
 
-func (obj *JoinRoom) users(builder *flatbuffers.Builder, users []string) flatbuffers.UOffsetT {
+func (obj *EnterRoom) users(builder *flatbuffers.Builder, users []User) flatbuffers.UOffsetT {
 	_size := len(users)
 	offsets := make([]flatbuffers.UOffsetT, _size)
 	for i, x := range users {
-		offsets[_size-i-1] = builder.CreateString(x)
+		offsets[_size-i-1] = x.create(builder)
 	}
 
 	builder.StartVector(4, _size, 4)
@@ -221,59 +267,67 @@ func (obj *JoinRoom) users(builder *flatbuffers.Builder, users []string) flatbuf
 	return builder.EndVector(_size)
 }
 
-func (obj *JoinRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+func (obj *EnterRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	_user := builder.CreateString(obj.User)
 	_users := obj.users(builder, obj.Users)
+	_master := builder.CreateString(obj.Master)
 
-	source.JoinRoomStart(builder)
-	source.JoinRoomAddUser(builder, _user)
-	source.JoinRoomAddUsers(builder, _users)
-	source.JoinRoomAddMaster(builder, obj.Master)
-	source.JoinRoomAddError(builder, obj.Error)
+	source.EnterRoomStart(builder)
+	source.EnterRoomAddUser(builder, _user)
+	source.EnterRoomAddUsers(builder, _users)
+	source.EnterRoomAddMaster(builder, _master)
+	source.EnterRoomAddError(builder, obj.Error)
 
-	return source.JoinRoomEnd(builder)
+	return source.EnterRoomEnd(builder)
 }
 
-func (obj *JoinRoom) parse(x *source.JoinRoom) *JoinRoom {
+func (obj *EnterRoom) parse(x *source.EnterRoom) *EnterRoom {
 	obj.User = string(x.User())
 
-	_sizeUsers := x.UsersLength()
-	obj.Users = make([]string, _sizeUsers)
-	for i := 0; i < _sizeUsers; i++ {
-		obj.Users = append(obj.Users, string(x.Users(i)))
+	obj.Users = []User{}
+	for i := 0; i < x.UsersLength(); i++ {
+		_user := &source.User{}
+		x.Users(_user, i)
+
+		user := User{}
+		user.parse(_user)
+		obj.Users = append(obj.Users, user)
 	}
-	obj.Master = x.Master()
+	obj.Master = string(x.Master())
 	obj.Error = x.Error()
 
 	return obj
 }
 
-func (obj *JoinRoom) Identity() int {
-	return JOIN_ROOM
+func (obj *EnterRoom) Identity() int {
+	return ENTER_ROOM
 }
 
-func (obj *JoinRoom) Serialize() []byte {
+func (obj *EnterRoom) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *JoinRoom) Deserialize(bytes []byte) protocol.Protocol {
-	root := source.GetRootAsJoinRoom(bytes, 0)
+func (obj *EnterRoom) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsEnterRoom(bytes, 0)
 	return obj.parse(root)
 }
 
 type LeaveRoom struct {
-	User  string
-	Error uint32
+	User      string
+	NewMaster string
+	Error     uint32
 }
 
 func (obj *LeaveRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	_user := builder.CreateString(obj.User)
+	_newMaster := builder.CreateString(obj.NewMaster)
 
 	source.LeaveRoomStart(builder)
 	source.LeaveRoomAddUser(builder, _user)
+	source.LeaveRoomAddNewMaster(builder, _newMaster)
 	source.LeaveRoomAddError(builder, obj.Error)
 
 	return source.LeaveRoomEnd(builder)
@@ -281,6 +335,7 @@ func (obj *LeaveRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT 
 
 func (obj *LeaveRoom) parse(x *source.LeaveRoom) *LeaveRoom {
 	obj.User = string(x.User())
+	obj.NewMaster = string(x.NewMaster())
 	obj.Error = x.Error()
 
 	return obj
@@ -438,9 +493,8 @@ func (obj *RoomList) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 
 func (obj *RoomList) parse(x *source.RoomList) *RoomList {
 
-	_sizeRooms := x.RoomsLength()
-	obj.Rooms = make([]string, _sizeRooms)
-	for i := 0; i < _sizeRooms; i++ {
+	obj.Rooms = []string{}
+	for i := 0; i < x.RoomsLength(); i++ {
 		obj.Rooms = append(obj.Rooms, string(x.Rooms(i)))
 	}
 	obj.Error = x.Error()
@@ -507,17 +561,20 @@ func (obj *Chat) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type Whisper struct {
-	User    string
+	From    string
+	To      string
 	Message string
 	Error   uint32
 }
 
 func (obj *Whisper) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
-	_user := builder.CreateString(obj.User)
+	_from := builder.CreateString(obj.From)
+	_to := builder.CreateString(obj.To)
 	_message := builder.CreateString(obj.Message)
 
 	source.WhisperStart(builder)
-	source.WhisperAddUser(builder, _user)
+	source.WhisperAddFrom(builder, _from)
+	source.WhisperAddTo(builder, _to)
 	source.WhisperAddMessage(builder, _message)
 	source.WhisperAddError(builder, obj.Error)
 
@@ -525,7 +582,8 @@ func (obj *Whisper) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 }
 
 func (obj *Whisper) parse(x *source.Whisper) *Whisper {
-	obj.User = string(x.User())
+	obj.From = string(x.From())
+	obj.To = string(x.To())
 	obj.Message = string(x.Message())
 	obj.Error = x.Error()
 
@@ -624,9 +682,8 @@ func (obj *ActionQueue) create(builder *flatbuffers.Builder) flatbuffers.UOffset
 
 func (obj *ActionQueue) parse(x *source.ActionQueue) *ActionQueue {
 
-	_sizeActions := x.ActionsLength()
-	obj.Actions = make([]Action, _sizeActions)
-	for i := 0; i < _sizeActions; i++ {
+	obj.Actions = []Action{}
+	for i := 0; i < x.ActionsLength(); i++ {
 		_action := &source.Action{}
 		x.Actions(_action, i)
 

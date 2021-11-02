@@ -203,7 +203,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1106783960983442686}
         m_TargetAssemblyTypeName: GameRoomButton, Client
-        m_MethodName: OnJoin
+        m_MethodName: OnEnter
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

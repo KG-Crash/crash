@@ -26,7 +26,7 @@ func (rcv *Whisper) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *Whisper) User() []byte {
+func (rcv *Whisper) From() []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
 		return rcv._tab.ByteVector(o + rcv._tab.Pos)
@@ -34,7 +34,7 @@ func (rcv *Whisper) User() []byte {
 	return nil
 }
 
-func (rcv *Whisper) Message() []byte {
+func (rcv *Whisper) To() []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(6))
 	if o != 0 {
 		return rcv._tab.ByteVector(o + rcv._tab.Pos)
@@ -42,8 +42,16 @@ func (rcv *Whisper) Message() []byte {
 	return nil
 }
 
-func (rcv *Whisper) Error() uint32 {
+func (rcv *Whisper) Message() []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(8))
+	if o != 0 {
+		return rcv._tab.ByteVector(o + rcv._tab.Pos)
+	}
+	return nil
+}
+
+func (rcv *Whisper) Error() uint32 {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(10))
 	if o != 0 {
 		return rcv._tab.GetUint32(o + rcv._tab.Pos)
 	}
@@ -51,20 +59,23 @@ func (rcv *Whisper) Error() uint32 {
 }
 
 func (rcv *Whisper) MutateError(n uint32) bool {
-	return rcv._tab.MutateUint32Slot(8, n)
+	return rcv._tab.MutateUint32Slot(10, n)
 }
 
 func WhisperStart(builder *flatbuffers.Builder) {
-	builder.StartObject(3)
+	builder.StartObject(4)
 }
-func WhisperAddUser(builder *flatbuffers.Builder, user flatbuffers.UOffsetT) {
-	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(user), 0)
+func WhisperAddFrom(builder *flatbuffers.Builder, from flatbuffers.UOffsetT) {
+	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(from), 0)
+}
+func WhisperAddTo(builder *flatbuffers.Builder, to flatbuffers.UOffsetT) {
+	builder.PrependUOffsetTSlot(1, flatbuffers.UOffsetT(to), 0)
 }
 func WhisperAddMessage(builder *flatbuffers.Builder, message flatbuffers.UOffsetT) {
-	builder.PrependUOffsetTSlot(1, flatbuffers.UOffsetT(message), 0)
+	builder.PrependUOffsetTSlot(2, flatbuffers.UOffsetT(message), 0)
 }
 func WhisperAddError(builder *flatbuffers.Builder, error uint32) {
-	builder.PrependUint32Slot(2, error, 0)
+	builder.PrependUint32Slot(3, error, 0)
 }
 func WhisperEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

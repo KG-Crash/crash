@@ -1,37 +1,36 @@
-package network
+package receiver
 
 import (
 	"encoding/binary"
 	"io"
-	"msg"
 	"net"
 	"protocol/request"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
-type ReceiverActor struct {
+type Actor struct {
 	net.Conn
 	Queue []byte
 }
 
-func NewReceiverActor() *ReceiverActor {
-	return &ReceiverActor{
+func New(conn net.Conn) *Actor {
+	return &Actor{
+		Conn:  conn,
 		Queue: make([]byte, 0, 4096),
 	}
 }
 
-func (state *ReceiverActor) Receive(context actor.Context) {
-	switch x := context.Message().(type) {
-	case *msg.SetConnection:
-		state.Conn = x.Conn
-		context.Send(context.Self(), &msg.Receive{})
+func (state *Actor) Receive(ctx actor.Context) {
+	switch ctx.Message().(type) {
+	case *actor.Started:
+		ctx.Send(ctx.Self(), &receive{})
 
-	case *msg.Receive:
+	case *receive:
 		buffer := make([]byte, 4096)
 		numRead, err := state.Conn.Read(buffer)
 		if numRead == 0 || err == io.EOF {
-			context.Stop(context.Parent())
+			ctx.Send(ctx.Parent(), &Disconnected{})
 			return
 		}
 		state.Queue = append(state.Queue, buffer[:numRead]...)
@@ -47,13 +46,13 @@ func (state *ReceiverActor) Receive(context actor.Context) {
 
 			deserialized := request.Deserialize(size-4, state.Queue[offset:])
 
-			context.Send(context.Parent(), &msg.Received{
+			ctx.Send(ctx.Parent(), &Received{
 				Protocol: deserialized,
 			})
 
 			state.Queue = state.Queue[size+4:]
 		}
 
-		context.Send(context.Self(), &msg.Receive{})
+		ctx.Send(ctx.Self(), &receive{})
 	}
 }

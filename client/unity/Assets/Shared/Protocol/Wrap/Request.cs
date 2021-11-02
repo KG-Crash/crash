@@ -6,7 +6,7 @@ namespace Protocol.Request
     public enum Identity
     {
         CREATE_ROOM,
-        JOIN_ROOM,
+        ENTER_ROOM,
         LEAVE_ROOM,
         KICK_ROOM,
         ROOM_LIST,
@@ -20,20 +20,24 @@ namespace Protocol.Request
     {
         public uint Identity => (uint)Protocol.Request.Identity.CREATE_ROOM;
 
-        
+        public string Title { get; set; }
+        public List<int> Teams { get; set; }
 
         public CreateRoom()
         { }
 
         public CreateRoom(FlatBuffer.Request.CreateRoom obj)
         {
-            
+            this.Title = obj.Title;
+            this.Teams = Enumerable.Range(0, obj.TeamsLength).Select(x => obj.Teams(x)).ToList();
         }
 
         public FlatBuffers.Offset<FlatBuffer.Request.CreateRoom> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            FlatBuffer.Request.CreateRoom.StartCreateRoom(builder);
-            return FlatBuffer.Request.CreateRoom.EndCreateRoom(builder);
+            var _title = builder.CreateString(this.Title);
+            var _teams = FlatBuffer.Request.CreateRoom.CreateTeamsVector(builder, this.Teams.ToArray());
+
+            return FlatBuffer.Request.CreateRoom.CreateCreateRoom(builder, _title, _teams);
         }
 
         public byte[] Serialize()
@@ -49,25 +53,25 @@ namespace Protocol.Request
         }
     }
 
-    public class JoinRoom : IProtocol
+    public class EnterRoom : IProtocol
     {
-        public uint Identity => (uint)Protocol.Request.Identity.JOIN_ROOM;
+        public uint Identity => (uint)Protocol.Request.Identity.ENTER_ROOM;
 
         public string Id { get; set; }
 
-        public JoinRoom()
+        public EnterRoom()
         { }
 
-        public JoinRoom(FlatBuffer.Request.JoinRoom obj)
+        public EnterRoom(FlatBuffer.Request.EnterRoom obj)
         {
             this.Id = obj.Id;
         }
 
-        public FlatBuffers.Offset<FlatBuffer.Request.JoinRoom> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        public FlatBuffers.Offset<FlatBuffer.Request.EnterRoom> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
             var _id = builder.CreateString(this.Id);
 
-            return FlatBuffer.Request.JoinRoom.CreateJoinRoom(builder, _id);
+            return FlatBuffer.Request.EnterRoom.CreateEnterRoom(builder, _id);
         }
 
         public byte[] Serialize()
@@ -77,9 +81,9 @@ namespace Protocol.Request
             return builder.DataBuffer.ToSizedArray();
         }
 
-        public static JoinRoom Deserialize(byte[] bytes)
+        public static EnterRoom Deserialize(byte[] bytes)
         {
-            return new JoinRoom(FlatBuffer.Request.JoinRoom.GetRootAsJoinRoom(new FlatBuffers.ByteBuffer(bytes)));
+            return new EnterRoom(FlatBuffer.Request.EnterRoom.GetRootAsEnterRoom(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 

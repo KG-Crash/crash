@@ -19,8 +19,8 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &CreateRoom{}
 		return x.Deserialize(payload)
 
-	case JOIN_ROOM:
-		x := &JoinRoom{}
+	case ENTER_ROOM:
+		x := &EnterRoom{}
 		return x.Deserialize(payload)
 
 	case LEAVE_ROOM:
@@ -61,8 +61,8 @@ func Text(p protocol.Protocol) string {
 	case *CreateRoom:
 		return "CREATE_ROOM"
 
-	case *JoinRoom:
-		return "JOIN_ROOM"
+	case *EnterRoom:
+		return "ENTER_ROOM"
 
 	case *LeaveRoom:
 		return "LEAVE_ROOM"
@@ -90,7 +90,7 @@ func Text(p protocol.Protocol) string {
 
 const (
 	CREATE_ROOM = iota
-	JOIN_ROOM
+	ENTER_ROOM
 	LEAVE_ROOM
 	KICK_ROOM
 	ROOM_LIST
@@ -101,16 +101,42 @@ const (
 )
 
 type CreateRoom struct {
+	Title string
+	Teams []int32
+}
+
+func (obj *CreateRoom) teams(builder *flatbuffers.Builder, teams []int32) flatbuffers.UOffsetT {
+	_size := len(teams)
+	offsets := make([]int32, _size)
+	for i, x := range teams {
+		offsets[_size-i-1] = x
+	}
+
+	builder.StartVector(4, _size, 4)
+	for _, offset := range offsets {
+		builder.PrependInt32(offset)
+	}
+	return builder.EndVector(_size)
 }
 
 func (obj *CreateRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_title := builder.CreateString(obj.Title)
+	_teams := obj.teams(builder, obj.Teams)
 
 	source.CreateRoomStart(builder)
+	source.CreateRoomAddTitle(builder, _title)
+	source.CreateRoomAddTeams(builder, _teams)
 
 	return source.CreateRoomEnd(builder)
 }
 
 func (obj *CreateRoom) parse(x *source.CreateRoom) *CreateRoom {
+	obj.Title = string(x.Title())
+
+	obj.Teams = []int32{}
+	for i := 0; i < x.TeamsLength(); i++ {
+		obj.Teams = append(obj.Teams, x.Teams(i))
+	}
 
 	return obj
 }
@@ -131,38 +157,38 @@ func (obj *CreateRoom) Deserialize(bytes []byte) protocol.Protocol {
 	return obj.parse(root)
 }
 
-type JoinRoom struct {
+type EnterRoom struct {
 	Id string
 }
 
-func (obj *JoinRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+func (obj *EnterRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	_id := builder.CreateString(obj.Id)
 
-	source.JoinRoomStart(builder)
-	source.JoinRoomAddId(builder, _id)
+	source.EnterRoomStart(builder)
+	source.EnterRoomAddId(builder, _id)
 
-	return source.JoinRoomEnd(builder)
+	return source.EnterRoomEnd(builder)
 }
 
-func (obj *JoinRoom) parse(x *source.JoinRoom) *JoinRoom {
+func (obj *EnterRoom) parse(x *source.EnterRoom) *EnterRoom {
 	obj.Id = string(x.Id())
 
 	return obj
 }
 
-func (obj *JoinRoom) Identity() int {
-	return JOIN_ROOM
+func (obj *EnterRoom) Identity() int {
+	return ENTER_ROOM
 }
 
-func (obj *JoinRoom) Serialize() []byte {
+func (obj *EnterRoom) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *JoinRoom) Deserialize(bytes []byte) protocol.Protocol {
-	root := source.GetRootAsJoinRoom(bytes, 0)
+func (obj *EnterRoom) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsEnterRoom(bytes, 0)
 	return obj.parse(root)
 }
 
@@ -409,9 +435,8 @@ func (obj *ActionQueue) create(builder *flatbuffers.Builder) flatbuffers.UOffset
 
 func (obj *ActionQueue) parse(x *source.ActionQueue) *ActionQueue {
 
-	_sizeActions := x.ActionsLength()
-	obj.Actions = make([]Action, _sizeActions)
-	for i := 0; i < _sizeActions; i++ {
+	obj.Actions = []Action{}
+	for i := 0; i < x.ActionsLength(); i++ {
 		_action := &source.Action{}
 		x.Actions(_action, i)
 

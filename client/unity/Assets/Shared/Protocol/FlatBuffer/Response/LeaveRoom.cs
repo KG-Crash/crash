@@ -26,20 +26,30 @@ public struct LeaveRoom : IFlatbufferObject
   public ArraySegment<byte>? GetUserBytes() { return __p.__vector_as_arraysegment(4); }
 #endif
   public byte[] GetUserArray() { return __p.__vector_as_array<byte>(4); }
-  public uint Error { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
+  public string NewMaster { get { int o = __p.__offset(6); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
+#if ENABLE_SPAN_T
+  public Span<byte> GetNewMasterBytes() { return __p.__vector_as_span<byte>(6, 1); }
+#else
+  public ArraySegment<byte>? GetNewMasterBytes() { return __p.__vector_as_arraysegment(6); }
+#endif
+  public byte[] GetNewMasterArray() { return __p.__vector_as_array<byte>(6); }
+  public uint Error { get { int o = __p.__offset(8); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
 
   public static Offset<FlatBuffer.Response.LeaveRoom> CreateLeaveRoom(FlatBufferBuilder builder,
       StringOffset userOffset = default(StringOffset),
+      StringOffset newMasterOffset = default(StringOffset),
       uint error = 0) {
-    builder.StartTable(2);
+    builder.StartTable(3);
     LeaveRoom.AddError(builder, error);
+    LeaveRoom.AddNewMaster(builder, newMasterOffset);
     LeaveRoom.AddUser(builder, userOffset);
     return LeaveRoom.EndLeaveRoom(builder);
   }
 
-  public static void StartLeaveRoom(FlatBufferBuilder builder) { builder.StartTable(2); }
+  public static void StartLeaveRoom(FlatBufferBuilder builder) { builder.StartTable(3); }
   public static void AddUser(FlatBufferBuilder builder, StringOffset userOffset) { builder.AddOffset(0, userOffset.Value, 0); }
-  public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(1, error, 0); }
+  public static void AddNewMaster(FlatBufferBuilder builder, StringOffset newMasterOffset) { builder.AddOffset(1, newMasterOffset.Value, 0); }
+  public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(2, error, 0); }
   public static Offset<FlatBuffer.Response.LeaveRoom> EndLeaveRoom(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Response.LeaveRoom>(o);

@@ -7,7 +7,8 @@ namespace Protocol.Response
     {
         LOGIN,
         CREATE_ROOM,
-        JOIN_ROOM,
+        USER,
+        ENTER_ROOM,
         LEAVE_ROOM,
         KICK_ROOM,
         KICKED_ROOM,
@@ -93,34 +94,28 @@ namespace Protocol.Response
         }
     }
 
-    public class JoinRoom : IProtocol
+    public class User : IProtocol
     {
-        public uint Identity => (uint)Protocol.Response.Identity.JOIN_ROOM;
+        public uint Identity => (uint)Protocol.Response.Identity.USER;
 
-        public string User { get; set; }
-        public List<string> Users { get; set; }
-        public bool Master { get; set; }
-        public uint Error { get; set; }
+        public string Id { get; set; }
+        public int Team { get; set; }
 
-        public JoinRoom()
+        public User()
         { }
 
-        public JoinRoom(FlatBuffer.Response.JoinRoom obj)
+        public User(FlatBuffer.Response.User obj)
         {
-            this.User = obj.User;
-            this.Users = Enumerable.Range(0, obj.UsersLength).Select(x => obj.Users(x)).ToList();
-            this.Master = obj.Master;
-            this.Error = obj.Error;
+            this.Id = obj.Id;
+            this.Team = obj.Team;
         }
 
-        public FlatBuffers.Offset<FlatBuffer.Response.JoinRoom> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        public FlatBuffers.Offset<FlatBuffer.Response.User> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _user = builder.CreateString(this.User);
-            var _users = FlatBuffer.Response.JoinRoom.CreateUsersVector(builder, this.Users.Select(x => builder.CreateString(x)).ToArray());
-            var _master = this.Master;
-            var _error = this.Error;
+            var _id = builder.CreateString(this.Id);
+            var _team = this.Team;
 
-            return FlatBuffer.Response.JoinRoom.CreateJoinRoom(builder, _user, _users, _master, _error);
+            return FlatBuffer.Response.User.CreateUser(builder, _id, _team);
         }
 
         public byte[] Serialize()
@@ -130,9 +125,52 @@ namespace Protocol.Response
             return builder.DataBuffer.ToSizedArray();
         }
 
-        public static JoinRoom Deserialize(byte[] bytes)
+        public static User Deserialize(byte[] bytes)
         {
-            return new JoinRoom(FlatBuffer.Response.JoinRoom.GetRootAsJoinRoom(new FlatBuffers.ByteBuffer(bytes)));
+            return new User(FlatBuffer.Response.User.GetRootAsUser(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class EnterRoom : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.ENTER_ROOM;
+
+        public string User { get; set; }
+        public List<User> Users { get; set; }
+        public string Master { get; set; }
+        public uint Error { get; set; }
+
+        public EnterRoom()
+        { }
+
+        public EnterRoom(FlatBuffer.Response.EnterRoom obj)
+        {
+            this.User = obj.User;
+            this.Users = Enumerable.Range(0, obj.UsersLength).Select(x => new User(obj.Users(x).Value)).ToList();
+            this.Master = obj.Master;
+            this.Error = obj.Error;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.EnterRoom> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _user = builder.CreateString(this.User);
+            var _users = FlatBuffer.Response.EnterRoom.CreateUsersVector(builder, this.Users.Select(x => x.ToFlatBuffer(builder)).ToArray());
+            var _master = builder.CreateString(this.Master);
+            var _error = this.Error;
+
+            return FlatBuffer.Response.EnterRoom.CreateEnterRoom(builder, _user, _users, _master, _error);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static EnterRoom Deserialize(byte[] bytes)
+        {
+            return new EnterRoom(FlatBuffer.Response.EnterRoom.GetRootAsEnterRoom(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 
@@ -141,6 +179,7 @@ namespace Protocol.Response
         public uint Identity => (uint)Protocol.Response.Identity.LEAVE_ROOM;
 
         public string User { get; set; }
+        public string NewMaster { get; set; }
         public uint Error { get; set; }
 
         public LeaveRoom()
@@ -149,15 +188,17 @@ namespace Protocol.Response
         public LeaveRoom(FlatBuffer.Response.LeaveRoom obj)
         {
             this.User = obj.User;
+            this.NewMaster = obj.NewMaster;
             this.Error = obj.Error;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.LeaveRoom> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
             var _user = builder.CreateString(this.User);
+            var _newMaster = builder.CreateString(this.NewMaster);
             var _error = this.Error;
 
-            return FlatBuffer.Response.LeaveRoom.CreateLeaveRoom(builder, _user, _error);
+            return FlatBuffer.Response.LeaveRoom.CreateLeaveRoom(builder, _user, _newMaster, _error);
         }
 
         public byte[] Serialize()
@@ -359,7 +400,8 @@ namespace Protocol.Response
     {
         public uint Identity => (uint)Protocol.Response.Identity.WHISPER;
 
-        public string User { get; set; }
+        public string From { get; set; }
+        public string To { get; set; }
         public string Message { get; set; }
         public uint Error { get; set; }
 
@@ -368,18 +410,20 @@ namespace Protocol.Response
 
         public Whisper(FlatBuffer.Response.Whisper obj)
         {
-            this.User = obj.User;
+            this.From = obj.From;
+            this.To = obj.To;
             this.Message = obj.Message;
             this.Error = obj.Error;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.Whisper> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _user = builder.CreateString(this.User);
+            var _from = builder.CreateString(this.From);
+            var _to = builder.CreateString(this.To);
             var _message = builder.CreateString(this.Message);
             var _error = this.Error;
 
-            return FlatBuffer.Response.Whisper.CreateWhisper(builder, _user, _message, _error);
+            return FlatBuffer.Response.Whisper.CreateWhisper(builder, _from, _to, _message, _error);
         }
 
         public byte[] Serialize()

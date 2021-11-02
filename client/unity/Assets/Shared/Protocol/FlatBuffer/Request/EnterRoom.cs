@@ -9,15 +9,15 @@ using global::System;
 using global::System.Collections.Generic;
 using global::FlatBuffers;
 
-public struct JoinRoom : IFlatbufferObject
+public struct EnterRoom : IFlatbufferObject
 {
   private Table __p;
   public ByteBuffer ByteBuffer { get { return __p.bb; } }
   public static void ValidateVersion() { FlatBufferConstants.FLATBUFFERS_1_12_0(); }
-  public static JoinRoom GetRootAsJoinRoom(ByteBuffer _bb) { return GetRootAsJoinRoom(_bb, new JoinRoom()); }
-  public static JoinRoom GetRootAsJoinRoom(ByteBuffer _bb, JoinRoom obj) { return (obj.__assign(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
+  public static EnterRoom GetRootAsEnterRoom(ByteBuffer _bb) { return GetRootAsEnterRoom(_bb, new EnterRoom()); }
+  public static EnterRoom GetRootAsEnterRoom(ByteBuffer _bb, EnterRoom obj) { return (obj.__assign(_bb.GetInt(_bb.Position) + _bb.Position, _bb)); }
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
-  public JoinRoom __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
+  public EnterRoom __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   public string Id { get { int o = __p.__offset(4); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
 #if ENABLE_SPAN_T
@@ -27,18 +27,18 @@ public struct JoinRoom : IFlatbufferObject
 #endif
   public byte[] GetIdArray() { return __p.__vector_as_array<byte>(4); }
 
-  public static Offset<FlatBuffer.Request.JoinRoom> CreateJoinRoom(FlatBufferBuilder builder,
+  public static Offset<FlatBuffer.Request.EnterRoom> CreateEnterRoom(FlatBufferBuilder builder,
       StringOffset idOffset = default(StringOffset)) {
     builder.StartTable(1);
-    JoinRoom.AddId(builder, idOffset);
-    return JoinRoom.EndJoinRoom(builder);
+    EnterRoom.AddId(builder, idOffset);
+    return EnterRoom.EndEnterRoom(builder);
   }
 
-  public static void StartJoinRoom(FlatBufferBuilder builder) { builder.StartTable(1); }
+  public static void StartEnterRoom(FlatBufferBuilder builder) { builder.StartTable(1); }
   public static void AddId(FlatBufferBuilder builder, StringOffset idOffset) { builder.AddOffset(0, idOffset.Value, 0); }
-  public static Offset<FlatBuffer.Request.JoinRoom> EndJoinRoom(FlatBufferBuilder builder) {
+  public static Offset<FlatBuffer.Request.EnterRoom> EndEnterRoom(FlatBufferBuilder builder) {
     int o = builder.EndTable();
-    return new Offset<FlatBuffer.Request.JoinRoom>(o);
+    return new Offset<FlatBuffer.Request.EnterRoom>(o);
   }
 };
 

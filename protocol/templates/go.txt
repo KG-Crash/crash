@@ -113,9 +113,8 @@ func (obj *{{ data.name.upper }}) create(builder *flatbuffers.Builder) flatbuffe
 func (obj *{{ data.name.upper }}) parse(x *source.{{ data.name.upper }}) *{{ data.name.upper }} {
     {% for param in data.params -%}
     {%- if param.array %}
-    _size{{ param.name.upper }} := x.{{ param.name.upper }}Length()
-	obj.{{ param.name.upper }} = make({{ param.type }}, _size{{ param.name.upper }})
-	for i := 0; i < _size{{ param.name.upper }}; i++ {
+	obj.{{ param.name.upper }} = {{ param.type }} {}
+	for i := 0; i < x.{{ param.name.upper }}Length(); i++ {
         {%- if param.element.primitive %}
         obj.{{ param.name.upper }} = append(obj.{{ param.name.upper }}, {% if param.element.string %}string(x.{{ param.name.upper }}(i)){% else %}x.{{ param.name.upper }}(i){% endif %})
         {%- else %}

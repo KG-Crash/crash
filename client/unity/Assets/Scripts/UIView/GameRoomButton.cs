@@ -17,9 +17,9 @@ public class GameRoomButton : MonoBehaviour
         
     }
 
-    public async void OnJoin()
+    public async void OnEnter()
     {
-        await Client.Send(new Protocol.Request.JoinRoom
+        await Client.Send(new Protocol.Request.EnterRoom
         {
             Id = RoomId
         });

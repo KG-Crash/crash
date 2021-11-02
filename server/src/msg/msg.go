@@ -1,88 +1,102 @@
 package msg
 
 import (
-	"net"
-	"protocol"
-
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
-type OnAccepted func(context actor.Context, conn net.Conn)
-type OnReceived func(context actor.Context, id string, protocol protocol.Protocol)
+/*
+	game messages
+*/
 
-type Listen struct {
-	Port uint16
+type RequestGetRoom struct {
+	ID string
 }
 
-type Accept struct {
+type ResponseGetRoom struct {
+	Room *actor.PID
 }
 
-type Accepted struct {
-	net.Conn
+type RequestGetRoomList struct{}
+
+type ResponseGetRoomList struct {
+	Rooms actor.PIDSet
 }
 
-type BindAcceptor struct {
-	OnAccepted
+type RequestGetUser struct {
+	ID string
 }
 
-type SetConnection struct {
-	net.Conn
-}
-
-type Receive struct {
-}
-
-type Disconnected struct {
-	*actor.PID
-}
-
-type Write struct {
-	protocol.Protocol
-}
-
-type Received struct {
-	protocol.Protocol
-}
-
-type SpawnUser struct {
-	net.Conn
-	OnReceived
-}
-
-type SpawnRoom struct {
-	Master *actor.PID
-	UserId string
-}
-
-type RoomList struct {
+type ResponseGetUser struct {
 	User *actor.PID
 }
 
-type BindUser struct {
-	Id string
-	OnReceived
+type RequestCreateRoom RoomConfig
+
+type ResponseCreateRoom struct {
+	ID   string
+	Room *actor.PID
 }
 
-type JoinedRoom struct {
-	UserId string
-	User   *actor.PID
-	Room   *actor.PID
-	Master bool
-	Users  []string
-	Error  uint32
+/*
+	room messages
+*/
+
+type RoomConfig struct {
+	ID    string
+	Title string
+	Teams []int32
 }
 
-type LeaveRoom struct {
-	UserId string
-	User   *actor.PID
+type DestroyRoom struct {
+	ID string
 }
 
-type Logout struct {
-	UserId string
+type RequestGetRoomState struct{}
+
+type ResponseGetRoomState struct {
+	PID    *actor.PID
+	State  RoomConfig
+	Users  map[int][]UserState
+	Teams  map[int]*actor.PIDSet
+	Master UserState
+}
+
+type RequestEnterRoom struct {
+	Sender *actor.PID
+}
+
+type ResponseEnterRoom struct {
+	PID       *actor.PID
+	RoomState RoomConfig
+	Users     map[int][]UserState
+	Teams     map[int]*actor.PIDSet
+	Master    UserState
+	Error     int
+}
+
+// 퇴장 요청
+type Leave struct {
+	User *actor.PID
+	UID  string
+}
+
+// 퇴장 요청한 유저에게 전달되는 메시지
+type LeftSelf struct{}
+
+// 특정 유저가 퇴장시 나머지 유저들에게 전달되는 메시지
+type Left struct {
+	User      *actor.PID
+	UID       string
+	NewMaster *UserState
 }
 
 type Chat struct {
-	UserId  string
+	User    string
+	Message string
+}
+
+type ReceiveChat struct {
+	User    string
 	Message string
 }
 
@@ -93,25 +107,30 @@ type Whisper struct {
 }
 
 type Kick struct {
-	From string
-	To   string
+	From *actor.PID
+	To   *actor.PID
 }
 
 type Kicked struct {
+	Error string
 }
 
-type JoinRoom struct {
-	User   *actor.PID
-	UserId string
-	RoomId string
+/*
+	user messages
+*/
+
+type UserState struct {
+	ID  string
+	PID *actor.PID
 }
 
-type LeavedRoom struct {
-	User   *actor.PID
-	UserId string
-	Error  uint32
+type RequestGetUserState struct{}
+
+type ResponseGetUserState struct {
+	PID   *actor.PID
+	State UserState
 }
 
-type DestroyedRoom struct {
-	RoomId string
+type Disconnected struct {
+	ID string
 }

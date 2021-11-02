@@ -10,15 +10,21 @@ table CreateRoom {
 	error: uint32;
 }
 
-table JoinRoom {
+table User {
+	id: string;
+	team: int;
+}
+
+table EnterRoom {
 	user: string;
-	users: [string];
-	master: bool;
+	users: [User];
+	master: string;
 	error: uint32;
 }
 
 table LeaveRoom {
 	user: string;
+	newMaster: string;
 	error: uint32;
 }
 
@@ -47,7 +53,8 @@ table Chat {
 }
 
 table Whisper {
-	user: string;
+	from: string;
+	to: string;
 	message: string;
 	error: uint32;
 }
