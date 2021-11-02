@@ -157,6 +157,17 @@ namespace Game
             }
         }
 
+        public AttackType attackType
+        {
+            get => table.AttackType;
+        }
+
+        public int projectileId
+        {
+            get => table.ProjectileID;
+        }
+
+
         public Fix64 maxhp
         {
             get
@@ -736,13 +747,13 @@ namespace Game
 
             var damage = CalculateDamage(unit);
 
-            if (this.attackRange < 3)
+            if (this.attackType == AttackType.Immediately)
             {
                 unit.AddHP(-damage, this);
                 listener?.OnAttack(this, unit, damage);
             }
             else
-                listener?.OnFireProjectile(this, unit, 0);
+                listener?.OnFireProjectile(this, unit, this.projectileId);
 
             
             _lastAttackTime = DateTime.Now;
