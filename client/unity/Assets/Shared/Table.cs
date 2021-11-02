@@ -78,6 +78,8 @@ namespace Shared.Table
         public bool Flyable { get; set; }
         
         public int KillScore { get; set; }
+        
+        public int ProjectileID { get; set; }
     }
 
     public class UnitUpgradeAbilityAttribute

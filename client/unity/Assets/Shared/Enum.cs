@@ -55,6 +55,12 @@ namespace Shared
         AttackMultiTarget
     }
 
+    public enum AttackType
+    {
+        Immediately,
+        Projectile
+    }
+
     public enum Ability
     {
         NONE = 0x00000000,

@@ -48,6 +48,11 @@ type _CommandType struct {
 	AttackMultiTarget  uint32
 }
 
+type _AttackType struct {
+	Immediately uint32
+	Projectile  uint32
+}
+
 type _Ability struct {
 	NONE       uint32
 	UPGRADE_1  uint32
@@ -85,6 +90,7 @@ var UnitState _UnitState
 var UnitType _UnitType
 var StatType _StatType
 var CommandType _CommandType
+var AttackType _AttackType
 var Ability _Ability
 var Advanced _Advanced
 
@@ -133,6 +139,11 @@ func init() {
 		Move:               1,
 		AttackSingleTarget: 2,
 		AttackMultiTarget:  3,
+	}
+
+	AttackType = _AttackType{
+		Immediately: 1,
+		Projectile:  2,
 	}
 
 	Ability = _Ability{
