@@ -30,7 +30,7 @@ namespace Game
 
         public IEnumerator<string> OnRefresh()
         {
-            return roomList.Rooms.GetEnumerator();
+            return roomList.Rooms.Select(x => x.Title).GetEnumerator();
         }
     }
 
