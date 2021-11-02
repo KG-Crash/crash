@@ -73,19 +73,17 @@ func (state *Actor) sendStateResponse(ctx actor.Context, fn func(users map[int][
 				}
 
 				// 해당 유저 정보를 응답 메시지에 저장
-				switch x := res.(type) {
-				case *msg.ResponseGetUserState:
-					users[teamId] = append(users[teamId], x.State)
-					gathered++
+				x := res.(*msg.ResponseGetUserState)
+				users[teamId] = append(users[teamId], x.State)
+				gathered++
 
-					if x.PID == state.master {
-						master = &x.State
-					}
+				if x.PID == state.master {
+					master = &x.State
+				}
 
-					// 모든 유저 정보 수집이 끝나면 응답 메시지 전달
-					if gathered == requests {
-						ctx.Respond(fn(users, *master))
-					}
+				// 모든 유저 정보 수집이 끝나면 응답 메시지 전달
+				if gathered == requests {
+					ctx.Respond(fn(users, *master))
 				}
 			})
 		}
@@ -204,13 +202,11 @@ func (state *Actor) Receive(ctx actor.Context) {
 					return
 				}
 
-				switch x := res.(type) {
-				case *msg.ResponseGetUserState:
-					result.NewMaster = &x.State
+				x := res.(*msg.ResponseGetUserState)
+				result.NewMaster = &x.State
 
-					for _, actor := range users.Values() {
-						ctx.Send(actor, result)
-					}
+				for _, actor := range users.Values() {
+					ctx.Send(actor, result)
 				}
 			})
 		}
@@ -234,26 +230,24 @@ func (state *Actor) Receive(ctx actor.Context) {
 				return
 			}
 
-			switch x := res.(type) {
-			case *msg.ResponseGetUserState:
-				users := state.selectUsers()
-				if state.master != from {
-					return
-				}
+			x := res.(*msg.ResponseGetUserState)
+			users := state.selectUsers()
+			if state.master != from {
+				return
+			}
 
-				if !users.Contains(to) {
-					return
-				}
+			if !users.Contains(to) {
+				return
+			}
 
-				users.Remove(to)
-				ctx.Send(to, &msg.Kicked{})
+			users.Remove(to)
+			ctx.Send(to, &msg.Kicked{})
 
-				for _, user := range users.Values() {
-					ctx.Send(user, &msg.Left{
-						User: to,
-						UID:  x.State.ID,
-					})
-				}
+			for _, user := range users.Values() {
+				ctx.Send(user, &msg.Left{
+					User: to,
+					UID:  x.State.ID,
+				})
 			}
 		})
 	}
