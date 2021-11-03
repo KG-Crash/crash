@@ -64,8 +64,6 @@ func (state *Actor) selects() *actor.PIDSet {
 
 func (state *Actor) sendStateResponse(ctx actor.Context, fn func(users []msg.UserState, master msg.User) interface{}) {
 
-	// TODO 클로저때문에 팀 현황이 제대로 반영되지 않음
-
 	var master *msg.User = nil
 	users := []msg.UserState{}
 	teams := map[*actor.PID]int{}
@@ -302,16 +300,18 @@ func (state *Actor) Receive(ctx actor.Context) {
 		})
 
 	case *msg.GameStart:
-		sender := ctx.Sender()
+		if x.Sender == nil {
+			return
+		}
 		users := state.selects()
 
 		// TODO 에러처리
-		if !users.Contains(sender) {
+		if !users.Contains(x.Sender) {
 			return
 		}
 
 		// TODO 예외처리
-		if state.master != sender {
+		if state.master != x.Sender {
 			return
 		}
 

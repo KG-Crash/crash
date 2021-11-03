@@ -207,7 +207,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			return
 		}
 
-		ctx.Send(state.Room, &msg.GameStart{})
+		ctx.Send(state.Room, &msg.GameStart{
+			Sender: ctx.Self(),
+		})
 	}
 }
 

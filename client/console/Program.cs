@@ -206,6 +206,13 @@ public class Controller
         Console.WriteLine("당신은 강퇴당했습니다.");
         return true;
     }
+
+    [FlatBufferEvent]
+    public async Task<bool> OnGameStart(Protocol.Response.GameStart response)
+    {
+        Console.WriteLine("게임 시작");
+        return true;
+    }
 }
 
 namespace console

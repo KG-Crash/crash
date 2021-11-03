@@ -115,7 +115,9 @@ type Kicked struct {
 	Error string
 }
 
-type GameStart struct{}
+type GameStart struct {
+	Sender *actor.PID
+}
 
 /*
 	user messages
