@@ -56,9 +56,9 @@ type RequestGetRoomState struct{}
 type ResponseGetRoomState struct {
 	PID    *actor.PID
 	State  RoomConfig
-	Users  map[int][]UserState
+	Users  []UserState
 	Teams  map[int]*actor.PIDSet
-	Master UserState
+	Master User
 }
 
 type RequestEnterRoom struct {
@@ -68,9 +68,9 @@ type RequestEnterRoom struct {
 type ResponseEnterRoom struct {
 	PID       *actor.PID
 	RoomState RoomConfig
-	Users     map[int][]UserState
+	Users     []UserState
 	Teams     map[int]*actor.PIDSet
-	Master    UserState
+	Master    User
 	Error     int
 }
 
@@ -87,7 +87,7 @@ type LeftSelf struct{}
 type Left struct {
 	User      *actor.PID
 	UID       string
-	NewMaster *UserState
+	NewMaster *User
 }
 
 type Chat struct {
@@ -121,16 +121,21 @@ type GameStart struct{}
 	user messages
 */
 
-type UserState struct {
+type User struct {
 	ID  string
 	PID *actor.PID
+}
+
+type UserState struct {
+	User
+	Team int
 }
 
 type RequestGetUserState struct{}
 
 type ResponseGetUserState struct {
-	PID   *actor.PID
-	State UserState
+	PID  *actor.PID
+	User User
 }
 
 type Disconnected struct {

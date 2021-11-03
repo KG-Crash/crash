@@ -62,18 +62,19 @@ func (state *Actor) selects() *actor.PIDSet {
 	return result
 }
 
-func (state *Actor) sendStateResponse(ctx actor.Context, fn func(users map[int][]msg.UserState, master msg.UserState) interface{}) {
+func (state *Actor) sendStateResponse(ctx actor.Context, fn func(users []msg.UserState, master msg.User) interface{}) {
 
 	// TODO 클로저때문에 팀 현황이 제대로 반영되지 않음
 
-	users := map[int][]msg.UserState{}
-	var master *msg.UserState = nil
+	var master *msg.User = nil
+	users := []msg.UserState{}
+	teams := map[*actor.PID]int{}
 	gathered := 0
 	requests := state.selects().Len()
-	for teamId, pidSet := range state.users {
-		users[teamId] = []msg.UserState{}
-
+	for team, pidSet := range state.users {
 		pidSet.ForEach(func(i int, pid *actor.PID) {
+			teams[pid] = team
+
 			// 각각의 유저들의 정보를 요청
 			future := ctx.RequestFuture(pid, &msg.RequestGetUserState{}, time.Hour)
 			ctx.AwaitFuture(future, func(res interface{}, err error) {
@@ -84,11 +85,14 @@ func (state *Actor) sendStateResponse(ctx actor.Context, fn func(users map[int][
 
 				// 해당 유저 정보를 응답 메시지에 저장
 				x := res.(*msg.ResponseGetUserState)
-				users[teamId] = append(users[teamId], x.State)
+				users = append(users, msg.UserState{
+					User: x.User,
+					Team: teams[x.PID],
+				})
 				gathered++
 
 				if x.PID == state.master {
-					master = &x.State
+					master = &x.User
 				}
 
 				// 모든 유저 정보 수집이 끝나면 응답 메시지 전달
@@ -161,7 +165,7 @@ func (state *Actor) playable() bool {
 func (state *Actor) Receive(ctx actor.Context) {
 	switch x := ctx.Message().(type) {
 	case *msg.RequestGetRoomState:
-		state.sendStateResponse(ctx, func(users map[int][]msg.UserState, master msg.UserState) interface{} {
+		state.sendStateResponse(ctx, func(users []msg.UserState, master msg.User) interface{} {
 			result := &msg.ResponseGetRoomState{
 				PID: ctx.Self(),
 				State: msg.RoomConfig{
@@ -192,7 +196,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 		}
 
 		state.users[i].Add(x.Sender)
-		state.sendStateResponse(ctx, func(users map[int][]msg.UserState, master msg.UserState) interface{} {
+		state.sendStateResponse(ctx, func(users []msg.UserState, master msg.User) interface{} {
 			return &msg.ResponseEnterRoom{
 				PID: ctx.Self(),
 				RoomState: msg.RoomConfig{
@@ -249,7 +253,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 				}
 
 				x := res.(*msg.ResponseGetUserState)
-				result.NewMaster = &x.State
+				result.NewMaster = &x.User
 
 				users.ForEach(func(i int, pid *actor.PID) {
 					ctx.Send(pid, result)
@@ -292,7 +296,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 			users.ForEach(func(i int, pid *actor.PID) {
 				ctx.Send(pid, &msg.Left{
 					User: to,
-					UID:  x.State.ID,
+					UID:  x.User.ID,
 				})
 			})
 		})

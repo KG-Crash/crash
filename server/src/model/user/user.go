@@ -55,19 +55,15 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 					Master: x.Master.ID,
 				}
 
-				for team, users := range x.Users {
-					for _, user := range users {
-						result.Users = append(result.Users, response.User{
-							Id:   user.ID,
-							Team: int32(team),
-						})
-					}
+				for _, user := range x.Users {
+					result.Users = append(result.Users, response.User{
+						Id:   user.ID,
+						Team: int32(user.Team),
+					})
 				}
 
-				for _, users := range x.Users {
-					for _, user := range users {
-						ctx.Send(user.PID, result)
-					}
+				for _, user := range x.Users {
+					ctx.Send(user.PID, result)
 				}
 			})
 		})
@@ -245,7 +241,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 	case *msg.RequestGetUserState:
 		ctx.Respond(&msg.ResponseGetUserState{
 			PID: ctx.Self(),
-			State: msg.UserState{
+			User: msg.User{
 				ID:  state.ID,
 				PID: ctx.Self(),
 			},
