@@ -13,7 +13,7 @@ namespace Game
         static public string ParseMessage(string msg)
         {
             MethodInfo methodInfo = null;
-            List<object> paramList = new List<object>();
+            List<object> paramList = null;
 
             foreach (var method in GetCommandMethodInfos())
             {
@@ -24,17 +24,33 @@ namespace Game
 
                 if (!match.Groups["command"].ToString().Equals(""))
                 {
+                    object[] matchParams = Array.Empty<object>();
                     methodInfo = method;
                     var paramInfos = methodInfo.GetParameters();
-                    object[] matchParams = match.Groups["param"].ToString().Split();
+
+                    if (!match.Groups["param"].ToString().Equals(""))
+                        matchParams = match.Groups["param"].ToString().Split();
 
                     if (paramInfos.Length != matchParams.Length)
                         return msg;
 
-                    for (int i = 0; i < paramInfos.Length; i++)
+                    if (paramInfos.Length == 0)
+                        break;
+                    else
                     {
-                        var convertedParam = Convert.ChangeType(matchParams[i], paramInfos[i].ParameterType);
-                        paramList.Add(convertedParam);
+                        paramList = new List<object>();
+                        try
+                        {
+                            for (int i = 0; i < paramInfos.Length; i++)
+                            {
+                                var convertedParam = Convert.ChangeType(matchParams[i], paramInfos[i].ParameterType);
+                                paramList.Add(convertedParam);
+                            }
+                        }
+                        catch (FormatException e)
+                        {
+                            return msg;
+                        }
                     }
                 }
             }
@@ -42,10 +58,11 @@ namespace Game
             if (methodInfo == null)
                 return msg;
 
-            if (paramList.Count < 1)
-                return msg;
+            if (paramList != null)
+                methodInfo.Invoke(null, paramList.ToArray());
+            else
+                methodInfo.Invoke(null, (object[])null);
 
-            methodInfo.Invoke(null, paramList.ToArray());
             msg = methodInfo.GetCustomAttribute<BuildCommandAttribute>().command + " Cheat enable";
             return msg;
         }

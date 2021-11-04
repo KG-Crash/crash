@@ -41,5 +41,11 @@ namespace Game
         {
 			Debug.Log("테스트 치트 param1 : " + value1 + ", param2 : " + value2 + ", param3 : " + value3);
 		}
+
+		[BuildCommand("empty cheat")]
+		public static void EmptyCheat()
+		{
+			Debug.Log("테스트 치트 인자없는");
+		}
 	}
 }
