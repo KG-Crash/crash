@@ -1,6 +1,8 @@
 package msg
 
 import (
+	"exception"
+
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
 
@@ -71,7 +73,7 @@ type ResponseEnterRoom struct {
 	Users     []UserState
 	Teams     map[int]*actor.PIDSet
 	Master    User
-	Error     int
+	Error     exception.Error
 }
 
 // 퇴장 요청

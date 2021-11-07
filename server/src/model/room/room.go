@@ -1,8 +1,8 @@
 package room
 
 import (
-	"errors"
-	"fmt"
+	"enum"
+	"exception"
 	"log"
 	"msg"
 	"protocol/response"
@@ -11,11 +11,6 @@ import (
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
-
-type teamCapPair struct {
-	team  int
-	count int
-}
 
 type RoomConfig struct {
 	Team  []int32
@@ -102,7 +97,7 @@ func (state *Actor) sendStateResponse(ctx actor.Context, fn func(users []msg.Use
 	}
 }
 
-func (state *Actor) placeable() (int, error) {
+func (state *Actor) placeable() (int, exception.Error) {
 	sorted := []int{}
 	for team := range state.config.Team {
 		sorted = append(sorted, team)
@@ -121,18 +116,17 @@ func (state *Actor) placeable() (int, error) {
 		}
 	}
 
-	return 0, errors.New("no place")
+	return 0, exception.New(enum.ResultCode.FullUsers)
 }
 
-func (state *Actor) placed(user *actor.PID) (int, error) {
+func (state *Actor) placed(user *actor.PID) (int, exception.Error) {
 	for i, team := range state.users {
 		if team.Contains(user) {
 			return i, nil
 		}
 	}
 
-	msg := fmt.Sprintf("not found user : %v", user.Id)
-	return 0, errors.New(msg)
+	return 0, exception.New(enum.ResultCode.InvalidUser)
 }
 
 func (state *Actor) contains(pid *actor.PID) bool {
@@ -140,16 +134,16 @@ func (state *Actor) contains(pid *actor.PID) bool {
 	return users.Contains(pid)
 }
 
-func (state *Actor) playable() bool {
+func (state *Actor) playable() exception.Error {
 	users := state.selects()
 
 	if state.playing {
-		return false
+		return exception.New(enum.ResultCode.AlreadyPlaying)
 	}
 
 	// 두명 이상 있어야함
 	if users.Len() < 2 {
-		return false
+		return exception.New(enum.ResultCode.NotEnoughUsers)
 	}
 
 	// 1명 이상 참여한 팀이 2개 이상 있어야함
@@ -157,7 +151,12 @@ func (state *Actor) playable() bool {
 	for team, pidSet := range state.users {
 		availables[team] = pidSet.Len()
 	}
-	return len(availables) >= 2
+
+	if len(availables) < 2 {
+		return exception.New(enum.ResultCode.NotEnoughTeams)
+	}
+
+	return nil
 }
 
 func (state *Actor) Receive(ctx actor.Context) {
@@ -182,13 +181,16 @@ func (state *Actor) Receive(ctx actor.Context) {
 	case *msg.RequestEnterRoom:
 		users := state.selects()
 		if users.Contains(x.Sender) {
+			ctx.Respond(&msg.ResponseEnterRoom{
+				Error: exception.New(enum.ResultCode.AlreadyEnteredGameRoom),
+			})
 			return
 		}
 
 		i, err := state.placeable()
 		if err != nil {
 			ctx.Respond(&msg.ResponseEnterRoom{
-				Error: 1, // 참여 불가능
+				Error: err,
 			})
 			return
 		}
@@ -305,24 +307,31 @@ func (state *Actor) Receive(ctx actor.Context) {
 		}
 		users := state.selects()
 
-		// TODO 에러처리
+		result := &response.GameStart{
+			Error: 0,
+		}
+
 		if !users.Contains(x.Sender) {
+			result.Error = enum.ResultCode.InvalidUser
+			ctx.Send(x.Sender, result)
 			return
 		}
 
-		// TODO 예외처리
 		if state.master != x.Sender {
+			result.Error = enum.ResultCode.NoPrivilege
+			ctx.Send(x.Sender, result)
 			return
 		}
 
-		// TODO 예외처리
-		if !state.playable() {
+		if err := state.playable(); err != nil {
+			result.Error = err.Code()
+			ctx.Send(x.Sender, result)
 			return
 		}
 
 		state.playing = true
 		users.ForEach(func(i int, pid *actor.PID) {
-			ctx.Send(pid, &response.GameStart{})
+			ctx.Send(pid, result)
 		})
 	}
 }

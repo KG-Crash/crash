@@ -2,6 +2,19 @@
 
 package enum
 
+type _ResultCode struct {
+	None                   uint32
+	InvalidUser            uint32
+	NoPrivilege            uint32
+	AlreadyPlaying         uint32
+	NotEnoughUsers         uint32
+	NotEnoughTeams         uint32
+	NotFoundGameRoom       uint32
+	AlreadyEnteredGameRoom uint32
+	NotEnteredAnyGameRoom  uint32
+	FullUsers              uint32
+}
+
 type _ProjectileState struct {
 	Disable uint32
 	Shoot   uint32
@@ -83,6 +96,7 @@ type _Advanced struct {
 	UPGRADE_SPEED  uint32
 }
 
+var ResultCode _ResultCode
 var ProjectileState _ProjectileState
 var ProjectileType _ProjectileType
 var UnitSize _UnitSize
@@ -95,6 +109,19 @@ var Ability _Ability
 var Advanced _Advanced
 
 func init() {
+	ResultCode = _ResultCode{
+		None:                   1,
+		InvalidUser:            2,
+		NoPrivilege:            3,
+		AlreadyPlaying:         4,
+		NotEnoughUsers:         5,
+		NotEnoughTeams:         6,
+		NotFoundGameRoom:       7,
+		AlreadyEnteredGameRoom: 8,
+		NotEnteredAnyGameRoom:  9,
+		FullUsers:              10,
+	}
+
 	ProjectileState = _ProjectileState{
 		Disable: 1,
 		Shoot:   2,

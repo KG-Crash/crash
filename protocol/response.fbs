@@ -76,4 +76,6 @@ table ActionQueue {
 	actions: [Action];
 }
 
-table GameStart {}
+table GameStart {
+	error: uint32;
+}

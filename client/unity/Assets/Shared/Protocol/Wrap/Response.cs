@@ -562,20 +562,21 @@ namespace Protocol.Response
     {
         public uint Identity => (uint)Protocol.Response.Identity.GAME_START;
 
-        
+        public uint Error { get; set; }
 
         public GameStart()
         { }
 
         public GameStart(FlatBuffer.Response.GameStart obj)
         {
-            
+            this.Error = obj.Error;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.GameStart> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            FlatBuffer.Response.GameStart.StartGameStart(builder);
-            return FlatBuffer.Response.GameStart.EndGameStart(builder);
+            var _error = this.Error;
+
+            return FlatBuffer.Response.GameStart.CreateGameStart(builder, _error);
         }
 
         public byte[] Serialize()

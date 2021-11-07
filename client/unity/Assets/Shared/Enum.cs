@@ -2,6 +2,20 @@
 
 namespace Shared
 {
+    public enum ResultCode
+    {
+        None,
+        InvalidUser,
+        NoPrivilege,
+        AlreadyPlaying,
+        NotEnoughUsers,
+        NotEnoughTeams,
+        NotFoundGameRoom,
+        AlreadyEnteredGameRoom,
+        NotEnteredAnyGameRoom,
+        FullUsers
+    }
+
     public enum ProjectileState
     {
         Disable,

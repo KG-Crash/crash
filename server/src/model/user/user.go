@@ -1,6 +1,7 @@
 package user
 
 import (
+	"enum"
 	"msg"
 	"net"
 	"protocol"
@@ -34,7 +35,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 	switch x := p.(type) {
 	case *request.EnterRoom:
 		if state.Room != nil {
-			ctx.Send(ctx.Self(), &response.EnterRoom{Error: 1})
+			ctx.Send(ctx.Self(), &response.EnterRoom{
+				Error: enum.ResultCode.AlreadyEnteredGameRoom,
+			})
 			return
 		}
 
@@ -101,13 +104,15 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 
 	case *request.CreateRoom:
 		if state.Room != nil {
-			ctx.Send(ctx.Self(), &response.CreateRoom{Error: 1})
+			ctx.Send(ctx.Self(), &response.CreateRoom{
+				Error: enum.ResultCode.AlreadyEnteredGameRoom,
+			})
 			return
 		}
 
 		if len(x.Teams) < 2 {
 			ctx.Send(ctx.Self(), &response.CreateRoom{
-				Error: 1, // 팀은 2개 이상 설정되어야 함
+				Error: enum.ResultCode.NotEnoughTeams, // 팀은 2개 이상 설정되어야 함
 			})
 			return
 		}
@@ -118,7 +123,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		}
 		if capacity < 2 {
 			ctx.Send(ctx.Self(), &response.CreateRoom{
-				Error: 1, // 수용 유저는 2명 이상이어야 함
+				Error: enum.ResultCode.NotEnoughUsers, // 수용 유저는 2명 이상이어야 함
 			})
 			return
 		}
@@ -138,6 +143,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 
 	case *request.Chat:
 		if state.Room == nil {
+			ctx.Send(ctx.Self(), &response.Chat{
+				Error: enum.ResultCode.NotEnteredAnyGameRoom,
+			})
 			return
 		}
 
@@ -154,7 +162,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		}, time.Hour)
 		ctx.AwaitFuture(future, func(res interface{}, err error) {
 			if err != nil {
-				// TODO: 귓속말 예외
+				ctx.Send(ctx.Self(), &response.Whisper{
+					Error: enum.ResultCode.InvalidUser,
+				})
 				return
 			}
 
@@ -170,6 +180,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 
 	case *request.KickRoom:
 		if state.Room == nil {
+			ctx.Send(ctx.Self(), &response.LeaveRoom{
+				Error: enum.ResultCode.NotEnteredAnyGameRoom,
+			})
 			return
 		}
 
@@ -183,6 +196,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 
 			x := res.(*msg.ResponseGetUser)
 			if state.Room == nil {
+				ctx.Send(ctx.Self(), &response.KickRoom{
+					Error: enum.ResultCode.NotEnteredAnyGameRoom,
+				})
 				return
 			}
 
@@ -194,6 +210,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 
 	case *request.LeaveRoom:
 		if state.Room == nil {
+			ctx.Send(ctx.Self(), &response.LeaveRoom{
+				Error: enum.ResultCode.NotEnteredAnyGameRoom,
+			})
 			return
 		}
 
@@ -204,7 +223,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 
 	case *request.GameStart:
 		if state.Room == nil {
-			return
+			ctx.Send(ctx.Self(), &response.GameStart{
+				Error: enum.ResultCode.NotEnteredAnyGameRoom,
+			})
 		}
 
 		ctx.Send(state.Room, &msg.GameStart{
@@ -221,8 +242,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 		}))
 
 		ctx.Send(ctx.Self(), &response.Login{
-			Id:    state.ID,
-			Error: 0,
+			Id: state.ID,
 		})
 
 	case *actor.Terminated:
