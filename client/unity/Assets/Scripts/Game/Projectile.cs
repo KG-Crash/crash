@@ -12,7 +12,7 @@ namespace Game
     {
         public interface Listener
         {
-            void OnProjectileReach(Projectile projectile);
+            void OnProjectileReach(Projectile projectile, Unit target);
         }
 
         [SerializeField] private int _projectileOriginID; 
@@ -130,7 +130,6 @@ namespace Game
                     break;
 
                 case ProjectileState.Hit:
-                    listener?.OnProjectileReach(this);
                     break;
             }
         }
@@ -147,9 +146,11 @@ namespace Game
             moveTarget = target.position;
             currentState = ProjectileState.Move;            
         }
-        public void Hit()
+        public void Hit(Unit target)
         {
             currentState = ProjectileState.Hit;
+            
+            listener?.OnProjectileReach(this, target);
         }
 
         private void DeltaMove(Fix64 delta)
@@ -167,12 +168,12 @@ namespace Game
 
                 var arrived = magnitude < (speed * delta);
                 if (arrived)
-                    Hit();
+                    Hit(_target);
                 else
                     position += (direction * speed * delta);
             }
             else
-                Hit();
+                Hit(_target);
         }        
     }
 }

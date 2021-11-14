@@ -16,7 +16,9 @@ namespace Game
 
         public void OnOwnerChanged(Player before, Player after, Unit unit)
         {
-            Debug.Log($"OnOwnerChanged({before}, {after}, {unit})");
+            var beforeString = before != null ? before.ToString(): "null";
+            var afterString = after != null ? after.ToString(): "null";
+            Debug.Log($"OnOwnerChanged({beforeString}, {afterString}, {unit})");
         }
 
         public void OnAttack(Unit me, Unit you, Fix64 damage)
@@ -25,6 +27,8 @@ namespace Game
             var randAttackIndex = Random.Range(0, maxAttackCount);
             me.animator.SetInteger("AttackIndex", randAttackIndex);
             me.animator.SetTrigger("Attack");
+
+            you.AddAttacker(me);
         }
 
         public void OnDamaged(Unit me, Unit you, Fix64 damage)
@@ -47,6 +51,10 @@ namespace Game
         public void OnEndMove(Unit unit)
         {
             unit.animator.SetFloat("Forward", 0);
+        }
+
+        public void OnIdle(Unit unit)
+        {
             unit.animator.SetTrigger("Idle");
         }
 

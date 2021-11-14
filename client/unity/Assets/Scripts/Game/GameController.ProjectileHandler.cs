@@ -8,7 +8,7 @@ namespace Game
     {
         public Dictionary<uint, Unit> fireHistory { get; set; } = new Dictionary<uint, Unit>(); // <projectileID, targetUnit>
 
-        public void OnProjectileReach(Projectile projectile)
+        public void OnProjectileReach(Projectile projectile, Unit target)
         {
             if (projectile.currentState != Shared.ProjectileState.Hit)
                 return;
@@ -22,6 +22,7 @@ namespace Game
                 }                
                 _projectilePool.ReturnProjectile(projectile);
                 fireHistory.Remove(projectile.projectileID);
+                target.AddAttacker(projectile.owner);
             }
         }
     }
