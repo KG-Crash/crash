@@ -255,7 +255,7 @@ namespace Game
 
         public void Delete(Unit unit)
         {
-            unit.owner = null;
+            // unit.owner = null;
             _units.Remove(unit.unitID);
         }
 
