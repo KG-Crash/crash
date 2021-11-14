@@ -27,11 +27,12 @@ namespace Game
             
             public Fix64 _radius = Fix64.Zero;
             public Fix64 _radian = _radianmax;
+            public Fix64 _startRadian = Fix64.Zero;
             public List<Unit> _placedUnits = new List<Unit>();
 
             public FixVector3 GetOffset()
             {
-                return new FixVector3(Fix64.Cos(_radian), 0, Fix64.Sin(_radian)) * _radius;
+                return new FixVector3(Fix64.Cos(_radian + _startRadian), 0, Fix64.Sin(_radian + _startRadian)) * _radius;
             }
 
             public void IncreaseOffset()
@@ -94,6 +95,10 @@ namespace Game
         {
             return _spawnPositions[index].position;
         }
+        public FixVector3 GetSpawnRotation(int index)
+        {
+            return _spawnPositions[index].rotation.eulerAngles;
+        }
         
         public Unit SpawnUnitToPlayerStart(int spawnUnitOriginID, Player ownPlayer, TemporalPlaceContext context)
         {
@@ -153,7 +158,8 @@ namespace Game
         private Player AddPlayerAndUnit(bool home, int spawnIndex, params int[] unitTypes)
         {
             var player = AddNewPlayer(home? (uint)0: 1, spawnIndex);
-            var ctx = new TemporalPlaceContext();
+            var rot = GetSpawnRotation(spawnIndex);
+            var ctx = new TemporalPlaceContext() { _startRadian = Fix64.Pi / 180.0f * rot.y };
 
             foreach (var unitType in unitTypes)
             {
