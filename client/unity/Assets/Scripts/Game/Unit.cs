@@ -398,10 +398,13 @@ namespace Game
             }
             
 #if UNITY_EDITOR
-            if (_destination != null)
-                UnityEditor.Handles.Label(transform.position, $"{unitID},{hp},{_currentState},{position.ToString("0.##", true)} -> {_destination?.ToString("0.##", true)}");
-            else
-                UnityEditor.Handles.Label(transform.position, $"{unitID},{hp},{_currentState},{position.ToString("0.##", true)}");
+
+            var targetStr = IsNullOrDead(_target) ? _target == null? "null": $"dead({_target.unitID})" : _target.unitID.ToString();
+            var destStr = _cellPath.Count > 0
+                ? $"{_cellPath.Find(x => true).center.ToString("0.##", true)} -> {_cellPath.FindLast(x => true).center.ToString("0.##", true)}"
+                : "none";
+
+            UnityEditor.Handles.Label(transform.position, $"{unitID},{hp},{_currentState},{targetStr},{destStr}");
 #endif
         }
 
@@ -466,6 +469,7 @@ namespace Game
                         else
                         {
                             _currentState = UnitState.Move;
+                            _listener?.OnStartMove(this);
                             goto case UnitState.Move;
                         }
                     }
@@ -509,11 +513,14 @@ namespace Game
                     if (!IsNullOrDead(_target) && ContainsAttackRange(_target.position))
                     {
                         _currentState = UnitState.Attack;
+                        _listener?.OnEndMove(this);
                         goto case UnitState.Attack;
                     }
                     else if (_cellPath.Count == 0)
                     {
                         _currentState = UnitState.Idle;
+                        _listener?.OnEndMove(this);
+                        _listener?.OnIdle(this);
                         break;
                     }
                     else
@@ -541,10 +548,12 @@ namespace Game
                         if (_cellPath.Count == 0)
                         {
                             _currentState = UnitState.Idle;
+                            _listener?.OnIdle(this);
                         }
                         else
                         {
                             _currentState = UnitState.Move;
+                            _listener?.OnStartMove(this);
                         }
                     }
                     else if (!ContainsAttackRange(_target.position))
@@ -555,6 +564,7 @@ namespace Game
                         }
 
                         _currentState = UnitState.Move;
+                        _listener?.OnStartMove(this);
                     }
                     else
                     {
@@ -674,6 +684,10 @@ namespace Game
         {
             return region.centroid.Near(cell => unit.IsWalkable(cell) && cell.region == region);
         }
+        private static Map.Cell WalkableCell(Unit unit, Map.Cell centerCell)
+        {
+            return centerCell.Near(cell => unit.IsWalkable(cell));
+        }
         
         private void UpdateMovePath(FixVector3 position, bool updateWithRegion = false, List<Unit> units = null)
         {
@@ -696,9 +710,9 @@ namespace Game
                 if (updateWithRegion)
                     _regionPath = _map.regions.Find(this.region, end.region);
 
-                var next = _regionPath.Count < 2? end: WalkableCell(this, _regionPath.First());
+                var next = _regionPath.Count < 2 ? WalkableCell(this, end) : WalkableCell(this, _regionPath.First());
                 if (!IsWalkable(next))
-                    throw new Exception($"next({next}) is not walkable");
+                    throw new Exception($"next({next}) is not walkable, {_regionPath.Count}");
 
                 var allowed = GetAllowedRegions(start.region, next.region);
                 var collisionList = this.collisionCells;
