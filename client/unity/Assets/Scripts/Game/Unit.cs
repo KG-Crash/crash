@@ -34,6 +34,7 @@ namespace Game
             void OnEndMove(Unit unit);
             void OnClear(Unit unit);
             void OnFireProjectile(Unit me, Unit you, int projectileOriginID);
+            void OnIdle(Unit unit);
         }
 
         public Shared.Table.Unit table => Table.From<TableUnit>()[this._unitOriginID];
@@ -272,7 +273,13 @@ namespace Game
         [NonSerialized] private List<KG.Map.Cell> _cellPath = new List<KG.Map.Cell>();
         [NonSerialized] private FixVector3? _destination;
         [NonSerialized] private Unit _target;
-        
+        [NonSerialized] private HashSet<Unit> _attackers = new HashSet<Unit>();
+
+        public void AddAttacker(Unit unit)
+        {
+            _attackers.Add(unit);
+        }
+
         // 다른 유닛과 부딪힌 횟수
         [NonSerialized] private int _blocked;
         [NonSerialized] private DateTime? _blockedTime;
@@ -299,6 +306,11 @@ namespace Game
 
         public bool IsDead => _currentState == UnitState.Dead || _hp == Fix64.Zero;
 
+        public bool IsNullOrDead(Unit unit)
+        {
+            return unit == null || unit.IsDead;
+        }
+        
         public void Awake()
         {
             animator.SetInteger("MaxAttack", _maxAttackAnimCount);
@@ -426,15 +438,36 @@ namespace Game
         {
             switch (_currentState)
             {
-                /*
-                 * 아무 행동도 하지 않음. 대기하다가 공격할 상대 있으면 이동
-                 */
                 case UnitState.Idle:
-                    _target = SearchEnemy(visibleRange);
-                    if (_target != null)
+                    if (IsNullOrDead(_target))
                     {
-                        _currentState = UnitState.Attack;
-                        UpdateMovePath(_target.position, true);
+                        // 공격할 상대가 없다면, 공격자 중 시야 거리 -> 시야 거리에 있는 적 탐색
+                        _target = _attackers
+                            .Where(x => !IsNullOrDead(x) && ContainsVisibleRange(x.position))
+                            .OrderBy(x => (x.position - position).sqrMagnitude)
+                            .FirstOrDefault();
+                        
+                        if (IsNullOrDead(_target))
+                            _target = SearchEnemyIn(visibleRange);
+
+                        if (_target)
+                        {
+                            UpdateMovePath(_target.position, true);   
+                        }
+                    }
+                    
+                    if (!IsNullOrDead(_target))
+                    {
+                        if (ContainsAttackRange(_target.position))
+                        {
+                            _currentState = UnitState.Attack;
+                            goto case UnitState.Attack;
+                        }
+                        else
+                        {
+                            _currentState = UnitState.Move;
+                            goto case UnitState.Move;
+                        }
                     }
                     break;
 
@@ -442,32 +475,91 @@ namespace Game
                  * 이동 중에는 공격 범위에 적이 있으면 공격, 아니면 그대로 고
                  */
                 case UnitState.Move:
-                    _target ??= SearchEnemy(attackRange);
-                    if (_target != null)
+                {
+                    if (IsNullOrDead(_target))
+                    {
+                        // 공격할 상대가 없다면, 공격자 중 사거리 이내 -> 나머지 사거리 이내에 있는 적 탐색
+                        _target = _attackers
+                            .Where(x => !IsNullOrDead(x) && ContainsAttackRange(x.position))
+                            .OrderBy(x => (x.position - position).sqrMagnitude)
+                            .FirstOrDefault();
+                        
+                        if (IsNullOrDead(_target))
+                            _target = SearchEnemyIn(attackRange);
+                    }
+                    else if (!ContainsAttackRange(_target.position))
+                    {
+                        // 공격할 상대가 사거리에 안닿으면, 공격자 중 사거리 이내 -> 나머지 사거리 이내에 있는 적 탐색
+                        var inRangeUnit = _attackers
+                            .Where(x => !IsNullOrDead(x) && ContainsAttackRange(x.position))
+                            .OrderBy(x => (x.position - position).sqrMagnitude)
+                            .FirstOrDefault();
+
+                        if (IsNullOrDead(inRangeUnit))
+                            inRangeUnit = SearchEnemyIn(attackRange);
+                        
+                        if (inRangeUnit != null)
+                        {
+                            // 바로 공격 때리기
+                            _target = inRangeUnit;
+                        }
+                    }
+                    
+                    // 공격 가능?
+                    if (!IsNullOrDead(_target) && ContainsAttackRange(_target.position))
                     {
                         _currentState = UnitState.Attack;
+                        goto case UnitState.Attack;
                     }
-                    else
-                        DeltaMove(GameController.TimeDelta);
-                    break;
-
-                /*
-                 * 1. 타겟이 없으면 찾기
-                 * 2. 타겟이 없거나 범위에 들어와 있지 않으면 다른 상태 전이
-                 * 3. 타겟이 있고 범위에 있으면 공격
-                 */
-                case UnitState.Attack:
-                    if (_target == null || _target.IsDead)
-                        _target = SearchEnemy(attackRange);
-
-                    if (_target == null || ContainsRange(_target.position) == false)
+                    else if (_cellPath.Count == 0)
                     {
-                        _currentState = _destination != null? UnitState.Move: UnitState.Idle;
-                        _target = null;
+                        _currentState = UnitState.Idle;
                         break;
                     }
+                    else
+                    {   
+                        DeltaMove(GameController.TimeDelta);
+                        break;
+                    }
+                }
 
-                    Attack(_target);
+                case UnitState.Attack:
+                    if (IsNullOrDead(_target))
+                    {
+                        // 공격할 상대가 없다면, 공격자 중 사거리 이내 -> 나머지 사거리 이내에 있는 적 탐색
+                        _target = _attackers
+                            .Where(x => !IsNullOrDead(x) && ContainsAttackRange(x.position))
+                            .OrderBy(x => (x.position - position).sqrMagnitude)
+                            .FirstOrDefault();
+                        
+                        if (IsNullOrDead(_target))
+                            _target = SearchEnemyIn(attackRange);
+                    }
+                    
+                    if (IsNullOrDead(_target))
+                    {
+                        if (_cellPath.Count == 0)
+                        {
+                            _currentState = UnitState.Idle;
+                        }
+                        else
+                        {
+                            _currentState = UnitState.Move;
+                        }
+                    }
+                    else if (!ContainsAttackRange(_target.position))
+                    {
+                        if (_cellPath.Count == 0)
+                        {
+                            UpdateMovePath(_target.position, true);
+                        }
+
+                        _currentState = UnitState.Move;
+                    }
+                    else
+                    {
+                        Attack(_target);   
+                    }
                     break;
             }
         }
@@ -542,12 +634,12 @@ namespace Game
             }
         }
 
-        private Unit SearchEnemy(Fix64 searchRadius)
+        private Unit SearchEnemyIn(Fix64 searchRadius)
         {
-            return GetNearUnits().
-                Where(x => !x.IsDead && x.teamID != this.teamID).
-                OrderBy(x => (this.position - x.position).sqrMagnitude).
-                FirstOrDefault(x => (this.position - x.position).sqrMagnitude <= searchRadius * searchRadius);
+            return GetNearUnitsIn(searchRadius)
+                .Where(x => !IsNullOrDead(x) && x.teamID != this.teamID)
+                .OrderBy(x => (x.position - position).sqrMagnitude)
+                .FirstOrDefault(x => ContainsRange(x.position, searchRadius));
         }
 
         public void Stop()
@@ -679,9 +771,19 @@ namespace Game
             listener?.OnStartMove(this);
         }
 
-        public bool ContainsRange(FixVector3 target)
+        public bool ContainsAttackRange(FixVector3 targetPosition)
         {
-            return (position - target).sqrMagnitude < (Fix64)Math.Pow(this.table.AttackRange, 2);
+            var attackRange = this.attackRange;
+            return (position - targetPosition).sqrMagnitude < attackRange * attackRange;
+        }
+        public bool ContainsVisibleRange(FixVector3 targetPosition)
+        {
+            var visibleRange = this.visibleRange;
+            return (position - targetPosition).sqrMagnitude < visibleRange * visibleRange;
+        }
+        public bool ContainsRange(FixVector3 targetPosition, Fix64 range)
+        {
+            return (position - targetPosition).sqrMagnitude < range * range;
         }
 
         private Fix64 CalculateDamage(Unit unit)
@@ -758,6 +860,7 @@ namespace Game
             
             _lastAttackTime = DateTime.Now;
 
+            _attackers.Clear();
             transform.LookAt(unit.position);
             return true;
         }
@@ -837,6 +940,40 @@ namespace Game
             var nodes = new List<KG.Map.Region> { this.region };
             nodes.AddRange(this._map.regions[this.region].edges.Select(x => x.data));
 
+            return nodes.SelectMany(x => x.units).Except(new[] { this });
+        }
+
+        private IEnumerable<Unit> GetNearUnitsIn(Fix64 range)
+        {
+            if (this.region == null)
+                return Enumerable.Empty<Unit>();
+
+            var regionSize = _map.regionDiagSize;
+            var nodes = new HashSet<KG.Map.Region>();
+            var q = new Queue<KG.Map.Region>();
+            q.Enqueue(this.region);
+
+            while (q.Count > 0)
+            {
+                var currentRegion = q.Dequeue();
+
+                if ((this.region.centroid.center - currentRegion.centroid.center).sqrMagnitude < (range + regionSize) *
+                    (range + regionSize)
+                    &&
+                    !nodes.Contains(currentRegion))
+                {
+                    nodes.Add(currentRegion);
+                    
+                    foreach (var otherRegion in _map.regions[currentRegion].edges)
+                    {
+                        if (!q.Contains(otherRegion.data) && !nodes.Contains(otherRegion.data))
+                        {
+                            q.Enqueue(otherRegion.data);
+                        }
+                    }
+                }
+            }
+            
             return nodes.SelectMany(x => x.units).Except(new[] { this });
         }
 

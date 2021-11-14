@@ -95,6 +95,9 @@ namespace KG
         
         public int cols => width * scale;
         public int rows => height * scale;
+        public int regionRowCellCount { get; private set; }
+        public int regionColCellCount { get; private set; }
+
         [field: Header("Properties"),SerializeField]
         public int width { get; private set; } = 192;
         [field: SerializeField]
@@ -107,6 +110,7 @@ namespace KG
         [field: SerializeField] 
         public int regionRowDivider { get; private set; } = 10;
         public Fix64 cellSize => Fix64.One / new Fix64(scale);
+        public Fix64 regionDiagSize => Fix64.Sqrt(regionRowCellCount * cellSize * regionRowCellCount * cellSize + regionColCellCount * cellSize * regionColCellCount * cellSize);
 
         public static implicit operator Cell[](Map map) => map._cells;
 
@@ -152,7 +156,7 @@ namespace KG
             
             return rectRegions.SelectMany(region => region.units);
         }
-
+    
         private void CreateCells(int rows, int cols)
         {
             _cells = new Cell[rows * cols];
@@ -213,15 +217,18 @@ namespace KG
             yield break;
         }
 
-        private Graph<Region> UpdateRegion(int rows, int cols)
+        private Graph<Region> UpdateRegion(int regionRows, int regionCols)
         {
+            regionRowCellCount = (this.rows / regionRows);
+            regionColCellCount = (this.cols / regionCols);
+            
             var regions = new Graph<Region>();
             var groups = _cells.GroupBy(x =>
             {
-                var row = x.row / (this.rows / rows);
-                var col = x.col / (this.cols / cols);
+                var regionRow = x.row / regionRowCellCount;
+                var regionCol = x.col / regionColCellCount;
 
-                return row * cols + col;
+                return regionRow * regionCols + regionCol;
             }).ToDictionary(x => x.Key, x => x.ToList());
 
             var region = 0;
