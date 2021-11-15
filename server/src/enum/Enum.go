@@ -13,6 +13,7 @@ type _ResultCode struct {
 	AlreadyEnteredGameRoom uint32
 	NotEnteredAnyGameRoom  uint32
 	FullUsers              uint32
+	NotPlayingState        uint32
 }
 
 type _ProjectileState struct {
@@ -120,6 +121,7 @@ func init() {
 		AlreadyEnteredGameRoom: 8,
 		NotEnteredAnyGameRoom:  9,
 		FullUsers:              10,
+		NotPlayingState:        11,
 	}
 
 	ProjectileState = _ProjectileState{

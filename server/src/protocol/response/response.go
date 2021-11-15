@@ -667,7 +667,6 @@ func (obj *Whisper) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type Action struct {
-	User      string
 	Frame     int32
 	Id        int32
 	PositionX int32
@@ -675,10 +674,8 @@ type Action struct {
 }
 
 func (obj *Action) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
-	_user := builder.CreateString(obj.User)
 
 	source.ActionStart(builder)
-	source.ActionAddUser(builder, _user)
 	source.ActionAddFrame(builder, obj.Frame)
 	source.ActionAddId(builder, obj.Id)
 	source.ActionAddPositionX(builder, obj.PositionX)
@@ -688,7 +685,6 @@ func (obj *Action) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 }
 
 func (obj *Action) parse(x *source.Action) *Action {
-	obj.User = string(x.User())
 	obj.Frame = x.Frame()
 	obj.Id = x.Id()
 	obj.PositionX = x.PositionX()
@@ -714,7 +710,9 @@ func (obj *Action) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type ActionQueue struct {
+	User    string
 	Actions []Action
+	Error   uint32
 }
 
 func (obj *ActionQueue) actions(builder *flatbuffers.Builder, actions []Action) flatbuffers.UOffsetT {
@@ -732,15 +730,19 @@ func (obj *ActionQueue) actions(builder *flatbuffers.Builder, actions []Action) 
 }
 
 func (obj *ActionQueue) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_user := builder.CreateString(obj.User)
 	_actions := obj.actions(builder, obj.Actions)
 
 	source.ActionQueueStart(builder)
+	source.ActionQueueAddUser(builder, _user)
 	source.ActionQueueAddActions(builder, _actions)
+	source.ActionQueueAddError(builder, obj.Error)
 
 	return source.ActionQueueEnd(builder)
 }
 
 func (obj *ActionQueue) parse(x *source.ActionQueue) *ActionQueue {
+	obj.User = string(x.User())
 
 	obj.Actions = []Action{}
 	for i := 0; i < x.ActionsLength(); i++ {
@@ -751,6 +753,7 @@ func (obj *ActionQueue) parse(x *source.ActionQueue) *ActionQueue {
 		action.parse(_action)
 		obj.Actions = append(obj.Actions, action)
 	}
+	obj.Error = x.Error()
 
 	return obj
 }

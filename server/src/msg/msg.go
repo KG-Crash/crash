@@ -2,6 +2,7 @@ package msg
 
 import (
 	"exception"
+	"protocol/request"
 
 	"github.com/AsynkronIT/protoactor-go/actor"
 )
@@ -119,6 +120,12 @@ type Kicked struct {
 
 type GameStart struct {
 	Sender *actor.PID
+}
+
+type Action struct {
+	Sender  *actor.PID
+	UID     string
+	Actions []request.Action
 }
 
 /*

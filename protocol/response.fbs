@@ -65,7 +65,6 @@ table Whisper {
 }
 
 table Action {
-	user: string;
 	frame: int;
 	id: int;
 	positionX: int;
@@ -73,7 +72,9 @@ table Action {
 }
 
 table ActionQueue {
+	user: string;
 	actions: [Action];
+	error: uint32;
 }
 
 table GameStart {

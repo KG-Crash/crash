@@ -333,5 +333,38 @@ func (state *Actor) Receive(ctx actor.Context) {
 		users.ForEach(func(i int, pid *actor.PID) {
 			ctx.Send(pid, result)
 		})
+
+	case *msg.Action:
+		sender := x.Sender
+		if !state.contains(sender) {
+			ctx.Send(sender, &response.ActionQueue{
+				Error: enum.ResultCode.InvalidUser,
+			})
+			return
+		}
+
+		if !state.playing {
+			ctx.Send(sender, &response.ActionQueue{
+				Error: enum.ResultCode.NotPlayingState,
+			})
+			return
+		}
+
+		result := &response.ActionQueue{
+			User:    x.UID,
+			Actions: []response.Action{},
+		}
+		for _, action := range x.Actions {
+			result.Actions = append(result.Actions, response.Action{
+				Id:        action.Id,
+				Frame:     action.Frame,
+				PositionX: action.PositionX,
+				PositionY: action.PositionY,
+			})
+		}
+
+		state.selects().ForEach(func(i int, pid *actor.PID) {
+			ctx.Send(pid, result)
+		})
 	}
 }

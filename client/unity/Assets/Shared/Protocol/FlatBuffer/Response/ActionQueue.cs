@@ -19,21 +19,35 @@ public struct ActionQueue : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public ActionQueue __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public FlatBuffer.Response.Action? Actions(int j) { int o = __p.__offset(4); return o != 0 ? (FlatBuffer.Response.Action?)(new FlatBuffer.Response.Action()).__assign(__p.__indirect(__p.__vector(o) + j * 4), __p.bb) : null; }
-  public int ActionsLength { get { int o = __p.__offset(4); return o != 0 ? __p.__vector_len(o) : 0; } }
+  public string User { get { int o = __p.__offset(4); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
+#if ENABLE_SPAN_T
+  public Span<byte> GetUserBytes() { return __p.__vector_as_span<byte>(4, 1); }
+#else
+  public ArraySegment<byte>? GetUserBytes() { return __p.__vector_as_arraysegment(4); }
+#endif
+  public byte[] GetUserArray() { return __p.__vector_as_array<byte>(4); }
+  public FlatBuffer.Response.Action? Actions(int j) { int o = __p.__offset(6); return o != 0 ? (FlatBuffer.Response.Action?)(new FlatBuffer.Response.Action()).__assign(__p.__indirect(__p.__vector(o) + j * 4), __p.bb) : null; }
+  public int ActionsLength { get { int o = __p.__offset(6); return o != 0 ? __p.__vector_len(o) : 0; } }
+  public uint Error { get { int o = __p.__offset(8); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
 
   public static Offset<FlatBuffer.Response.ActionQueue> CreateActionQueue(FlatBufferBuilder builder,
-      VectorOffset actionsOffset = default(VectorOffset)) {
-    builder.StartTable(1);
+      StringOffset userOffset = default(StringOffset),
+      VectorOffset actionsOffset = default(VectorOffset),
+      uint error = 0) {
+    builder.StartTable(3);
+    ActionQueue.AddError(builder, error);
     ActionQueue.AddActions(builder, actionsOffset);
+    ActionQueue.AddUser(builder, userOffset);
     return ActionQueue.EndActionQueue(builder);
   }
 
-  public static void StartActionQueue(FlatBufferBuilder builder) { builder.StartTable(1); }
-  public static void AddActions(FlatBufferBuilder builder, VectorOffset actionsOffset) { builder.AddOffset(0, actionsOffset.Value, 0); }
+  public static void StartActionQueue(FlatBufferBuilder builder) { builder.StartTable(3); }
+  public static void AddUser(FlatBufferBuilder builder, StringOffset userOffset) { builder.AddOffset(0, userOffset.Value, 0); }
+  public static void AddActions(FlatBufferBuilder builder, VectorOffset actionsOffset) { builder.AddOffset(1, actionsOffset.Value, 0); }
   public static VectorOffset CreateActionsVector(FlatBufferBuilder builder, Offset<FlatBuffer.Response.Action>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static VectorOffset CreateActionsVectorBlock(FlatBufferBuilder builder, Offset<FlatBuffer.Response.Action>[] data) { builder.StartVector(4, data.Length, 4); builder.Add(data); return builder.EndVector(); }
   public static void StartActionsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
+  public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(2, error, 0); }
   public static Offset<FlatBuffer.Response.ActionQueue> EndActionQueue(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Response.ActionQueue>(o);

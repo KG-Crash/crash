@@ -13,7 +13,8 @@ namespace Shared
         NotFoundGameRoom,
         AlreadyEnteredGameRoom,
         NotEnteredAnyGameRoom,
-        FullUsers
+        FullUsers,
+        NotPlayingState
     }
 
     public enum ProjectileState

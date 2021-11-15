@@ -210,7 +210,46 @@ public class Controller
     [FlatBufferEvent]
     public async Task<bool> OnGameStart(Protocol.Response.GameStart response)
     {
+        if (response.Error > 0)
+            return false;
+
         Console.WriteLine("게임 시작");
+        await Client.Send(new Protocol.Request.ActionQueue
+        { 
+            Actions = new System.Collections.Generic.List<Protocol.Request.Action>
+            {
+                new Protocol.Request.Action
+                {
+                    Frame = 1,
+                    Id = 123,
+                    PositionX = 111,
+                    PositionY = 222
+                },
+
+                new Protocol.Request.Action
+                {
+                    Frame = 2,
+                    Id = 456,
+                    PositionX = 111,
+                    PositionY = 333
+                }
+            }
+        });
+        return true;
+    }
+
+    [FlatBufferEvent]
+    public async Task<bool> OnPong(Protocol.Response.ActionQueue response)
+    {
+        if (response.Error > 0)
+            return false;
+
+        Console.WriteLine($"{response.User}의 액션");
+        foreach (var action in response.Actions)
+        {
+            Console.WriteLine($"{action.Frame}번째 프레임의 액션 : {action.Id} ... {action.PositionX}, {action.PositionY}");
+        }
+
         return true;
     }
 }

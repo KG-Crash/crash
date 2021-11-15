@@ -26,8 +26,16 @@ func (rcv *ActionQueue) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *ActionQueue) Actions(obj *Action, j int) bool {
+func (rcv *ActionQueue) User() []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
+	if o != 0 {
+		return rcv._tab.ByteVector(o + rcv._tab.Pos)
+	}
+	return nil
+}
+
+func (rcv *ActionQueue) Actions(obj *Action, j int) bool {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(6))
 	if o != 0 {
 		x := rcv._tab.Vector(o)
 		x += flatbuffers.UOffsetT(j) * 4
@@ -39,21 +47,39 @@ func (rcv *ActionQueue) Actions(obj *Action, j int) bool {
 }
 
 func (rcv *ActionQueue) ActionsLength() int {
-	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(6))
 	if o != 0 {
 		return rcv._tab.VectorLen(o)
 	}
 	return 0
 }
 
+func (rcv *ActionQueue) Error() uint32 {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(8))
+	if o != 0 {
+		return rcv._tab.GetUint32(o + rcv._tab.Pos)
+	}
+	return 0
+}
+
+func (rcv *ActionQueue) MutateError(n uint32) bool {
+	return rcv._tab.MutateUint32Slot(8, n)
+}
+
 func ActionQueueStart(builder *flatbuffers.Builder) {
-	builder.StartObject(1)
+	builder.StartObject(3)
+}
+func ActionQueueAddUser(builder *flatbuffers.Builder, user flatbuffers.UOffsetT) {
+	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(user), 0)
 }
 func ActionQueueAddActions(builder *flatbuffers.Builder, actions flatbuffers.UOffsetT) {
-	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(actions), 0)
+	builder.PrependUOffsetTSlot(1, flatbuffers.UOffsetT(actions), 0)
 }
 func ActionQueueStartActionsVector(builder *flatbuffers.Builder, numElems int) flatbuffers.UOffsetT {
 	return builder.StartVector(4, numElems, 4)
+}
+func ActionQueueAddError(builder *flatbuffers.Builder, error uint32) {
+	builder.PrependUint32Slot(2, error, 0)
 }
 func ActionQueueEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

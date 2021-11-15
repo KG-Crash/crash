@@ -482,7 +482,6 @@ namespace Protocol.Response
     {
         public uint Identity => (uint)Protocol.Response.Identity.ACTION;
 
-        public string User { get; set; }
         public int Frame { get; set; }
         public int Id { get; set; }
         public int PositionX { get; set; }
@@ -493,7 +492,6 @@ namespace Protocol.Response
 
         public Action(FlatBuffer.Response.Action obj)
         {
-            this.User = obj.User;
             this.Frame = obj.Frame;
             this.Id = obj.Id;
             this.PositionX = obj.PositionX;
@@ -502,13 +500,12 @@ namespace Protocol.Response
 
         public FlatBuffers.Offset<FlatBuffer.Response.Action> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _user = builder.CreateString(this.User);
             var _frame = this.Frame;
             var _id = this.Id;
             var _positionX = this.PositionX;
             var _positionY = this.PositionY;
 
-            return FlatBuffer.Response.Action.CreateAction(builder, _user, _frame, _id, _positionX, _positionY);
+            return FlatBuffer.Response.Action.CreateAction(builder, _frame, _id, _positionX, _positionY);
         }
 
         public byte[] Serialize()
@@ -528,21 +525,27 @@ namespace Protocol.Response
     {
         public uint Identity => (uint)Protocol.Response.Identity.ACTION_QUEUE;
 
+        public string User { get; set; }
         public List<Action> Actions { get; set; }
+        public uint Error { get; set; }
 
         public ActionQueue()
         { }
 
         public ActionQueue(FlatBuffer.Response.ActionQueue obj)
         {
+            this.User = obj.User;
             this.Actions = Enumerable.Range(0, obj.ActionsLength).Select(x => new Action(obj.Actions(x).Value)).ToList();
+            this.Error = obj.Error;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.ActionQueue> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
+            var _user = builder.CreateString(this.User);
             var _actions = FlatBuffer.Response.ActionQueue.CreateActionsVector(builder, this.Actions.Select(x => x.ToFlatBuffer(builder)).ToArray());
+            var _error = this.Error;
 
-            return FlatBuffer.Response.ActionQueue.CreateActionQueue(builder, _actions);
+            return FlatBuffer.Response.ActionQueue.CreateActionQueue(builder, _user, _actions, _error);
         }
 
         public byte[] Serialize()
