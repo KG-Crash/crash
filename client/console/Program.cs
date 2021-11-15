@@ -213,7 +213,7 @@ public class Controller
         if (response.Error > 0)
             return false;
 
-        Console.WriteLine("게임 시작");
+        Console.WriteLine($"게임 시작 (랜덤시드 : {response.Seed}");
         await Client.Send(new Protocol.Request.ActionQueue
         { 
             Actions = new System.Collections.Generic.List<Protocol.Request.Action>

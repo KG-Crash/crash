@@ -28,6 +28,11 @@ public class GameRoomView : UIView
         });
     }
 
+    public async void OnGameStart()
+    {
+        await Client.Send(new GameStart());
+    }
+
     public async void OnExit()
     {
         await Client.Send(new LeaveRoom());

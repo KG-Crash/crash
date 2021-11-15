@@ -166,5 +166,12 @@ namespace Game
 
             return true;
         }
+
+        [FlatBufferEvent]
+        public async Task<bool> OnGameStart(GameStart response)
+        {
+            UnityEngine.Debug.Log($"random seed : {response.Seed}");
+            return true;
+        }
     }
 }

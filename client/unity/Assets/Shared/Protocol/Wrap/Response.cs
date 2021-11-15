@@ -565,6 +565,7 @@ namespace Protocol.Response
     {
         public uint Identity => (uint)Protocol.Response.Identity.GAME_START;
 
+        public long Seed { get; set; }
         public uint Error { get; set; }
 
         public GameStart()
@@ -572,14 +573,16 @@ namespace Protocol.Response
 
         public GameStart(FlatBuffer.Response.GameStart obj)
         {
+            this.Seed = obj.Seed;
             this.Error = obj.Error;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.GameStart> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
+            var _seed = this.Seed;
             var _error = this.Error;
 
-            return FlatBuffer.Response.GameStart.CreateGameStart(builder, _error);
+            return FlatBuffer.Response.GameStart.CreateGameStart(builder, _seed, _error);
         }
 
         public byte[] Serialize()

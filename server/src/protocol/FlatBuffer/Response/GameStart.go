@@ -26,8 +26,20 @@ func (rcv *GameStart) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *GameStart) Error() uint32 {
+func (rcv *GameStart) Seed() int64 {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
+	if o != 0 {
+		return rcv._tab.GetInt64(o + rcv._tab.Pos)
+	}
+	return 0
+}
+
+func (rcv *GameStart) MutateSeed(n int64) bool {
+	return rcv._tab.MutateInt64Slot(4, n)
+}
+
+func (rcv *GameStart) Error() uint32 {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(6))
 	if o != 0 {
 		return rcv._tab.GetUint32(o + rcv._tab.Pos)
 	}
@@ -35,14 +47,17 @@ func (rcv *GameStart) Error() uint32 {
 }
 
 func (rcv *GameStart) MutateError(n uint32) bool {
-	return rcv._tab.MutateUint32Slot(4, n)
+	return rcv._tab.MutateUint32Slot(6, n)
 }
 
 func GameStartStart(builder *flatbuffers.Builder) {
-	builder.StartObject(1)
+	builder.StartObject(2)
+}
+func GameStartAddSeed(builder *flatbuffers.Builder, seed int64) {
+	builder.PrependInt64Slot(0, seed, 0)
 }
 func GameStartAddError(builder *flatbuffers.Builder, error uint32) {
-	builder.PrependUint32Slot(0, error, 0)
+	builder.PrependUint32Slot(1, error, 0)
 }
 func GameStartEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

@@ -1,9 +1,12 @@
 package room
 
 import (
+	"crypto/rand"
 	"enum"
 	"exception"
 	"log"
+	"math"
+	"math/big"
 	"msg"
 	"protocol/response"
 	"sort"
@@ -328,6 +331,10 @@ func (state *Actor) Receive(ctx actor.Context) {
 			ctx.Send(x.Sender, result)
 			return
 		}
+
+		// 랜덤시드 설정
+		seed, _ := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
+		result.Seed = seed.Int64()
 
 		state.playing = true
 		users.ForEach(func(i int, pid *actor.PID) {

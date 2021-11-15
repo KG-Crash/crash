@@ -775,18 +775,21 @@ func (obj *ActionQueue) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type GameStart struct {
+	Seed  int64
 	Error uint32
 }
 
 func (obj *GameStart) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 
 	source.GameStartStart(builder)
+	source.GameStartAddSeed(builder, obj.Seed)
 	source.GameStartAddError(builder, obj.Error)
 
 	return source.GameStartEnd(builder)
 }
 
 func (obj *GameStart) parse(x *source.GameStart) *GameStart {
+	obj.Seed = x.Seed()
 	obj.Error = x.Error()
 
 	return obj

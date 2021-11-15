@@ -78,5 +78,6 @@ table ActionQueue {
 }
 
 table GameStart {
+	seed: int64;
 	error: uint32;
 }

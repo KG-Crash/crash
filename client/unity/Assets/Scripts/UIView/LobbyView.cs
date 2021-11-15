@@ -21,7 +21,14 @@ public class LobbyView : UIView
 
     public async void OnCreateGameRoom()
     {
-        await Client.Send(new CreateRoom { });
+        await Client.Send(new CreateRoom 
+        {
+            Title = "my game room title",
+            Teams = new System.Collections.Generic.List<int>
+            {
+                2, 2 // 2 vs 2
+            }
+        });
     }
 
     public override async Task OnLoad()
