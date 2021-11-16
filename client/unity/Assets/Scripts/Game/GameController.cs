@@ -73,6 +73,7 @@ namespace Game
         private void Start()
         {
             Application.targetFrameRate = FPS;
+            ist = this;
         }
 
         private void Update()

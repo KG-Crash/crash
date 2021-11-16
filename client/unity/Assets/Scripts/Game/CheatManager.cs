@@ -12,39 +12,88 @@ namespace Game
     {
         static public string ParseMessage(string msg)
         {
+            List<object> paramListToCall = new List<object>();
+            object[] matchedParams = Array.Empty<object>();
+
+            Regex regex;
+            Match match;
+            String command;
+
+            ParameterInfo[] paramInfos;
             MethodInfo methodInfo = null;
-            List<object> paramList = null;
+
+            int defaultParamQuantity;
+            bool hasLastArrayParam;
+            List<int> arrayParamList = null;
 
             foreach (var method in GetCommandMethodInfos())
             {
-                String command = method.GetCustomAttribute<BuildCommandAttribute>().command;
+                command = method.GetCustomAttribute<BuildCommandAttribute>().command;
+                regex = new Regex("(?<command>" + command + ")" + @"\s*(?<param>.*)\s*");
+                match = regex.Match(msg);
 
-                Regex regex = new Regex("(?<command>" + command + ")" + @"\s*(?<param>.*)\s*");
-                Match match = regex.Match(msg);
+                defaultParamQuantity = 0;
+                hasLastArrayParam = false;
 
                 if (!match.Groups["command"].ToString().Equals(""))
                 {
-                    object[] matchParams = Array.Empty<object>();
+                    matchedParams = Array.Empty<object>();
                     methodInfo = method;
-                    var paramInfos = methodInfo.GetParameters();
+                    paramInfos = methodInfo.GetParameters();
+
+                    foreach (var param in paramInfos)
+                    {
+                        if (param.HasDefaultValue)
+                            defaultParamQuantity++;
+                    }
 
                     if (!match.Groups["param"].ToString().Equals(""))
-                        matchParams = match.Groups["param"].ToString().Split();
+                        matchedParams = match.Groups["param"].ToString().Split();
 
-                    if (paramInfos.Length != matchParams.Length)
+                    if (paramInfos.Length - matchedParams.Length > defaultParamQuantity)
                         return msg;
 
                     if (paramInfos.Length == 0)
                         break;
                     else
                     {
-                        paramList = new List<object>();
                         try
                         {
-                            for (int i = 0; i < paramInfos.Length; i++)
+                            int loopCount = matchedParams.Length + defaultParamQuantity;
+
+                            if (hasLastArrayParam)
+                                loopCount = matchedParams.Length;
+
+                            for (int i = 0; i < loopCount; i++)
                             {
-                                var convertedParam = Convert.ChangeType(matchParams[i], paramInfos[i].ParameterType);
-                                paramList.Add(convertedParam);
+                                object param = null;
+
+                                if (i == paramInfos.Length - 1 && paramInfos[i].ParameterType.IsArray)
+                                {
+                                    arrayParamList = new List<int>();
+                                }
+
+
+                                if (i >= matchedParams.Length)
+                                    param = paramInfos[i].DefaultValue;
+                                else
+                                    param = matchedParams[i];
+
+                                object convertedParam;
+                                if (i >= paramInfos.Length - 1)
+                                {
+                                    Debug.Log(i.GetType());
+                                    convertedParam = Convert.ChangeType(param, i.GetType());
+                                    if (arrayParamList != null)
+                                    {
+                                        arrayParamList.Add((int)convertedParam);
+                                    }
+                                }
+                                else
+                                {
+                                    convertedParam = Convert.ChangeType(param, paramInfos[i].ParameterType);
+                                    paramListToCall.Add(convertedParam);
+                                }
                             }
                         }
                         catch (FormatException e)
@@ -58,8 +107,11 @@ namespace Game
             if (methodInfo == null)
                 return msg;
 
-            if (paramList != null)
-                methodInfo.Invoke(null, paramList.ToArray());
+            if (arrayParamList != null)
+                paramListToCall.Add(arrayParamList.ToArray());
+
+            if (paramListToCall.Count > 0)
+                methodInfo.Invoke(null, paramListToCall.ToArray());
             else
                 methodInfo.Invoke(null, (object[])null);
 
