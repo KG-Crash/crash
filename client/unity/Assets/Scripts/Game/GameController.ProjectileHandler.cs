@@ -15,6 +15,9 @@ namespace Game
 
             if (fireHistory.ContainsKey(projectile.projectileID))
             {
+                if (target != null)
+                    target.AddAttacker(projectile.owner);
+                
                 if (!fireHistory[projectile.projectileID].IsDead)
                 {
                     var damage = projectile.damage;
@@ -22,7 +25,6 @@ namespace Game
                 }                
                 _projectilePool.ReturnProjectile(projectile);
                 fireHistory.Remove(projectile.projectileID);
-                target.AddAttacker(projectile.owner);
             }
         }
     }
