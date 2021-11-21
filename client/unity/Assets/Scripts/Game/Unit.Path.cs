@@ -22,6 +22,9 @@ namespace Game
         [NonSerialized] private int _blocked;
         [NonSerialized] private DateTime? _blockedTime;
 
+        public bool remainPath => _regionPath.Count > 0 || _destination != null;
+        public bool remainImmediatePath => _cellPath.Count > 0;
+
         private void DeltaMove(Fix64 delta)
         {
             if (_blockedTime != null && (DateTime.Now - _blockedTime.Value).TotalSeconds < 1)
@@ -115,7 +118,7 @@ namespace Game
             return centerCell.Near(cell => unit.IsWalkable(cell));
         }
         
-        private void UpdateMovePath(FixVector3 position, bool updateWithRegion = false, List<Unit> units = null)
+        private bool UpdateMovePath(FixVector3 position, bool updateWithRegion = false, List<Unit> units = null)
         {
             try
             {
@@ -130,7 +133,7 @@ namespace Game
                 if (this.table.Flyable)
                 {
                     _cellPath = new List<KG.Map.Cell> { end };
-                    return;
+                    return true;
                 }
 
                 if (updateWithRegion)
@@ -165,10 +168,10 @@ namespace Game
                     }, Fix64.One * 3);
 
                     if(end == null)
-                        return;
+                        return false;
 
                     UpdateMovePath(end.center, true, units);
-                    return;
+                    return true;
                 }
 
                 _cellPath = _map.cells.Find(start, next, node => 
@@ -191,12 +194,53 @@ namespace Game
                 UnityEngine.Debug.Log($"update detail route. unitID: {unitID}, _cellPath.Count: {_cellPath.Count}, _regionPath.Count: {_regionPath.Count}");
 
                 _destination = position;
+                return true;
             }
             catch(Exception e)
             {
                 UnityEngine.Debug.LogError($"exception: {e.Message}, unitID: {unitID}");
                 _cellPath.Clear();
+                return false;
             }
+        }
+        
+        public bool ResetMovePathAndDestination(FixVector3 position)
+        {
+            ClearPathAndDestination();
+
+            _destination = position;
+            return UpdateMovePath(position, true);
+        }
+        
+        public void ClearPathAndDestination()
+        {
+            _destination = null;
+            _cellPath.Clear();
+            _regionPath.Clear();
+        }
+
+        private bool TryUpdateMovePath()
+        {
+            if (_blockedTime != null && (DateTime.Now - _blockedTime.Value).TotalSeconds < 1)
+                return false;
+            if (_destination == null)
+                return false;
+            
+            _blocked++;
+            if (_blocked > 2)
+            {
+                _blocked = 0;
+                _blockedTime = null;
+                
+                if (UpdateMovePath(_destStack.Peek(), true))
+                    return true;
+            }
+            else
+            {
+                _blockedTime = DateTime.Now;
+            }
+            
+            return false;
         }
     }
 }

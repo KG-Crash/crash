@@ -434,15 +434,10 @@ namespace Game
                     {
                         _target = GetNearAttacker();
                         
-                        if (IsNullOrDead(_target))
+                        if (_target == null)
                             _target = SearchEnemyIn(visibleRange);
-
-                        if (_target)
-                        {
-                            UpdateMovePath(_target.position, true);   
-                        }
                     }
-                    
+
                     if (!IsNullOrDead(_target))
                     {
                         if (ContainsAttackRange(_target.position))
@@ -451,7 +446,26 @@ namespace Game
                         }
                         else
                         {
+                            if (remainImmediatePath)
+                                TransitionTo(UnitState.Move);
+                            else if (remainPath && TryUpdateMovePath())
+                            {
+                                TransitionTo(UnitState.Move);
+                            }
+                        }
+                    }
+                    else 
+                    {
+                        if (remainImmediatePath)
+                        {
                             TransitionTo(UnitState.Move);
+                        }
+                        else if (remainPath)
+                        {
+                            if (TryUpdateMovePath())
+                            {
+                                TransitionTo(UnitState.Move);   
+                            }
                         }
                     }
                     break;
@@ -479,7 +493,7 @@ namespace Game
                     {
                         TransitionTo(UnitState.Attack);
                     }
-                    else if (_cellPath.Count == 0)
+                    else if (!remainImmediatePath)
                     {
                         TransitionTo(UnitState.Idle);
                     }
@@ -494,29 +508,23 @@ namespace Game
                     {
                         if (TryGetNearAttackerInAttackRange(out var inRangeUnit))
                             _target = inRangeUnit;
-                                                
+
                         if (IsNullOrDead(_target))
                             _target = SearchEnemyIn(attackRange);
                     }
-                    
-                    if (IsNullOrDead(_target))
-                    {
-                        if (_cellPath.Count == 0)
-                        {
-                            TransitionTo(UnitState.Idle);
-                        }
-                        else
-                        {
-                            TransitionTo(UnitState.Move);
-                        }
-                    }
                     else if (!ContainsAttackRange(_target.position))
                     {
-                        if (_cellPath.Count == 0)
+                        if (TryGetNearAttackerInAttackRange(out var inRangeUnit))
                         {
-                            UpdateMovePath(_target.position, true);
+                            _target = inRangeUnit;   
                         }
-                        TransitionTo(UnitState.Move);
+                    }
+
+                    if (IsNullOrDead(_target) || !ContainsAttackRange(_target.position))
+                    {
+                        var canMoveNow = TryUpdateMovePath();
+                        var targetState = canMoveNow ? UnitState.Move : UnitState.Idle;
+                        TransitionTo(targetState);
                     }
                     else
                     {
@@ -536,7 +544,7 @@ namespace Game
 
         public void Stop()
         {
-            _destination = null;
+            ClearPathAndDestination();
             TransitionTo(UnitState.Idle);
 
             UnityEngine.Debug.Log("stop moving");
@@ -547,15 +555,13 @@ namespace Game
             if (_highlighted) _highlighted.SetActive(select);
         }
 
-
         public void MoveTo(FixVector3 position)
         {
-            UpdateMovePath(position, true);
             _target = null;
-            _destination = position;
-            _stopMoveDistance = 0.0f;
 
-            TransitionTo(UnitState.Move);
+            var targetState = 
+                ResetMovePathAndDestination(position) ? UnitState.Move : UnitState.Idle;
+            TransitionTo(targetState);
         }
 
         public bool ContainsAttackRange(FixVector3 targetPosition)
