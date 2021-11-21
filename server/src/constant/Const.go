@@ -14,9 +14,13 @@ type _Character struct {
 type _Input struct {
 }
 
+type _Time struct {
+}
+
 var Portal _Portal
 var Character _Character
 var Input _Input
+var Time _Time
 
 func init() {
 	Portal = _Portal{
@@ -27,4 +31,5 @@ func init() {
 		InitStat: "캐릭터.스탯",
 	}
 	Input = _Input{}
+	Time = _Time{}
 }

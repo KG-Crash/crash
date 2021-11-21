@@ -47,5 +47,33 @@ namespace Game
 		{
 			Debug.Log("테스트 치트 인자없는");
 		}
+
+		[BuildCommand("setfps")]
+		public static void SetFPS(int fps)
+		{
+			if (!IsNetworkMode)
+				FPS = fps;
+		}
+		
+		[BuildCommand("refreshfps")]
+		public static void RefreshFPS()
+		{
+			if (!IsNetworkMode)
+				FPS = Shared.Const.Time.FPS;
+		}
+
+		[BuildCommand("settps")]
+		public static void SetTPS(int tps)
+		{
+			if (!IsNetworkMode)
+				TPS = tps;
+		}
+
+		[BuildCommand("refreshtps")]
+		public static void RefreshTPS()
+		{
+			if (!IsNetworkMode)
+				TPS = Shared.Const.Time.TPS;
+		}
 	}
 }

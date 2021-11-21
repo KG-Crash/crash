@@ -80,6 +80,12 @@ namespace Game
             follower.offsetPosition -= onScrollDelta * (float)Shared.Const.Input.ScrollDelta;
         }
 
+        public void OnAlphaNum(int num)
+        {
+            if (!IsNetworkMode)
+                FPS = Shared.Const.Time.FPS / num;
+        }
+
         public void OnScroll(float delta)
         {
             

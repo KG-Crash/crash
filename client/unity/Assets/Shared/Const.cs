@@ -20,4 +20,10 @@ namespace Shared.Const
         public static readonly double DragDelta = 0.1;
         public static readonly double ScrollDelta = 0.1;
     }
+    
+    public static class Time
+    {
+        public static readonly int FPS = 60;
+        public static readonly int TPS = 8;
+    }
 }

@@ -10,11 +10,13 @@ using UnityEngine;
 namespace Game
 {
     public partial class GameController : MonoBehaviour
-    {
-        public const int FPS = 60;
-        public const int TPS = 8;
+    {   
+        public static int FPS { get; set; }
+        public static int TPS { get; set; }
+        public static bool IsNetworkMode { get; set; }
+
         public static Fix64 TimeDelta => Fix64.One / new Fix64(FPS);
-        public static Fix64 TurnRate => Fix64.One / new Fix64(8);
+        public static Fix64 TurnRate => Fix64.One / new Fix64(TPS);
         public int Frame { get; private set; }
         private Protocol.Request.ActionQueue _actionQueue = new Protocol.Request.ActionQueue();
 
@@ -26,8 +28,7 @@ namespace Game
         [NonSerialized] private List<Unit> _allUnitInFrustum;
         [NonSerialized] private ProjectilePool _projectilePool;
 
-        [Header("Miscellaneous")]
-
+        [Header("Miscellaneous")] 
         [SerializeField] private Transform _poolOffset; 
         [SerializeField] private Transform _focusTransform;
         
@@ -35,6 +36,7 @@ namespace Game
         [SerializeField] private UnitFactory _unitFactory;
         [SerializeField] private UnitTable _unitPrefabTable;
         [SerializeField] private ProjectileTable _projectilehPrefabTable;
+        [SerializeField] private bool _networkMode;
        
         private static uint playerIDStepper = 0;
 
@@ -55,6 +57,10 @@ namespace Game
         private void Awake()
         {
             Handler.Bind(this, Dispatcher.Instance);
+
+            FPS = Shared.Const.Time.FPS;
+            TPS = Shared.Const.Time.TPS;
+            IsNetworkMode = _networkMode;
             
             InitInput();
             OnLoadScene();

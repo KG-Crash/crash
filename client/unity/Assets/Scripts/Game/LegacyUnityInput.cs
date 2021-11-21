@@ -69,6 +69,26 @@ namespace Game
             {
                 inputBridge.OnScrollDelta(Input.mouseScrollDelta.y);
             }
+
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                inputBridge.OnAlphaNum(1);
+            }
+            
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                inputBridge.OnAlphaNum(2);
+            }
+            
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                inputBridge.OnAlphaNum(3);
+            }
+            
+            if (Input.GetKeyDown(KeyCode.Alpha4))
+            {
+                inputBridge.OnAlphaNum(4);
+            }
         }
     }
 }
