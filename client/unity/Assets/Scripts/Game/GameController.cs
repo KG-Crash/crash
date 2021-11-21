@@ -56,6 +56,7 @@ namespace Game
         {
             Handler.Bind(this, Dispatcher.Instance);
             
+            InitInput();
             OnLoadScene();
             
             _projectilePool = new ProjectilePool(_projectilehPrefabTable, 15, this, _poolOffset);
@@ -83,7 +84,7 @@ namespace Game
 
         private void OnDestroy()
         {
-            
+            ClearInput();
         }
 
         private Vector3[] frustumPoints = new Vector3[8];

@@ -1,26 +1,20 @@
-using System;
-using System.Collections.Generic;
-using FixMath.NET;
 using UnityEngine;
 
 namespace Game
 {
-    [RequireComponent(typeof(GameController), typeof(GameUI))]
-    public class GameInput : MonoBehaviour, IInputSubscriber
-    {
-        private GameController _controller;
+    public partial class GameController : IInputSubscriber
+    {       
         private GameUI _ui;
         private Vector2 _lastPositionSS;
         
-        private void Awake()
+        private void InitInput()
         {
-            _controller = GetComponent<GameController>();
             _ui = GetComponent<GameUI>();
             
             InputBridge._instance.Register(this);
         }
 
-        private void OnDestroy()
+        private void ClearInput()
         {
             InputBridge._instance.Unregister(this);
         }
@@ -57,9 +51,9 @@ namespace Game
 
         public void OnReleaseAltBtn(Vector2 positionSS)
         {
-            var positionWS = _controller.ScreenPositionToWorldPosition(positionSS);
+            var positionWS = ScreenPositionToWorldPosition(positionSS);
 
-            _controller.SpawnUnitToPosition(_controller._spawnUnitOriginID, _controller._spawnPlayerID, positionWS, new GameController.TemporalPlaceContext());
+            SpawnUnitToPosition(_spawnUnitOriginID, _spawnPlayerID, positionWS, new GameController.TemporalPlaceContext());
         }
 
         public void OnUpKey()
