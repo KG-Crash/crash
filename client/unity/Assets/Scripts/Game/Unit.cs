@@ -382,6 +382,33 @@ namespace Game
             this.transform.position = this.position;
         }
 
+        private void TransitionTo(UnitState state)
+        {
+            if (_currentState == state)
+            {
+                return;   
+            }
+
+            var prevState = state;
+            _currentState = state;
+            
+            if (prevState == UnitState.Move)
+                listener?.OnEndMove(this);
+
+            switch (_currentState)
+            {
+                case UnitState.Idle:
+                    listener?.OnIdle(this);
+                    break;
+                case UnitState.Move:
+                    listener?.OnStartMove(this);
+                    break;
+                case UnitState.Attack:
+                    Attack(_target);
+                    break;
+            }
+        }
+        
         private void Action()
         {
             switch (_currentState)
@@ -408,14 +435,11 @@ namespace Game
                     {
                         if (ContainsAttackRange(_target.position))
                         {
-                            _currentState = UnitState.Attack;
-                            goto case UnitState.Attack;
+                            TransitionTo(UnitState.Attack);
                         }
                         else
                         {
-                            _currentState = UnitState.Move;
-                            _listener?.OnStartMove(this);
-                            goto case UnitState.Move;
+                            TransitionTo(UnitState.Move);
                         }
                     }
                     break;
@@ -424,7 +448,6 @@ namespace Game
                  * 이동 중에는 공격 범위에 적이 있으면 공격, 아니면 그대로 고
                  */
                 case UnitState.Move:
-                {
                     if (IsNullOrDead(_target))
                     {
                         // 공격할 상대가 없다면, 공격자 중 사거리 이내 -> 나머지 사거리 이내에 있는 적 탐색
@@ -457,23 +480,17 @@ namespace Game
                     // 공격 가능?
                     if (!IsNullOrDead(_target) && ContainsAttackRange(_target.position))
                     {
-                        _currentState = UnitState.Attack;
-                        _listener?.OnEndMove(this);
-                        goto case UnitState.Attack;
+                        TransitionTo(UnitState.Attack);
                     }
                     else if (_cellPath.Count == 0)
                     {
-                        _currentState = UnitState.Idle;
-                        _listener?.OnEndMove(this);
-                        _listener?.OnIdle(this);
-                        break;
+                        TransitionTo(UnitState.Idle);
                     }
                     else
                     {   
                         DeltaMove(GameController.TimeDelta);
-                        break;
                     }
-                }
+                    break;
 
                 case UnitState.Attack:
                     if (IsNullOrDead(_target))
@@ -492,13 +509,11 @@ namespace Game
                     {
                         if (_cellPath.Count == 0)
                         {
-                            _currentState = UnitState.Idle;
-                            _listener?.OnIdle(this);
+                            TransitionTo(UnitState.Idle);
                         }
                         else
                         {
-                            _currentState = UnitState.Move;
-                            _listener?.OnStartMove(this);
+                            TransitionTo(UnitState.Move);
                         }
                     }
                     else if (!ContainsAttackRange(_target.position))
@@ -507,9 +522,7 @@ namespace Game
                         {
                             UpdateMovePath(_target.position, true);
                         }
-
-                        _currentState = UnitState.Move;
-                        _listener?.OnStartMove(this);
+                        TransitionTo(UnitState.Move);
                     }
                     else
                     {
@@ -529,9 +542,8 @@ namespace Game
 
         public void Stop()
         {
-            _currentState = UnitState.Idle;
             _destination = null;
-            listener?.OnEndMove(this);
+            TransitionTo(UnitState.Idle);
 
             UnityEngine.Debug.Log("stop moving");
         }
@@ -545,13 +557,11 @@ namespace Game
         public void MoveTo(FixVector3 position)
         {
             UpdateMovePath(position, true);
-
-            _currentState = UnitState.Move;
             _target = null;
             _destination = position;
             _stopMoveDistance = 0.0f;
 
-            listener?.OnStartMove(this);
+            TransitionTo(UnitState.Move);
         }
 
         public bool ContainsAttackRange(FixVector3 targetPosition)
