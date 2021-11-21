@@ -162,7 +162,7 @@ namespace Game
                 // 공격중인 유닛은 어케 처리해야할지...
                 var stopUnits = GetNearUnits().Where(x => x._currentState == UnitState.Idle);
                 if (units != null)
-                    stopUnits.Concat(units).Distinct();
+                    stopUnits = stopUnits.Concat(units).Distinct();
 
                 var unitCollideBoxes = stopUnits.Select(x => x.collisionBox).ToList();
                 if (unitCollideBoxes.Any(x => x.Contains(end.collisionBox)))
