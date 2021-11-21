@@ -240,13 +240,6 @@ namespace Game
         [SerializeField] private Player _owner;
         [NonSerialized] private KG.Map _map;
         [NonSerialized] private Listener _listener;
-        [SerializeField] private int _maxAttackAnimCount;
-
-        public int maxAttackAnimCount
-        {
-            get => _maxAttackAnimCount;
-            set => _maxAttackAnimCount = value;
-        }
         
         [NonSerialized] private UnitState _currentState;
         
@@ -291,11 +284,6 @@ namespace Game
         public bool IsNullOrDead(Unit unit)
         {
             return unit == null || unit.IsDead;
-        }
-        
-        public void Awake()
-        {
-            animator.SetInteger("MaxAttack", _maxAttackAnimCount);
         }
 
         public FixRect GetCollisionBox(FixVector2 position)
@@ -386,6 +374,7 @@ namespace Game
 
         public void Init(uint unitID, KG.Map map, Player owner, Unit.Listener listener)
         {
+            InitAnimation();
             this.unitID = unitID;
             this._map = map;
             this._owner = owner;
@@ -849,44 +838,6 @@ namespace Game
             _currentState = UnitState.Dead;
             listener?.OnDead(this, from);
             owner.units.Delete(this);
-        }
-
-        private void OnAnimEnd(UnitState state)
-        {
-            Debug.Log($"{state} : {name}");
-            
-            switch (state)
-            {
-                case UnitState.Attack:
-                    break;
-                case UnitState.Move:
-                    break;
-                case UnitState.Dead:
-                    StartCoroutine(OnDisappearAnim());
-                    break;
-                case UnitState.Idle:
-                    break;
-            }
-        }
-
-        private IEnumerator<Unit> OnDisappearAnim()
-        {
-            var duration = 1.0f;
-            var startTime = Time.time;
-
-            SetFadeMaterialAndAlpha(1.0f);
-
-            while (startTime + duration >= Time.time)
-            {
-                var alpha = 1.0f - (Time.time - startTime) / duration;
-                SetFadeAlpha(alpha);
-
-                yield return null;
-            }
-
-            SetFadeAlpha(0.0f);
-            
-            listener?.OnClear(this);
         }
 
         private IEnumerable<Unit> GetNearUnits()
