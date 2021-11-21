@@ -375,7 +375,6 @@ namespace Game
 
         private void Update()
         {
-
             UpdateBounds();
             Action();
 
@@ -409,6 +408,23 @@ namespace Game
             }
         }
         
+        private bool TryGetNearAttackerInAttackRange(out Unit unit)
+        {
+            unit = _attackers
+                .Where(x => !IsNullOrDead(x) && ContainsAttackRange(x.position))
+                .OrderBy(x => (x.position - position).sqrMagnitude)
+                .FirstOrDefault();
+            return unit != null;
+        }
+        
+        private Unit GetNearAttacker()
+        {
+            return _attackers
+                .Where(x => !IsNullOrDead(x))
+                .OrderBy(x => (x.position - position).sqrMagnitude)
+                .FirstOrDefault();
+        }
+        
         private void Action()
         {
             switch (_currentState)
@@ -416,11 +432,7 @@ namespace Game
                 case UnitState.Idle:
                     if (IsNullOrDead(_target))
                     {
-                        // 공격할 상대가 없다면, 공격자 중 시야 거리 -> 시야 거리에 있는 적 탐색
-                        _target = _attackers
-                            .Where(x => !IsNullOrDead(x) && ContainsVisibleRange(x.position))
-                            .OrderBy(x => (x.position - position).sqrMagnitude)
-                            .FirstOrDefault();
+                        _target = GetNearAttacker();
                         
                         if (IsNullOrDead(_target))
                             _target = SearchEnemyIn(visibleRange);
@@ -444,36 +456,21 @@ namespace Game
                     }
                     break;
 
-                /*
-                 * 이동 중에는 공격 범위에 적이 있으면 공격, 아니면 그대로 고
-                 */
                 case UnitState.Move:
                     if (IsNullOrDead(_target))
                     {
-                        // 공격할 상대가 없다면, 공격자 중 사거리 이내 -> 나머지 사거리 이내에 있는 적 탐색
-                        _target = _attackers
-                            .Where(x => !IsNullOrDead(x) && ContainsAttackRange(x.position))
-                            .OrderBy(x => (x.position - position).sqrMagnitude)
-                            .FirstOrDefault();
+                        _target = GetNearAttacker();
                         
                         if (IsNullOrDead(_target))
+                        {
                             _target = SearchEnemyIn(attackRange);
+                        }
                     }
                     else if (!ContainsAttackRange(_target.position))
                     {
-                        // 공격할 상대가 사거리에 안닿으면, 공격자 중 사거리 이내 -> 나머지 사거리 이내에 있는 적 탐색
-                        var inRangeUnit = _attackers
-                            .Where(x => !IsNullOrDead(x) && ContainsAttackRange(x.position))
-                            .OrderBy(x => (x.position - position).sqrMagnitude)
-                            .FirstOrDefault();
-
-                        if (IsNullOrDead(inRangeUnit))
-                            inRangeUnit = SearchEnemyIn(attackRange);
-                        
-                        if (inRangeUnit != null)
+                        if (TryGetNearAttackerInAttackRange(out var inRangeUnit))
                         {
-                            // 바로 공격 때리기
-                            _target = inRangeUnit;
+                            _target = inRangeUnit;   
                         }
                     }
                     
@@ -495,12 +492,9 @@ namespace Game
                 case UnitState.Attack:
                     if (IsNullOrDead(_target))
                     {
-                        // 공격할 상대가 없다면, 공격자 중 사거리 이내 -> 나머지 사거리 이내에 있는 적 탐색
-                        _target = _attackers
-                            .Where(x => !IsNullOrDead(x) && ContainsAttackRange(x.position))
-                            .OrderBy(x => (x.position - position).sqrMagnitude)
-                            .FirstOrDefault();
-                        
+                        if (TryGetNearAttackerInAttackRange(out var inRangeUnit))
+                            _target = inRangeUnit;
+                                                
                         if (IsNullOrDead(_target))
                             _target = SearchEnemyIn(attackRange);
                     }
