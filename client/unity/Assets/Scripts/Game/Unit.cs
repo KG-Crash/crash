@@ -15,13 +15,8 @@ namespace Game
         bool selectable { get; set; }
         Bounds bounds { get; }
     }
-
-    public interface IRenderable
-    {
-        Renderer[] renderers { get; }
-    }
-
-    public class Unit : MonoBehaviour, ISelectable, IRenderable
+    
+    public partial class Unit : MonoBehaviour, ISelectable
     {
         public interface Listener
         {
@@ -245,25 +240,12 @@ namespace Game
         [SerializeField] private Player _owner;
         [NonSerialized] private KG.Map _map;
         [NonSerialized] private Listener _listener;
-
-        public Bounds bounds { get => _totalBounds; }
-        public Renderer[] renderers { get => _rendereres; }
-
-        [NonSerialized] private Bounds _totalBounds = new Bounds();
-        [SerializeField] private Renderer[] _rendereres;
-        [SerializeField] private Material[] _deadMaterials;
         [SerializeField] private int _maxAttackAnimCount;
 
         public int maxAttackAnimCount
         {
             get => _maxAttackAnimCount;
             set => _maxAttackAnimCount = value;
-        }
-
-        public Material[] deadMaterials
-        {
-            get => _deadMaterials;
-            set => _deadMaterials = value;
         }
         
         [NonSerialized] private UnitState _currentState;
@@ -314,12 +296,6 @@ namespace Game
         public void Awake()
         {
             animator.SetInteger("MaxAttack", _maxAttackAnimCount);
-        }
-
-        [ContextMenu("Gather renderers")]
-        public void OnRefreshRenderers()
-        {
-            _rendereres = GetComponentsInChildren<Renderer>();
         }
 
         public FixRect GetCollisionBox(FixVector2 position)
@@ -419,19 +395,8 @@ namespace Game
 
         private void Update()
         {
-            _totalBounds = new Bounds();
-            foreach (var renderer in _rendereres)
-            {
-                if (_totalBounds == new Bounds())
-                {
-                    _totalBounds = renderer.bounds;
-                }
-                else
-                {
-                    _totalBounds.Encapsulate(renderer.bounds);   
-                }
-            }
 
+            UpdateBounds();
             Action();
 
             this.transform.position = this.position;
@@ -904,27 +869,6 @@ namespace Game
             }
         }
 
-        private void SetFadeMaterialAndAlpha(float alpha)
-        {
-            for (int i = 0; i < _rendereres.Length; i++)
-            {
-                _rendereres[i].sharedMaterial = _deadMaterials[i];
-                var color = _deadMaterials[i].color;
-                color.a = alpha;
-                _deadMaterials[i].color = color;
-            }
-        }
-        
-        private void SetFadeAlpha(float alpha)
-        {
-            for (int i = 0; i < _rendereres.Length; i++)
-            {
-                var color = _deadMaterials[i].color;
-                color.a = alpha;
-                _deadMaterials[i].color = color;
-            }
-        }
-        
         private IEnumerator<Unit> OnDisappearAnim()
         {
             var duration = 1.0f;
