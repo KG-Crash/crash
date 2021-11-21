@@ -11,7 +11,7 @@ namespace Game
     public partial class Unit
     {
         [Header("경로에 상관없이 원하는 목적지")]
-        [NonSerialized] private FixVector3? _destination;
+        [NonSerialized] private Stack<FixVector3> _destStack = new Stack<FixVector3>();
         [NonSerialized] private float _stopMoveDistance = 0.0f;
         
         [Header("경로 데이터")]
@@ -22,7 +22,7 @@ namespace Game
         [NonSerialized] private int _blocked;
         [NonSerialized] private DateTime? _blockedTime;
 
-        public bool remainPath => _regionPath.Count > 0 || _destination != null;
+        public bool remainPath => _regionPath.Count > 0 || _destStack.Count > 0;
         public bool remainImmediatePath => _cellPath.Count > 0;
 
         private void DeltaMove(Fix64 delta)
@@ -33,7 +33,6 @@ namespace Game
             var dst = _cellPath.FirstOrDefault();
             if (dst == null)
             {
-                Stop();
                 return;
             }
 
@@ -61,9 +60,21 @@ namespace Game
                 if (_cellPath.Count == 0)
                 {
                     if (_regionPath.Count == 0)
-                        Stop();
+                    {
+                        if (_destStack.Count > 0)
+                        {
+                            _destStack.Pop();  
+                        
+                            if (_destStack.Count > 0)
+                            {
+                                UpdateMovePath(_destStack.Peek(), true);
+                            }
+                        }
+                    }
                     else
-                        UpdateMovePath(this._destination.Value);
+                    {
+                        UpdateMovePath(_destStack.Peek());
+                    }
                 }
             }
             else
@@ -76,7 +87,7 @@ namespace Game
                     _blocked++;
                     if (_blocked > 2)
                     {
-                        UpdateMovePath(this._destination.Value, units: new List<Unit> { collisionUnit });
+                        UpdateMovePath(_destStack.Peek(), units: new List<Unit> { collisionUnit });
                         _blocked = 0;
                         _blockedTime = null;
                     }
@@ -192,8 +203,6 @@ namespace Game
                     throw new Exception("_cellPath.Count == 0");
                 
                 UnityEngine.Debug.Log($"update detail route. unitID: {unitID}, _cellPath.Count: {_cellPath.Count}, _regionPath.Count: {_regionPath.Count}");
-
-                _destination = position;
                 return true;
             }
             catch(Exception e)
@@ -208,13 +217,13 @@ namespace Game
         {
             ClearPathAndDestination();
 
-            _destination = position;
+            _destStack.Push(position);
             return UpdateMovePath(position, true);
         }
         
         public void ClearPathAndDestination()
         {
-            _destination = null;
+            _destStack.Clear();
             _cellPath.Clear();
             _regionPath.Clear();
         }
@@ -223,7 +232,7 @@ namespace Game
         {
             if (_blockedTime != null && (DateTime.Now - _blockedTime.Value).TotalSeconds < 1)
                 return false;
-            if (_destination == null)
+            if (_destStack.Count == 0)
                 return false;
             
             _blocked++;
