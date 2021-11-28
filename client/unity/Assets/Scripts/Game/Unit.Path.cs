@@ -135,11 +135,11 @@ namespace Game
             {
                 var start = _map[this.position];
                 if (start == null)
-                    throw new Exception("start = _map[this.position] == null");
+                    throw new InvalidCellAccessException("start", this.position);
 
                 var end = _map[position];
                 if (end == null)
-                    throw new Exception("end = _map[position] == null");
+                    throw new InvalidCellAccessException("end", this.position);
 
                 if (this.table.Flyable)
                 {
@@ -152,7 +152,7 @@ namespace Game
 
                 var next = _regionPath.Count < 2 ? WalkableCell(this, end) : WalkableCell(this, _regionPath.First());
                 if (!IsWalkable(next))
-                    throw new Exception($"next({next}) is not walkable, {_regionPath.Count}");
+                    throw new NotWalkableNextCellException(next, _regionPath.Count);
 
                 var allowed = GetAllowedRegions(start.region, next.region);
                 var collisionList = this.collisionCells;
@@ -200,7 +200,7 @@ namespace Game
                 });
                 
                 if (_cellPath.Count == 0)
-                    throw new Exception("_cellPath.Count == 0");
+                    throw new ZeroCellPathException();
                 
                 UnityEngine.Debug.Log($"update detail route. unitID: {unitID}, _cellPath.Count: {_cellPath.Count}, _regionPath.Count: {_regionPath.Count}");
                 return true;

@@ -29,7 +29,7 @@ public class UIPool : MonoBehaviour
             if (ist._pool.ContainsKey(typeof(T)) == false)
             {
                 var attribute = typeof(T).GetCustomAttributes(typeof(UIAttribute), true).FirstOrDefault() as UIAttribute ??
-                    throw new System.Exception($"Not found UI attribute.");
+                    throw new NotFoundUIAttributeException();
 
                 var prefab = Resources.Load<GameObject>($"UI/{attribute.Path}");
                 var instance = Instantiate(prefab, ist.transform);
@@ -38,7 +38,7 @@ public class UIPool : MonoBehaviour
             }
 
             return ist._pool[typeof(T)].GetComponent<T>() ??
-                throw new Exception($"{ist._pool[typeof(T)].name} does not contains {typeof(T).Name} script.");
+                throw new NotContainUIScript(ist._pool[typeof(T)].name, typeof(T).Name);
         }
         catch (Exception e)
         {

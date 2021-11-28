@@ -2,6 +2,14 @@
 
 package enum
 
+type _ClientExceptionCode struct {
+	InvalidCellAccess   uint32
+	NotWalkableNextCell uint32
+	ZeroCellPath        uint32
+	NotFoundUIAttribute uint32
+	NotContainUIScript  uint32
+}
+
 type _ResultCode struct {
 	None                   uint32
 	InvalidUser            uint32
@@ -97,6 +105,7 @@ type _Advanced struct {
 	UPGRADE_SPEED  uint32
 }
 
+var ClientExceptionCode _ClientExceptionCode
 var ResultCode _ResultCode
 var ProjectileState _ProjectileState
 var ProjectileType _ProjectileType
@@ -110,6 +119,14 @@ var Ability _Ability
 var Advanced _Advanced
 
 func init() {
+	ClientExceptionCode = _ClientExceptionCode{
+		InvalidCellAccess:   1,
+		NotWalkableNextCell: 2,
+		ZeroCellPath:        3,
+		NotFoundUIAttribute: 4,
+		NotContainUIScript:  5,
+	}
+
 	ResultCode = _ResultCode{
 		None:                   1,
 		InvalidUser:            2,

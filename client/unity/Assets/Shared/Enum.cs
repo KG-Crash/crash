@@ -2,6 +2,15 @@
 
 namespace Shared
 {
+    public enum ClientExceptionCode
+    {
+        InvalidCellAccess,
+        NotWalkableNextCell,
+        ZeroCellPath,
+        NotFoundUIAttribute,
+        NotContainUIScript
+    }
+
     public enum ResultCode
     {
         None,
