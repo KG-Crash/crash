@@ -47,10 +47,16 @@ namespace Game
                             defaultParamQuantity++;
                     }
 
+                    if (paramInfos.Last().ParameterType.IsArray)
+                    {
+                        hasLastArrayParam = true;
+                        arrayParamList = new List<int>();
+                    }
+
                     if (!match.Groups["param"].ToString().Equals(""))
                         matchedParams = match.Groups["param"].ToString().Split();
 
-                    if (paramInfos.Length - matchedParams.Length > defaultParamQuantity)
+                    if (paramInfos.Length - matchedParams.Length > defaultParamQuantity + Convert.ToInt32(hasLastArrayParam))
                         return msg;
 
                     if (paramInfos.Length == 0)
@@ -61,33 +67,25 @@ namespace Game
                         {
                             int loopCount = matchedParams.Length + defaultParamQuantity;
 
-                            if (hasLastArrayParam)
+                            if (matchedParams.Length == paramInfos.Length && defaultParamQuantity > 0)
                                 loopCount = matchedParams.Length;
 
                             for (int i = 0; i < loopCount; i++)
                             {
                                 object param = null;
-
-                                if (i == paramInfos.Length - 1 && paramInfos[i].ParameterType.IsArray)
-                                {
-                                    arrayParamList = new List<int>();
-                                }
-
+                                object convertedParam = null;
 
                                 if (i >= matchedParams.Length)
                                     param = paramInfos[i].DefaultValue;
                                 else
                                     param = matchedParams[i];
 
-                                object convertedParam;
-                                if (i >= paramInfos.Length - 1)
+
+                                if (i >= paramInfos.Length - 1 && arrayParamList != null)
                                 {
                                     Debug.Log(i.GetType());
                                     convertedParam = Convert.ChangeType(param, i.GetType());
-                                    if (arrayParamList != null)
-                                    {
-                                        arrayParamList.Add((int)convertedParam);
-                                    }
+                                    arrayParamList.Add((int)convertedParam);
                                 }
                                 else
                                 {
