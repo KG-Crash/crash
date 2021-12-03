@@ -14,14 +14,13 @@ namespace Game
         public static int FPS { get; set; }
         public static int TPS { get; set; }
         public static bool IsNetworkMode { get; set; }
-
-        public const int FPS = 60;
-        public const int TPS = 8;
         public static Fix64 TimeSpeed { get; set; } = Fix64.One;
         public static Fix64 TimeDelta => (Fix64.One * TimeSpeed) / new Fix64(FPS);
         public static Fix64 TurnRate => Fix64.One / new Fix64(8);
         public int Frame { get; private set; }
         private Protocol.Request.ActionQueue _actionQueue = new Protocol.Request.ActionQueue();
+
+        private static GameController ist = null;
 
         [NonSerialized] private int _playerID;
         [NonSerialized] private uint _playerTeamID;
