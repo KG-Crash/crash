@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Shared;
 using UnityEngine;
 
 public class UIPool : MonoBehaviour
@@ -29,7 +30,7 @@ public class UIPool : MonoBehaviour
             if (ist._pool.ContainsKey(typeof(T)) == false)
             {
                 var attribute = typeof(T).GetCustomAttributes(typeof(UIAttribute), true).FirstOrDefault() as UIAttribute ??
-                    throw new NotFoundUIAttributeException();
+                    throw new ClientException(ClientExceptionCode.NotFoundUIAttribute, "Not found UI attribute.");
 
                 var prefab = Resources.Load<GameObject>($"UI/{attribute.Path}");
                 var instance = Instantiate(prefab, ist.transform);
@@ -38,7 +39,8 @@ public class UIPool : MonoBehaviour
             }
 
             return ist._pool[typeof(T)].GetComponent<T>() ??
-                throw new NotContainUIScript(ist._pool[typeof(T)].name, typeof(T).Name);
+                   throw new ClientException(ClientExceptionCode.NotContainUIScript,
+                       $"{ist._pool[typeof(T)].name} does not contains {typeof(T).Name} script.");
         }
         catch (Exception e)
         {

@@ -135,11 +135,11 @@ namespace Game
             {
                 var start = _map[this.position];
                 if (start == null)
-                    throw new InvalidCellAccessException("start", this.position);
+                    throw new ClientException(ClientExceptionCode.InvalidCellAccess, $"start, _map[{position}] == null");
 
                 var end = _map[position];
                 if (end == null)
-                    throw new InvalidCellAccessException("end", this.position);
+                    throw new ClientException(ClientExceptionCode.InvalidCellAccess, $"end, _map[{position}] == null");
 
                 if (this.table.Flyable)
                 {
@@ -152,7 +152,7 @@ namespace Game
 
                 var next = _regionPath.Count < 2 ? WalkableCell(this, end) : WalkableCell(this, _regionPath.First());
                 if (!IsWalkable(next))
-                    throw new NotWalkableNextCellException(next, _regionPath.Count);
+                    throw new ClientException(ClientExceptionCode.NotWalkableNextCell, $"next({next}) cell of region is not walkable, {_regionPath.Count}");
 
                 var allowed = GetAllowedRegions(start.region, next.region);
                 var collisionList = this.collisionCells;
@@ -200,14 +200,15 @@ namespace Game
                 });
                 
                 if (_cellPath.Count == 0)
-                    throw new ZeroCellPathException();
-                
-                UnityEngine.Debug.Log($"update detail route. unitID: {unitID}, _cellPath.Count: {_cellPath.Count}, _regionPath.Count: {_regionPath.Count}");
+                    throw new ClientException(ClientExceptionCode.ZeroCellPath, "_cellPath.Count == 0");
+
+                Debug.Log(
+                    $"update detail route. unitID: {unitID}, _cellPath.Count: {_cellPath.Count}, _regionPath.Count: {_regionPath.Count}");
                 return true;
             }
-            catch(Exception e)
+            catch (ClientException e)
             {
-                UnityEngine.Debug.LogError($"exception: {e.Message}, unitID: {unitID}");
+                Debug.LogError($"code: {e._code}, exception: {e.Message}, unitID: {unitID}");
                 _cellPath.Clear();
                 return false;
             }
