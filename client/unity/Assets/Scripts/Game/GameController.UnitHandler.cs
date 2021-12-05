@@ -28,7 +28,8 @@ namespace Game
             me.animator.SetInteger("AttackIndex", randAttackIndex);
             me.animator.SetTrigger("Attack");
 
-            you.AddAttacker(me);
+            if (you != null && me != null)
+                you.AddAttacker(me);
         }
 
         public void OnDamaged(Unit me, Unit you, Fix64 damage)

@@ -13,19 +13,20 @@ namespace Game
             if (projectile.currentState != Shared.ProjectileState.Hit)
                 return;
 
-            if (fireHistory.ContainsKey(projectile.projectileID))
+            if (fireHistory.TryGetValue(projectile.projectileID, out var fireUnit))
             {
-                if (target != null)
-                    target.AddAttacker(projectile.owner);
-                
-                if (!fireHistory[projectile.projectileID].IsDead)
+                if (!Unit.IsNullOrDead(fireUnit))
                 {
+                    if (target != null)
+                        target.AddAttacker(fireUnit);
+
                     var damage = projectile.damage;
-                    fireHistory[projectile.projectileID].AddHP(-damage, projectile.owner);
-                }                
-                _projectilePool.ReturnProjectile(projectile);
-                fireHistory.Remove(projectile.projectileID);
-            }
+                    fireUnit.AddHP(-damage, fireUnit);
+                }
+            } 
+
+            _projectilePool.ReturnProjectile(projectile);
+            fireHistory.Remove(projectile.projectileID);
         }
     }
 }

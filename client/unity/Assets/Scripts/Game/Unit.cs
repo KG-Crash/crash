@@ -272,7 +272,7 @@ namespace Game
 
         public bool IsDead => _currentState == UnitState.Dead || _hp == Fix64.Zero;
 
-        public bool IsNullOrDead(Unit unit)
+        public static bool IsNullOrDead(Unit unit)
         {
             return unit == null || unit.IsDead;
         }

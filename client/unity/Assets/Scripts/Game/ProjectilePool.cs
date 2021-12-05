@@ -56,14 +56,15 @@ namespace Game
             _objectQueueDict[projectile.projectileOriginID].Enqueue(projectile);
 		}
 
-        private void InitProjectile(Projectile projectile, Unit owner, Unit target)
+        private void InitProjectile(Projectile projectile, Unit attacker, Unit target)
 		{
             projectile.gameObject.SetActive(true);
-            projectile.transform.SetParent(owner.transform);
-            projectile.position = owner.position;
-            projectile.owner = owner;
+            projectile.transform.SetParent(attacker.transform);
+            projectile.position = attacker.position;
+            projectile.fireUnit = attacker;
+            projectile.owner = attacker.owner;
             projectile.target = target;
-            projectile.damage = owner.damage;
+            projectile.damage = attacker.damage;
             projectile.Shoot();  
         }
         private void ClearProjectile(Projectile projectile)

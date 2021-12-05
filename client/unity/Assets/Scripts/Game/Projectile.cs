@@ -23,7 +23,8 @@ namespace Game
         [SerializeField] private Fix64 _damage;
 
         [NonSerialized] private Unit? _target;
-        [SerializeField] private Unit? _owner;
+        [NonSerialized] private Unit? _fireUnit;
+        [NonSerialized] private Player _owner;
 
         [NonSerialized] private Listener _listener;
 
@@ -66,10 +67,16 @@ namespace Game
             }
         }
 
-        public Unit owner
+        public Player owner
         {
             get => _owner;
             set => _owner = value;
+        }
+
+        public Unit fireUnit
+        {
+            get => _fireUnit;
+            set => _fireUnit = value;
         }
 
         public Unit target
@@ -137,7 +144,7 @@ namespace Game
         {
             currentState = ProjectileState.Disable;
             target = null;
-            owner = null;
+            fireUnit = null;
             moveTarget = null;
 
         }
