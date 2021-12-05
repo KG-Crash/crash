@@ -15,8 +15,8 @@ namespace Game
         [NonSerialized] private float _stopMoveDistance = 0.0f;
         
         [Header("경로 데이터")]
-        [NonSerialized] private List<KG.Map.Region> _regionPath = new List<KG.Map.Region>();
-        [NonSerialized] private List<KG.Map.Cell> _cellPath = new List<KG.Map.Cell>();
+        [NonSerialized] public List<KG.Map.Region> _regionPath = new List<KG.Map.Region>();
+        [NonSerialized] public List<KG.Map.Cell> _cellPath = new List<KG.Map.Cell>();
         
         [Header("다른 유닛과 부딪힌 횟수")]
         [NonSerialized] private int _blocked;

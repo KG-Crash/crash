@@ -241,10 +241,9 @@ namespace Game
         [NonSerialized] private KG.Map _map;
         [NonSerialized] private Listener _listener;
         
-        [NonSerialized] private UnitState _currentState;
-        
-        [NonSerialized] private Unit _target;
-        [NonSerialized] private HashSet<Unit> _attackers = new HashSet<Unit>();
+        [NonSerialized] public UnitState _currentState;
+        [NonSerialized] public Unit _target;
+        [NonSerialized] public HashSet<Unit> _attackers = new HashSet<Unit>();
 
         public void AddAttacker(Unit unit)
         {
@@ -322,45 +321,6 @@ namespace Game
         public bool IsWalkable(KG.Map.Cell cell)
         {
             return GetCollisionCells(cell.position).All(x => x.walkable);
-        }
-
-        private void OnDrawGizmos()
-        {
-            Gizmos.color = Color.blue;
-            for (int i = 0; i < _cellPath.Count - 1; i++)
-            {
-                var begin = _cellPath[i];
-                var end = _cellPath[i + 1];
-                Gizmos.DrawLine(begin.position, end.position);
-            }
-
-            //var area = this.collisionBox;
-            //Gizmos.DrawLine(new Vector3(area.minX, 0, area.minY), new Vector3(area.maxX, 0, area.minY));
-            //Gizmos.DrawLine(new Vector3(area.minX, 0, area.maxY), new Vector3(area.maxX, 0, area.maxY));
-            //Gizmos.DrawLine(new Vector3(area.minX, 0, area.minY), new Vector3(area.minX, 0, area.maxY));
-            //Gizmos.DrawLine(new Vector3(area.maxX, 0, area.minY), new Vector3(area.maxX, 0, area.maxY));
-
-            //Gizmos.color = Color.red;
-            var cells = this.collisionCells;
-            foreach (var cell in cells)
-            {
-                var cellBox = new FixRect(cell.position.x, cell.position.y, cell.size, cell.size);
-
-                Gizmos.DrawLine(new Vector3(cellBox.minX, 0, cellBox.minY), new Vector3(cellBox.maxX, 0, cellBox.minY));
-                Gizmos.DrawLine(new Vector3(cellBox.minX, 0, cellBox.maxY), new Vector3(cellBox.maxX, 0, cellBox.maxY));
-                Gizmos.DrawLine(new Vector3(cellBox.minX, 0, cellBox.minY), new Vector3(cellBox.minX, 0, cellBox.maxY));
-                Gizmos.DrawLine(new Vector3(cellBox.maxX, 0, cellBox.minY), new Vector3(cellBox.maxX, 0, cellBox.maxY));
-            }
-            
-#if UNITY_EDITOR
-
-            var targetStr = IsNullOrDead(_target) ? _target == null? "null": $"dead({_target.unitID})" : _target.unitID.ToString();
-            var destStr = _cellPath.Count > 0
-                ? $"{_cellPath.Find(x => true).center.ToString("0.##", true)} -> {_cellPath.FindLast(x => true).center.ToString("0.##", true)}"
-                : "none";
-
-            UnityEditor.Handles.Label(transform.position, $"{unitID},{hp},{_currentState},{targetStr},{destStr}");
-#endif
         }
 
         public void Init(uint unitID, KG.Map map, Player owner, Unit.Listener listener)
