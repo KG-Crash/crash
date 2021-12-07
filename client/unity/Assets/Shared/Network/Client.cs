@@ -26,6 +26,7 @@ namespace Network
         private IChannel _channel = null;
 
         public string id { get; set; }
+        public long seed { get; set; }
         public bool Connected => _channel?.Active ?? false;
 
         private Client()

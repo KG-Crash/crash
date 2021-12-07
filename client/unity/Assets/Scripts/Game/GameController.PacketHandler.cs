@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Game
@@ -36,11 +37,13 @@ namespace Game
 
     public class UserListListener : KG.ScrollView.IListener<string>
     {
-        private readonly EnterRoom _response;
+        private string _mine;
+        private readonly List<string> _idList = new List<string>();
 
-        public UserListListener(EnterRoom response)
+        public UserListListener(string mine, IEnumerable<string> idList)
         {
-            _response = response;
+            _mine = mine;
+            _idList = idList.ToList();
         }
 
         public void OnCreated(string data, UIBehaviour item)
@@ -48,7 +51,7 @@ namespace Game
             var text = item.GetComponent<Text>();
             text.text = data;
 
-            var mine = (data == _response.User);
+            var mine = (data == _mine);
             if (mine)
                 text.color = UnityEngine.Color.blue;
         }
@@ -60,7 +63,7 @@ namespace Game
 
         public IEnumerator<string> OnRefresh()
         {
-            return _response.Users.Select(x => x.Id).GetEnumerator();
+            return _idList.GetEnumerator();
         }
     }
 
@@ -106,7 +109,8 @@ namespace Game
         [FlatBufferEvent]
         public async Task<bool> OnCreateRoom(CreateRoom response)
         {
-            await UIView.Show<GameRoomView>(hideBackView: true);
+            var view = await UIView.Show<GameRoomView>();
+            view.userNameList.Refresh(new UserListListener(Client.Instance.id, new string[] { Client.Instance.id }));
             return true;
         }
 
@@ -116,7 +120,7 @@ namespace Game
             var isMine = (response.User == Client.Instance.id);
 
             var view = isMine ? await UIView.Show<GameRoomView>() : UIView.Get<GameRoomView>();
-            view.userNameList.Refresh(new UserListListener(response));
+            view.userNameList.Refresh(new UserListListener(Client.Instance.id, response.Users.Select(x => x.Id)));
             return true;
         }
 
@@ -170,7 +174,8 @@ namespace Game
         [FlatBufferEvent]
         public async Task<bool> OnGameStart(GameStart response)
         {
-            UnityEngine.Debug.Log($"random seed : {response.Seed}");
+            Client.Instance.seed = response.Seed;
+            SceneManager.LoadSceneAsync("OnlineScene");
             return true;
         }
     }
