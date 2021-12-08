@@ -9,19 +9,31 @@ namespace Module
     public class Dispatcher : MonoBehaviour, IDispatchable
     {
         private static Dispatcher _ist = null;
+        public static Dispatcher Instance
+        {
+            get
+            {
+                if (_ist == null)
+                {
+                    var obj = new GameObject("Dispatcher");
+                    _ist = obj.AddComponent<Dispatcher>();
+                    DontDestroyOnLoad(obj);
+                }
+
+                return _ist;
+            }
+        }
+
         private readonly Queue<Action> _queue = new Queue<Action>();
-        public static Dispatcher Instance => _ist;
 
         void Awake()
         {
-            var inst = GetComponent<Dispatcher>();
+            var ist = GetComponent<Dispatcher>();
             if (_ist == null)
             {
-                _ist = inst;
+                _ist = ist;
                 DontDestroyOnLoad(gameObject);
             }
-            else if (_ist != inst)
-                Destroy(gameObject);
         }
 
         public void Update()
@@ -56,5 +68,4 @@ namespace Module
             yield return null;
         }
     }
-
 }

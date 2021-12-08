@@ -4208,7 +4208,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1122248843}
   - component: {fileID: 1122248845}
-  - component: {fileID: 1122248844}
   - component: {fileID: 1122248847}
   - component: {fileID: 1122248846}
   - component: {fileID: 1122248848}
@@ -4235,18 +4234,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1122248844
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1122248842}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 93d8ea2852229054a9c41e47d7f0e0e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1122248845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4299,6 +4286,7 @@ MonoBehaviour:
   _unitFactory: {fileID: 1122248849}
   _unitPrefabTable: {fileID: 11400000, guid: 90bd777a778c3ef40941d1163ecba028, type: 2}
   _projectilehPrefabTable: {fileID: 11400000, guid: cc0c122d377e12141b81dcb0f6272455, type: 2}
+  _networkMode: 0
 --- !u!114 &1122248848
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5433,9 +5421,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1973897ad4e472447ad20cc0139fd844, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  drawCells: 1
-  drawEdges: 0
-  drawRegionEdges: 0
   <width>k__BackingField: 64
   <height>k__BackingField: 64
   <scale>k__BackingField: 1
