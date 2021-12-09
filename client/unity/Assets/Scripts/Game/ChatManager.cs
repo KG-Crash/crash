@@ -20,9 +20,12 @@ namespace Game
 		[SerializeField] private ScrollRect _scrollRect;
 		[SerializeField] private string _name;
 
+		private GameController _gameController;
+
 		// Start is called before the first frame update
 		void Start()
 		{
+			_gameController = this.gameObject.GetComponent<GameController>();
 			_scrollRect.verticalNormalizedPosition = 0.0f;
 			_name = "ME";
 		}
@@ -47,7 +50,7 @@ namespace Game
 
 			resultMsg = msg;			
 			if(_useCheat)
-				resultMsg = CheatManager.ParseMessage(msg);
+				resultMsg = CheatManager.ParseMessage(msg, _gameController);
 
 			if (msg.Equals(resultMsg))
 			{

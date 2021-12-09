@@ -23,8 +23,6 @@ namespace Game
             Actions = new List<Protocol.Request.Action>()
         };
 
-        private static GameController ist = null;
-
         [NonSerialized] private int _playerID;
         [NonSerialized] private uint _playerTeamID;
         [NonSerialized] private Team _allPlayerByTeam;
@@ -80,7 +78,6 @@ namespace Game
         private void Start()
         {
             Application.targetFrameRate = FPS;
-            ist = this;
         }
 
         private void Update()

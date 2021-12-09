@@ -10,7 +10,7 @@ namespace Game
 {
     public class CheatManager
     {
-        static public string ParseMessage(string msg)
+        static public string ParseMessage(string msg, GameController gameController)
         {
             List<object> paramListToCall = new List<object>();
             object[] matchedParams = Array.Empty<object>();
@@ -109,9 +109,9 @@ namespace Game
                 paramListToCall.Add(arrayParamList.ToArray());
 
             if (paramListToCall.Count > 0)
-                methodInfo.Invoke(null, paramListToCall.ToArray());
+                methodInfo.Invoke(gameController, paramListToCall.ToArray());
             else
-                methodInfo.Invoke(null, (object[])null);
+                methodInfo.Invoke(gameController, (object[])null);
 
             msg = methodInfo.GetCustomAttribute<BuildCommandAttribute>().command + " Cheat enable";
             return msg;
