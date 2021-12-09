@@ -20,7 +20,7 @@ namespace Game
     public partial class GameController
     {
         [BuildCommand("spawn unit")]
-        public static void SpawnUnit(int unitOriginId, uint quantity, int playerNumber = -1)
+        public static void SpawnUnit(int unitOriginId, uint count, int playerNumber = -1)
         {
             Fix64 _startRadian = Fix64.Zero;
             FixVector2 rot;
@@ -33,27 +33,27 @@ namespace Game
             var ctx = new TemporalPlaceContext() { _startRadian = Fix64.Pi / 180.0f * rot.y };
             var positionWS = ist.ScreenMiddlePositionToWorldPosition();
 
-            Debug.Log("유닛 스폰 유닛id : " + unitOriginId + "갯수 : " + quantity);
+            Debug.Log("유닛 스폰 유닛id : " + unitOriginId + "갯수 : " + count);
             if (playerNumber == -1)
             {
-                for (int i = 0; i < quantity; i++)
+                for (int i = 0; i < count; i++)
                     ist.SpawnUnitToPosition(unitOriginId, ist.GetPlayer((uint)ist._playerID), positionWS, ctx);
             }
             else
             {
-                for (int i = 0; i < quantity; i++)
+                for (int i = 0; i < count; i++)
                     ist.SpawnUnitToPlayerStart(unitOriginId, ist.GetPlayer((uint)playerNumber), ctx);
             }
         }
 
         [BuildCommand("attack to")]
-        public static void AttackTo(int targetPlayerNumber, params int[] unitOriginIdList)
+        public static void AttackTo(int targetPlayerNumber, params int[] unitOriginIds)
         {
             if (ist._playerID == targetPlayerNumber)
                 return;
 
             Debug.Log($"어택땅 타겟 플레이어 : {targetPlayerNumber}");
-            foreach (var unitID in unitOriginIdList)
+            foreach (var unitID in unitOriginIds)
             {
                 Debug.Log(unitID);
             }
@@ -61,7 +61,7 @@ namespace Game
             Player player = ist.GetPlayer((uint)targetPlayerNumber);
             var targetPosition = ist.GetSpawnPosition(player.spawnIndex);
 
-            if (unitOriginIdList.Length == 0)
+            if (unitOriginIds.Length == 0)
             {
                 player.targetPlayerID = (uint)targetPlayerNumber;
             }
@@ -69,9 +69,9 @@ namespace Game
             {
                 foreach (var unit in player.units)
                 {
-                    for (int i = 0; i < unitOriginIdList.Length; i++)
+                    for (int i = 0; i < unitOriginIds.Length; i++)
                     {
-                        if (unit.unitOriginID == unitOriginIdList[i])
+                        if (unit.unitOriginID == unitOriginIds[i])
                         {
                             unit.MoveTo(targetPosition);
                         }
