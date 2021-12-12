@@ -185,6 +185,11 @@ namespace Game
         public Fix64 hp
         {
             get => _hp;
+            set 
+            {
+                _hp = value;
+                SetTintByHP(_hp, maxhp);
+            }
         }
 
         public int killScore
@@ -326,11 +331,12 @@ namespace Game
         public void Init(uint unitID, KG.Map map, Player owner, Unit.Listener listener)
         {
             InitAnimation();
+            LoadMaterials();
             this.unitID = unitID;
             this._map = map;
             this._owner = owner;
             this._listener = listener;
-            _hp = maxhp;
+            hp = maxhp;
         }
 
         private void Update()
@@ -578,12 +584,7 @@ namespace Game
 
         public void AddHP(Fix64 value, Unit from = null)
         {
-            _hp += value;
-            if (_hp > maxhp)
-                _hp = maxhp;
-
-            if (_hp < Fix64.Zero)
-                _hp = Fix64.Zero;
+            hp = Fix64.Clamp(Fix64.Zero, maxhp, hp + value);
 
             if (value < Fix64.Zero)
                 listener?.OnDamaged(this, from, -value);

@@ -11,5 +11,10 @@ namespace FixMath.NET
         {
             return a > b? a: b;
         }
+
+        public static Fix64 Clamp(Fix64 min, Fix64 max, Fix64 value)
+        {
+            return Max(Min(max, value), min);
+        }
     }
 }
