@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class CrashSettings : ScriptableObject
 {
-    public const string _crashSettingsPath = "Assets/Editor/CrashSettings.asset";
+    public const string _crashSettingsPath = "Assets/Editor/Objects/CrashSettings.asset";
 
     [SerializeField]
     public bool _mapDrawCells;
