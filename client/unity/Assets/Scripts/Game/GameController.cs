@@ -63,6 +63,8 @@ namespace Game
             FPS = Shared.Const.Time.FPS;
             TPS = Shared.Const.Time.TPS;
             IsNetworkMode = _networkMode;
+
+            Application.targetFrameRate = FPS;
             
             InitInput();
             OnLoadScene();
