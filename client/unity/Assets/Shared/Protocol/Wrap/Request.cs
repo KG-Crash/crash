@@ -265,8 +265,8 @@ namespace Protocol.Request
 
         public int Id { get; set; }
         public int Frame { get; set; }
-        public int PositionX { get; set; }
-        public int PositionY { get; set; }
+        public uint Param1 { get; set; }
+        public uint Param2 { get; set; }
 
         public Action()
         { }
@@ -275,18 +275,18 @@ namespace Protocol.Request
         {
             this.Id = obj.Id;
             this.Frame = obj.Frame;
-            this.PositionX = obj.PositionX;
-            this.PositionY = obj.PositionY;
+            this.Param1 = obj.Param1;
+            this.Param2 = obj.Param2;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Request.Action> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
             var _id = this.Id;
             var _frame = this.Frame;
-            var _positionX = this.PositionX;
-            var _positionY = this.PositionY;
+            var _param1 = this.Param1;
+            var _param2 = this.Param2;
 
-            return FlatBuffer.Request.Action.CreateAction(builder, _id, _frame, _positionX, _positionY);
+            return FlatBuffer.Request.Action.CreateAction(builder, _id, _frame, _param1, _param2);
         }
 
         public byte[] Serialize()

@@ -326,11 +326,11 @@ func (state *Actor) Receive(ctx actor.Context) {
 			return
 		}
 
-		if err := state.playable(); err != nil {
-			result.Error = err.Code()
-			ctx.Send(x.Sender, result)
-			return
-		}
+		// if err := state.playable(); err != nil {
+		// 	result.Error = err.Code()
+		// 	ctx.Send(x.Sender, result)
+		// 	return
+		// }
 
 		// 랜덤시드 설정
 		seed, _ := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
@@ -363,10 +363,10 @@ func (state *Actor) Receive(ctx actor.Context) {
 		}
 		for _, action := range x.Actions {
 			result.Actions = append(result.Actions, response.Action{
-				Id:        action.Id,
-				Frame:     action.Frame,
-				PositionX: action.PositionX,
-				PositionY: action.PositionY,
+				Id:     action.Id,
+				Frame:  action.Frame,
+				Param1: action.Param1,
+				Param2: action.Param2,
 			})
 		}
 

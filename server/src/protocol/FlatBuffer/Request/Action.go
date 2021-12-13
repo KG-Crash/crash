@@ -50,28 +50,28 @@ func (rcv *Action) MutateFrame(n int32) bool {
 	return rcv._tab.MutateInt32Slot(6, n)
 }
 
-func (rcv *Action) PositionX() int32 {
+func (rcv *Action) Param1() uint32 {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(8))
 	if o != 0 {
-		return rcv._tab.GetInt32(o + rcv._tab.Pos)
+		return rcv._tab.GetUint32(o + rcv._tab.Pos)
 	}
 	return 0
 }
 
-func (rcv *Action) MutatePositionX(n int32) bool {
-	return rcv._tab.MutateInt32Slot(8, n)
+func (rcv *Action) MutateParam1(n uint32) bool {
+	return rcv._tab.MutateUint32Slot(8, n)
 }
 
-func (rcv *Action) PositionY() int32 {
+func (rcv *Action) Param2() uint32 {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(10))
 	if o != 0 {
-		return rcv._tab.GetInt32(o + rcv._tab.Pos)
+		return rcv._tab.GetUint32(o + rcv._tab.Pos)
 	}
 	return 0
 }
 
-func (rcv *Action) MutatePositionY(n int32) bool {
-	return rcv._tab.MutateInt32Slot(10, n)
+func (rcv *Action) MutateParam2(n uint32) bool {
+	return rcv._tab.MutateUint32Slot(10, n)
 }
 
 func ActionStart(builder *flatbuffers.Builder) {
@@ -83,11 +83,11 @@ func ActionAddId(builder *flatbuffers.Builder, id int32) {
 func ActionAddFrame(builder *flatbuffers.Builder, frame int32) {
 	builder.PrependInt32Slot(1, frame, 0)
 }
-func ActionAddPositionX(builder *flatbuffers.Builder, positionX int32) {
-	builder.PrependInt32Slot(2, positionX, 0)
+func ActionAddParam1(builder *flatbuffers.Builder, param1 uint32) {
+	builder.PrependUint32Slot(2, param1, 0)
 }
-func ActionAddPositionY(builder *flatbuffers.Builder, positionY int32) {
-	builder.PrependInt32Slot(3, positionY, 0)
+func ActionAddParam2(builder *flatbuffers.Builder, param2 uint32) {
+	builder.PrependUint32Slot(3, param2, 0)
 }
 func ActionEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

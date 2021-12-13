@@ -18,7 +18,10 @@ namespace Game
         public static Fix64 TimeDelta => (Fix64.One * TimeSpeed) / new Fix64(FPS);
         public static Fix64 TurnRate => Fix64.One / new Fix64(8);
         public int Frame { get; private set; }
-        private Protocol.Request.ActionQueue _actionQueue = new Protocol.Request.ActionQueue();
+        private readonly Protocol.Request.ActionQueue _actionQueue = new Protocol.Request.ActionQueue 
+        {
+            Actions = new List<Protocol.Request.Action>()
+        };
 
         private static GameController ist = null;
 
@@ -85,12 +88,20 @@ namespace Game
             UpdateForDebug();
             _player.UpdateUpgrade(UnityEngine.Time.time);
             UpdateUnitInFrustumPlane();
-            //
-            // if (Frame++ >= TPS)
-            // {
-            //     OnTurnChanged();
-            //     Frame = 0;
-            // }
+
+            EnqueueAction(new Protocol.Request.Action
+            {
+                Frame = Frame,
+                Id = 0,
+                Param1 = (uint)(TPS - Frame),
+                Param2 = (uint)Frame
+            });
+
+            if (++Frame >= TPS)
+            {
+                OnTurnChanged();
+                Frame = 0;
+            }
         }
 
         private void OnDestroy()
@@ -103,7 +114,10 @@ namespace Game
 
         private void OnTurnChanged()
         {
-            // 서버에 ActionQueue 보냄
+            if (IsNetworkMode)
+            {
+                _ = Client.Send(_actionQueue);
+            }
             _actionQueue.Actions.Clear();
         }
 

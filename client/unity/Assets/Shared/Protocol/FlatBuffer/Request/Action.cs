@@ -21,17 +21,17 @@ public struct Action : IFlatbufferObject
 
   public int Id { get { int o = __p.__offset(4); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
   public int Frame { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
-  public int PositionX { get { int o = __p.__offset(8); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
-  public int PositionY { get { int o = __p.__offset(10); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
+  public uint Param1 { get { int o = __p.__offset(8); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
+  public uint Param2 { get { int o = __p.__offset(10); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
 
   public static Offset<FlatBuffer.Request.Action> CreateAction(FlatBufferBuilder builder,
       int id = 0,
       int frame = 0,
-      int positionX = 0,
-      int positionY = 0) {
+      uint param1 = 0,
+      uint param2 = 0) {
     builder.StartTable(4);
-    Action.AddPositionY(builder, positionY);
-    Action.AddPositionX(builder, positionX);
+    Action.AddParam2(builder, param2);
+    Action.AddParam1(builder, param1);
     Action.AddFrame(builder, frame);
     Action.AddId(builder, id);
     return Action.EndAction(builder);
@@ -40,8 +40,8 @@ public struct Action : IFlatbufferObject
   public static void StartAction(FlatBufferBuilder builder) { builder.StartTable(4); }
   public static void AddId(FlatBufferBuilder builder, int id) { builder.AddInt(0, id, 0); }
   public static void AddFrame(FlatBufferBuilder builder, int frame) { builder.AddInt(1, frame, 0); }
-  public static void AddPositionX(FlatBufferBuilder builder, int positionX) { builder.AddInt(2, positionX, 0); }
-  public static void AddPositionY(FlatBufferBuilder builder, int positionY) { builder.AddInt(3, positionY, 0); }
+  public static void AddParam1(FlatBufferBuilder builder, uint param1) { builder.AddUint(2, param1, 0); }
+  public static void AddParam2(FlatBufferBuilder builder, uint param2) { builder.AddUint(3, param2, 0); }
   public static Offset<FlatBuffer.Request.Action> EndAction(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Request.Action>(o);

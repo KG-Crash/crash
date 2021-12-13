@@ -67,8 +67,8 @@ table Whisper {
 table Action {
 	frame: int;
 	id: int;
-	positionX: int;
-	positionY: int;
+	param1: uint;
+	param2: uint;
 }
 
 table ActionQueue {

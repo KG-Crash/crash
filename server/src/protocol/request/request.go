@@ -372,10 +372,10 @@ func (obj *Whisper) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type Action struct {
-	Id        int32
-	Frame     int32
-	PositionX int32
-	PositionY int32
+	Id     int32
+	Frame  int32
+	Param1 uint32
+	Param2 uint32
 }
 
 func (obj *Action) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
@@ -383,8 +383,8 @@ func (obj *Action) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	source.ActionStart(builder)
 	source.ActionAddId(builder, obj.Id)
 	source.ActionAddFrame(builder, obj.Frame)
-	source.ActionAddPositionX(builder, obj.PositionX)
-	source.ActionAddPositionY(builder, obj.PositionY)
+	source.ActionAddParam1(builder, obj.Param1)
+	source.ActionAddParam2(builder, obj.Param2)
 
 	return source.ActionEnd(builder)
 }
@@ -392,8 +392,8 @@ func (obj *Action) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 func (obj *Action) parse(x *source.Action) *Action {
 	obj.Id = x.Id()
 	obj.Frame = x.Frame()
-	obj.PositionX = x.PositionX()
-	obj.PositionY = x.PositionY()
+	obj.Param1 = x.Param1()
+	obj.Param2 = x.Param2()
 
 	return obj
 }

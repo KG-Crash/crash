@@ -4286,7 +4286,7 @@ MonoBehaviour:
   _unitFactory: {fileID: 1122248849}
   _unitPrefabTable: {fileID: 11400000, guid: 90bd777a778c3ef40941d1163ecba028, type: 2}
   _projectilehPrefabTable: {fileID: 11400000, guid: cc0c122d377e12141b81dcb0f6272455, type: 2}
-  _networkMode: 0
+  _networkMode: 1
 --- !u!114 &1122248848
 MonoBehaviour:
   m_ObjectHideFlags: 0

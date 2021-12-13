@@ -172,11 +172,11 @@ public partial class LobbyController : MonoBehaviour
     [FlatBufferEvent]
     public async Task<bool> OnGameStart(GameStart response)
     {
-        //if (response.Error != 0)
-        //{
-        //    UnityEngine.Debug.LogError("게임을 시작할 수 없음");
-        //    return true;
-        //}
+        if (response.Error != 0)
+        {
+            UnityEngine.Debug.LogError("게임을 시작할 수 없음");
+            return true;
+        }
 
         Client.Instance.seed = response.Seed;
         SceneManager.LoadSceneAsync("OnlineScene");
