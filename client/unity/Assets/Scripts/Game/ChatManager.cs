@@ -11,73 +11,73 @@ using Protocol.Request;
 
 namespace Game
 {
-	public class ChatManager : MonoBehaviour
-	{
-		[SerializeField] public bool _useCheat;
+    public class ChatManager : MonoBehaviour
+    {
+        [SerializeField] public bool _useCheat;
 
-		[SerializeField] private Text _chatLog;
-		[SerializeField] private InputField _input;
-		[SerializeField] private ScrollRect _scrollRect;
-		[SerializeField] private string _name;
+        [SerializeField] private Text _chatLog;
+        [SerializeField] private InputField _input;
+        [SerializeField] private ScrollRect _scrollRect;
+        [SerializeField] private string _name;
 
-		private GameController _gameController;
+        private GameController _gameController;
 
-		// Start is called before the first frame update
-		void Start()
-		{
-			_gameController = this.gameObject.GetComponent<GameController>();
-			_scrollRect.verticalNormalizedPosition = 0.0f;
-			_name = "ME";
-		}
+        // Start is called before the first frame update
+        void Start()
+        {
+            _gameController = this.gameObject.GetComponent<GameController>();
+            _scrollRect.verticalNormalizedPosition = 0.0f;
+            _name = "ME";
+        }
 
-		// Update is called once per frame
-		void Update()
-		{
-			if (Input.GetKeyDown(KeyCode.Return))
-				SendMessage();
-		}
+        // Update is called once per frame
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Return))
+                SendMessage();
+        }
 
-		public async void SendMessage()
-		{
-			if (_input.text.Equals(" ") || _input.text.Equals(""))
-				return;
+        public async void SendMessage()
+        {
+            if (_input.text.Equals(" ") || _input.text.Equals(""))
+                return;
 
-			string msg = _input.text;
-			string resultMsg = "";
+            string msg = _input.text;
+            string resultMsg = "";
 
-			_input.ActivateInputField();
-			_input.text = "";
+            _input.ActivateInputField();
+            _input.text = "";
 
-			resultMsg = msg;			
-			if(_useCheat)
-				resultMsg = CheatManager.ParseMessage(msg, _gameController);
+            resultMsg = msg;            
+            if(_useCheat)
+                resultMsg = CheatManager.ParseMessage(msg, _gameController);
 
-			if (msg.Equals(resultMsg))
-			{
-				//await Client.Send(new Chat
-				//{
-				//	Message = msg
-				//});	
-				RecvMessage(resultMsg);
-			}
-			else
-			{
-				Debug.Log(resultMsg);
-				PrintLog(resultMsg);
-			}
-			return;
-		}
+            if (msg.Equals(resultMsg))
+            {
+                //await Client.Send(new Chat
+                //{
+                //  Message = msg
+                //});   
+                RecvMessage(resultMsg);
+            }
+            else
+            {
+                Debug.Log(resultMsg);
+                PrintLog(resultMsg);
+            }
+            return;
+        }
 
-		public void RecvMessage(string msg)
-		{
-			_chatLog.text += "\n" + _name + " : " + msg;
-			_scrollRect.verticalNormalizedPosition = 0.0f;
-		}
+        public void RecvMessage(string msg)
+        {
+            _chatLog.text += "\n" + _name + " : " + msg;
+            _scrollRect.verticalNormalizedPosition = 0.0f;
+        }
 
-		public void PrintLog(string msg)
-		{
-			_chatLog.text += "\n" + msg;
-			_scrollRect.verticalNormalizedPosition = 0.0f;
-		}
-	}
+        public void PrintLog(string msg)
+        {
+            _chatLog.text += "\n" + msg;
+            _scrollRect.verticalNormalizedPosition = 0.0f;
+        }
+    }
 }
