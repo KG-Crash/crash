@@ -1,12 +1,9 @@
 package room
 
 import (
-	"crypto/rand"
 	"enum"
 	"exception"
 	"log"
-	"math"
-	"math/big"
 	"msg"
 	"protocol/response"
 	"sort"
@@ -60,8 +57,7 @@ func (state *Actor) selects() *actor.PIDSet {
 	return result
 }
 
-func (state *Actor) sendStateResponse(ctx actor.Context, fn func(users []msg.UserState, master msg.User) interface{}) {
-
+func (state *Actor) getUsers(ctx actor.Context) {
 	var master *msg.User = nil
 	users := []msg.UserState{}
 	teams := map[*actor.PID]int{}
@@ -93,7 +89,10 @@ func (state *Actor) sendStateResponse(ctx actor.Context, fn func(users []msg.Use
 
 				// 모든 유저 정보 수집이 끝나면 응답 메시지 전달
 				if gathered == requests {
-					ctx.Respond(fn(users, *master))
+					ctx.Respond(&msg.ResponseGetUsers{
+						Master: *master,
+						Users:  users,
+					})
 				}
 			})
 		})
@@ -164,8 +163,20 @@ func (state *Actor) playable() exception.Error {
 
 func (state *Actor) Receive(ctx actor.Context) {
 	switch x := ctx.Message().(type) {
+
+	case *msg.RequestGetUsers:
+		state.getUsers(ctx)
+
 	case *msg.RequestGetRoomState:
-		state.sendStateResponse(ctx, func(users []msg.UserState, master msg.User) interface{} {
+		future := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
+
+		ctx.AwaitFuture(future, func(res interface{}, err error) {
+			if err != nil {
+				log.Fatalf("Failed to handle, message : %#v.", ctx.Message())
+				return
+			}
+
+			x := res.(*msg.ResponseGetUsers)
 			result := &msg.ResponseGetRoomState{
 				PID: ctx.Self(),
 				State: msg.RoomConfig{
@@ -173,12 +184,12 @@ func (state *Actor) Receive(ctx actor.Context) {
 					Title: state.config.Title,
 					Teams: state.config.Team,
 				},
-				Users:  users,
-				Master: master,
+				Users:  x.Users,
+				Master: x.Master,
 				Teams:  state.users,
 			}
 
-			return result
+			ctx.Respond(result)
 		})
 
 	case *msg.RequestEnterRoom:
@@ -199,17 +210,25 @@ func (state *Actor) Receive(ctx actor.Context) {
 		}
 
 		state.users[i].Add(x.Sender)
-		state.sendStateResponse(ctx, func(users []msg.UserState, master msg.User) interface{} {
-			return &msg.ResponseEnterRoom{
+		future := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
+
+		ctx.AwaitFuture(future, func(res interface{}, err error) {
+			if err != nil {
+				log.Fatalf("Failed to handle, message : %#v.", ctx.Message())
+				return
+			}
+
+			x := res.(*msg.ResponseGetUsers)
+			ctx.Respond(&msg.ResponseEnterRoom{
 				PID: ctx.Self(),
 				RoomState: msg.RoomConfig{
 					ID:    state.id,
 					Title: state.config.Title,
 					Teams: state.config.Team,
 				},
-				Users:  users,
-				Master: master,
-			}
+				Users:  x.Users,
+				Master: x.Master,
+			})
 		})
 
 	case *msg.Leave:
@@ -333,8 +352,8 @@ func (state *Actor) Receive(ctx actor.Context) {
 		// }
 
 		// 랜덤시드 설정
-		seed, _ := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
-		result.Seed = seed.Int64()
+		// seed, _ := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
+		// result.Seed = seed.Int64()
 
 		state.playing = true
 		users.ForEach(func(i int, pid *actor.PID) {

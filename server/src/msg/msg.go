@@ -122,6 +122,13 @@ type GameStart struct {
 	Sender *actor.PID
 }
 
+type RequestGetUsers struct{}
+
+type ResponseGetUsers struct {
+	Users  []UserState
+	Master User
+}
+
 type Action struct {
 	Sender  *actor.PID
 	UID     string

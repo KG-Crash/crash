@@ -71,6 +71,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &ActionQueue{}
 		return x.Deserialize(payload)
 
+	case TEAM:
+		x := &Team{}
+		return x.Deserialize(payload)
+
 	case GAME_START:
 		x := &GameStart{}
 		return x.Deserialize(payload)
@@ -124,6 +128,9 @@ func Text(p protocol.Protocol) string {
 	case *ActionQueue:
 		return "ACTION_QUEUE"
 
+	case *Team:
+		return "TEAM"
+
 	case *GameStart:
 		return "GAME_START"
 	}
@@ -145,6 +152,7 @@ const (
 	WHISPER
 	ACTION
 	ACTION_QUEUE
+	TEAM
 	GAME_START
 )
 
@@ -774,22 +782,72 @@ func (obj *ActionQueue) Deserialize(bytes []byte) protocol.Protocol {
 	return obj.parse(root)
 }
 
+type Team struct {
+	Users []string
+}
+
+func (obj *Team) users(builder *flatbuffers.Builder, users []string) flatbuffers.UOffsetT {
+	_size := len(users)
+	offsets := make([]flatbuffers.UOffsetT, _size)
+	for i, x := range users {
+		offsets[_size-i-1] = builder.CreateString(x)
+	}
+
+	builder.StartVector(4, _size, 4)
+	for _, offset := range offsets {
+		builder.PrependUOffsetT(offset)
+	}
+	return builder.EndVector(_size)
+}
+
+func (obj *Team) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_users := obj.users(builder, obj.Users)
+
+	source.TeamStart(builder)
+	source.TeamAddUsers(builder, _users)
+
+	return source.TeamEnd(builder)
+}
+
+func (obj *Team) parse(x *source.Team) *Team {
+
+	obj.Users = []string{}
+	for i := 0; i < x.UsersLength(); i++ {
+		obj.Users = append(obj.Users, string(x.Users(i)))
+	}
+
+	return obj
+}
+
+func (obj *Team) Identity() int {
+	return TEAM
+}
+
+func (obj *Team) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *Team) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsTeam(bytes, 0)
+	return obj.parse(root)
+}
+
 type GameStart struct {
-	Seed  int64
 	Error uint32
 }
 
 func (obj *GameStart) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 
 	source.GameStartStart(builder)
-	source.GameStartAddSeed(builder, obj.Seed)
 	source.GameStartAddError(builder, obj.Error)
 
 	return source.GameStartEnd(builder)
 }
 
 func (obj *GameStart) parse(x *source.GameStart) *GameStart {
-	obj.Seed = x.Seed()
 	obj.Error = x.Error()
 
 	return obj

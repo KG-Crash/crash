@@ -77,7 +77,10 @@ table ActionQueue {
 	error: uint32;
 }
 
+table Team {
+	users: [string];
+}
+
 table GameStart {
-	seed: int64;
 	error: uint32;
 }

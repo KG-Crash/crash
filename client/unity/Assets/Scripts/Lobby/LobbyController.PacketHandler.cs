@@ -178,7 +178,7 @@ public partial class LobbyController : MonoBehaviour
             return true;
         }
 
-        Client.Instance.seed = response.Seed;
+        //Client.Instance.seed = response.Seed;
         SceneManager.LoadSceneAsync("OnlineScene");
         return true;
     }

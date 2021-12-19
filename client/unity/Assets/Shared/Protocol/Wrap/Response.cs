@@ -19,6 +19,7 @@ namespace Protocol.Response
         WHISPER,
         ACTION,
         ACTION_QUEUE,
+        TEAM,
         GAME_START
     }
 
@@ -561,11 +562,44 @@ namespace Protocol.Response
         }
     }
 
+    public class Team : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.TEAM;
+
+        public List<string> Users { get; set; }
+
+        public Team()
+        { }
+
+        public Team(FlatBuffer.Response.Team obj)
+        {
+            this.Users = Enumerable.Range(0, obj.UsersLength).Select(x => obj.Users(x)).ToList();
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.Team> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _users = FlatBuffer.Response.Team.CreateUsersVector(builder, this.Users.Select(x => builder.CreateString(x)).ToArray());
+
+            return FlatBuffer.Response.Team.CreateTeam(builder, _users);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Team Deserialize(byte[] bytes)
+        {
+            return new Team(FlatBuffer.Response.Team.GetRootAsTeam(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
     public class GameStart : IProtocol
     {
         public uint Identity => (uint)Protocol.Response.Identity.GAME_START;
 
-        public long Seed { get; set; }
         public uint Error { get; set; }
 
         public GameStart()
@@ -573,16 +607,14 @@ namespace Protocol.Response
 
         public GameStart(FlatBuffer.Response.GameStart obj)
         {
-            this.Seed = obj.Seed;
             this.Error = obj.Error;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.GameStart> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _seed = this.Seed;
             var _error = this.Error;
 
-            return FlatBuffer.Response.GameStart.CreateGameStart(builder, _seed, _error);
+            return FlatBuffer.Response.GameStart.CreateGameStart(builder, _error);
         }
 
         public byte[] Serialize()
