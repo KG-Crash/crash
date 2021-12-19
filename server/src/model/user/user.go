@@ -30,6 +30,23 @@ func New(id string, conn net.Conn) *Actor {
 	}
 }
 
+func toUserResponse(user msg.UserState) response.User {
+	return response.User{
+		Id:   user.ID,
+		Team: int32(user.Team),
+	}
+}
+
+func toUserResponses(users []msg.UserState) []response.User {
+	result := []response.User{}
+
+	for _, user := range users {
+		result = append(result, toUserResponse(user))
+	}
+
+	return result
+}
+
 func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) {
 
 	switch x := p.(type) {
@@ -54,15 +71,8 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 
 				result := &response.EnterRoom{
 					User:   state.ID,
-					Users:  []response.User{},
+					Users:  toUserResponses(x.Users),
 					Master: x.Master.ID,
-				}
-
-				for _, user := range x.Users {
-					result.Users = append(result.Users, response.User{
-						Id:   user.ID,
-						Team: int32(user.Team),
-					})
 				}
 
 				for _, user := range x.Users {
@@ -244,6 +254,24 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			Sender:  ctx.Self(),
 			UID:     state.ID,
 			Actions: x.Actions,
+		})
+
+	case *request.Ready:
+		if state.Room == nil {
+			ctx.Send(ctx.Self(), &response.ActionQueue{
+				Error: enum.ResultCode.NotEnteredAnyGameRoom,
+			})
+			return
+		}
+
+		future := ctx.RequestFuture(state.Room, &msg.RequestReady{}, time.Hour)
+		ctx.AwaitFuture(future, func(res interface{}, err error) {
+			x := res.(*msg.ResponseReady)
+
+			ctx.Send(ctx.Self(), &response.Ready{
+				Seed:  x.Seed,
+				Users: toUserResponses(x.Users),
+			})
 		})
 	}
 }

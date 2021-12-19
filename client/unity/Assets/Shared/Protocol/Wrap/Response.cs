@@ -20,7 +20,8 @@ namespace Protocol.Response
         ACTION,
         ACTION_QUEUE,
         TEAM,
-        GAME_START
+        GAME_START,
+        READY
     }
 
     public class Room : IProtocol
@@ -627,6 +628,43 @@ namespace Protocol.Response
         public static GameStart Deserialize(byte[] bytes)
         {
             return new GameStart(FlatBuffer.Response.GameStart.GetRootAsGameStart(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class Ready : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.READY;
+
+        public long Seed { get; set; }
+        public List<User> Users { get; set; }
+
+        public Ready()
+        { }
+
+        public Ready(FlatBuffer.Response.Ready obj)
+        {
+            this.Seed = obj.Seed;
+            this.Users = Enumerable.Range(0, obj.UsersLength).Select(x => new User(obj.Users(x).Value)).ToList();
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.Ready> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _seed = this.Seed;
+            var _users = FlatBuffer.Response.Ready.CreateUsersVector(builder, this.Users.Select(x => x.ToFlatBuffer(builder)).ToArray());
+
+            return FlatBuffer.Response.Ready.CreateReady(builder, _seed, _users);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Ready Deserialize(byte[] bytes)
+        {
+            return new Ready(FlatBuffer.Response.Ready.GetRootAsReady(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 }

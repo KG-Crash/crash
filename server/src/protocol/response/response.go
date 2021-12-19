@@ -79,6 +79,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &GameStart{}
 		return x.Deserialize(payload)
 
+	case READY:
+		x := &Ready{}
+		return x.Deserialize(payload)
+
 	}
 
 	return nil
@@ -133,6 +137,9 @@ func Text(p protocol.Protocol) string {
 
 	case *GameStart:
 		return "GAME_START"
+
+	case *Ready:
+		return "READY"
 	}
 	return ""
 }
@@ -154,6 +161,7 @@ const (
 	ACTION_QUEUE
 	TEAM
 	GAME_START
+	READY
 )
 
 type Room struct {
@@ -866,5 +874,66 @@ func (obj *GameStart) Serialize() []byte {
 
 func (obj *GameStart) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsGameStart(bytes, 0)
+	return obj.parse(root)
+}
+
+type Ready struct {
+	Seed  int64
+	Users []User
+}
+
+func (obj *Ready) users(builder *flatbuffers.Builder, users []User) flatbuffers.UOffsetT {
+	_size := len(users)
+	offsets := make([]flatbuffers.UOffsetT, _size)
+	for i, x := range users {
+		offsets[_size-i-1] = x.create(builder)
+	}
+
+	builder.StartVector(4, _size, 4)
+	for _, offset := range offsets {
+		builder.PrependUOffsetT(offset)
+	}
+	return builder.EndVector(_size)
+}
+
+func (obj *Ready) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_users := obj.users(builder, obj.Users)
+
+	source.ReadyStart(builder)
+	source.ReadyAddSeed(builder, obj.Seed)
+	source.ReadyAddUsers(builder, _users)
+
+	return source.ReadyEnd(builder)
+}
+
+func (obj *Ready) parse(x *source.Ready) *Ready {
+	obj.Seed = x.Seed()
+
+	obj.Users = []User{}
+	for i := 0; i < x.UsersLength(); i++ {
+		_user := &source.User{}
+		x.Users(_user, i)
+
+		user := User{}
+		user.parse(_user)
+		obj.Users = append(obj.Users, user)
+	}
+
+	return obj
+}
+
+func (obj *Ready) Identity() int {
+	return READY
+}
+
+func (obj *Ready) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *Ready) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsReady(bytes, 0)
 	return obj.parse(root)
 }

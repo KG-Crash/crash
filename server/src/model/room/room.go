@@ -1,9 +1,12 @@
 package room
 
 import (
+	"crypto/rand"
 	"enum"
 	"exception"
 	"log"
+	"math"
+	"math/big"
 	"msg"
 	"protocol/response"
 	"sort"
@@ -351,13 +354,22 @@ func (state *Actor) Receive(ctx actor.Context) {
 		// 	return
 		// }
 
-		// 랜덤시드 설정
-		// seed, _ := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
-		// result.Seed = seed.Int64()
-
 		state.playing = true
 		users.ForEach(func(i int, pid *actor.PID) {
 			ctx.Send(pid, result)
+		})
+
+	case *msg.RequestReady:
+		future := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
+		ctx.AwaitFuture(future, func(res interface{}, err error) {
+			x := res.(*msg.ResponseGetUsers)
+
+			// 랜덤시드 설정
+			seed, _ := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
+			ctx.Respond(&msg.ResponseReady{
+				Seed:  seed.Int64(),
+				Users: x.Users,
+			})
 		})
 
 	case *msg.Action:

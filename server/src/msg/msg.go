@@ -129,6 +129,14 @@ type ResponseGetUsers struct {
 	Master User
 }
 
+type RequestReady struct {
+}
+
+type ResponseReady struct {
+	Seed  int64
+	Users []UserState
+}
+
 type Action struct {
 	Sender  *actor.PID
 	UID     string

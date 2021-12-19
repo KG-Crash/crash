@@ -42,3 +42,7 @@ table ActionQueue {
 }
 
 table GameStart {}
+
+table Ready {
+	
+}

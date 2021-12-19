@@ -84,3 +84,8 @@ table Team {
 table GameStart {
 	error: uint32;
 }
+
+table Ready {
+	seed: int64;
+	users: [User];
+}
