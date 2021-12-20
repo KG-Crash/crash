@@ -16,45 +16,24 @@ namespace Game
         [SerializeField] private Transform[] _spawnPositions;
 
         #endregion 유닛 스폰 필드
-        
         #region 유닛 스폰 로직
-        
         public class TemporalPlaceContext
         {
-            public static readonly Fix64 _radiusinc = 1;
-            public static readonly Fix64 _radianmax = Fix64.Pi * 2;
-            public static readonly Fix64 _radianinc = _radianmax / (10);
-            
-            public Fix64 _radius = Fix64.Zero;
-            public Fix64 _radian = _radianmax;
-            public Fix64 _startRadian = Fix64.Zero;
             public List<Unit> _placedUnits = new List<Unit>();
+            public Queue<Map.Cell> _nearCellQueue = new Queue<Map.Cell>();
 
-            public FixVector3 GetOffset()
-            {
-                return new FixVector3(Fix64.Cos(_radian + _startRadian), 0, Fix64.Sin(_radian + _startRadian)) * _radius;
-            }
-
-            public void IncreaseOffset()
-            {
-                if (_radian >= _radianmax)
-                {
-                    _radius += _radiusinc;
-                    _radian = Fix64.Zero;
-                }
-                else
-                {
-                    _radian += _radianinc;
-                }
-            }
-            
             public static void PlaceUnit(KG.Map map, TemporalPlaceContext ctx, Unit unit, FixVector3 centerPosition)
             {
-                var pos = centerPosition;
-                
+                FixVector3 pos;
+                Map.Cell nowCell;
+
+                if(ctx._nearCellQueue.Count <= 0)
+                    ctx._nearCellQueue.Enqueue(map[centerPosition]);
+
                 while (true)
                 {
-                    pos = centerPosition + ctx.GetOffset();
+                    nowCell = ctx._nearCellQueue.Dequeue();
+                    pos = nowCell.position;
                     var rect = unit.GetCollisionBox(pos);
                     var noneCollided = true;
 
@@ -69,7 +48,6 @@ namespace Game
                             }
                         }
                     }
-                    
                     if (noneCollided)
                         foreach(var placedUnit in Enumerable.Reverse(ctx._placedUnits))
                         {
@@ -82,15 +60,17 @@ namespace Game
 
                     if (noneCollided)
                         break;
-                    
-                    ctx.IncreaseOffset();
+
+                    foreach(var near in map.NearsForSpawn(nowCell))
+                    {
+                        if(!ctx._nearCellQueue.Contains(near))
+                            ctx._nearCellQueue.Enqueue(near);
+                    }
                 }
-                
                 unit.position = pos;
                 ctx._placedUnits.Add(unit);
             }
         }
-        
         public FixVector3 GetSpawnPosition(int index)
         {
             return _spawnPositions[index].position;
@@ -159,8 +139,7 @@ namespace Game
         {
             var player = AddNewPlayer(home? (uint)0: 1, spawnIndex);
             var rot = GetSpawnRotation(spawnIndex);
-            var ctx = new TemporalPlaceContext() { _startRadian = Fix64.Pi / 180.0f * rot.y };
-
+            var ctx = new TemporalPlaceContext();
             foreach (var unitType in unitTypes)
             {
                 SpawnUnitToPlayerStart(unitType, player, ctx);

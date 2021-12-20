@@ -30,10 +30,10 @@ namespace Game
             else
                 rot = GetSpawnRotation(playerNumber);
 
-            var ctx = new TemporalPlaceContext() { _startRadian = Fix64.Pi / 180.0f * rot.y };
+            var ctx = new TemporalPlaceContext();
             var positionWS = ScreenMiddlePositionToWorldPosition();
 
-            Debug.Log("유닛 스폰 유닛id : " + unitOriginId + "갯수 : " + count);
+            Debug.Log($"유닛 스폰 유닛id : {unitOriginId} + 갯수 : { count}");
             if (playerNumber == -1)
             {
                 for (int i = 0; i < count; i++)

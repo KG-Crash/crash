@@ -217,6 +217,33 @@ namespace KG
             yield break;
         }
 
+        public IEnumerable<Cell> NearsForSpawn(Cell cell, bool includeOpposite = true)
+        {
+            var isLeftest = !(cell.row > 0);
+            var isRightest = !(cell.row < rows - 1);
+            var isTopest = !(cell.col > 0);
+            var isBottomest = !(cell.col < cols - 1);
+
+            if (!isRightest)
+                yield return this[cell.row + 1, cell.col];
+            if (!isRightest && !isBottomest)
+                yield return this[cell.row + 1, cell.col + 1];
+            if (!isBottomest)
+                yield return this[cell.row, cell.col + 1];
+            if (!isLeftest && !isBottomest)
+                yield return this[cell.row - 1, cell.col + 1];
+            if (!isLeftest)
+                yield return this[cell.row - 1, cell.col];
+            if (!isLeftest && !isTopest)
+                yield return this[cell.row - 1, cell.col - 1];
+            if (!isTopest)
+                yield return this[cell.row, cell.col - 1];
+            if (!isRightest && !isTopest)
+                yield return this[cell.row + 1, cell.col - 1];
+
+            yield break;
+        }
+
         private Graph<Region> UpdateRegion(int regionRows, int regionCols)
         {
             regionRowCellCount = (this.rows / regionRows);
