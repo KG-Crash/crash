@@ -17,7 +17,11 @@ namespace Game
         public static Fix64 TimeSpeed { get; set; } = Fix64.One;
         public static Fix64 TimeDelta => (Fix64.One * TimeSpeed) / new Fix64(FPS);
         public static Fix64 TurnRate => Fix64.One / new Fix64(8);
-        public int Frame { get; private set; }
+        
+        public static int Frame { get; private set; }
+        public static int Turn { get; private set; }
+        public static int TotalFrame => Frame + Turn * Shared.Const.Time.FramePerTurn;
+        
         private readonly Protocol.Request.ActionQueue _actionQueue = new Protocol.Request.ActionQueue 
         {
             Actions = new List<Protocol.Request.Action>()
@@ -85,7 +89,7 @@ namespace Game
         private void Update()
         {
             UpdateForDebug();
-            _player.UpdateUpgrade(UnityEngine.Time.time);
+            _player.UpdateUpgrade();
             UpdateUnitInFrustumPlane();
 
             EnqueueAction(new Protocol.Request.Action
@@ -96,9 +100,10 @@ namespace Game
                 Param2 = (uint)Frame
             });
 
-            if (++Frame >= TPS)
+            if (++Frame >= Shared.Const.Time.FramePerTurn)
             {
                 OnTurnChanged();
+                Turn++;
                 Frame = 0;
             }
         }

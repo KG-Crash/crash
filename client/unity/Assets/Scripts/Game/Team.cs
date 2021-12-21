@@ -154,7 +154,7 @@ namespace Game
             return abilities;
         }
         
-        private Dictionary<Ability, float> _upgradeStartTime = new Dictionary<Ability, float>();
+        private Dictionary<Ability, int> _upgradeStartFrame = new Dictionary<Ability, int>();
 
         public void StartUpgrade(Ability ability)
         {
@@ -163,20 +163,20 @@ namespace Game
                 return;
             }
             
-            if (!_upgradeStartTime.ContainsKey(ability))
+            if (!_upgradeStartFrame.ContainsKey(ability))
             {
-                _upgradeStartTime.Add(ability, UnityEngine.Time.time);   
+                _upgradeStartFrame.Add(ability, GameController.TotalFrame);   
                 Debug.Log($"StartUpgrade({ability}), After {Table.From<TableUnitUpgradeCost>()[ability].Time}ms");
             }
         }
 
-        public void UpdateUpgrade(float time)
+        public void UpdateUpgrade()
         {
             List<Ability> completeList = new List<Ability>();
             
-            foreach (var k in _upgradeStartTime.Keys)
+            foreach (var k in _upgradeStartFrame.Keys)
             {
-                if (_upgradeStartTime[k] + Table.From<TableUnitUpgradeCost>()[k].Time / 1000.0f < time)
+                if (_upgradeStartFrame[k] + Table.From<TableUnitUpgradeCost>()[k].Time / GameController.TimeDelta < GameController.TotalFrame)
                 {
                     completeList.Add(k);
                 }
@@ -184,7 +184,7 @@ namespace Game
 
             foreach (var ability in completeList)
             {
-                _upgradeStartTime.Remove(ability);
+                _upgradeStartFrame.Remove(ability);
                 SetAbilityFlag(ability);
                 listener?.OnFinishUpgrade(ability);
             }

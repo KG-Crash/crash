@@ -240,7 +240,6 @@ namespace Game
         [SerializeField] private uint _teamID;
         [SerializeField] private bool _selectable = true;
         [SerializeField] private uint _unitID;
-        [SerializeField] private DateTime _lastAttackTime = DateTime.MinValue;
         [SerializeField] private Fix64 _hp;
         [SerializeField] private Player _owner;
         [NonSerialized] private KG.Map _map;
@@ -249,6 +248,7 @@ namespace Game
         [NonSerialized] public UnitState _currentState;
         [NonSerialized] public Unit _target;
         [NonSerialized] public HashSet<Unit> _attackers = new HashSet<Unit>();
+        [NonSerialized] private int _lastAttackFrame;
 
         public void AddAttacker(Unit unit)
         {
@@ -337,6 +337,8 @@ namespace Game
             this._owner = owner;
             this._listener = listener;
             hp = maxhp;
+            
+            _lastAttackFrame = -attackSpeed / new Fix64(1000) / GameController.TimeDelta;
         }
 
         private void Update()
@@ -597,8 +599,8 @@ namespace Game
 
         public bool Attack(Unit unit)
         {
-            var now = DateTime.Now;
-            if ((now - _lastAttackTime).TotalMilliseconds < attackSpeed)
+            var currentFrame = GameController.TotalFrame;
+            if ((currentFrame - _lastAttackFrame) * GameController.TimeDelta < attackSpeed / new Fix64(1000))
                 return false;
 
             var damage = CalculateDamage(unit);
@@ -612,7 +614,7 @@ namespace Game
                 listener?.OnFireProjectile(this, unit, this.projectileId);
 
             
-            _lastAttackTime = DateTime.Now;
+            _lastAttackFrame = currentFrame;
 
             _attackers.Clear();
             transform.LookAt(unit.position);

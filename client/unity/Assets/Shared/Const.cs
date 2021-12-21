@@ -25,5 +25,6 @@ namespace Shared.Const
     {
         public static readonly int FPS = 60;
         public static readonly int TPS = 8;
+        public static readonly int FramePerTurn = 8;
     }
 }

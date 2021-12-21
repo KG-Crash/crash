@@ -20,14 +20,14 @@ namespace Game
         
         [Header("다른 유닛과 부딪힌 횟수")]
         [NonSerialized] private int _blocked;
-        [NonSerialized] private DateTime? _blockedTime;
+        [NonSerialized] private int? _blockedFrame = null;
 
         public bool remainPath => _regionPath.Count > 0 || _destStack.Count > 0;
         public bool remainImmediatePath => _cellPath.Count > 0;
 
         private void DeltaMove(Fix64 delta)
         {
-            if (_blockedTime != null && (DateTime.Now - _blockedTime.Value).TotalSeconds < 1)
+            if (_blockedFrame != null && (GameController.TotalFrame - _blockedFrame.Value) * GameController.TimeDelta < 1)
                 return;
 
             var dst = _cellPath.FirstOrDefault();
@@ -89,11 +89,11 @@ namespace Game
                     {
                         UpdateMovePath(_destStack.Peek(), units: new List<Unit> { collisionUnit });
                         _blocked = 0;
-                        _blockedTime = null;
+                        _blockedFrame = null;
                     }
                     else
                     {
-                        _blockedTime = DateTime.Now;
+                        _blockedFrame = GameController.TotalFrame;
                     }
 
                     position = old;
@@ -101,7 +101,7 @@ namespace Game
                 else
                 {
                     _blocked = 0;
-                    _blockedTime = null;
+                    _blockedFrame = null;
                 }
             }
         }
@@ -231,7 +231,7 @@ namespace Game
 
         private bool TryUpdateMovePath()
         {
-            if (_blockedTime != null && (DateTime.Now - _blockedTime.Value).TotalSeconds < 1)
+            if (_blockedFrame != null && (GameController.TotalFrame - _blockedFrame.Value) * GameController.TimeDelta < 1)
                 return false;
             if (_destStack.Count == 0)
                 return false;
@@ -240,14 +240,14 @@ namespace Game
             if (_blocked > 2)
             {
                 _blocked = 0;
-                _blockedTime = null;
+                _blockedFrame = null;
                 
                 if (UpdateMovePath(_destStack.Peek(), true))
                     return true;
             }
             else
             {
-                _blockedTime = DateTime.Now;
+                _blockedFrame = GameController.TotalFrame;
             }
             
             return false;
