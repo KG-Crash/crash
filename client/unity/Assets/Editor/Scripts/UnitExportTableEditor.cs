@@ -371,6 +371,7 @@ public class UnitExportTableEditor : Editor
         unit.highlighted = highlightGO;
         unit.maxAttackAnimCount = maxAttackCount;
         unit.animator = instance.GetOrAddComponent<Animator>();;
+        unit.animator.enabled = false;
         unit.OnRefreshRenderers();
 
         List<Material> deadMaterials = new List<Material>();

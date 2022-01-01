@@ -1038,7 +1038,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5287188528037558193}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 9000000, guid: 5d07395aafef48345892197f723fb954, type: 3}
   m_Controller: {fileID: 22100000, guid: 4852b67bde111c84d8c40e62af6e429c, type: 2}
   m_CullingMode: 1
@@ -1061,6 +1061,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27ea18366bfd4ec780f2c3fd70876b82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _maxAttackAnimCount: 2
+  _rendereres:
+  - {fileID: 38322794652481054}
+  _deadMaterials:
+  - {fileID: 2100000, guid: 5ede3076a2333ee49b5d11c47418ee9d, type: 2}
   _unitOriginID: 9
   _highlighted: {fileID: 680235503987658231}
   animator: {fileID: 2792340956362475352}
@@ -1070,11 +1075,6 @@ MonoBehaviour:
   _unitID: 0
   _hp:
     m_rawValue: 0
-  _rendereres:
-  - {fileID: 38322794652481054}
-  _deadMaterials:
-  - {fileID: 2100000, guid: 5ede3076a2333ee49b5d11c47418ee9d, type: 2}
-  _maxAttackAnimCount: 2
 --- !u!1 &5472190141310707800
 GameObject:
   m_ObjectHideFlags: 0

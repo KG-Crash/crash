@@ -1515,7 +1515,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7244354318397555312}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 9000000, guid: b8fc9913ae047d24db7e04ad4e003381, type: 3}
   m_Controller: {fileID: 22100000, guid: 7442a30a427a63149969e5f38053738a, type: 2}
   m_CullingMode: 1
@@ -1538,6 +1538,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27ea18366bfd4ec780f2c3fd70876b82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _maxAttackAnimCount: 2
+  _rendereres:
+  - {fileID: 8370822027574976288}
+  - {fileID: 7692798499183982128}
+  _deadMaterials:
+  - {fileID: 2100000, guid: bc9a4c1d6fb49da4390b8e566e852de1, type: 2}
+  - {fileID: 2100000, guid: bc9a4c1d6fb49da4390b8e566e852de1, type: 2}
   _unitOriginID: 22
   _highlighted: {fileID: 3980958376924035325}
   animator: {fileID: 7767148603110035275}
@@ -1547,13 +1554,6 @@ MonoBehaviour:
   _unitID: 0
   _hp:
     m_rawValue: 0
-  _rendereres:
-  - {fileID: 8370822027574976288}
-  - {fileID: 7692798499183982128}
-  _deadMaterials:
-  - {fileID: 2100000, guid: bc9a4c1d6fb49da4390b8e566e852de1, type: 2}
-  - {fileID: 2100000, guid: bc9a4c1d6fb49da4390b8e566e852de1, type: 2}
-  _maxAttackAnimCount: 2
 --- !u!1 &7673183588145039589
 GameObject:
   m_ObjectHideFlags: 0

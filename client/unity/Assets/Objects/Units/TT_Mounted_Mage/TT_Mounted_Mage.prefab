@@ -9655,7 +9655,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4611638858231847372}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 9000000, guid: cf2f4f48c57855a4faee32e736b71983, type: 3}
   m_Controller: {fileID: 22100000, guid: 2e31e58239241e544a07d0221d5f78ac, type: 2}
   m_CullingMode: 1
@@ -9678,15 +9678,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27ea18366bfd4ec780f2c3fd70876b82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _unitOriginID: 55
-  _highlighted: {fileID: 7307134259918830043}
-  animator: {fileID: 5382853398707588678}
-  _speed: 1
-  _teamID: 0
-  _selectable: 1
-  _unitID: 0
-  _hp:
-    m_rawValue: 0
+  _maxAttackAnimCount: 1
   _rendereres:
   - {fileID: 5049991954202428009}
   - {fileID: 5631931130454017991}
@@ -9699,7 +9691,15 @@ MonoBehaviour:
   - {fileID: 2100000, guid: eb4392f31aa3f2a4497bb5fc9646a18f, type: 2}
   - {fileID: 2100000, guid: eb4392f31aa3f2a4497bb5fc9646a18f, type: 2}
   - {fileID: 2100000, guid: eb4392f31aa3f2a4497bb5fc9646a18f, type: 2}
-  _maxAttackAnimCount: 1
+  _unitOriginID: 55
+  _highlighted: {fileID: 7307134259918830043}
+  animator: {fileID: 5382853398707588678}
+  _speed: 1
+  _teamID: 0
+  _selectable: 1
+  _unitID: 0
+  _hp:
+    m_rawValue: 0
 --- !u!1 &4644433984714669986
 GameObject:
   m_ObjectHideFlags: 0
