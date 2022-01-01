@@ -113,5 +113,17 @@ namespace Game
 			if (!IsNetworkMode)
 				TPS = Shared.Const.Time.TPS;
 		}
+
+		[BuildCommand("togglepause")]
+		public void TogglePause()
+		{
+			paused = !paused;
+		}
+
+		[BuildCommand("pause")]
+		public void SetPause(bool pause)
+		{
+			paused = pause;
+		}
 	}
 }

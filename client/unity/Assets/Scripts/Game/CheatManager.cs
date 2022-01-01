@@ -47,7 +47,7 @@ namespace Game
                             defaultParamQuantity++;
                     }
 
-                    if (paramInfos.Last().ParameterType.IsArray)
+                    if (paramInfos.Length > 0 && paramInfos.Last().ParameterType.IsArray)
                     {
                         hasLastArrayParam = true;
                         arrayParamList = new List<int>();
