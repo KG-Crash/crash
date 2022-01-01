@@ -17,6 +17,7 @@ namespace Game
         public static Fix64 TimeSpeed { get; set; } = Fix64.One;
         public static Fix64 TimeDelta => (Fix64.One * TimeSpeed) / new Fix64(FPS);
         public static Fix64 TurnRate => Fix64.One / new Fix64(8);
+        public static bool paused { get; set; }
         
         public static int Frame { get; private set; }
         public static int Turn { get; private set; }
@@ -88,10 +89,11 @@ namespace Game
 
         private void Update()
         {
-            UpdateForDebug();
-            _player.UpdateUpgrade();
             UpdateUnitInFrustumPlane();
-
+            UpdateForDebug();
+            
+            if (paused) return;
+            
             EnqueueAction(new Protocol.Request.Action
             {
                 Frame = Frame,
@@ -106,6 +108,8 @@ namespace Game
                 Turn++;
                 Frame = 0;
             }
+            
+            _player.UpdateUpgrade();
         }
 
         private void OnDestroy()

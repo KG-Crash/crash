@@ -343,6 +343,8 @@ namespace Game
 
         private void Update()
         {
+            if (GameController.paused) return;
+            
             // float 캐스팅
             animator.Update(GameController.TimeDelta);
             UpdateBounds();

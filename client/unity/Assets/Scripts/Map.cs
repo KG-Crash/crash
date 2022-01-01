@@ -374,16 +374,6 @@ namespace KG
             Provisioning();
         }
 
-        public void Start()
-        {
-
-        }
-
-        public void Update()
-        {
-
-        }
-
         #region Precompute
         
         [SerializeField] public float _threshold = 1.0f;
