@@ -80,6 +80,8 @@ namespace Game
             _allUnitInFrustum = new List<Unit>();
 
             _ = Client.Send(new Protocol.Request.Ready{ });
+
+            InitializeUniRx();
         }
 
         private void Start()
@@ -87,13 +89,14 @@ namespace Game
             Application.targetFrameRate = FPS;
         }
 
-        private void Update()
+        private void OnUpdateAlways()
         {
             UpdateUnitInFrustumPlane();
             UpdateForDebug();
-            
-            if (paused) return;
-            
+        }
+
+        private void OnUpdateFrame(Fix64 timeDelta)
+        {
             EnqueueAction(new Protocol.Request.Action
             {
                 Frame = Frame,

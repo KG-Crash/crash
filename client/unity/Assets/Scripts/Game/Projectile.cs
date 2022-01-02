@@ -116,10 +116,8 @@ namespace Game
             currentState = ProjectileState.Shoot;
         }
 
-        private void Update()
+        public void OnUpdateFrame(Fix64 _)
         {
-            if (GameController.paused) return;
-
             Action(); 
 
             this.transform.position = this.position;

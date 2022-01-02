@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 
 namespace Game
@@ -15,6 +17,10 @@ namespace Game
             projectile.projectileID = _sequence++;
             projectile.listener = listener;
             projectile.Disable();
+            
+            var frameUpdateDisposable = GameController.gameFrameStream.Subscribe(projectile.OnUpdateFrame);
+            projectile.OnDestroyAsObservable().Subscribe(_ => frameUpdateDisposable.Dispose());
+
             return projectile;
         }
 

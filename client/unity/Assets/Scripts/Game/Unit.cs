@@ -341,12 +341,10 @@ namespace Game
             _lastAttackFrame = -attackSpeed / new Fix64(1000) / GameController.TimeDelta;
         }
 
-        private void Update()
+        public void OnUpdateFrame(Fix64 timeDelta)
         {
-            if (GameController.paused) return;
-            
             // float 캐스팅
-            animator.Update(GameController.TimeDelta);
+            animator.Update(timeDelta);
             UpdateBounds();
             Action();
 

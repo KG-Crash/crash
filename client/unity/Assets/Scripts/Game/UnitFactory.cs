@@ -1,4 +1,6 @@
 using UnityEngine;
+using UniRx;
+using UniRx.Triggers;
 
 namespace Game
 {
@@ -11,6 +13,10 @@ namespace Game
             var unitOrigin = unitTable.GetOriginUnit(unitOriginID);
             var unit = Object.Instantiate(unitOrigin, parent);
             unit.Init(_sequence++, map, owner, listener);
+            
+            var frameUpdateDisposable = GameController.gameFrameStream.Subscribe(unit.OnUpdateFrame);
+            unit.OnDestroyAsObservable().Subscribe(_ => frameUpdateDisposable.Dispose());
+            
             return unit;
         }
     }
