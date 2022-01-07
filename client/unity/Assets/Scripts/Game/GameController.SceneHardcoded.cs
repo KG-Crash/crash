@@ -21,6 +21,8 @@ namespace Game
         {
             public List<Unit> _placedUnits = new List<Unit>();
             public Queue<Map.Cell> _nearCellQueue = new Queue<Map.Cell>();
+            public uint threshold { get; private set; } = 7; // temp
+            public bool isValid { get; private set; } = true;
 
             public static void PlaceUnit(KG.Map map, TemporalPlaceContext ctx, Unit unit, FixVector3 centerPosition)
             {
@@ -30,12 +32,34 @@ namespace Game
                 if(ctx._nearCellQueue.Count <= 0)
                     ctx._nearCellQueue.Enqueue(map[centerPosition]);
 
+                if (!ctx.isValid)
+                {
+                    unit.owner.units.Delete(unit);
+                    Destroy(unit.gameObject);
+                    return;
+                }
+
                 while (true)
                 {
                     nowCell = ctx._nearCellQueue.Dequeue();
                     pos = nowCell.position;
                     var rect = unit.GetCollisionBox(pos);
                     var noneCollided = true;
+
+                    if ((pos - centerPosition).magnitude >= (Fix64)ctx.threshold)
+                    {
+                        ctx.isValid = false;
+                        ctx._placedUnits.Add(unit);
+
+                        foreach (var placedUnit in ctx._placedUnits)
+                        {
+                            unit.owner.units.Delete(placedUnit);
+                            Destroy(placedUnit.gameObject);
+                        }
+                        ctx._placedUnits.Clear();
+
+                        return;
+                    } 
 
                     foreach (var collideUnit in map.GetRegionUnits(rect))
                     {
