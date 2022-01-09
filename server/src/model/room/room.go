@@ -71,8 +71,8 @@ func (state *Actor) getUsers(ctx actor.Context) {
 			teams[pid] = team
 
 			// 각각의 유저들의 정보를 요청
-			future := ctx.RequestFuture(pid, &msg.RequestGetUserState{}, time.Hour)
-			ctx.AwaitFuture(future, func(res interface{}, err error) {
+			userStateFuture := ctx.RequestFuture(pid, &msg.RequestGetUserState{}, time.Hour)
+			ctx.AwaitFuture(userStateFuture, func(res interface{}, err error) {
 				if err != nil {
 					log.Fatalf("Failed to handle, message : %#v.", ctx.Message())
 					return
@@ -165,21 +165,21 @@ func (state *Actor) playable() exception.Error {
 }
 
 func (state *Actor) Receive(ctx actor.Context) {
-	switch x := ctx.Message().(type) {
+	switch m := ctx.Message().(type) {
 
 	case *msg.RequestGetUsers:
 		state.getUsers(ctx)
 
 	case *msg.RequestGetRoomState:
-		future := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
+		usersFuture := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
 
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
+		ctx.AwaitFuture(usersFuture, func(res interface{}, err error) {
 			if err != nil {
 				log.Fatalf("Failed to handle, message : %#v.", ctx.Message())
 				return
 			}
 
-			x := res.(*msg.ResponseGetUsers)
+			users := res.(*msg.ResponseGetUsers)
 			result := &msg.ResponseGetRoomState{
 				PID: ctx.Self(),
 				State: msg.RoomConfig{
@@ -187,8 +187,8 @@ func (state *Actor) Receive(ctx actor.Context) {
 					Title: state.config.Title,
 					Teams: state.config.Team,
 				},
-				Users:  x.Users,
-				Master: x.Master,
+				Users:  users.Users,
+				Master: users.Master,
 				Teams:  state.users,
 			}
 
@@ -197,7 +197,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 
 	case *msg.RequestEnterRoom:
 		users := state.selects()
-		if users.Contains(x.Sender) {
+		if users.Contains(m.Sender) {
 			ctx.Respond(&msg.ResponseEnterRoom{
 				Error: exception.New(enum.ResultCode.AlreadyEnteredGameRoom),
 			})
@@ -212,16 +212,16 @@ func (state *Actor) Receive(ctx actor.Context) {
 			return
 		}
 
-		state.users[i].Add(x.Sender)
-		future := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
+		state.users[i].Add(m.Sender)
+		usersFuture := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
 
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
+		ctx.AwaitFuture(usersFuture, func(res interface{}, err error) {
 			if err != nil {
 				log.Fatalf("Failed to handle, message : %#v.", ctx.Message())
 				return
 			}
 
-			x := res.(*msg.ResponseGetUsers)
+			users := res.(*msg.ResponseGetUsers)
 			ctx.Respond(&msg.ResponseEnterRoom{
 				PID: ctx.Self(),
 				RoomState: msg.RoomConfig{
@@ -229,23 +229,23 @@ func (state *Actor) Receive(ctx actor.Context) {
 					Title: state.config.Title,
 					Teams: state.config.Team,
 				},
-				Users:  x.Users,
-				Master: x.Master,
+				Users:  users.Users,
+				Master: users.Master,
 			})
 		})
 
 	case *msg.Leave:
-		if !state.contains(x.User) {
+		if !state.contains(m.User) {
 			return
 		}
 
-		i, err := state.placed(x.User)
+		i, err := state.placed(m.User)
 		if err != nil {
 			return
 		}
 
-		state.users[i].Remove(x.User)
-		ctx.Send(x.User, &msg.LeftSelf{})
+		state.users[i].Remove(m.User)
+		ctx.Send(m.User, &msg.LeftSelf{})
 
 		var master *actor.PID
 		users := state.selects()
@@ -255,15 +255,15 @@ func (state *Actor) Receive(ctx actor.Context) {
 			})
 			ctx.Poison(ctx.Self())
 			return
-		} else if state.master == x.User { // 퇴장한 유저가 방장인 경우
+		} else if state.master == m.User { // 퇴장한 유저가 방장인 경우
 			master = users.Values()[0]
 		} else {
 			master = nil
 		}
 
 		result := &msg.Left{
-			User: x.User,
-			UID:  x.UID,
+			User: m.User,
+			UID:  m.UID,
 		}
 		if master == nil {
 			users.ForEach(func(i int, pid *actor.PID) {
@@ -271,14 +271,14 @@ func (state *Actor) Receive(ctx actor.Context) {
 			})
 		} else {
 
-			future := ctx.RequestFuture(master, &msg.RequestGetUserState{}, time.Hour)
-			ctx.AwaitFuture(future, func(res interface{}, err error) {
+			userStateFuture := ctx.RequestFuture(master, &msg.RequestGetUserState{}, time.Hour)
+			ctx.AwaitFuture(userStateFuture, func(res interface{}, err error) {
 				if err != nil {
 					return
 				}
 
-				x := res.(*msg.ResponseGetUserState)
-				result.NewMaster = &x.User
+				userState := res.(*msg.ResponseGetUserState)
+				result.NewMaster = &userState.User
 
 				users.ForEach(func(i int, pid *actor.PID) {
 					ctx.Send(pid, result)
@@ -286,26 +286,17 @@ func (state *Actor) Receive(ctx actor.Context) {
 			})
 		}
 
-	case *msg.Chat:
-		users := state.selects()
-		users.ForEach(func(i int, pid *actor.PID) {
-			ctx.Send(pid, &msg.ReceiveChat{
-				User:    x.User,
-				Message: x.Message,
-			})
-		})
+	case *msg.RequestKick:
+		from := m.From
+		to := m.To
 
-	case *msg.Kick:
-		from := x.From
-		to := x.To
-
-		future := ctx.RequestFuture(x.To, &msg.RequestGetUserState{}, time.Hour)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
+		userStateFuture := ctx.RequestFuture(m.To, &msg.RequestGetUserState{}, time.Hour)
+		ctx.AwaitFuture(userStateFuture, func(res interface{}, err error) {
 			if err != nil {
 				return
 			}
 
-			x := res.(*msg.ResponseGetUserState)
+			userState := res.(*msg.ResponseGetUserState)
 			users := state.selects()
 			if state.master != from {
 				return
@@ -321,13 +312,13 @@ func (state *Actor) Receive(ctx actor.Context) {
 			users.ForEach(func(i int, pid *actor.PID) {
 				ctx.Send(pid, &msg.Left{
 					User: to,
-					UID:  x.User.ID,
+					UID:  userState.User.ID,
 				})
 			})
 		})
 
 	case *msg.GameStart:
-		if x.Sender == nil {
+		if m.Sender == nil {
 			return
 		}
 		users := state.selects()
@@ -336,15 +327,15 @@ func (state *Actor) Receive(ctx actor.Context) {
 			Error: 0,
 		}
 
-		if !users.Contains(x.Sender) {
+		if !users.Contains(m.Sender) {
 			result.Error = enum.ResultCode.InvalidUser
-			ctx.Send(x.Sender, result)
+			ctx.Send(m.Sender, result)
 			return
 		}
 
-		if state.master != x.Sender {
+		if state.master != m.Sender {
 			result.Error = enum.ResultCode.NoPrivilege
-			ctx.Send(x.Sender, result)
+			ctx.Send(m.Sender, result)
 			return
 		}
 
@@ -360,20 +351,20 @@ func (state *Actor) Receive(ctx actor.Context) {
 		})
 
 	case *msg.RequestReady:
-		future := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
-			x := res.(*msg.ResponseGetUsers)
+		usersFuture := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
+		ctx.AwaitFuture(usersFuture, func(res interface{}, err error) {
+			users := res.(*msg.ResponseGetUsers)
 
 			// 랜덤시드 설정
 			seed, _ := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
 			ctx.Respond(&msg.ResponseReady{
 				Seed:  seed.Int64(),
-				Users: x.Users,
+				Users: users.Users,
 			})
 		})
 
 	case *msg.Action:
-		sender := x.Sender
+		sender := m.Sender
 		if !state.contains(sender) {
 			ctx.Send(sender, &response.ActionQueue{
 				Error: enum.ResultCode.InvalidUser,
@@ -389,10 +380,10 @@ func (state *Actor) Receive(ctx actor.Context) {
 		}
 
 		result := &response.ActionQueue{
-			User:    x.UID,
+			User:    m.UID,
 			Actions: []response.Action{},
 		}
-		for _, action := range x.Actions {
+		for _, action := range m.Actions {
 			result.Actions = append(result.Actions, response.Action{
 				Id:     action.Id,
 				Frame:  action.Frame,

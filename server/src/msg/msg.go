@@ -98,18 +98,13 @@ type Chat struct {
 	Message string
 }
 
-type ReceiveChat struct {
-	User    string
-	Message string
-}
-
 type Whisper struct {
 	From    string
 	To      string
 	Message string
 }
 
-type Kick struct {
+type RequestKick struct {
 	From *actor.PID
 	To   *actor.PID
 }

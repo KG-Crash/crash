@@ -29,7 +29,7 @@ func New(port uint16) *Actor {
 }
 
 func (state *Actor) Receive(ctx actor.Context) {
-	switch x := ctx.Message().(type) {
+	switch m := ctx.Message().(type) {
 	case *actor.Started:
 		state.acceptor = ctx.Spawn(actor.PropsFromProducer(func() actor.Actor {
 			return acceptor.New(state.port)
@@ -38,22 +38,22 @@ func (state *Actor) Receive(ctx actor.Context) {
 	case *acceptor.Connected:
 		id := uuid.NewString()
 		state.Users[id] = ctx.Spawn(actor.PropsFromProducer(func() actor.Actor {
-			return user.New(id, x.Conn)
+			return user.New(id, m.Conn)
 		}))
 		return
 
 	case *msg.Disconnected:
-		delete(state.Users, x.ID)
+		delete(state.Users, m.ID)
 
 	case *msg.RequestGetUser:
-		user, ok := state.Users[x.ID]
+		user, ok := state.Users[m.ID]
 		if !ok {
 			user = nil
 		}
 		ctx.Respond(&msg.ResponseGetUser{User: user})
 
 	case *msg.RequestGetRoom:
-		room, ok := state.Rooms[x.ID]
+		room, ok := state.Rooms[m.ID]
 		if !ok {
 			room = nil
 		}
@@ -71,9 +71,9 @@ func (state *Actor) Receive(ctx actor.Context) {
 	case *msg.RequestCreateRoom:
 		id := uuid.NewString()
 		room := ctx.Spawn(actor.PropsFromProducer(func() actor.Actor {
-			return room.New(id, state.Users[x.ID], room.RoomConfig{
-				Team:  x.Teams,
-				Title: x.Title,
+			return room.New(id, state.Users[m.ID], room.RoomConfig{
+				Team:  m.Teams,
+				Title: m.Title,
 			})
 		}))
 		state.Rooms[id] = room
@@ -84,13 +84,13 @@ func (state *Actor) Receive(ctx actor.Context) {
 		})
 
 	case *msg.DestroyRoom:
-		_, exists := state.Rooms[x.ID]
+		_, exists := state.Rooms[m.ID]
 		if !exists {
 			return
 		}
-		delete(state.Rooms, x.ID)
+		delete(state.Rooms, m.ID)
 
 	default:
-		fmt.Print(x)
+		fmt.Print(m)
 	}
 }

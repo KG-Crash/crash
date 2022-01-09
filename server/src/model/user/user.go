@@ -49,7 +49,7 @@ func toUserResponses(users []msg.UserState) []response.User {
 
 func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) {
 
-	switch x := p.(type) {
+	switch ptc := p.(type) {
 	case *request.EnterRoom:
 		if state.Room != nil {
 			ctx.Send(ctx.Self(), &response.EnterRoom{
@@ -58,48 +58,48 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			return
 		}
 
-		future := ctx.RequestFuture(ctx.Parent(), &msg.RequestGetRoom{
-			ID: x.Id,
+		getRoomFuture := ctx.RequestFuture(ctx.Parent(), &msg.RequestGetRoom{
+			ID: ptc.Id,
 		}, time.Hour)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
-			x := res.(*msg.ResponseGetRoom)
-			future := ctx.RequestFuture(x.Room, &msg.RequestEnterRoom{
+		ctx.AwaitFuture(getRoomFuture, func(res interface{}, err error) {
+			room := res.(*msg.ResponseGetRoom)
+			enterRoomFuture := ctx.RequestFuture(room.Room, &msg.RequestEnterRoom{
 				Sender: ctx.Self(),
 			}, time.Hour)
-			ctx.AwaitFuture(future, func(res interface{}, err error) {
-				x := res.(*msg.ResponseEnterRoom)
+			ctx.AwaitFuture(enterRoomFuture, func(res interface{}, err error) {
+				enterRoom := res.(*msg.ResponseEnterRoom)
 
 				result := &response.EnterRoom{
 					User:   state.ID,
-					Users:  toUserResponses(x.Users),
-					Master: x.Master.ID,
+					Users:  toUserResponses(enterRoom.Users),
+					Master: enterRoom.Master.ID,
 				}
 
-				for _, user := range x.Users {
+				for _, user := range enterRoom.Users {
 					ctx.Send(user.PID, result)
 				}
 			})
 		})
 
 	case *request.RoomList:
-		future := ctx.RequestFuture(ctx.Parent(), &msg.RequestGetRoomList{}, time.Hour)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
+		roomListFuture := ctx.RequestFuture(ctx.Parent(), &msg.RequestGetRoomList{}, time.Hour)
+		ctx.AwaitFuture(roomListFuture, func(res interface{}, err error) {
 
-			x := res.(*msg.ResponseGetRoomList)
+			roomList := res.(*msg.ResponseGetRoomList)
 			result := &response.RoomList{
 				Rooms: []response.Room{},
 			}
 
-			count := x.Rooms.Len()
+			count := roomList.Rooms.Len()
 			if count > 0 {
-				x.Rooms.ForEach(func(i int, pid *actor.PID) {
-					future := ctx.RequestFuture(pid, &msg.RequestGetRoomState{}, time.Hour)
-					ctx.AwaitFuture(future, func(res interface{}, err error) {
+				roomList.Rooms.ForEach(func(i int, pid *actor.PID) {
+					roomStateFuture := ctx.RequestFuture(pid, &msg.RequestGetRoomState{}, time.Hour)
+					ctx.AwaitFuture(roomStateFuture, func(res interface{}, err error) {
 
-						x := res.(*msg.ResponseGetRoomState)
+						roomState := res.(*msg.ResponseGetRoomState)
 						result.Rooms = append(result.Rooms, response.Room{
-							Id:    x.State.ID,
-							Title: x.State.Title,
+							Id:    roomState.State.ID,
+							Title: roomState.State.Title,
 						})
 
 						if len(result.Rooms) == count {
@@ -120,7 +120,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			return
 		}
 
-		if len(x.Teams) < 2 {
+		if len(ptc.Teams) < 2 {
 			ctx.Send(ctx.Self(), &response.CreateRoom{
 				Error: enum.ResultCode.NotEnoughTeams, // 팀은 2개 이상 설정되어야 함
 			})
@@ -128,7 +128,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		}
 
 		var capacity int32 = 0
-		for _, team := range x.Teams {
+		for _, team := range ptc.Teams {
 			capacity += team
 		}
 		if capacity < 2 {
@@ -138,16 +138,16 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			return
 		}
 
-		future := ctx.RequestFuture(ctx.Parent(), &msg.RequestCreateRoom{
+		createRoomFuture := ctx.RequestFuture(ctx.Parent(), &msg.RequestCreateRoom{
 			ID:    state.ID,
-			Title: x.Title,
-			Teams: x.Teams,
+			Title: ptc.Title,
+			Teams: ptc.Teams,
 		}, time.Hour)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
-			x := res.(*msg.ResponseCreateRoom)
-			state.Room = x.Room
+		ctx.AwaitFuture(createRoomFuture, func(res interface{}, err error) {
+			createRoom := res.(*msg.ResponseCreateRoom)
+			state.Room = createRoom.Room
 			ctx.Send(ctx.Self(), &response.CreateRoom{
-				Id: x.ID,
+				Id: createRoom.ID,
 			})
 		})
 
@@ -159,18 +159,25 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			return
 		}
 
-		ctx.Send(state.Room, &msg.Chat{
-			User:    state.ID,
-			Message: x.Message,
+		message := ptc.Message
+		usersFuture := ctx.RequestFuture(state.Room, &msg.RequestGetUsers{}, time.Hour)
+		ctx.AwaitFuture(usersFuture, func(res interface{}, err error) {
+			users := res.(*msg.ResponseGetUsers)
+			for _, user := range users.Users {
+				ctx.Send(user.PID, &msg.Chat{
+					User:    state.ID,
+					Message: message,
+				})
+			}
 		})
 
 	case *request.Whisper:
-		to := x.User
-		message := x.Message
-		future := ctx.RequestFuture(ctx.Parent(), &msg.RequestGetUser{
+		to := ptc.User
+		message := ptc.Message
+		userFuture := ctx.RequestFuture(ctx.Parent(), &msg.RequestGetUser{
 			ID: to,
 		}, time.Hour)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
+		ctx.AwaitFuture(userFuture, func(res interface{}, err error) {
 			if err != nil {
 				ctx.Send(ctx.Self(), &response.Whisper{
 					Error: enum.ResultCode.InvalidUser,
@@ -178,33 +185,33 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 				return
 			}
 
-			x := res.(*msg.ResponseGetUser)
-			msg := &msg.Whisper{
+			user := res.(*msg.ResponseGetUser)
+			whisper := &msg.Whisper{
 				From:    state.ID,
 				To:      to,
 				Message: message,
 			}
-			ctx.Send(ctx.Self(), msg)
-			ctx.Send(x.User, msg)
+			ctx.Send(ctx.Self(), whisper)
+			ctx.Send(user.User, whisper)
 		})
 
 	case *request.KickRoom:
 		if state.Room == nil {
-			ctx.Send(ctx.Self(), &response.LeaveRoom{
+			ctx.Send(ctx.Self(), &response.KickRoom{
 				Error: enum.ResultCode.NotEnteredAnyGameRoom,
 			})
 			return
 		}
 
-		future := ctx.RequestFuture(ctx.Parent(), &msg.RequestGetUser{
-			ID: x.User,
+		userFuture := ctx.RequestFuture(ctx.Parent(), &msg.RequestGetUser{
+			ID: ptc.User,
 		}, time.Hour)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
+		ctx.AwaitFuture(userFuture, func(res interface{}, err error) {
 			if err != nil {
 				return
 			}
 
-			x := res.(*msg.ResponseGetUser)
+			user := res.(*msg.ResponseGetUser)
 			if state.Room == nil {
 				ctx.Send(ctx.Self(), &response.KickRoom{
 					Error: enum.ResultCode.NotEnteredAnyGameRoom,
@@ -212,9 +219,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 				return
 			}
 
-			ctx.Send(state.Room, &msg.Kick{
+			ctx.Send(state.Room, &msg.RequestKick{
 				From: ctx.Self(),
-				To:   x.User,
+				To:   user.User,
 			})
 		})
 
@@ -253,7 +260,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		ctx.Send(state.Room, &msg.Action{
 			Sender:  ctx.Self(),
 			UID:     state.ID,
-			Actions: x.Actions,
+			Actions: ptc.Actions,
 		})
 
 	case *request.Ready:
@@ -264,20 +271,20 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			return
 		}
 
-		future := ctx.RequestFuture(state.Room, &msg.RequestReady{}, time.Hour)
-		ctx.AwaitFuture(future, func(res interface{}, err error) {
-			x := res.(*msg.ResponseReady)
+		readyFuture := ctx.RequestFuture(state.Room, &msg.RequestReady{}, time.Hour)
+		ctx.AwaitFuture(readyFuture, func(res interface{}, err error) {
+			ready := res.(*msg.ResponseReady)
 
 			ctx.Send(ctx.Self(), &response.Ready{
-				Seed:  x.Seed,
-				Users: toUserResponses(x.Users),
+				Seed:  ready.Seed,
+				Users: toUserResponses(ready.Users),
 			})
 		})
 	}
 }
 
 func (state *Actor) Receive(ctx actor.Context) {
-	switch x := ctx.Message().(type) {
+	switch m := ctx.Message().(type) {
 	case *actor.Started:
 		state.session = ctx.Spawn(actor.PropsFromProducer(func() actor.Actor {
 			return session.New(state.conn)
@@ -311,17 +318,11 @@ func (state *Actor) Receive(ctx actor.Context) {
 			},
 		})
 
-	case *msg.ReceiveChat:
-		ctx.Send(ctx.Self(), &response.Chat{
-			User:    x.User,
-			Message: x.Message,
-		})
-
 	case *msg.Whisper:
 		ctx.Send(ctx.Self(), &response.Whisper{
-			From:    x.From,
-			To:      x.To,
-			Message: x.Message,
+			From:    m.From,
+			To:      m.To,
+			Message: m.Message,
 		})
 
 	case *msg.Kicked:
@@ -334,18 +335,18 @@ func (state *Actor) Receive(ctx actor.Context) {
 
 	case *msg.Left:
 		msg := &response.LeaveRoom{
-			User: x.UID,
+			User: m.UID,
 		}
 
-		if x.NewMaster != nil {
-			msg.NewMaster = x.NewMaster.ID
+		if m.NewMaster != nil {
+			msg.NewMaster = m.NewMaster.ID
 		}
 		ctx.Send(ctx.Self(), msg)
 
 	case *receiver.Received:
-		state.onReceiveFlatBuffer(ctx, x.Protocol)
+		state.onReceiveFlatBuffer(ctx, m.Protocol)
 
 	case protocol.Protocol:
-		ctx.Send(state.session, &sender.Send{Protocol: x})
+		ctx.Send(state.session, &sender.Send{Protocol: m})
 	}
 }
