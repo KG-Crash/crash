@@ -32,17 +32,20 @@ namespace Game
 
             var ctx = new TemporalPlaceContext();
             var positionWS = ScreenMiddlePositionToWorldPosition();
+            Player player;
 
             Debug.Log($"유닛 스폰 유닛id : {unitOriginId} + 갯수 : { count}");
             if (playerNumber == -1)
             {
+                player = GetPlayer((uint)_playerID);
                 for (int i = 0; i < count; i++)
-                    SpawnUnitToPosition(unitOriginId, GetPlayer((uint)_playerID), positionWS, ctx);
+                    SpawnUnitToPosition(unitOriginId, player, positionWS, ctx);
             }
             else
             {
+                player = GetPlayer((uint)playerNumber);
                 for (int i = 0; i < count; i++)
-                    SpawnUnitToPlayerStart(unitOriginId, GetPlayer((uint)playerNumber), ctx);
+                    SpawnUnitToPlayerStart(unitOriginId, player, ctx);
             }
         }
 

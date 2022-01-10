@@ -32,13 +32,6 @@ namespace Game
                 if(ctx._nearCellQueue.Count <= 0)
                     ctx._nearCellQueue.Enqueue(map[centerPosition]);
 
-                if (!ctx.isValid)
-                {
-                    unit.owner.units.Delete(unit);
-                    Destroy(unit.gameObject);
-                    return;
-                }
-
                 while (true)
                 {
                     nowCell = ctx._nearCellQueue.Dequeue();
@@ -106,6 +99,9 @@ namespace Game
         
         public Unit SpawnUnitToPlayerStart(int spawnUnitOriginID, Player ownPlayer, TemporalPlaceContext context)
         {
+            if (!context.isValid)
+                return null;
+
             var newUnit = _unitFactory.CreateNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this, _unitParent);
             ownPlayer.units.Add(newUnit);
             TemporalPlaceContext.PlaceUnit(_map, context, newUnit, GetSpawnPosition(ownPlayer.spawnIndex));
@@ -115,6 +111,9 @@ namespace Game
 
         public Unit SpawnUnitToPosition(int spawnUnitOriginID, Player ownPlayer, FixVector3 centerPosition, TemporalPlaceContext context)
         {
+            if (!context.isValid)
+                return null;
+            
             var newUnit = _unitFactory.CreateNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this, _unitParent);
             ownPlayer.units.Add(newUnit);
             TemporalPlaceContext.PlaceUnit(_map, context, newUnit, centerPosition);
