@@ -382,6 +382,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 		result := &response.ActionQueue{
 			User:    m.UID,
 			Actions: []response.Action{},
+			Turn:    m.Turn,
 		}
 		for _, action := range m.Actions {
 			result.Actions = append(result.Actions, response.Action{
