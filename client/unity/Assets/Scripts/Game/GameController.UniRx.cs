@@ -17,10 +17,10 @@ namespace Game
     
     public partial class GameController
     {
-        public static IObservable<Frame> updateFrameStream => Observable.EveryUpdate().Where(_ => !paused)
+        public static IObservable<Frame> updateFrameStream => Observable.EveryUpdate().Where(_ => !paused && !waitPacket)
             .Select(_ => InputFrameChunk);
 
-        public static IObservable<Frame> lateUpdateFrameStream => Observable.EveryLateUpdate().Where(_ => !paused)
+        public static IObservable<Frame> lateUpdateFrameStream => Observable.EveryLateUpdate().Where(_ => !paused && !waitPacket)
             .Select(_ => InputFrameChunk);
 
         private void InitializeUniRx()
@@ -29,6 +29,7 @@ namespace Game
             var lateUpdateDisposable = lateUpdateFrameStream.Subscribe(OnLateUpdateFrame);
             
             this.UpdateAsObservable().Subscribe(_ => OnUpdateAlways());
+            this.UpdateAsObservable().Where(_ => !paused).Subscribe(_ => OnUpdateGame());
             this.OnDestroyAsObservable().Subscribe(_ =>
             {
                 updateDisposable.Dispose();

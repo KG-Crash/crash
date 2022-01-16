@@ -24,8 +24,6 @@ namespace Game
 
             // 프레임 수 정렬 보장 필요
             _actions[response.User].AddLast(response);
-            Debug.LogError($"_actions[{response.User}].AddLast({response.Turn}), {_actions[response.User].Count}");
-
             return true;
         }
 

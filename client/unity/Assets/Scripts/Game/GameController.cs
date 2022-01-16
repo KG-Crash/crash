@@ -19,6 +19,7 @@ namespace Game
         public static Fix64 TimeDelta => (Fix64.One * TimeSpeed) / new Fix64(FPS);
         public static Fix64 TurnRate => Fix64.One / new Fix64(8);
         public static bool paused { get; set; }
+        public static bool waitPacket { get; set; }
         
         public static int InputFrame { get; private set; }
         public static int InputTurn { get; private set; }
@@ -100,7 +101,10 @@ namespace Game
         private void OnUpdateAlways()
         {
             OnUpdateAlwaysDebug();
-            
+        }
+        
+        private void OnUpdateGame()
+        {
             if (_actions.Count > 0 && _actions.All(kv =>
             {
                 var list = kv.Value;
@@ -123,7 +127,7 @@ namespace Game
             }
             
             Debug.Log($"InputTurn({InputTurn}) > OutputTurn({OutputTurn}) + 2");
-            paused = InputTurn > OutputTurn + 2;
+            waitPacket = InputTurn > OutputTurn + 2;
         }
 
         private void OnUpdateAction(Protocol.Response.ActionQueue queue)
@@ -157,7 +161,7 @@ namespace Game
                 InputFrame = 0;
             }
             
-            paused = InputTurn > OutputTurn + 2;
+            waitPacket = InputTurn > OutputTurn + 2;
         }
 
         private void OnDestroy()
