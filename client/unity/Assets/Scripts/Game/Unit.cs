@@ -341,12 +341,12 @@ namespace Game
             _lastAttackFrame = -attackSpeed / new Fix64(1000) / GameController.TimeDelta;
         }
 
-        public void OnUpdateFrame(Fix64 timeDelta)
+        public void OnUpdateFrame(Frame f)
         {
             // float 캐스팅
-            animator.Update(timeDelta);
+            animator.Update(f.deltaTime);
             UpdateBounds();
-            Action();
+            Action(f);
 
             this.transform.position = this.position;
         }
@@ -395,7 +395,7 @@ namespace Game
                 .FirstOrDefault();
         }
         
-        private void Action()
+        private void Action(Frame f)
         {
             switch (_currentState)
             {
@@ -469,7 +469,7 @@ namespace Game
                     }
                     else
                     {   
-                        DeltaMove(GameController.TimeDelta);
+                        DeltaMove(f);
                     }
                     break;
 
@@ -601,7 +601,7 @@ namespace Game
 
         public bool Attack(Unit unit)
         {
-            var currentFrame = GameController.TotalFrame;
+            var currentFrame = GameController.InputTotalFrame;
             if ((currentFrame - _lastAttackFrame) * GameController.TimeDelta < attackSpeed / new Fix64(1000))
                 return false;
 

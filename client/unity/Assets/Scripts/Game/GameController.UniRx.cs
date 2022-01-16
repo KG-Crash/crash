@@ -8,15 +8,32 @@ using UniRx.Triggers;
 
 namespace Game
 {
+    public struct Frame
+    {
+        public int currentFrame;
+        public int currentTurn;
+        public Fix64 deltaTime;
+    }
+    
     public partial class GameController
     {
-        public static IObservable<Fix64> gameFrameStream => Observable.EveryUpdate().Where(_ => !GameController.paused).Select(_ => GameController.TimeDelta);
+        public static IObservable<Frame> updateFrameStream => Observable.EveryUpdate().Where(_ => !paused)
+            .Select(_ => InputFrameChunk);
+
+        public static IObservable<Frame> lateUpdateFrameStream => Observable.EveryLateUpdate().Where(_ => !paused)
+            .Select(_ => InputFrameChunk);
 
         private void InitializeUniRx()
         {
-            var disposable = gameFrameStream.Subscribe(OnUpdateFrame);
+            var updateDisposable = updateFrameStream.Subscribe(OnUpdateFrame);
+            var lateUpdateDisposable = lateUpdateFrameStream.Subscribe(OnLateUpdateFrame);
+            
             this.UpdateAsObservable().Subscribe(_ => OnUpdateAlways());
-            this.OnDestroyAsObservable().Subscribe(_ => disposable.Dispose());
+            this.OnDestroyAsObservable().Subscribe(_ =>
+            {
+                updateDisposable.Dispose();
+                lateUpdateDisposable.Dispose();
+            });
         }
     }
 }

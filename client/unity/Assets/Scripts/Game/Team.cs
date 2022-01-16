@@ -156,7 +156,7 @@ namespace Game
         
         private Dictionary<Ability, int> _upgradeStartFrame = new Dictionary<Ability, int>();
 
-        public void StartUpgrade(Ability ability)
+        public void StartUpgrade(Ability ability, int currentFrame)
         {
             if (ability == Ability.NONE)
             {
@@ -165,18 +165,18 @@ namespace Game
             
             if (!_upgradeStartFrame.ContainsKey(ability))
             {
-                _upgradeStartFrame.Add(ability, GameController.TotalFrame);   
+                _upgradeStartFrame.Add(ability, currentFrame);   
                 Debug.Log($"StartUpgrade({ability}), After {Table.From<TableUnitUpgradeCost>()[ability].Time}ms");
             }
         }
 
-        public void UpdateUpgrade()
+        public void UpdateUpgrade(Frame f)
         {
             List<Ability> completeList = new List<Ability>();
             
             foreach (var k in _upgradeStartFrame.Keys)
             {
-                if (_upgradeStartFrame[k] + Table.From<TableUnitUpgradeCost>()[k].Time / GameController.TimeDelta < GameController.TotalFrame)
+                if (_upgradeStartFrame[k] + Table.From<TableUnitUpgradeCost>()[k].Time / GameController.TimeDelta < f.currentFrame)
                 {
                     completeList.Add(k);
                 }

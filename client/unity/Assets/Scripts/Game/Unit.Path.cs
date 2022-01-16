@@ -25,9 +25,9 @@ namespace Game
         public bool remainPath => _regionPath.Count > 0 || _destStack.Count > 0;
         public bool remainImmediatePath => _cellPath.Count > 0;
 
-        private void DeltaMove(Fix64 delta)
+        private void DeltaMove(Frame f)
         {
-            if (_blockedFrame != null && (GameController.TotalFrame - _blockedFrame.Value) * GameController.TimeDelta < 1)
+            if (_blockedFrame != null && (f.currentFrame - _blockedFrame.Value) * f.deltaTime < 1)
                 return;
 
             var dst = _cellPath.FirstOrDefault();
@@ -51,7 +51,7 @@ namespace Game
                 // TODO : 이거는 나중에 동기화 때 처리해야 할 문제 (Time.deltaTime을 사용하지 않아야 함)
                 transform.LookAt(new FixVector3(dst.position.x, this.transform.position.y, dst.position.y));
 
-                arrived = magnitude < (speed * delta) || magnitude < (Fix64)_stopMoveDistance + (Fix64)Shared.Const.Character.MoveEpsilon;
+                arrived = magnitude < (speed * f.deltaTime) || magnitude < (Fix64)_stopMoveDistance + (Fix64)Shared.Const.Character.MoveEpsilon;
             }
 
             if (arrived)
@@ -80,7 +80,7 @@ namespace Game
             else
             {
                 var old = new FixVector3(position);
-                position += (direction * speed * delta);
+                position += (direction * speed * f.deltaTime);
                 var collisionUnit = GetNearUnits().FirstOrDefault(x => !x.IsDead && x.collisionBox.Contains(this.collisionBox));
                 if (collisionUnit != null)
                 {
@@ -93,7 +93,7 @@ namespace Game
                     }
                     else
                     {
-                        _blockedFrame = GameController.TotalFrame;
+                        _blockedFrame = GameController.InputTotalFrame;
                     }
 
                     position = old;
@@ -202,13 +202,13 @@ namespace Game
                 if (_cellPath.Count == 0)
                     throw new ClientException(ClientExceptionCode.ZeroCellPath, "_cellPath.Count == 0");
 
-                Debug.Log(
-                    $"update detail route. unitID: {unitID}, _cellPath.Count: {_cellPath.Count}, _regionPath.Count: {_regionPath.Count}");
+                // Debug.Log(
+                //     $"update detail route. unitID: {unitID}, _cellPath.Count: {_cellPath.Count}, _regionPath.Count: {_regionPath.Count}");
                 return true;
             }
             catch (ClientException e)
             {
-                Debug.LogError($"code: {e._code}, exception: {e.Message}, unitID: {unitID}");
+                // Debug.LogError($"code: {e._code}, exception: {e.Message}, unitID: {unitID}");
                 _cellPath.Clear();
                 return false;
             }
@@ -231,7 +231,7 @@ namespace Game
 
         private bool TryUpdateMovePath()
         {
-            if (_blockedFrame != null && (GameController.TotalFrame - _blockedFrame.Value) * GameController.TimeDelta < 1)
+            if (_blockedFrame != null && (GameController.InputTotalFrame - _blockedFrame.Value) * GameController.TimeDelta < 1)
                 return false;
             if (_destStack.Count == 0)
                 return false;
@@ -247,7 +247,7 @@ namespace Game
             }
             else
             {
-                _blockedFrame = GameController.TotalFrame;
+                _blockedFrame = GameController.InputTotalFrame;
             }
             
             return false;
