@@ -14,7 +14,7 @@ namespace Game
             var unit = Object.Instantiate(unitOrigin, parent);
             unit.Init(_sequence++, map, owner, listener);
             
-            var frameUpdateDisposable = GameController.gameFrameStream.Subscribe(unit.OnUpdateFrame);
+            var frameUpdateDisposable = GameController.updateFrameStream.Subscribe(unit.OnUpdateFrame);
             unit.OnDestroyAsObservable().Subscribe(_ => frameUpdateDisposable.Dispose());
             
             return unit;

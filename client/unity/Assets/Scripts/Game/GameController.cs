@@ -5,6 +5,7 @@ using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Protocol.Request;
 using UnityEngine;
 
 namespace Game
@@ -19,10 +20,20 @@ namespace Game
         public static Fix64 TurnRate => Fix64.One / new Fix64(8);
         public static bool paused { get; set; }
         
-        public static int Frame { get; private set; }
-        public static int Turn { get; private set; }
-        public static int TotalFrame => Frame + Turn * Shared.Const.Time.FramePerTurn;
+        public static int InputFrame { get; private set; }
+        public static int InputTurn { get; private set; }
+        public static int InputTotalFrame => InputFrame + InputTurn * Shared.Const.Time.FramePerTurn;
+
+        public static Frame InputFrameChunk => new Frame()
+            {currentFrame = InputFrame, currentTurn = InputTurn, deltaTime = InputTotalFrame};
         
+        public static int OutputFrame { get; private set; }
+        public static int OutputTurn { get; private set; }
+        public static int OutputTotalFrame => OutputFrame + OutputTurn * Shared.Const.Time.FramePerTurn;
+
+        public static Frame OutputFrameChunk => new Frame()
+            {currentFrame = OutputFrame, currentTurn = OutputTurn, deltaTime = OutputTotalFrame};
+
         private readonly Protocol.Request.ActionQueue _actionQueue = new Protocol.Request.ActionQueue 
         {
             Actions = new List<Protocol.Request.Action>()
@@ -32,8 +43,6 @@ namespace Game
         [NonSerialized] private uint _playerTeamID;
         [NonSerialized] private Team _allPlayerByTeam;
         [NonSerialized] private Player _player;
-        [NonSerialized] private List<Unit> _selectedUnits;
-        [NonSerialized] private List<Unit> _allUnitInFrustum;
         [NonSerialized] private ProjectilePool _projectilePool;
 
         [Header("Miscellaneous")] 
@@ -76,9 +85,8 @@ namespace Game
             OnLoadScene();
             
             _projectilePool = new ProjectilePool(_projectilehPrefabTable, 15, this, _poolOffset);
-            _selectedUnits = new List<Unit>();
-            _allUnitInFrustum = new List<Unit>();
 
+            // 레디에서 이름 보내야 하지 않을까?
             _ = Client.Send(new Protocol.Request.Ready{ });
 
             InitializeUniRx();
@@ -91,36 +99,66 @@ namespace Game
 
         private void OnUpdateAlways()
         {
-            UpdateUnitInFrustumPlane();
-            UpdateForDebug();
+            OnUpdateAlwaysDebug();
+            
+            if (_actions.All(kv =>
+            {
+                var list = kv.Value;
+                if (list.Count == 0)
+                {
+                    return false;
+                }
+
+                return list.First.Value.Turn == OutputTurn;
+            }))
+            {
+                foreach (var kv in _actions)
+                {
+                    var list = kv.Value;
+                    OnUpdateAction(list.First.Value);
+                    list.RemoveFirst();
+                }
+
+                OutputTurn++;
+            }
+            
+            paused = InputTurn > OutputTurn + 2;
         }
 
-        private void OnUpdateFrame(Fix64 timeDelta)
+        private void OnUpdateAction(Protocol.Response.ActionQueue queue)
+        {
+            
+        }
+
+        private void OnUpdateFrame(Frame f)
         {
             EnqueueAction(new Protocol.Request.Action
             {
-                Frame = Frame,
+                Frame = InputFrame,
                 Id = 0,
-                Param1 = (uint)(TPS - Frame),
-                Param2 = (uint)Frame
+                Param1 = (uint)(TPS - InputFrame),
+                Param2 = (uint)InputFrame
             });
+            
+            _player.UpdateUpgrade(f);
+            OnUpdateFrameDebug(f);
+        }
 
-            if (++Frame >= Shared.Const.Time.FramePerTurn)
+        private void OnLateUpdateFrame(Frame f)
+        {
+            if (++InputFrame >= Shared.Const.Time.FramePerTurn)
             {
-                OnTurnChanged(Turn++);
-                Frame = 0;
+                OnTurnChanged(InputTurn++);
+                InputFrame = 0;
             }
             
-            _player.UpdateUpgrade();
+            paused = InputTurn > OutputTurn + 2;
         }
 
         private void OnDestroy()
         {
             ClearInput();
         }
-
-        private Vector3[] frustumPoints = new Vector3[8];
-        private Plane[] frustumPlanes = new Plane[6];
 
         private void OnTurnChanged(int turn)
         {
@@ -134,124 +172,8 @@ namespace Game
 
         public void EnqueueAction(Protocol.Request.Action action)
         {
-            action.Frame = Frame;
+            action.Frame = InputFrame;
             _actionQueue.Actions.Add(action);
-        }
-        
-        public void UpdateDragRect(Rect rect)
-        {
-            var uobj = UnityResources._instance.Get("objects");
-            var selectedCamera = uobj.GetCamera();
-            var teamPlayers = _allPlayerByTeam.players[_playerTeamID];
-            var player = teamPlayers[_playerID];
-            var units = player.units.Values.ToArray();
-            var selectedUnits = new List<Unit>();
-
-            if (rect.size != Vector2.zero)
-            {
-                CrashMath.GetFrustumPlanes(selectedCamera, rect, frustumPlanes); 
-                UnityObjects.IntersectUnits(frustumPlanes, units, selectedUnits);
-            }
-            else
-            {
-                var ray = selectedCamera.ScreenPointToRay(rect.position);
-                var selectedUnit = UnityObjects.IntersectNearestUnit(ray, units);
-                
-                if (selectedUnit)
-                    selectedUnits.Add(selectedUnit);
-            }
-            
-            SelectUnits(selectedUnits);
-        }
-
-        public void SelectUnits(List<Unit> selectedUnitList)
-        {
-            foreach (var unit in _selectedUnits.Except(selectedUnitList))
-            {
-                unit.Selected(false);
-            }
-            foreach (var unit in selectedUnitList.Except(_selectedUnits))
-            {
-                unit.Selected(true);
-            }
-
-            _selectedUnits = selectedUnitList;
-        }
-        
-        public bool MoveSelectedUnitTo(Ray camRay, float farClipPlane)
-        {           
-            if (Physics.Raycast(camRay, out var hitInfo, farClipPlane))
-            {
-                foreach (var unit in _selectedUnits)
-                {
-                    unit.MoveTo(hitInfo.point);
-                }
-
-                return true;
-            }
-            else if (camRay.origin.y > 0 && camRay.direction.y < 0)
-            {
-                var t = camRay.origin.y / (-camRay.direction.y);
-                var point = camRay.GetPoint(t);
-             
-                foreach (var unit in _selectedUnits)
-                {
-                    unit.MoveTo(point);
-                }
-                    
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public IEnumerable<Unit> GetAllUnits()
-        {
-            return _allPlayerByTeam.players.SelectMany(x => x.Value).SelectMany(x => x.units).Select(x => x);
-        }
-
-        public void UpdateUnitInFrustumPlane()
-        {
-            var uobj = UnityResources._instance.Get("objects");
-            var selectedCamera = uobj.GetCamera();
-            var frustumPlanes = GeometryUtility.CalculateFrustumPlanes(selectedCamera);
-            
-            _allUnitInFrustum = GetAllUnits().
-                Where(x => GeometryUtility.TestPlanesAABB(frustumPlanes, x.bounds)).ToList();
-        }
-
-        public void ApplyCommand(IEnumerable<ICommand> commands)
-        {
-            var teamPlayers = _allPlayerByTeam.players[_playerTeamID];
-            var player = teamPlayers[_playerID];
-            
-            foreach (var command in commands)
-            {
-                switch (command.type)
-                {
-                    case CommandType.Move:
-                        var unit = player.units[command.behaiveUnitID];
-                        var moveCommand = (MoveCommand) command;
-                        unit.MoveTo(CrashMath.DecodePosition(moveCommand._position));
-                        break;
-                    case CommandType.AttackSingleTarget:
-                        break;
-                    case CommandType.AttackMultiTarget:
-                        break;
-                }
-            }
-        }
-
-        public void AppendCommand(ICommand command)
-        {
-            ApplyCommand(new ICommand[1] { command });
-        }
-
-        public void AppendCommand(IEnumerable<ICommand> commands)
-        {
-            ApplyCommand(commands);
         }
     }
 }

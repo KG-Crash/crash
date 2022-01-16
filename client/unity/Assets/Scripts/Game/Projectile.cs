@@ -116,14 +116,14 @@ namespace Game
             currentState = ProjectileState.Shoot;
         }
 
-        public void OnUpdateFrame(Fix64 _)
+        public void OnUpdateFrame(Frame f)
         {
-            Action(); 
+            Action(f); 
 
             this.transform.position = this.position;
         }
 
-        private void Action()
+        private void Action(Frame f)
         {
             switch (currentState)
             {
@@ -133,7 +133,7 @@ namespace Game
                     break;
 
                 case ProjectileState.Move:
-                    DeltaMove(GameController.TimeDelta);
+                    DeltaMove(f.deltaTime);
                     break;
 
                 case ProjectileState.Hit:

@@ -18,7 +18,7 @@ namespace Game
             projectile.listener = listener;
             projectile.Disable();
             
-            var frameUpdateDisposable = GameController.gameFrameStream.Subscribe(projectile.OnUpdateFrame);
+            var frameUpdateDisposable = GameController.updateFrameStream.Subscribe(projectile.OnUpdateFrame);
             projectile.OnDestroyAsObservable().Subscribe(_ => frameUpdateDisposable.Dispose());
 
             return projectile;
