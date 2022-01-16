@@ -74,6 +74,7 @@ table Action {
 table ActionQueue {
 	user: string;
 	actions: [Action];
+	turn: int;
 	error: uint32;
 }
 

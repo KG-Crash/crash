@@ -308,6 +308,7 @@ namespace Protocol.Request
         public uint Identity => (uint)Protocol.Request.Identity.ACTION_QUEUE;
 
         public List<Action> Actions { get; set; }
+        public int Turn { get; set; }
 
         public ActionQueue()
         { }
@@ -315,13 +316,15 @@ namespace Protocol.Request
         public ActionQueue(FlatBuffer.Request.ActionQueue obj)
         {
             this.Actions = Enumerable.Range(0, obj.ActionsLength).Select(x => new Action(obj.Actions(x).Value)).ToList();
+            this.Turn = obj.Turn;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Request.ActionQueue> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
             var _actions = FlatBuffer.Request.ActionQueue.CreateActionsVector(builder, this.Actions.Select(x => x.ToFlatBuffer(builder)).ToArray());
+            var _turn = this.Turn;
 
-            return FlatBuffer.Request.ActionQueue.CreateActionQueue(builder, _actions);
+            return FlatBuffer.Request.ActionQueue.CreateActionQueue(builder, _actions, _turn);
         }
 
         public byte[] Serialize()

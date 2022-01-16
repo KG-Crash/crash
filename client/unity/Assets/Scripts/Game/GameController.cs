@@ -107,8 +107,7 @@ namespace Game
 
             if (++Frame >= Shared.Const.Time.FramePerTurn)
             {
-                OnTurnChanged();
-                Turn++;
+                OnTurnChanged(Turn++);
                 Frame = 0;
             }
             
@@ -123,10 +122,11 @@ namespace Game
         private Vector3[] frustumPoints = new Vector3[8];
         private Plane[] frustumPlanes = new Plane[6];
 
-        private void OnTurnChanged()
+        private void OnTurnChanged(int turn)
         {
             if (IsNetworkMode)
             {
+                _actionQueue.Turn = turn;
                 _ = Client.Send(_actionQueue);
             }
             _actionQueue.Actions.Clear();

@@ -39,6 +39,7 @@ table Action {
 
 table ActionQueue {
 	actions: [Action];
+	turn: int;
 }
 
 table GameStart {}

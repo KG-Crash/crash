@@ -21,19 +21,23 @@ public struct ActionQueue : IFlatbufferObject
 
   public FlatBuffer.Request.Action? Actions(int j) { int o = __p.__offset(4); return o != 0 ? (FlatBuffer.Request.Action?)(new FlatBuffer.Request.Action()).__assign(__p.__indirect(__p.__vector(o) + j * 4), __p.bb) : null; }
   public int ActionsLength { get { int o = __p.__offset(4); return o != 0 ? __p.__vector_len(o) : 0; } }
+  public int Turn { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
 
   public static Offset<FlatBuffer.Request.ActionQueue> CreateActionQueue(FlatBufferBuilder builder,
-      VectorOffset actionsOffset = default(VectorOffset)) {
-    builder.StartTable(1);
+      VectorOffset actionsOffset = default(VectorOffset),
+      int turn = 0) {
+    builder.StartTable(2);
+    ActionQueue.AddTurn(builder, turn);
     ActionQueue.AddActions(builder, actionsOffset);
     return ActionQueue.EndActionQueue(builder);
   }
 
-  public static void StartActionQueue(FlatBufferBuilder builder) { builder.StartTable(1); }
+  public static void StartActionQueue(FlatBufferBuilder builder) { builder.StartTable(2); }
   public static void AddActions(FlatBufferBuilder builder, VectorOffset actionsOffset) { builder.AddOffset(0, actionsOffset.Value, 0); }
   public static VectorOffset CreateActionsVector(FlatBufferBuilder builder, Offset<FlatBuffer.Request.Action>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static VectorOffset CreateActionsVectorBlock(FlatBufferBuilder builder, Offset<FlatBuffer.Request.Action>[] data) { builder.StartVector(4, data.Length, 4); builder.Add(data); return builder.EndVector(); }
   public static void StartActionsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
+  public static void AddTurn(FlatBufferBuilder builder, int turn) { builder.AddInt(1, turn, 0); }
   public static Offset<FlatBuffer.Request.ActionQueue> EndActionQueue(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Request.ActionQueue>(o);

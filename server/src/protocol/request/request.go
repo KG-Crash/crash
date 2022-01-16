@@ -424,6 +424,7 @@ func (obj *Action) Deserialize(bytes []byte) protocol.Protocol {
 
 type ActionQueue struct {
 	Actions []Action
+	Turn    int32
 }
 
 func (obj *ActionQueue) actions(builder *flatbuffers.Builder, actions []Action) flatbuffers.UOffsetT {
@@ -445,6 +446,7 @@ func (obj *ActionQueue) create(builder *flatbuffers.Builder) flatbuffers.UOffset
 
 	source.ActionQueueStart(builder)
 	source.ActionQueueAddActions(builder, _actions)
+	source.ActionQueueAddTurn(builder, obj.Turn)
 
 	return source.ActionQueueEnd(builder)
 }
@@ -460,6 +462,7 @@ func (obj *ActionQueue) parse(x *source.ActionQueue) *ActionQueue {
 		action.parse(_action)
 		obj.Actions = append(obj.Actions, action)
 	}
+	obj.Turn = x.Turn()
 
 	return obj
 }

@@ -728,6 +728,7 @@ func (obj *Action) Deserialize(bytes []byte) protocol.Protocol {
 type ActionQueue struct {
 	User    string
 	Actions []Action
+	Turn    int32
 	Error   uint32
 }
 
@@ -752,6 +753,7 @@ func (obj *ActionQueue) create(builder *flatbuffers.Builder) flatbuffers.UOffset
 	source.ActionQueueStart(builder)
 	source.ActionQueueAddUser(builder, _user)
 	source.ActionQueueAddActions(builder, _actions)
+	source.ActionQueueAddTurn(builder, obj.Turn)
 	source.ActionQueueAddError(builder, obj.Error)
 
 	return source.ActionQueueEnd(builder)
@@ -769,6 +771,7 @@ func (obj *ActionQueue) parse(x *source.ActionQueue) *ActionQueue {
 		action.parse(_action)
 		obj.Actions = append(obj.Actions, action)
 	}
+	obj.Turn = x.Turn()
 	obj.Error = x.Error()
 
 	return obj

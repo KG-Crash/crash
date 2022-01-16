@@ -46,14 +46,29 @@ func (rcv *ActionQueue) ActionsLength() int {
 	return 0
 }
 
+func (rcv *ActionQueue) Turn() int32 {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(6))
+	if o != 0 {
+		return rcv._tab.GetInt32(o + rcv._tab.Pos)
+	}
+	return 0
+}
+
+func (rcv *ActionQueue) MutateTurn(n int32) bool {
+	return rcv._tab.MutateInt32Slot(6, n)
+}
+
 func ActionQueueStart(builder *flatbuffers.Builder) {
-	builder.StartObject(1)
+	builder.StartObject(2)
 }
 func ActionQueueAddActions(builder *flatbuffers.Builder, actions flatbuffers.UOffsetT) {
 	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(actions), 0)
 }
 func ActionQueueStartActionsVector(builder *flatbuffers.Builder, numElems int) flatbuffers.UOffsetT {
 	return builder.StartVector(4, numElems, 4)
+}
+func ActionQueueAddTurn(builder *flatbuffers.Builder, turn int32) {
+	builder.PrependInt32Slot(1, turn, 0)
 }
 func ActionQueueEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

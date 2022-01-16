@@ -529,6 +529,7 @@ namespace Protocol.Response
 
         public string User { get; set; }
         public List<Action> Actions { get; set; }
+        public int Turn { get; set; }
         public uint Error { get; set; }
 
         public ActionQueue()
@@ -538,6 +539,7 @@ namespace Protocol.Response
         {
             this.User = obj.User;
             this.Actions = Enumerable.Range(0, obj.ActionsLength).Select(x => new Action(obj.Actions(x).Value)).ToList();
+            this.Turn = obj.Turn;
             this.Error = obj.Error;
         }
 
@@ -545,9 +547,10 @@ namespace Protocol.Response
         {
             var _user = builder.CreateString(this.User);
             var _actions = FlatBuffer.Response.ActionQueue.CreateActionsVector(builder, this.Actions.Select(x => x.ToFlatBuffer(builder)).ToArray());
+            var _turn = this.Turn;
             var _error = this.Error;
 
-            return FlatBuffer.Response.ActionQueue.CreateActionQueue(builder, _user, _actions, _error);
+            return FlatBuffer.Response.ActionQueue.CreateActionQueue(builder, _user, _actions, _turn, _error);
         }
 
         public byte[] Serialize()
