@@ -25,14 +25,14 @@ namespace Game
         public static int InputTotalFrame => InputFrame + InputTurn * Shared.Const.Time.FramePerTurn;
 
         public static Frame InputFrameChunk => new Frame()
-            {currentFrame = InputFrame, currentTurn = InputTurn, deltaTime = InputTotalFrame};
+            {currentFrame = InputFrame, currentTurn = InputTurn, deltaTime = TimeDelta};
         
         public static int OutputFrame { get; private set; }
         public static int OutputTurn { get; private set; }
         public static int OutputTotalFrame => OutputFrame + OutputTurn * Shared.Const.Time.FramePerTurn;
 
         public static Frame OutputFrameChunk => new Frame()
-            {currentFrame = OutputFrame, currentTurn = OutputTurn, deltaTime = OutputTotalFrame};
+            {currentFrame = OutputFrame, currentTurn = OutputTurn, deltaTime = TimeDelta};
 
         private readonly Protocol.Request.ActionQueue _actionQueue = new Protocol.Request.ActionQueue 
         {
@@ -101,7 +101,7 @@ namespace Game
         {
             OnUpdateAlwaysDebug();
             
-            if (_actions.All(kv =>
+            if (_actions.Count > 0 && _actions.All(kv =>
             {
                 var list = kv.Value;
                 if (list.Count == 0)
@@ -122,6 +122,7 @@ namespace Game
                 OutputTurn++;
             }
             
+            Debug.Log($"InputTurn({InputTurn}) > OutputTurn({OutputTurn}) + 2");
             paused = InputTurn > OutputTurn + 2;
         }
 
@@ -132,6 +133,8 @@ namespace Game
 
         private void OnUpdateFrame(Frame f)
         {
+            Debug.Log($"InputTurn({InputTurn}) > OutputTurn({OutputTurn}) + 2");
+            
             EnqueueAction(new Protocol.Request.Action
             {
                 Frame = InputFrame,
@@ -146,6 +149,8 @@ namespace Game
 
         private void OnLateUpdateFrame(Frame f)
         {
+            Debug.Log($"InputTurn({InputTurn}) > OutputTurn({OutputTurn}) + 2");
+            
             if (++InputFrame >= Shared.Const.Time.FramePerTurn)
             {
                 OnTurnChanged(InputTurn++);
@@ -166,6 +171,7 @@ namespace Game
             {
                 _actionQueue.Turn = turn;
                 _ = Client.Send(_actionQueue);
+                Debug.Log($"send queue : {turn}");
             }
             _actionQueue.Actions.Clear();
         }
