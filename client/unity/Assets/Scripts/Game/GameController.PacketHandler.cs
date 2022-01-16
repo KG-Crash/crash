@@ -20,7 +20,6 @@ namespace Game
             {
                 _actions.Add(response.User, new LinkedList<ActionQueue>());
                 Debug.LogError($"초기화 되지 않은 유저 이름 : {response.User}");
-                return false;
             }
 
             // 프레임 수 정렬 보장 필요
