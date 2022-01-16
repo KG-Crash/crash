@@ -14,7 +14,7 @@ namespace Game
         [FlatBufferEvent]
         public async Task<bool> OnActionQueue(ActionQueue response)
         {
-            Debug.Log($"turn : {response.Turn}");
+            Debug.Log($"receive queue : {response.Turn}");
 
             if (!_actions.ContainsKey(response.User))
             {
@@ -24,6 +24,8 @@ namespace Game
 
             // 프레임 수 정렬 보장 필요
             _actions[response.User].AddLast(response);
+            Debug.LogError($"_actions[{response.User}].AddLast({response.Turn}), {_actions[response.User].Count}");
+
             return true;
         }
 
