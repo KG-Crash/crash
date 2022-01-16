@@ -136,6 +136,7 @@ type Action struct {
 	Sender  *actor.PID
 	UID     string
 	Actions []request.Action
+	Turn    int32
 }
 
 /*

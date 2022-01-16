@@ -252,7 +252,6 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 	case *request.ActionQueue:
 		if state.Room == nil {
 			ctx.Send(ctx.Self(), &response.ActionQueue{
-				Turn:  ptc.Turn,
 				Error: enum.ResultCode.NotEnteredAnyGameRoom,
 			})
 			return
@@ -262,6 +261,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			Sender:  ctx.Self(),
 			UID:     state.ID,
 			Actions: ptc.Actions,
+			Turn:    ptc.Turn,
 		})
 
 	case *request.Ready:
