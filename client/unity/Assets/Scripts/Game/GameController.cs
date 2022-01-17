@@ -116,6 +116,8 @@ namespace Game
                 return list.First.Value.Turn == OutputTurn;
             }))
             {
+                Debug.Log($"OutputTurn={OutputTurn}, Execute");
+                
                 foreach (var kv in _actions)
                 {
                     var list = kv.Value;
