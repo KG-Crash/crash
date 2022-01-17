@@ -14,7 +14,7 @@ namespace Game
         [FlatBufferEvent]
         public async Task<bool> OnActionQueue(ActionQueue response)
         {
-            Debug.Log($"receive queue : {response.Turn}");
+            Debug.Log($"receive queue : {response.Turn}, {response.User}");
 
             if (!_actions.ContainsKey(response.User))
             {
