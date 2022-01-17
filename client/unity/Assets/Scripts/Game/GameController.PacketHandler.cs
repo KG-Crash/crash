@@ -43,6 +43,11 @@ namespace Game
             // random seed
             Client.Instance.seed = response.Seed;
 
+            foreach (var user in response.Users)
+            {
+                _actions.Add(user.Id, new LinkedList<ActionQueue>());   
+            }
+
             return true;
         }
     }
