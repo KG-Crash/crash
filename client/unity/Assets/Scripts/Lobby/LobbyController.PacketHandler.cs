@@ -30,7 +30,7 @@ public class RoomListListener : KG.ScrollView.IListener<string>
 
     public IEnumerator<string> OnRefresh()
     {
-        return roomList.Rooms.Select(x => x.Title).GetEnumerator();
+        return roomList.Rooms.Select(x => x.Id).GetEnumerator();
     }
 }
 
