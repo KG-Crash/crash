@@ -45,7 +45,8 @@ namespace Game
 
             foreach (var user in response.Users)
             {
-                _actions.Add(user.Id, new LinkedList<ActionQueue>());   
+                _actions.Add(user.Id, new LinkedList<ActionQueue>());
+                Debug.Log($"user.Id={user}");
             }
 
             return true;
