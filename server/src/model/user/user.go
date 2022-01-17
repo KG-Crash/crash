@@ -2,6 +2,7 @@ package user
 
 import (
 	"enum"
+	"log"
 	"msg"
 	"net"
 	"protocol"
@@ -62,8 +63,8 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			ID: ptc.Id,
 		}, time.Hour)
 		ctx.AwaitFuture(getRoomFuture, func(res interface{}, err error) {
-			room := res.(*msg.ResponseGetRoom)
-			enterRoomFuture := ctx.RequestFuture(room.Room, &msg.RequestEnterRoom{
+			getRoom := res.(*msg.ResponseGetRoom)
+			enterRoomFuture := ctx.RequestFuture(getRoom.Room, &msg.RequestEnterRoom{
 				Sender: ctx.Self(),
 			}, time.Hour)
 			ctx.AwaitFuture(enterRoomFuture, func(res interface{}, err error) {
@@ -78,6 +79,8 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 				for _, user := range enterRoom.Users {
 					ctx.Send(user.PID, result)
 				}
+
+				state.Room = getRoom.Room
 			})
 		})
 
@@ -264,6 +267,8 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			Turn:    ptc.Turn,
 		})
 
+		log.Printf("turn (from %d) : %s", ptc.Turn, state.ID)
+
 	case *request.Ready:
 		if state.Room == nil {
 			ctx.Send(ctx.Self(), &response.ActionQueue{
@@ -333,6 +338,8 @@ func (state *Actor) Receive(ctx actor.Context) {
 		ctx.Send(ctx.Self(), &response.LeaveRoom{
 			User: state.ID,
 		})
+
+		state.Room = nil
 
 	case *msg.Left:
 		msg := &response.LeaveRoom{
