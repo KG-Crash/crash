@@ -21,7 +21,7 @@ namespace Game
         {
             public List<Unit> _placedUnits = new List<Unit>();
             public Queue<Map.Cell> _nearCellQueue = new Queue<Map.Cell>();
-            public uint threshold { get; private set; } = 7; // temp
+            public uint threshold { get; private set; } = 10; // temp
             public bool isValid { get; private set; } = true;
 
             public static void PlaceUnit(KG.Map map, TemporalPlaceContext ctx, Unit unit, FixVector3 centerPosition)

@@ -145,18 +145,18 @@ namespace KG
             HashSet<Region> rectRegions = new HashSet<Region>();
             rectRegions.Clear();
 
-            var cell = this[rectPosition.minX, rectPosition.maxY];
+            var cell = this[rectPosition.minY, rectPosition.maxX];
             if (cell != null) rectRegions.Add(cell.region);
-            cell = this[rectPosition.maxX, rectPosition.minY];
+            cell = this[rectPosition.maxY, rectPosition.minX];
             if (cell != null) rectRegions.Add(cell.region);
-            cell = this[rectPosition.maxX, rectPosition.maxY];
+            cell = this[rectPosition.maxY, rectPosition.maxX];
             if (cell != null) rectRegions.Add(cell.region);
-            cell = this[rectPosition.minX, rectPosition.minY];
+            cell = this[rectPosition.minY, rectPosition.minX];
             if (cell != null) rectRegions.Add(cell.region);
-            
+
             return rectRegions.SelectMany(region => region.units);
         }
-    
+
         private void CreateCells(int rows, int cols)
         {
             _cells = new Cell[rows * cols];

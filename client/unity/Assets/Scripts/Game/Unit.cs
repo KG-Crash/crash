@@ -628,6 +628,7 @@ namespace Game
             _currentState = UnitState.Dead;
             listener?.OnDead(this, from);
             owner.units.Delete(this);
+            region.units.Remove(this);
         }
 
         private IEnumerable<Unit> GetNearUnits()
