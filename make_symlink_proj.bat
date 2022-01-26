@@ -28,6 +28,7 @@ for /L %%i in (0,1,%instance_count%) do (
     cd .\unity_instance_%%i
 
     if not exist Assets mklink /D Assets ..\unity\Assets
+    if not exist json mklink /D json ..\unity\json
     if not exist Packages mklink /D Packages ..\unity\Packages
     if not exist ProjectSettings mklink /D ProjectSettings ..\unity\ProjectSettings
 
