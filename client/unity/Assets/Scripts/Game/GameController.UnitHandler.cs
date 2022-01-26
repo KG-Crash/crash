@@ -18,7 +18,7 @@ namespace Game
         {
             var beforeString = before != null ? before.ToString(): "null";
             var afterString = after != null ? after.ToString(): "null";
-            Debug.Log($"OnOwnerChanged({beforeString}, {afterString}, {unit})");
+            // Debug.Log($"OnOwnerChanged({beforeString}, {afterString}, {unit})");
         }
 
         public void OnAttack(Unit me, Unit you, Fix64 damage)

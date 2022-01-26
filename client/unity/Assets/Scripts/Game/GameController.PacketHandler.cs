@@ -14,16 +14,31 @@ namespace Game
         [FlatBufferEvent]
         public async Task<bool> OnActionQueue(ActionQueue response)
         {
-            Debug.Log($"receive queue : {response.Turn}, {response.User}");
+            Debug.Log($"receive queue : {response.Turn}, {response.User}, me?={response.User==Client.Instance.id}");
 
             if (!_actions.ContainsKey(response.User))
             {
                 _actions.Add(response.User, new LinkedList<ActionQueue>());
-                Debug.LogError($"초기화 되지 않은 유저 이름 : {response.User}");
+                Debug.LogError($"OnReady 에서 초기화 안함 : {response.User}");
             }
 
-            // 프레임 수 정렬 보장 필요
-            _actions[response.User].AddLast(response);
+            var actionQueueList = _actions[response.User];
+            var current = actionQueueList.Last; 
+            for (var i = actionQueueList.Count - 1; current != null; i++, current = current.Previous)
+            {
+                var actionQueue = current.Value;
+                if (actionQueue.Turn < response.Turn)
+                {
+                    actionQueueList.AddAfter(current, response);
+                    break;
+                }
+            }
+
+            if (current == null)
+            {
+                actionQueueList.AddFirst(response);
+            }
+
             return true;
         }
 
@@ -42,11 +57,12 @@ namespace Game
 
             // random seed
             Client.Instance.seed = response.Seed;
+            Debug.Log($"OnReady, myname is {Client.Instance.id}"); 
 
             foreach (var user in response.Users)
             {
                 _actions.Add(user.Id, new LinkedList<ActionQueue>());
-                Debug.Log($"user.Id={user}");
+                Debug.Log($"OnReady, user.Id={user.Id}");
             }
 
             return true;
