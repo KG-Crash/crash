@@ -277,13 +277,16 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			return
 		}
 
-		readyFuture := ctx.RequestFuture(state.Room, &msg.RequestReady{}, time.Hour)
+		readyFuture := ctx.RequestFuture(state.Room, &msg.RequestReady{
+			PID: ctx.Self(),
+		}, time.Hour)
 		ctx.AwaitFuture(readyFuture, func(res interface{}, err error) {
 			ready := res.(*msg.ResponseReady)
 
 			ctx.Send(ctx.Self(), &response.Ready{
 				Seed:  ready.Seed,
 				Users: toUserResponses(ready.Users),
+				Ready: ready.ReadyState,
 			})
 		})
 	}

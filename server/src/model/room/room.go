@@ -21,20 +21,23 @@ type RoomConfig struct {
 }
 
 type Actor struct {
-	id      string
-	users   map[int]*actor.PIDSet
-	playing bool
-	config  RoomConfig
-	master  *actor.PID
+	id            string
+	users         map[int]*actor.PIDSet
+	playing       bool
+	config        RoomConfig
+	master        *actor.PID
+	seed          int64
+	preparedUsers *actor.PIDSet
 }
 
 func New(id string, master *actor.PID, config RoomConfig) *Actor {
 	result := &Actor{
-		id:      id,
-		users:   make(map[int]*actor.PIDSet),
-		playing: false,
-		config:  config,
-		master:  master,
+		id:            id,
+		users:         make(map[int]*actor.PIDSet),
+		playing:       false,
+		config:        config,
+		master:        master,
+		preparedUsers: actor.NewPIDSet(),
 	}
 
 	for i := 0; i < len(config.Team); i++ {
@@ -350,16 +353,28 @@ func (state *Actor) Receive(ctx actor.Context) {
 			ctx.Send(pid, result)
 		})
 
+		// 랜덤시드 설정
+		seed, _ := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
+		state.seed = seed.Int64()
+
 	case *msg.RequestReady:
+		state.preparedUsers.Add(m.PID)
+
 		usersFuture := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
 		ctx.AwaitFuture(usersFuture, func(res interface{}, err error) {
 			users := res.(*msg.ResponseGetUsers)
 
-			// 랜덤시드 설정
-			seed, _ := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
+			readyState := []string{}
+			for _, user := range users.Users {
+				if state.preparedUsers.Contains(user.PID) {
+					readyState = append(readyState, user.ID)
+				}
+			}
+
 			ctx.Respond(&msg.ResponseReady{
-				Seed:  seed.Int64(),
-				Users: users.Users,
+				Seed:       state.seed,
+				Users:      users.Users,
+				ReadyState: readyState,
 			})
 		})
 

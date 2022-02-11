@@ -640,6 +640,7 @@ namespace Protocol.Response
 
         public long Seed { get; set; }
         public List<User> Users { get; set; }
+        public List<string> Ready { get; set; }
 
         public Ready()
         { }
@@ -648,14 +649,16 @@ namespace Protocol.Response
         {
             this.Seed = obj.Seed;
             this.Users = Enumerable.Range(0, obj.UsersLength).Select(x => new User(obj.Users(x).Value)).ToList();
+            this.Ready = Enumerable.Range(0, obj.ReadyLength).Select(x => obj.Ready(x)).ToList();
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.Ready> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
             var _seed = this.Seed;
             var _users = FlatBuffer.Response.Ready.CreateUsersVector(builder, this.Users.Select(x => x.ToFlatBuffer(builder)).ToArray());
+            var _ready = FlatBuffer.Response.Ready.CreateReadyVector(builder, this.Ready.Select(x => builder.CreateString(x)).ToArray());
 
-            return FlatBuffer.Response.Ready.CreateReady(builder, _seed, _users);
+            return FlatBuffer.Response.Ready.CreateReady(builder, _seed, _users, _ready);
         }
 
         public byte[] Serialize()

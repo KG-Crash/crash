@@ -125,11 +125,13 @@ type ResponseGetUsers struct {
 }
 
 type RequestReady struct {
+	PID *actor.PID
 }
 
 type ResponseReady struct {
-	Seed  int64
-	Users []UserState
+	Seed       int64
+	Users      []UserState
+	ReadyState []string
 }
 
 type Action struct {
