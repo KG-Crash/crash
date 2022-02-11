@@ -881,9 +881,9 @@ func (obj *GameStart) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type Ready struct {
-	Seed  int64
-	Users []User
-	Ready []string
+	Seed       int64
+	Users      []User
+	ReadyState []string
 }
 
 func (obj *Ready) users(builder *flatbuffers.Builder, users []User) flatbuffers.UOffsetT {
@@ -900,10 +900,10 @@ func (obj *Ready) users(builder *flatbuffers.Builder, users []User) flatbuffers.
 	return builder.EndVector(_size)
 }
 
-func (obj *Ready) ready(builder *flatbuffers.Builder, ready []string) flatbuffers.UOffsetT {
-	_size := len(ready)
+func (obj *Ready) readyState(builder *flatbuffers.Builder, readyState []string) flatbuffers.UOffsetT {
+	_size := len(readyState)
 	offsets := make([]flatbuffers.UOffsetT, _size)
-	for i, x := range ready {
+	for i, x := range readyState {
 		offsets[_size-i-1] = builder.CreateString(x)
 	}
 
@@ -916,12 +916,12 @@ func (obj *Ready) ready(builder *flatbuffers.Builder, ready []string) flatbuffer
 
 func (obj *Ready) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	_users := obj.users(builder, obj.Users)
-	_ready := obj.ready(builder, obj.Ready)
+	_readyState := obj.readyState(builder, obj.ReadyState)
 
 	source.ReadyStart(builder)
 	source.ReadyAddSeed(builder, obj.Seed)
 	source.ReadyAddUsers(builder, _users)
-	source.ReadyAddReady(builder, _ready)
+	source.ReadyAddReadyState(builder, _readyState)
 
 	return source.ReadyEnd(builder)
 }
@@ -939,9 +939,9 @@ func (obj *Ready) parse(x *source.Ready) *Ready {
 		obj.Users = append(obj.Users, user)
 	}
 
-	obj.Ready = []string{}
-	for i := 0; i < x.ReadyLength(); i++ {
-		obj.Ready = append(obj.Ready, string(x.Ready(i)))
+	obj.ReadyState = []string{}
+	for i := 0; i < x.ReadyStateLength(); i++ {
+		obj.ReadyState = append(obj.ReadyState, string(x.ReadyState(i)))
 	}
 
 	return obj

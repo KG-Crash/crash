@@ -284,9 +284,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			ready := res.(*msg.ResponseReady)
 
 			ctx.Send(ctx.Self(), &response.Ready{
-				Seed:  ready.Seed,
-				Users: toUserResponses(ready.Users),
-				Ready: ready.ReadyState,
+				Seed:       ready.Seed,
+				Users:      toUserResponses(ready.Users),
+				ReadyState: ready.ReadyState,
 			})
 		})
 	}

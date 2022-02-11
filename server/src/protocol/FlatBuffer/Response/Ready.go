@@ -58,7 +58,7 @@ func (rcv *Ready) UsersLength() int {
 	return 0
 }
 
-func (rcv *Ready) Ready(j int) []byte {
+func (rcv *Ready) ReadyState(j int) []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(8))
 	if o != 0 {
 		a := rcv._tab.Vector(o)
@@ -67,7 +67,7 @@ func (rcv *Ready) Ready(j int) []byte {
 	return nil
 }
 
-func (rcv *Ready) ReadyLength() int {
+func (rcv *Ready) ReadyStateLength() int {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(8))
 	if o != 0 {
 		return rcv._tab.VectorLen(o)
@@ -87,10 +87,10 @@ func ReadyAddUsers(builder *flatbuffers.Builder, users flatbuffers.UOffsetT) {
 func ReadyStartUsersVector(builder *flatbuffers.Builder, numElems int) flatbuffers.UOffsetT {
 	return builder.StartVector(4, numElems, 4)
 }
-func ReadyAddReady(builder *flatbuffers.Builder, ready flatbuffers.UOffsetT) {
-	builder.PrependUOffsetTSlot(2, flatbuffers.UOffsetT(ready), 0)
+func ReadyAddReadyState(builder *flatbuffers.Builder, readyState flatbuffers.UOffsetT) {
+	builder.PrependUOffsetTSlot(2, flatbuffers.UOffsetT(readyState), 0)
 }
-func ReadyStartReadyVector(builder *flatbuffers.Builder, numElems int) flatbuffers.UOffsetT {
+func ReadyStartReadyStateVector(builder *flatbuffers.Builder, numElems int) flatbuffers.UOffsetT {
 	return builder.StartVector(4, numElems, 4)
 }
 func ReadyEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {

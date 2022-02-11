@@ -89,5 +89,5 @@ table GameStart {
 table Ready {
 	seed: int64;
 	users: [User];
-	ready: [string];
+	readyState: [string];
 }
