@@ -4,16 +4,25 @@ using Protocol.Response;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using KG.Util;
+using System;
+using Newtonsoft.Json;
 
 namespace Game
 {
     public partial class GameController
     {
         private Dictionary<string, LinkedList<ActionQueue>> _actions = new Dictionary<string, LinkedList<ActionQueue>>();
+        private FileLogger _logger;
         
         [FlatBufferEvent]
         public async Task<bool> OnActionQueue(ActionQueue response)
         {
+            if (_logger != null)
+            {
+                _logger.Info($"[{response.User}] : {JsonConvert.SerializeObject(response.Actions)}");
+            }
+
             Debug.Log($"receive queue : {response.Turn}, {response.User}, me?={response.User==Client.Instance.id}");
 
             if (!_actions.ContainsKey(response.User))
@@ -50,6 +59,12 @@ namespace Game
         [FlatBufferEvent]
         public async Task<bool> OnReady(Ready response)
         {
+            var allReady = (response.ReadyState.Count == response.Users.Count);
+            if (allReady)
+            {
+                _logger = new FileLogger($"log/{DateTime.Now}.txt");
+            }
+
             // team : users
             var users = response.Users
                 .GroupBy(x => x.Team)
