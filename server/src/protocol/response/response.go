@@ -691,6 +691,7 @@ func (obj *Whisper) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type InGameChat struct {
+	Turn    int32
 	Frame   int32
 	User    string
 	Message string
@@ -701,6 +702,7 @@ func (obj *InGameChat) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT
 	_message := builder.CreateString(obj.Message)
 
 	source.InGameChatStart(builder)
+	source.InGameChatAddTurn(builder, obj.Turn)
 	source.InGameChatAddFrame(builder, obj.Frame)
 	source.InGameChatAddUser(builder, _user)
 	source.InGameChatAddMessage(builder, _message)
@@ -709,6 +711,7 @@ func (obj *InGameChat) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT
 }
 
 func (obj *InGameChat) parse(x *source.InGameChat) *InGameChat {
+	obj.Turn = x.Turn()
 	obj.Frame = x.Frame()
 	obj.User = string(x.User())
 	obj.Message = string(x.Message())

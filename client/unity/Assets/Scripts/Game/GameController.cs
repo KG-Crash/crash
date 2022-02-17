@@ -171,6 +171,14 @@ namespace Game
 
         private void OnTurnChanged(int turn)
         {
+            _ = Client.Send(new Protocol.Request.InGameChat
+            { 
+                Frame = InputTurn,
+                Message = "qweqwe"
+            });
+
+
+
             if (IsNetworkMode)
             {
                 _actionQueue.Turn = turn;

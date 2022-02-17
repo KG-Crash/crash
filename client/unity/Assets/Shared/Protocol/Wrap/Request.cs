@@ -265,6 +265,7 @@ namespace Protocol.Request
     {
         public uint Identity => (uint)Protocol.Request.Identity.IN_GAME_CHAT;
 
+        public int Turn { get; set; }
         public int Frame { get; set; }
         public string Message { get; set; }
 
@@ -273,16 +274,18 @@ namespace Protocol.Request
 
         public InGameChat(FlatBuffer.Request.InGameChat obj)
         {
+            this.Turn = obj.Turn;
             this.Frame = obj.Frame;
             this.Message = obj.Message;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Request.InGameChat> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
+            var _turn = this.Turn;
             var _frame = this.Frame;
             var _message = builder.CreateString(this.Message);
 
-            return FlatBuffer.Request.InGameChat.CreateInGameChat(builder, _frame, _message);
+            return FlatBuffer.Request.InGameChat.CreateInGameChat(builder, _turn, _frame, _message);
         }
 
         public byte[] Serialize()

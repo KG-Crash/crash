@@ -31,6 +31,7 @@ table Whisper {
 }
 
 table InGameChat {
+	turn: int;
 	frame: int;
 	message: string;
 }

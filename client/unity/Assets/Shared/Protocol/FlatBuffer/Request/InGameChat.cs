@@ -19,27 +19,31 @@ public struct InGameChat : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public InGameChat __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public int Frame { get { int o = __p.__offset(4); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
-  public string Message { get { int o = __p.__offset(6); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
+  public int Turn { get { int o = __p.__offset(4); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
+  public int Frame { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
+  public string Message { get { int o = __p.__offset(8); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
 #if ENABLE_SPAN_T
-  public Span<byte> GetMessageBytes() { return __p.__vector_as_span<byte>(6, 1); }
+  public Span<byte> GetMessageBytes() { return __p.__vector_as_span<byte>(8, 1); }
 #else
-  public ArraySegment<byte>? GetMessageBytes() { return __p.__vector_as_arraysegment(6); }
+  public ArraySegment<byte>? GetMessageBytes() { return __p.__vector_as_arraysegment(8); }
 #endif
-  public byte[] GetMessageArray() { return __p.__vector_as_array<byte>(6); }
+  public byte[] GetMessageArray() { return __p.__vector_as_array<byte>(8); }
 
   public static Offset<FlatBuffer.Request.InGameChat> CreateInGameChat(FlatBufferBuilder builder,
+      int turn = 0,
       int frame = 0,
       StringOffset messageOffset = default(StringOffset)) {
-    builder.StartTable(2);
+    builder.StartTable(3);
     InGameChat.AddMessage(builder, messageOffset);
     InGameChat.AddFrame(builder, frame);
+    InGameChat.AddTurn(builder, turn);
     return InGameChat.EndInGameChat(builder);
   }
 
-  public static void StartInGameChat(FlatBufferBuilder builder) { builder.StartTable(2); }
-  public static void AddFrame(FlatBufferBuilder builder, int frame) { builder.AddInt(0, frame, 0); }
-  public static void AddMessage(FlatBufferBuilder builder, StringOffset messageOffset) { builder.AddOffset(1, messageOffset.Value, 0); }
+  public static void StartInGameChat(FlatBufferBuilder builder) { builder.StartTable(3); }
+  public static void AddTurn(FlatBufferBuilder builder, int turn) { builder.AddInt(0, turn, 0); }
+  public static void AddFrame(FlatBufferBuilder builder, int frame) { builder.AddInt(1, frame, 0); }
+  public static void AddMessage(FlatBufferBuilder builder, StringOffset messageOffset) { builder.AddOffset(2, messageOffset.Value, 0); }
   public static Offset<FlatBuffer.Request.InGameChat> EndInGameChat(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Request.InGameChat>(o);

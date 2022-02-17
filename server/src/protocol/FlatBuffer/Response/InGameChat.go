@@ -26,7 +26,7 @@ func (rcv *InGameChat) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *InGameChat) Frame() int32 {
+func (rcv *InGameChat) Turn() int32 {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
 		return rcv._tab.GetInt32(o + rcv._tab.Pos)
@@ -34,19 +34,23 @@ func (rcv *InGameChat) Frame() int32 {
 	return 0
 }
 
-func (rcv *InGameChat) MutateFrame(n int32) bool {
+func (rcv *InGameChat) MutateTurn(n int32) bool {
 	return rcv._tab.MutateInt32Slot(4, n)
 }
 
-func (rcv *InGameChat) User() []byte {
+func (rcv *InGameChat) Frame() int32 {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(6))
 	if o != 0 {
-		return rcv._tab.ByteVector(o + rcv._tab.Pos)
+		return rcv._tab.GetInt32(o + rcv._tab.Pos)
 	}
-	return nil
+	return 0
 }
 
-func (rcv *InGameChat) Message() []byte {
+func (rcv *InGameChat) MutateFrame(n int32) bool {
+	return rcv._tab.MutateInt32Slot(6, n)
+}
+
+func (rcv *InGameChat) User() []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(8))
 	if o != 0 {
 		return rcv._tab.ByteVector(o + rcv._tab.Pos)
@@ -54,17 +58,28 @@ func (rcv *InGameChat) Message() []byte {
 	return nil
 }
 
+func (rcv *InGameChat) Message() []byte {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(10))
+	if o != 0 {
+		return rcv._tab.ByteVector(o + rcv._tab.Pos)
+	}
+	return nil
+}
+
 func InGameChatStart(builder *flatbuffers.Builder) {
-	builder.StartObject(3)
+	builder.StartObject(4)
+}
+func InGameChatAddTurn(builder *flatbuffers.Builder, turn int32) {
+	builder.PrependInt32Slot(0, turn, 0)
 }
 func InGameChatAddFrame(builder *flatbuffers.Builder, frame int32) {
-	builder.PrependInt32Slot(0, frame, 0)
+	builder.PrependInt32Slot(1, frame, 0)
 }
 func InGameChatAddUser(builder *flatbuffers.Builder, user flatbuffers.UOffsetT) {
-	builder.PrependUOffsetTSlot(1, flatbuffers.UOffsetT(user), 0)
+	builder.PrependUOffsetTSlot(2, flatbuffers.UOffsetT(user), 0)
 }
 func InGameChatAddMessage(builder *flatbuffers.Builder, message flatbuffers.UOffsetT) {
-	builder.PrependUOffsetTSlot(2, flatbuffers.UOffsetT(message), 0)
+	builder.PrependUOffsetTSlot(3, flatbuffers.UOffsetT(message), 0)
 }
 func InGameChatEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()
