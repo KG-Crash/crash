@@ -121,6 +121,14 @@ namespace KG.Collection
             _buffers[userId].Add(turnId, frameId, protocols);
         }
 
+        public void Add(string userId, int turnId, int frameId, IProtocol protocol)
+        {
+            if (_buffers.ContainsKey(userId) == false)
+                _buffers.Add(userId, new TurnBuffer());
+
+            _buffers[userId].Add(turnId, frameId, protocol);
+        }
+
         public Dictionary<string, FrameBuffer> Peek(int turnId)
         {
             return _buffers.ToDictionary(x => x.Key, x => x.Value.Peek(turnId));
