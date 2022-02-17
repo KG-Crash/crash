@@ -30,6 +30,11 @@ table Whisper {
 	message: string;
 }
 
+table InGameChat {
+	frame: int;
+	message: string;
+}
+
 table Action {
 	id: int;
 	frame: int;

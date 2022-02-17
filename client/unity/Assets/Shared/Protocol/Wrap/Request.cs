@@ -12,6 +12,7 @@ namespace Protocol.Request
         ROOM_LIST,
         CHAT,
         WHISPER,
+        IN_GAME_CHAT,
         ACTION,
         ACTION_QUEUE,
         GAME_START,
@@ -257,6 +258,43 @@ namespace Protocol.Request
         public static Whisper Deserialize(byte[] bytes)
         {
             return new Whisper(FlatBuffer.Request.Whisper.GetRootAsWhisper(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class InGameChat : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Request.Identity.IN_GAME_CHAT;
+
+        public int Frame { get; set; }
+        public string Message { get; set; }
+
+        public InGameChat()
+        { }
+
+        public InGameChat(FlatBuffer.Request.InGameChat obj)
+        {
+            this.Frame = obj.Frame;
+            this.Message = obj.Message;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Request.InGameChat> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _frame = this.Frame;
+            var _message = builder.CreateString(this.Message);
+
+            return FlatBuffer.Request.InGameChat.CreateInGameChat(builder, _frame, _message);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static InGameChat Deserialize(byte[] bytes)
+        {
+            return new InGameChat(FlatBuffer.Request.InGameChat.GetRootAsInGameChat(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 

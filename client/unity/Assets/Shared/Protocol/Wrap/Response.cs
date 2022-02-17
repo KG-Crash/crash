@@ -17,6 +17,7 @@ namespace Protocol.Response
         ROOM_LIST,
         CHAT,
         WHISPER,
+        IN_GAME_CHAT,
         ACTION,
         ACTION_QUEUE,
         TEAM,
@@ -477,6 +478,46 @@ namespace Protocol.Response
         public static Whisper Deserialize(byte[] bytes)
         {
             return new Whisper(FlatBuffer.Response.Whisper.GetRootAsWhisper(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class InGameChat : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.IN_GAME_CHAT;
+
+        public int Frame { get; set; }
+        public string User { get; set; }
+        public string Message { get; set; }
+
+        public InGameChat()
+        { }
+
+        public InGameChat(FlatBuffer.Response.InGameChat obj)
+        {
+            this.Frame = obj.Frame;
+            this.User = obj.User;
+            this.Message = obj.Message;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.InGameChat> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _frame = this.Frame;
+            var _user = builder.CreateString(this.User);
+            var _message = builder.CreateString(this.Message);
+
+            return FlatBuffer.Response.InGameChat.CreateInGameChat(builder, _frame, _user, _message);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static InGameChat Deserialize(byte[] bytes)
+        {
+            return new InGameChat(FlatBuffer.Response.InGameChat.GetRootAsInGameChat(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 

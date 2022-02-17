@@ -63,6 +63,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &Whisper{}
 		return x.Deserialize(payload)
 
+	case IN_GAME_CHAT:
+		x := &InGameChat{}
+		return x.Deserialize(payload)
+
 	case ACTION:
 		x := &Action{}
 		return x.Deserialize(payload)
@@ -126,6 +130,9 @@ func Text(p protocol.Protocol) string {
 	case *Whisper:
 		return "WHISPER"
 
+	case *InGameChat:
+		return "IN_GAME_CHAT"
+
 	case *Action:
 		return "ACTION"
 
@@ -157,6 +164,7 @@ const (
 	ROOM_LIST
 	CHAT
 	WHISPER
+	IN_GAME_CHAT
 	ACTION
 	ACTION_QUEUE
 	TEAM
@@ -679,6 +687,48 @@ func (obj *Whisper) Serialize() []byte {
 
 func (obj *Whisper) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsWhisper(bytes, 0)
+	return obj.parse(root)
+}
+
+type InGameChat struct {
+	Frame   int32
+	User    string
+	Message string
+}
+
+func (obj *InGameChat) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_user := builder.CreateString(obj.User)
+	_message := builder.CreateString(obj.Message)
+
+	source.InGameChatStart(builder)
+	source.InGameChatAddFrame(builder, obj.Frame)
+	source.InGameChatAddUser(builder, _user)
+	source.InGameChatAddMessage(builder, _message)
+
+	return source.InGameChatEnd(builder)
+}
+
+func (obj *InGameChat) parse(x *source.InGameChat) *InGameChat {
+	obj.Frame = x.Frame()
+	obj.User = string(x.User())
+	obj.Message = string(x.Message())
+
+	return obj
+}
+
+func (obj *InGameChat) Identity() int {
+	return IN_GAME_CHAT
+}
+
+func (obj *InGameChat) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *InGameChat) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsInGameChat(bytes, 0)
 	return obj.parse(root)
 }
 

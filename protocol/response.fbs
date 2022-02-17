@@ -64,6 +64,12 @@ table Whisper {
 	error: uint32;
 }
 
+table InGameChat {
+	frame: int;
+	user: string;
+	message: string;
+}
+
 table Action {
 	frame: int;
 	id: int;
