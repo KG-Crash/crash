@@ -1,19 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using KG.Collection;
+using KG.Util;
 using Network;
+using Newtonsoft.Json;
 using Protocol.Response;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using KG.Util;
-using System;
-using Newtonsoft.Json;
 
 namespace Game
 {
     public partial class GameController
     {
-        private Dictionary<string, LinkedList<ActionQueue>> _actions = new Dictionary<string, LinkedList<ActionQueue>>();
         private FileLogger _logger;
+        private ActionBuffer _actions = new ActionBuffer();
+
         
         [FlatBufferEvent]
         public async Task<bool> OnActionQueue(ActionQueue response)
@@ -25,28 +26,8 @@ namespace Game
 
             Debug.Log($"receive queue : {response.Turn}, {response.User}, me?={response.User==Client.Instance.id}");
 
-            if (!_actions.ContainsKey(response.User))
-            {
-                _actions.Add(response.User, new LinkedList<ActionQueue>());
-                Debug.LogError($"OnReady 에서 초기화 안함 : {response.User}");
-            }
-
-            var actionQueueList = _actions[response.User];
-            var current = actionQueueList.Last; 
-            for (var i = actionQueueList.Count - 1; current != null; i++, current = current.Previous)
-            {
-                var actionQueue = current.Value;
-                if (actionQueue.Turn < response.Turn)
-                {
-                    actionQueueList.AddAfter(current, response);
-                    break;
-                }
-            }
-
-            if (current == null)
-            {
-                actionQueueList.AddFirst(response);
-            }
+            foreach (var x in response.Actions.GroupBy(x => x.Frame))
+                _actions.Add(response.User, response.Turn, x.Key, x.Select(x => x));
 
             return true;
         }
@@ -76,7 +57,6 @@ namespace Game
 
             foreach (var user in response.Users)
             {
-                _actions.Add(user.Id, new LinkedList<ActionQueue>());
                 Debug.Log($"OnReady, user.Id={user.Id}");
             }
 

@@ -105,34 +105,32 @@ namespace Game
         
         private void OnUpdateGame()
         {
-            if (_actions.Count > 0 && _actions.All(kv =>
-            {
-                var list = kv.Value;
-                if (list.Count == 0)
-                {
-                    return false;
-                }
-
-                return list.First.Value.Turn == OutputTurn;
-            }))
-            {
-                Debug.Log($"OutputTurn={OutputTurn}, Execute");
-                
-                foreach (var kv in _actions)
-                {
-                    var list = kv.Value;
-                    OnUpdateAction(list.First.Value);
-                    list.RemoveFirst();
-                }
-
-                OutputTurn++;
-            }
-            
             Debug.Log($"InputTurn({InputTurn}) > OutputTurn({OutputTurn}) + 2");
             waitPacket = InputTurn > OutputTurn + 2;
+
+            var buffers = _actions.Pop(OutputTurn);
+            if (buffers == null)
+                return;
+
+            foreach (var pair in buffers)
+            {
+                var userId = pair.Key;
+                var buffer = pair.Value;
+
+                var actions = buffer.Protocols
+                    .Where(x => x is Protocol.Response.Action) // 나중에 채팅때 바뀔 수 있음
+                    .Cast<Protocol.Response.Action>();
+
+                foreach (var action in actions)
+                {
+                    OnUpdateAction(action);
+                }
+            }
+
+            OutputTurn++;
         }
 
-        private void OnUpdateAction(Protocol.Response.ActionQueue queue)
+        private void OnUpdateAction(Protocol.Response.Action action)
         {
             
         }
