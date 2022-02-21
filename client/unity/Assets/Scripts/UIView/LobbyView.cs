@@ -1,16 +1,25 @@
 using Network;
 using Protocol.Request;
+using System;
+using System.Collections;
 using System.Threading.Tasks;
+using UnityEngine;
 
 [UI("LobbyView")]
 public class LobbyView : UIView
 {
+    public const int REFRESH_ROOM_INTERVAL = 10;
+
+    private DateTime _lastUpdatedRefreshDate = DateTime.Now;
+
     // Start is called before the first frame update
     public KG.ScrollView gameRoomList;
 
     public override void Start()
     {
         base.Start();
+
+        StartCoroutine(RefreshRoom(REFRESH_ROOM_INTERVAL));
     }
 
     // Update is called once per frame
@@ -33,6 +42,28 @@ public class LobbyView : UIView
 
     public override async Task OnLoad()
     {
-        await Client.Send(new RoomList { });
+        await Refresh();
+    }
+
+    public async Task Refresh() => await Client.Send(new RoomList { });
+
+    public IEnumerator RefreshRoom(int seconds) 
+    {
+        while (true)
+        {
+            var elapsedTime = DateTime.Now - _lastUpdatedRefreshDate;
+            if (elapsedTime.TotalSeconds < REFRESH_ROOM_INTERVAL)
+            {
+                yield return new WaitForSeconds(REFRESH_ROOM_INTERVAL - (int)elapsedTime.TotalSeconds);
+            }
+            else
+            {
+                yield return new WaitForSeconds(REFRESH_ROOM_INTERVAL);
+            }
+
+            _lastUpdatedRefreshDate = DateTime.Now;
+            _ = Refresh();
+            UnityEngine.Debug.Log("request room list");
+        }
     }
 }

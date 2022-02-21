@@ -159,6 +159,7 @@ public partial class LobbyController : MonoBehaviour
 
         if (isMine)
         {
+            await UIView.Get<LobbyView>()?.Refresh();
             await UIView.Close();
         }
         else
