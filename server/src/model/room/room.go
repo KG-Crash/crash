@@ -357,24 +357,32 @@ func (state *Actor) Receive(ctx actor.Context) {
 		seed, _ := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
 		state.seed = seed.Int64()
 
-	case *msg.RequestReady:
-		state.preparedUsers.Add(m.PID)
+	case *msg.Ready:
+		state.preparedUsers.Add(ctx.Sender())
 
 		usersFuture := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
 		ctx.AwaitFuture(usersFuture, func(res interface{}, err error) {
-			users := res.(*msg.ResponseGetUsers)
+			usersResponse := res.(*msg.ResponseGetUsers)
 
 			readyState := []string{}
-			for _, user := range users.Users {
+			users := []response.User{}
+			for _, user := range usersResponse.Users {
 				if state.preparedUsers.Contains(user.PID) {
 					readyState = append(readyState, user.ID)
 				}
+
+				users = append(users, response.User{
+					Id:   user.ID,
+					Team: int32(user.Team),
+				})
 			}
 
-			ctx.Respond(&msg.ResponseReady{
-				Seed:       state.seed,
-				Users:      users.Users,
-				ReadyState: readyState,
+			state.selects().ForEach(func(i int, pid *actor.PID) {
+				ctx.Send(pid, &response.Ready{
+					Seed:       state.seed,
+					Users:      users,
+					ReadyState: readyState,
+				})
 			})
 		})
 

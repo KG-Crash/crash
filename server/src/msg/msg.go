@@ -124,9 +124,7 @@ type ResponseGetUsers struct {
 	Master User
 }
 
-type RequestReady struct {
-	PID *actor.PID
-}
+type Ready struct{}
 
 type ResponseReady struct {
 	Seed       int64
