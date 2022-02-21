@@ -167,6 +167,18 @@ func (state *Actor) playable() exception.Error {
 	return nil
 }
 
+func (state *Actor) assertPlay(sender *actor.PID) uint32 {
+	if !state.contains(sender) {
+		return enum.ResultCode.InvalidUser
+	}
+
+	if !state.playing {
+		return enum.ResultCode.NotPlayingState
+	}
+
+	return enum.ResultCode.None
+}
+
 func (state *Actor) Receive(ctx actor.Context) {
 	switch m := ctx.Message().(type) {
 
@@ -387,17 +399,9 @@ func (state *Actor) Receive(ctx actor.Context) {
 		})
 
 	case *msg.Action:
-		sender := m.Sender
-		if !state.contains(sender) {
-			ctx.Send(sender, &response.ActionQueue{
-				Error: enum.ResultCode.InvalidUser,
-			})
-			return
-		}
-
-		if !state.playing {
-			ctx.Send(sender, &response.ActionQueue{
-				Error: enum.ResultCode.NotPlayingState,
+		if err := state.assertPlay(m.Sender); err != enum.ResultCode.None {
+			ctx.Send(m.Sender, &response.ActionQueue{
+				Error: err,
 			})
 			return
 		}
@@ -418,6 +422,23 @@ func (state *Actor) Receive(ctx actor.Context) {
 
 		state.selects().ForEach(func(i int, pid *actor.PID) {
 			ctx.Send(pid, result)
+		})
+
+	case *msg.InGameChat:
+		if err := state.assertPlay(m.Sender); err != enum.ResultCode.None {
+			ctx.Send(m.Sender, &response.ActionQueue{
+				Error: err,
+			})
+			return
+		}
+
+		state.selects().ForEach(func(i int, pid *actor.PID) {
+			ctx.Send(pid, response.InGameChat{
+				Turn:    m.Turn,
+				Frame:   m.Frame,
+				User:    m.UID,
+				Message: m.Message,
+			})
 		})
 	}
 }

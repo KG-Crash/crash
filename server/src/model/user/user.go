@@ -269,6 +269,24 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 
 		log.Printf("turn (from %d) : %s", ptc.Turn, state.ID)
 
+	case *request.InGameChat:
+		if state.Room == nil {
+			ctx.Send(ctx.Self(), &response.ActionQueue{
+				Error: enum.ResultCode.NotEnteredAnyGameRoom,
+			})
+			return
+		}
+
+		ctx.Send(state.Room, &msg.InGameChat{
+			Sender:  ctx.Self(),
+			UID:     state.ID,
+			Message: ptc.Message,
+			Frame:   ptc.Frame,
+			Turn:    ptc.Frame,
+		})
+
+		log.Printf("ingame chat (from %d) : %s", ptc.Turn, state.ID)
+
 	case *request.Ready:
 		if state.Room == nil {
 			ctx.Send(ctx.Self(), &response.ActionQueue{

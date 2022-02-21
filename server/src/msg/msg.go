@@ -139,6 +139,14 @@ type Action struct {
 	Turn    int32
 }
 
+type InGameChat struct {
+	Sender  *actor.PID
+	UID     string
+	Message string
+	Frame   int32
+	Turn    int32
+}
+
 /*
 	user messages
 */
