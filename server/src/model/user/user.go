@@ -295,7 +295,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			return
 		}
 
-		ctx.Send(ctx.Self(), &msg.Ready{})
+		ctx.Send(state.Room, &msg.Ready{})
 	}
 }
 
