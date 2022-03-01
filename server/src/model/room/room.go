@@ -370,7 +370,8 @@ func (state *Actor) Receive(ctx actor.Context) {
 		state.seed = seed.Int64()
 
 	case *msg.Ready:
-		state.preparedUsers.Add(ctx.Sender())
+		sender := ctx.Sender()
+		state.preparedUsers.Add(sender)
 
 		usersFuture := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
 		ctx.AwaitFuture(usersFuture, func(res interface{}, err error) {
