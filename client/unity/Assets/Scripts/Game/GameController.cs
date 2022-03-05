@@ -134,7 +134,12 @@ namespace Game
 
         private void OnUpdateAction(Protocol.Response.Action action)
         {
-            
+            switch ((Shared.ActionKind)action.Id)
+            {
+                case ActionKind.Pause:
+                    paused = true;
+                    break;
+            }
         }
 
         private void OnUpdateFrame(Frame f)

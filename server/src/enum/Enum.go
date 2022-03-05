@@ -24,6 +24,14 @@ type _ResultCode struct {
 	NotPlayingState        uint32
 }
 
+type _ActionKind struct {
+	None           uint32
+	Pause          uint32
+	Resume         uint32
+	SetDestination uint32
+	AttackTo       uint32
+}
+
 type _ProjectileState struct {
 	Disable uint32
 	Shoot   uint32
@@ -107,6 +115,7 @@ type _Advanced struct {
 
 var ClientExceptionCode _ClientExceptionCode
 var ResultCode _ResultCode
+var ActionKind _ActionKind
 var ProjectileState _ProjectileState
 var ProjectileType _ProjectileType
 var UnitSize _UnitSize
@@ -139,6 +148,14 @@ func init() {
 		NotEnteredAnyGameRoom:  9,
 		FullUsers:              10,
 		NotPlayingState:        11,
+	}
+
+	ActionKind = _ActionKind{
+		None:           1,
+		Pause:          2,
+		Resume:         3,
+		SetDestination: 4,
+		AttackTo:       5,
 	}
 
 	ProjectileState = _ProjectileState{

@@ -26,6 +26,15 @@ namespace Shared
         NotPlayingState
     }
 
+    public enum ActionKind
+    {
+        None,
+        Pause,
+        Resume,
+        SetDestination,
+        AttackTo
+    }
+
     public enum ProjectileState
     {
         Disable,
