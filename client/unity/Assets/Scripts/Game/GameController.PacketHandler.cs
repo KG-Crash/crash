@@ -43,7 +43,8 @@ namespace Game
             var allReady = (response.ReadyState.Count == response.Users.Count);
             if (allReady)
             {
-                _logger = new FileLogger($"log/{DateTime.Now}.txt");
+                ready = true;
+                _logger = new FileLogger($"log/{DateTime.Now}.txt".Replace(":", "_"));
             }
 
             // team : users

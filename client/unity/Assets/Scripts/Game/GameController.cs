@@ -5,7 +5,6 @@ using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Protocol.Request;
 using UnityEngine;
 
 namespace Game
@@ -19,6 +18,7 @@ namespace Game
         public static Fix64 TimeDelta => (Fix64.One * TimeSpeed) / new Fix64(FPS);
         public static Fix64 TurnRate => Fix64.One / new Fix64(8);
         public static bool paused { get; set; }
+        public static bool ready { get; set; }
         public static bool waitPacket { get; set; }
         
         public static int InputFrame { get; private set; }
@@ -98,13 +98,15 @@ namespace Game
             Application.targetFrameRate = FPS;
         }
 
-        private void OnUpdateAlways()
+        private void OnUpdate()
         {
             OnUpdateAlwaysDebug();
-        }
-        
-        private void OnUpdateGame()
-        {
+
+            if (!ready || paused)
+            {
+                return;
+            }
+            
             Debug.Log($"InputTurn({InputTurn}) > OutputTurn({OutputTurn}) + 2");
             waitPacket = InputTurn > OutputTurn + 2;
 

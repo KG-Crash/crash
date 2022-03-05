@@ -259,13 +259,20 @@ namespace Game
         public FixVector3 position
         {
             get => _position;
-            set
-            {
-                _position = value;
-                this.region = this.map[this.position]?.region;
+            set => SetPosition(value, false);
+        }
 
-                // 길찾기 경로에서 현재 경로 제거
-                this._regionPath.Remove(this.region);
+        public void SetPosition(FixVector3 value, bool refreshTransform)
+        {
+            _position = value;
+            this.region = this.map[this.position]?.region;
+
+            // 길찾기 경로에서 현재 경로 제거
+            this._regionPath.Remove(this.region);
+
+            if (refreshTransform)
+            {
+                transform.position = value;   
             }
         }
 

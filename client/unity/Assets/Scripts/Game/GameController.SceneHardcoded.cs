@@ -84,7 +84,7 @@ namespace Game
                             ctx._nearCellQueue.Enqueue(near);
                     }
                 }
-                unit.position = pos;
+                unit.SetPosition(pos, true);
                 ctx._placedUnits.Add(unit);
             }
         }
@@ -137,7 +137,6 @@ namespace Game
         private void OnLoadScene()
         {   
             _allPlayerByTeam = new Team();
-            var placeContext = new TemporalPlaceContext();
             
             var player1 = AddPlayerAndUnit(true,  0, new[] {  0,  1,  2,  3,  3 });
             var player2 = AddPlayerAndUnit(true,  1, new[] {  0,  1,  2,  3,  3 });
