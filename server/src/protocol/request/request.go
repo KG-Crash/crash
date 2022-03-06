@@ -47,6 +47,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &InGameChat{}
 		return x.Deserialize(payload)
 
+	case RESUME:
+		x := &Resume{}
+		return x.Deserialize(payload)
+
 	case ACTION:
 		x := &Action{}
 		return x.Deserialize(payload)
@@ -94,6 +98,9 @@ func Text(p protocol.Protocol) string {
 	case *InGameChat:
 		return "IN_GAME_CHAT"
 
+	case *Resume:
+		return "RESUME"
+
 	case *Action:
 		return "ACTION"
 
@@ -118,6 +125,7 @@ const (
 	CHAT
 	WHISPER
 	IN_GAME_CHAT
+	RESUME
 	ACTION
 	ACTION_QUEUE
 	GAME_START
@@ -425,6 +433,37 @@ func (obj *InGameChat) Serialize() []byte {
 
 func (obj *InGameChat) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsInGameChat(bytes, 0)
+	return obj.parse(root)
+}
+
+type Resume struct {
+}
+
+func (obj *Resume) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+
+	source.ResumeStart(builder)
+
+	return source.ResumeEnd(builder)
+}
+
+func (obj *Resume) parse(x *source.Resume) *Resume {
+
+	return obj
+}
+
+func (obj *Resume) Identity() int {
+	return RESUME
+}
+
+func (obj *Resume) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *Resume) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsResume(bytes, 0)
 	return obj.parse(root)
 }
 

@@ -69,6 +69,12 @@ table InGameChat {
 	frame: int;
 	user: string;
 	message: string;
+	error: uint32;
+}
+
+table Resume {
+	user: string;
+	error: uint32;
 }
 
 table Action {

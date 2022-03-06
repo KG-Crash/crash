@@ -63,5 +63,20 @@ namespace Game
 
             return true;
         }
+
+        [FlatBufferEvent]
+        public async Task<bool> OnResume(Resume response)
+        {
+            /*
+             
+            if not pause:
+                return
+
+            Resume(...)
+             
+             */
+
+            return true;
+        }
     }
 }

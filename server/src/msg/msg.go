@@ -126,6 +126,10 @@ type ResponseGetUsers struct {
 
 type Ready struct{}
 
+type Resume struct {
+	User string
+}
+
 type ResponseReady struct {
 	Seed       int64
 	Users      []UserState

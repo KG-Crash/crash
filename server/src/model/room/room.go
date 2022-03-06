@@ -434,11 +434,25 @@ func (state *Actor) Receive(ctx actor.Context) {
 		}
 
 		state.selects().ForEach(func(i int, pid *actor.PID) {
-			ctx.Send(pid, response.InGameChat{
+			ctx.Send(pid, &response.InGameChat{
 				Turn:    m.Turn,
 				Frame:   m.Frame,
 				User:    m.UID,
 				Message: m.Message,
+			})
+		})
+
+	case *msg.Resume:
+		if err := state.assertPlay(ctx.Sender()); err != enum.ResultCode.None {
+			ctx.Send(ctx.Sender(), &response.Resume{
+				Error: err,
+			})
+			return
+		}
+
+		state.selects().ForEach(func(i int, pid *actor.PID) {
+			ctx.Send(pid, &response.Resume{
+				User: m.User,
 			})
 		})
 	}

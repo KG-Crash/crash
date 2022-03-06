@@ -66,8 +66,20 @@ func (rcv *InGameChat) Message() []byte {
 	return nil
 }
 
+func (rcv *InGameChat) Error() uint32 {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(12))
+	if o != 0 {
+		return rcv._tab.GetUint32(o + rcv._tab.Pos)
+	}
+	return 0
+}
+
+func (rcv *InGameChat) MutateError(n uint32) bool {
+	return rcv._tab.MutateUint32Slot(12, n)
+}
+
 func InGameChatStart(builder *flatbuffers.Builder) {
-	builder.StartObject(4)
+	builder.StartObject(5)
 }
 func InGameChatAddTurn(builder *flatbuffers.Builder, turn int32) {
 	builder.PrependInt32Slot(0, turn, 0)
@@ -80,6 +92,9 @@ func InGameChatAddUser(builder *flatbuffers.Builder, user flatbuffers.UOffsetT) 
 }
 func InGameChatAddMessage(builder *flatbuffers.Builder, message flatbuffers.UOffsetT) {
 	builder.PrependUOffsetTSlot(3, flatbuffers.UOffsetT(message), 0)
+}
+func InGameChatAddError(builder *flatbuffers.Builder, error uint32) {
+	builder.PrependUint32Slot(4, error, 0)
 }
 func InGameChatEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

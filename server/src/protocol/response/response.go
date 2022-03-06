@@ -67,6 +67,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &InGameChat{}
 		return x.Deserialize(payload)
 
+	case RESUME:
+		x := &Resume{}
+		return x.Deserialize(payload)
+
 	case ACTION:
 		x := &Action{}
 		return x.Deserialize(payload)
@@ -133,6 +137,9 @@ func Text(p protocol.Protocol) string {
 	case *InGameChat:
 		return "IN_GAME_CHAT"
 
+	case *Resume:
+		return "RESUME"
+
 	case *Action:
 		return "ACTION"
 
@@ -165,6 +172,7 @@ const (
 	CHAT
 	WHISPER
 	IN_GAME_CHAT
+	RESUME
 	ACTION
 	ACTION_QUEUE
 	TEAM
@@ -695,6 +703,7 @@ type InGameChat struct {
 	Frame   int32
 	User    string
 	Message string
+	Error   uint32
 }
 
 func (obj *InGameChat) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
@@ -706,6 +715,7 @@ func (obj *InGameChat) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT
 	source.InGameChatAddFrame(builder, obj.Frame)
 	source.InGameChatAddUser(builder, _user)
 	source.InGameChatAddMessage(builder, _message)
+	source.InGameChatAddError(builder, obj.Error)
 
 	return source.InGameChatEnd(builder)
 }
@@ -715,6 +725,7 @@ func (obj *InGameChat) parse(x *source.InGameChat) *InGameChat {
 	obj.Frame = x.Frame()
 	obj.User = string(x.User())
 	obj.Message = string(x.Message())
+	obj.Error = x.Error()
 
 	return obj
 }
@@ -732,6 +743,44 @@ func (obj *InGameChat) Serialize() []byte {
 
 func (obj *InGameChat) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsInGameChat(bytes, 0)
+	return obj.parse(root)
+}
+
+type Resume struct {
+	User  string
+	Error uint32
+}
+
+func (obj *Resume) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_user := builder.CreateString(obj.User)
+
+	source.ResumeStart(builder)
+	source.ResumeAddUser(builder, _user)
+	source.ResumeAddError(builder, obj.Error)
+
+	return source.ResumeEnd(builder)
+}
+
+func (obj *Resume) parse(x *source.Resume) *Resume {
+	obj.User = string(x.User())
+	obj.Error = x.Error()
+
+	return obj
+}
+
+func (obj *Resume) Identity() int {
+	return RESUME
+}
+
+func (obj *Resume) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj *Resume) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsResume(bytes, 0)
 	return obj.parse(root)
 }
 

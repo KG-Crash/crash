@@ -13,6 +13,7 @@ namespace Protocol.Request
         CHAT,
         WHISPER,
         IN_GAME_CHAT,
+        RESUME,
         ACTION,
         ACTION_QUEUE,
         GAME_START,
@@ -298,6 +299,39 @@ namespace Protocol.Request
         public static InGameChat Deserialize(byte[] bytes)
         {
             return new InGameChat(FlatBuffer.Request.InGameChat.GetRootAsInGameChat(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class Resume : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Request.Identity.RESUME;
+
+        
+
+        public Resume()
+        { }
+
+        public Resume(FlatBuffer.Request.Resume obj)
+        {
+            
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Request.Resume> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            FlatBuffer.Request.Resume.StartResume(builder);
+            return FlatBuffer.Request.Resume.EndResume(builder);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Resume Deserialize(byte[] bytes)
+        {
+            return new Resume(FlatBuffer.Request.Resume.GetRootAsResume(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 

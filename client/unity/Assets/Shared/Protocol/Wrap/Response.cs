@@ -18,6 +18,7 @@ namespace Protocol.Response
         CHAT,
         WHISPER,
         IN_GAME_CHAT,
+        RESUME,
         ACTION,
         ACTION_QUEUE,
         TEAM,
@@ -489,6 +490,7 @@ namespace Protocol.Response
         public int Frame { get; set; }
         public string User { get; set; }
         public string Message { get; set; }
+        public uint Error { get; set; }
 
         public InGameChat()
         { }
@@ -499,6 +501,7 @@ namespace Protocol.Response
             this.Frame = obj.Frame;
             this.User = obj.User;
             this.Message = obj.Message;
+            this.Error = obj.Error;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.InGameChat> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
@@ -507,8 +510,9 @@ namespace Protocol.Response
             var _frame = this.Frame;
             var _user = builder.CreateString(this.User);
             var _message = builder.CreateString(this.Message);
+            var _error = this.Error;
 
-            return FlatBuffer.Response.InGameChat.CreateInGameChat(builder, _turn, _frame, _user, _message);
+            return FlatBuffer.Response.InGameChat.CreateInGameChat(builder, _turn, _frame, _user, _message, _error);
         }
 
         public byte[] Serialize()
@@ -521,6 +525,43 @@ namespace Protocol.Response
         public static InGameChat Deserialize(byte[] bytes)
         {
             return new InGameChat(FlatBuffer.Response.InGameChat.GetRootAsInGameChat(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class Resume : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.RESUME;
+
+        public string User { get; set; }
+        public uint Error { get; set; }
+
+        public Resume()
+        { }
+
+        public Resume(FlatBuffer.Response.Resume obj)
+        {
+            this.User = obj.User;
+            this.Error = obj.Error;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.Resume> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _user = builder.CreateString(this.User);
+            var _error = this.Error;
+
+            return FlatBuffer.Response.Resume.CreateResume(builder, _user, _error);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Resume Deserialize(byte[] bytes)
+        {
+            return new Resume(FlatBuffer.Response.Resume.GetRootAsResume(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 

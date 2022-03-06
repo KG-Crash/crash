@@ -36,6 +36,10 @@ table InGameChat {
 	message: string;
 }
 
+table Resume {
+	
+}
+
 table Action {
 	id: int;
 	frame: int;

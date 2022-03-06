@@ -35,13 +35,16 @@ public struct InGameChat : IFlatbufferObject
   public ArraySegment<byte>? GetMessageBytes() { return __p.__vector_as_arraysegment(10); }
 #endif
   public byte[] GetMessageArray() { return __p.__vector_as_array<byte>(10); }
+  public uint Error { get { int o = __p.__offset(12); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
 
   public static Offset<FlatBuffer.Response.InGameChat> CreateInGameChat(FlatBufferBuilder builder,
       int turn = 0,
       int frame = 0,
       StringOffset userOffset = default(StringOffset),
-      StringOffset messageOffset = default(StringOffset)) {
-    builder.StartTable(4);
+      StringOffset messageOffset = default(StringOffset),
+      uint error = 0) {
+    builder.StartTable(5);
+    InGameChat.AddError(builder, error);
     InGameChat.AddMessage(builder, messageOffset);
     InGameChat.AddUser(builder, userOffset);
     InGameChat.AddFrame(builder, frame);
@@ -49,11 +52,12 @@ public struct InGameChat : IFlatbufferObject
     return InGameChat.EndInGameChat(builder);
   }
 
-  public static void StartInGameChat(FlatBufferBuilder builder) { builder.StartTable(4); }
+  public static void StartInGameChat(FlatBufferBuilder builder) { builder.StartTable(5); }
   public static void AddTurn(FlatBufferBuilder builder, int turn) { builder.AddInt(0, turn, 0); }
   public static void AddFrame(FlatBufferBuilder builder, int frame) { builder.AddInt(1, frame, 0); }
   public static void AddUser(FlatBufferBuilder builder, StringOffset userOffset) { builder.AddOffset(2, userOffset.Value, 0); }
   public static void AddMessage(FlatBufferBuilder builder, StringOffset messageOffset) { builder.AddOffset(3, messageOffset.Value, 0); }
+  public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(4, error, 0); }
   public static Offset<FlatBuffer.Response.InGameChat> EndInGameChat(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Response.InGameChat>(o);
