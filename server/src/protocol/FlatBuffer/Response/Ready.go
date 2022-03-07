@@ -75,8 +75,20 @@ func (rcv *Ready) ReadyStateLength() int {
 	return 0
 }
 
+func (rcv *Ready) Error() uint32 {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(10))
+	if o != 0 {
+		return rcv._tab.GetUint32(o + rcv._tab.Pos)
+	}
+	return 0
+}
+
+func (rcv *Ready) MutateError(n uint32) bool {
+	return rcv._tab.MutateUint32Slot(10, n)
+}
+
 func ReadyStart(builder *flatbuffers.Builder) {
-	builder.StartObject(3)
+	builder.StartObject(4)
 }
 func ReadyAddSeed(builder *flatbuffers.Builder, seed int64) {
 	builder.PrependInt64Slot(0, seed, 0)
@@ -92,6 +104,9 @@ func ReadyAddReadyState(builder *flatbuffers.Builder, readyState flatbuffers.UOf
 }
 func ReadyStartReadyStateVector(builder *flatbuffers.Builder, numElems int) flatbuffers.UOffsetT {
 	return builder.StartVector(4, numElems, 4)
+}
+func ReadyAddError(builder *flatbuffers.Builder, error uint32) {
+	builder.PrependUint32Slot(3, error, 0)
 }
 func ReadyEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

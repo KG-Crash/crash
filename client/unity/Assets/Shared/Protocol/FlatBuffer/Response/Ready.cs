@@ -24,19 +24,22 @@ public struct Ready : IFlatbufferObject
   public int UsersLength { get { int o = __p.__offset(6); return o != 0 ? __p.__vector_len(o) : 0; } }
   public string ReadyState(int j) { int o = __p.__offset(8); return o != 0 ? __p.__string(__p.__vector(o) + j * 4) : null; }
   public int ReadyStateLength { get { int o = __p.__offset(8); return o != 0 ? __p.__vector_len(o) : 0; } }
+  public uint Error { get { int o = __p.__offset(10); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
 
   public static Offset<FlatBuffer.Response.Ready> CreateReady(FlatBufferBuilder builder,
       long seed = 0,
       VectorOffset usersOffset = default(VectorOffset),
-      VectorOffset readyStateOffset = default(VectorOffset)) {
-    builder.StartTable(3);
+      VectorOffset readyStateOffset = default(VectorOffset),
+      uint error = 0) {
+    builder.StartTable(4);
     Ready.AddSeed(builder, seed);
+    Ready.AddError(builder, error);
     Ready.AddReadyState(builder, readyStateOffset);
     Ready.AddUsers(builder, usersOffset);
     return Ready.EndReady(builder);
   }
 
-  public static void StartReady(FlatBufferBuilder builder) { builder.StartTable(3); }
+  public static void StartReady(FlatBufferBuilder builder) { builder.StartTable(4); }
   public static void AddSeed(FlatBufferBuilder builder, long seed) { builder.AddLong(0, seed, 0); }
   public static void AddUsers(FlatBufferBuilder builder, VectorOffset usersOffset) { builder.AddOffset(1, usersOffset.Value, 0); }
   public static VectorOffset CreateUsersVector(FlatBufferBuilder builder, Offset<FlatBuffer.Response.User>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
@@ -46,6 +49,7 @@ public struct Ready : IFlatbufferObject
   public static VectorOffset CreateReadyStateVector(FlatBufferBuilder builder, StringOffset[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static VectorOffset CreateReadyStateVectorBlock(FlatBufferBuilder builder, StringOffset[] data) { builder.StartVector(4, data.Length, 4); builder.Add(data); return builder.EndVector(); }
   public static void StartReadyStateVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
+  public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(3, error, 0); }
   public static Offset<FlatBuffer.Response.Ready> EndReady(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Response.Ready>(o);

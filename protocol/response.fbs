@@ -103,4 +103,5 @@ table Ready {
 	seed: int64;
 	users: [User];
 	readyState: [string];
+	error: uint32;
 }

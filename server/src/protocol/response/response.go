@@ -986,6 +986,7 @@ type Ready struct {
 	Seed       int64
 	Users      []User
 	ReadyState []string
+	Error      uint32
 }
 
 func (obj *Ready) users(builder *flatbuffers.Builder, users []User) flatbuffers.UOffsetT {
@@ -1024,6 +1025,7 @@ func (obj *Ready) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	source.ReadyAddSeed(builder, obj.Seed)
 	source.ReadyAddUsers(builder, _users)
 	source.ReadyAddReadyState(builder, _readyState)
+	source.ReadyAddError(builder, obj.Error)
 
 	return source.ReadyEnd(builder)
 }
@@ -1045,6 +1047,7 @@ func (obj *Ready) parse(x *source.Ready) *Ready {
 	for i := 0; i < x.ReadyStateLength(); i++ {
 		obj.ReadyState = append(obj.ReadyState, string(x.ReadyState(i)))
 	}
+	obj.Error = x.Error()
 
 	return obj
 }

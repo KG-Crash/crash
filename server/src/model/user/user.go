@@ -48,19 +48,15 @@ func toUserResponses(users []msg.UserState) []response.User {
 	return result
 }
 
-func (state *Actor) assertEnterRoom() uint32 {
-	if state.Room == nil {
-		return enum.ResultCode.NotEnteredAnyGameRoom
-	}
-
-	return enum.ResultCode.None
+func (state *Actor) isEntered() bool {
+	return state.Room != nil
 }
 
 func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) {
 
 	switch ptc := p.(type) {
 	case *request.EnterRoom:
-		if state.Room != nil {
+		if state.isEntered() {
 			ctx.Send(ctx.Self(), &response.EnterRoom{
 				Error: enum.ResultCode.AlreadyEnteredGameRoom,
 			})
@@ -124,9 +120,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		})
 
 	case *request.CreateRoom:
-		if err := state.assertEnterRoom(); err != enum.ResultCode.None {
+		if state.isEntered() {
 			ctx.Send(ctx.Self(), &response.CreateRoom{
-				Error: err,
+				Error: enum.ResultCode.AlreadyEnteredGameRoom,
 			})
 			return
 		}
@@ -163,9 +159,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		})
 
 	case *request.Chat:
-		if err := state.assertEnterRoom(); err != enum.ResultCode.None {
+		if !state.isEntered() {
 			ctx.Send(ctx.Self(), &response.Chat{
-				Error: err,
+				Error: enum.ResultCode.NotEnteredAnyGameRoom,
 			})
 			return
 		}
@@ -207,9 +203,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		})
 
 	case *request.KickRoom:
-		if err := state.assertEnterRoom(); err != enum.ResultCode.None {
-			ctx.Send(ctx.Self(), &response.KickedRoom{
-				Error: err,
+		if state.isEntered() {
+			ctx.Send(ctx.Self(), &response.KickRoom{
+				Error: enum.ResultCode.AlreadyEnteredGameRoom,
 			})
 			return
 		}
@@ -250,9 +246,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		})
 
 	case *request.GameStart:
-		if err := state.assertEnterRoom(); err != enum.ResultCode.None {
+		if !state.isEntered() {
 			ctx.Send(ctx.Self(), &response.GameStart{
-				Error: err,
+				Error: enum.ResultCode.AlreadyEnteredGameRoom,
 			})
 			return
 		}
@@ -262,9 +258,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		})
 
 	case *request.ActionQueue:
-		if err := state.assertEnterRoom(); err != enum.ResultCode.None {
+		if !state.isEntered() {
 			ctx.Send(ctx.Self(), &response.ActionQueue{
-				Error: err,
+				Error: enum.ResultCode.AlreadyEnteredGameRoom,
 			})
 			return
 		}
@@ -279,9 +275,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		log.Printf("turn (from %d) : %s", ptc.Turn, state.ID)
 
 	case *request.InGameChat:
-		if err := state.assertEnterRoom(); err != enum.ResultCode.None {
+		if !state.isEntered() {
 			ctx.Send(ctx.Self(), &response.InGameChat{
-				Error: err,
+				Error: enum.ResultCode.AlreadyEnteredGameRoom,
 			})
 			return
 		}
@@ -297,9 +293,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		log.Printf("ingame chat (from %d) : %s", ptc.Turn, state.ID)
 
 	case *request.Ready:
-		if err := state.assertEnterRoom(); err != enum.ResultCode.None {
-			ctx.Send(ctx.Self(), &response.ActionQueue{
-				Error: err,
+		if !state.isEntered() {
+			ctx.Send(ctx.Self(), &response.Ready{
+				Error: enum.ResultCode.AlreadyEnteredGameRoom,
 			})
 			return
 		}
@@ -307,9 +303,9 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 		ctx.Request(state.Room, &msg.Ready{})
 
 	case *request.Resume:
-		if err := state.assertEnterRoom(); err != enum.ResultCode.None {
+		if !state.isEntered() {
 			ctx.Send(ctx.Self(), &response.Resume{
-				Error: err,
+				Error: enum.ResultCode.AlreadyEnteredGameRoom,
 			})
 			return
 		}
