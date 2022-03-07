@@ -51,6 +51,18 @@ namespace Game
             {
                 _player.targetPlayerID = null;
             }
+            
+            if (Input.GetKeyUp(KeyCode.F1))
+            {
+                if (paused)
+                {
+                    SendResume();   
+                }
+                else
+                {
+                    ReservePause();
+                }
+            }
         }
 
         void OnUpdateFrameDebug(Frame f)

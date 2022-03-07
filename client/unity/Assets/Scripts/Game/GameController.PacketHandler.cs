@@ -31,11 +31,6 @@ namespace Game
 
             return true;
         }
-
-        public void OnActionSelf(ActionQueue myAction)
-        {
-            
-        }
         
         [FlatBufferEvent]
         public async Task<bool> OnReady(Ready response)
@@ -67,16 +62,29 @@ namespace Game
         [FlatBufferEvent]
         public async Task<bool> OnResume(Resume response)
         {
-            /*
-             
-            if not pause:
-                return
+            if (!paused)
+            {
+                Debug.LogError("receive resume but not paused.");
+                return true;
+            }
 
-            Resume(...)
-             
-             */
-
+            Debug.Log($"user {response.User} resume.");
+            paused = false;
             return true;
+        }
+
+        public void SendResume()
+        {
+            _ = Client.Send(new Protocol.Request.Resume());
+        }
+
+        public void ReservePause()
+        {
+            EnqueueAction(new Protocol.Request.Action
+            {
+                Frame = InputFrame,
+                Id = (int)Shared.ActionKind.Pause
+            });
         }
     }
 }
