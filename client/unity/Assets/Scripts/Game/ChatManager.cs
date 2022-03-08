@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Threading.Tasks;
 using Network;
 using Protocol.Request;
 
@@ -37,10 +38,10 @@ namespace Game
                 SendMessage();
         }
 
-        public async void SendMessage()
+        public async Task<bool> SendMessage()
         {
             if (_input.text.Equals(" ") || _input.text.Equals(""))
-                return;
+                return false;
 
             string msg = _input.text;
             string resultMsg = "";
@@ -48,35 +49,23 @@ namespace Game
             _input.ActivateInputField();
             _input.text = "";
 
-            resultMsg = msg;            
-            if(_useCheat)
+            resultMsg = msg;
+
+            _gameController.EnqueueChatAction(resultMsg);
+            
+            Debug.Log($"chat send : {resultMsg}");
+
+            return true;
+        }
+
+        public void RecvMessage(string msg, string user)
+        {
+            string resultMsg = "";
+
+            if (_useCheat) 
                 resultMsg = CheatManager.ParseMessage(msg, _gameController);
 
-            if (msg.Equals(resultMsg))
-            {
-                //await Client.Send(new Chat
-                //{
-                //  Message = msg
-                //});   
-                RecvMessage(resultMsg);
-            }
-            else
-            {
-                Debug.Log(resultMsg);
-                PrintLog(resultMsg);
-            }
-            return;
-        }
-
-        public void RecvMessage(string msg)
-        {
-            _chatLog.text += "\n" + _name + " : " + msg;
-            _scrollRect.verticalNormalizedPosition = 0.0f;
-        }
-
-        public void PrintLog(string msg)
-        {
-            _chatLog.text += "\n" + msg;
+            _chatLog.text += $"\n {user}  :  {resultMsg}";
             _scrollRect.verticalNormalizedPosition = 0.0f;
         }
     }

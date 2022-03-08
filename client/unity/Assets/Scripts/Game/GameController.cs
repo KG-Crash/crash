@@ -123,10 +123,14 @@ namespace Game
                     .Where(x => x is Protocol.Response.Action) // 나중에 채팅때 바뀔 수 있음
                     .Cast<Protocol.Response.Action>();
 
+                //var chat = buffer.Protocols.Where(x => x is Protocol.Response.InGameChat)
+                //    .Cast<Protocol.Response.InGameChat>();
+
                 foreach (var action in actions)
                 {
                     OnUpdateAction(action);
                 }
+
             }
 
             OutputTurn++;
@@ -178,6 +182,7 @@ namespace Game
 
         private void OnTurnChanged(int turn)
         {
+
             if (IsNetworkMode)
             {
                 _actionQueue.Turn = turn;
@@ -191,6 +196,17 @@ namespace Game
         {
             action.Frame = InputFrame;
             _actionQueue.Actions.Add(action);
+        }
+
+        public void EnqueueChatAction(string massage)
+        {
+            _ = Client.Send(new Protocol.Request.InGameChat
+            {
+                Turn = InputTurn,
+                Frame = InputFrame,
+                Message = massage
+
+            });
         }
     }
 }
