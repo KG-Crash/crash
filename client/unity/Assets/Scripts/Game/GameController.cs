@@ -9,6 +9,36 @@ using UnityEngine;
 
 namespace Game
 {
+    public static class ActionExtension
+    {
+        public static ushort LOWORD(this uint actionParam) => (ushort)(actionParam & 0x0000FFFF);
+        public static ushort HIWORD(this uint actionParam) => (ushort)((actionParam & 0xFFFF0000) >> 8);
+
+        public static uint SetParam1LOWORD(this Protocol.Request.Action action, ushort value)
+        {
+            action.Param1 = (action.Param1 & 0xFFFF0000) + (uint)(value & 0x0000FFFF);
+            return action.Param1;
+        }
+
+        public static uint SetParam1HIWORD(this Protocol.Request.Action action, ushort value)
+        {
+            action.Param1 = (action.Param1 & 0x0000FFFF) + (uint)((value & 0x0000FFFF) << 16);
+            return action.Param1;
+        }
+
+        public static uint SetParam2LOWORD(this Protocol.Request.Action action, ushort value)
+        {
+            action.Param2 = (action.Param2 & 0xFFFF0000) + (uint)(value & 0x0000FFFF);
+            return action.Param2;
+        }
+
+        public static uint SetParam2HIWORD(this Protocol.Request.Action action, ushort value)
+        {
+            action.Param2 = (action.Param2 & 0x0000FFFF) + (uint)((value & 0x0000FFFF) << 16);
+            return action.Param2;
+        }
+    }
+
     public partial class GameController : MonoBehaviour
     {   
         public static int FPS { get; set; }
