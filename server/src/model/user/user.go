@@ -287,7 +287,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			UID:     state.ID,
 			Message: ptc.Message,
 			Frame:   ptc.Frame,
-			Turn:    ptc.Frame,
+			Turn:    ptc.Turn,
 		})
 
 		log.Printf("ingame chat (from %d) : %s", ptc.Turn, state.ID)
