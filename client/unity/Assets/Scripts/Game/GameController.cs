@@ -75,6 +75,7 @@ namespace Game
         [NonSerialized] private Team _allPlayerByTeam;
         [NonSerialized] private Player _player;
         [NonSerialized] private ProjectilePool _projectilePool;
+        [NonSerialized] private ChatManager _chatManager;
 
         [Header("Miscellaneous")] 
         [SerializeField] private Transform _poolOffset; 
@@ -116,6 +117,7 @@ namespace Game
             OnLoadScene();
             
             _projectilePool = new ProjectilePool(_projectilehPrefabTable, 15, this, _poolOffset);
+            _chatManager = this.gameObject.GetComponent<ChatManager>();
 
             // 레디에서 이름 보내야 하지 않을까?
             _ = Client.Send(new Protocol.Request.Ready{ });
@@ -149,18 +151,25 @@ namespace Game
                 var userId = pair.Key;
                 var buffer = pair.Value;
 
-                var actions = buffer.Protocols
-                    .Where(x => x is Protocol.Response.Action) // 나중에 채팅때 바뀔 수 있음
-                    .Cast<Protocol.Response.Action>();
+                var protocols = buffer.Protocols.GroupBy(x => x.GetType())
+                    .ToDictionary(x => x.Key, x => x.ToList());
 
-                //var chat = buffer.Protocols.Where(x => x is Protocol.Response.InGameChat)
-                //    .Cast<Protocol.Response.InGameChat>();
-
-                foreach (var action in actions)
+                if(protocols.TryGetValue(typeof(Protocol.Response.Action), out var actions) == false)
+                {
+                    actions = new List<Protocol.IProtocol>();
+                }
+                if(protocols.TryGetValue(typeof(Protocol.Response.InGameChat), out var chats) == false)
+                {
+                    chats = new List<Protocol.IProtocol>();
+                }
+                foreach(var action in actions.Select(x => x as Protocol.Response.Action))
                 {
                     OnUpdateAction(action);
                 }
-
+                foreach (var chat in chats.Select(x => x as Protocol.Response.InGameChat))
+                {
+                    OnUpdateIngameChat(chat);
+                }
             }
 
             OutputTurn++;
@@ -174,6 +183,10 @@ namespace Game
                     paused = true;
                     break;
             }
+        }
+        private void OnUpdateIngameChat(Protocol.Response.InGameChat chat)
+        {
+            _chatManager.RecvMessage(chat.Message, chat.User.Substring(0,8));
         }
 
         private void OnUpdateFrame(Frame f)

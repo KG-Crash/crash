@@ -52,8 +52,6 @@ namespace Game
             resultMsg = msg;
 
             _gameController.EnqueueChatAction(resultMsg);
-            
-            Debug.Log($"chat send : {resultMsg}");
 
             return true;
         }
@@ -62,7 +60,7 @@ namespace Game
         {
             string resultMsg = "";
 
-            if (_useCheat) 
+            if (GameController.IsNetworkMode) 
                 resultMsg = CheatManager.ParseMessage(msg, _gameController);
 
             _chatLog.text += $"\n {user}  :  {resultMsg}";

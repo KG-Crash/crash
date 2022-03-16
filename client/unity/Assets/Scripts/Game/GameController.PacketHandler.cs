@@ -35,17 +35,15 @@ namespace Game
         [FlatBufferEvent]
         public async Task<bool> OnInGameChat(InGameChat response)
         {
-            Debug.Log("OnIngame Chat");
-
             if (_logger != null)
             {
                 _logger.Info($"[{response.User}] : {JsonConvert.SerializeObject(response)}");
             }
 
             Debug.Log($"chat receive queue : {response.Turn}, {response.User},{response.Message} me?={response.User == Client.Instance.id}");
-            Debug.Log($"chat : {response.User}, msg : {response.Message}");
             
-            //_actions.Add(response.User, response.Turn, response.Frame, response);
+            _actions.Add(response.User, response.Turn, response.Frame, response);
+            
 
             return true;
         }
