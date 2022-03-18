@@ -25,11 +25,12 @@ type _ResultCode struct {
 }
 
 type _ActionKind struct {
-	None           uint32
-	Pause          uint32
-	Resume         uint32
-	SetDestination uint32
-	AttackTo       uint32
+	None         uint32
+	Pause        uint32
+	Speed        uint32
+	Upgrade      uint32
+	AttackPlayer uint32
+	Spawn        uint32
 }
 
 type _ProjectileState struct {
@@ -151,11 +152,12 @@ func init() {
 	}
 
 	ActionKind = _ActionKind{
-		None:           1,
-		Pause:          2,
-		Resume:         3,
-		SetDestination: 4,
-		AttackTo:       5,
+		None:         1,
+		Pause:        2,
+		Speed:        3,
+		Upgrade:      4,
+		AttackPlayer: 5,
+		Spawn:        6,
 	}
 
 	ProjectileState = _ProjectileState{

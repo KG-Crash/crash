@@ -30,9 +30,10 @@ namespace Shared
     {
         None,
         Pause,
-        Resume,
-        SetDestination,
-        AttackTo
+        Speed,
+        Upgrade,
+        AttackPlayer,
+        Spawn
     }
 
     public enum ProjectileState
