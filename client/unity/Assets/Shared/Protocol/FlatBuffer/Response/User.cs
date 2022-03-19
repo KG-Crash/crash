@@ -27,19 +27,23 @@ public struct User : IFlatbufferObject
 #endif
   public byte[] GetIdArray() { return __p.__vector_as_array<byte>(4); }
   public int Team { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
+  public int Sequence { get { int o = __p.__offset(8); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
 
   public static Offset<FlatBuffer.Response.User> CreateUser(FlatBufferBuilder builder,
       StringOffset idOffset = default(StringOffset),
-      int team = 0) {
-    builder.StartTable(2);
+      int team = 0,
+      int sequence = 0) {
+    builder.StartTable(3);
+    User.AddSequence(builder, sequence);
     User.AddTeam(builder, team);
     User.AddId(builder, idOffset);
     return User.EndUser(builder);
   }
 
-  public static void StartUser(FlatBufferBuilder builder) { builder.StartTable(2); }
+  public static void StartUser(FlatBufferBuilder builder) { builder.StartTable(3); }
   public static void AddId(FlatBufferBuilder builder, StringOffset idOffset) { builder.AddOffset(0, idOffset.Value, 0); }
   public static void AddTeam(FlatBufferBuilder builder, int team) { builder.AddInt(1, team, 0); }
+  public static void AddSequence(FlatBufferBuilder builder, int sequence) { builder.AddInt(2, sequence, 0); }
   public static Offset<FlatBuffer.Response.User> EndUser(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Response.User>(o);

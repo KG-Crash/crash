@@ -18,6 +18,7 @@ table CreateRoom {
 table User {
 	id: string;
 	team: int;
+	sequence: int;
 }
 
 table EnterRoom {
@@ -102,6 +103,5 @@ table GameStart {
 table Ready {
 	seed: int64;
 	users: [User];
-	readyState: [string];
 	error: uint32;
 }

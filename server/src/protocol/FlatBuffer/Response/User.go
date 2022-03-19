@@ -46,14 +46,29 @@ func (rcv *User) MutateTeam(n int32) bool {
 	return rcv._tab.MutateInt32Slot(6, n)
 }
 
+func (rcv *User) Sequence() int32 {
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(8))
+	if o != 0 {
+		return rcv._tab.GetInt32(o + rcv._tab.Pos)
+	}
+	return 0
+}
+
+func (rcv *User) MutateSequence(n int32) bool {
+	return rcv._tab.MutateInt32Slot(8, n)
+}
+
 func UserStart(builder *flatbuffers.Builder) {
-	builder.StartObject(2)
+	builder.StartObject(3)
 }
 func UserAddId(builder *flatbuffers.Builder, id flatbuffers.UOffsetT) {
 	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(id), 0)
 }
 func UserAddTeam(builder *flatbuffers.Builder, team int32) {
 	builder.PrependInt32Slot(1, team, 0)
+}
+func UserAddSequence(builder *flatbuffers.Builder, sequence int32) {
+	builder.PrependInt32Slot(2, sequence, 0)
 }
 func UserEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

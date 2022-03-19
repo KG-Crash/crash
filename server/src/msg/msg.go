@@ -162,7 +162,8 @@ type User struct {
 
 type UserState struct {
 	User
-	Team int
+	Team     int
+	Sequence int
 }
 
 type RequestGetUserState struct{}

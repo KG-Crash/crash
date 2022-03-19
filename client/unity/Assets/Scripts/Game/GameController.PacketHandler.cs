@@ -56,7 +56,9 @@ namespace Game
         [FlatBufferEvent]
         public async Task<bool> OnReady(Ready response)
         {
-            var allReady = (response.ReadyState.Count == response.Users.Count);
+            // 준비가 완료된 유저는 0 based의 Sequence가 발급됨
+            // 준비가 안되면 -1로 설정됨
+            var allReady = response.Users.All(x => x.Sequence != -1);
             if (allReady)
             {
                 ready = true;

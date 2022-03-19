@@ -21,23 +21,26 @@ type RoomConfig struct {
 }
 
 type Actor struct {
-	id            string
-	users         map[int]*actor.PIDSet
-	playing       bool
-	config        RoomConfig
-	master        *actor.PID
-	seed          int64
-	preparedUsers *actor.PIDSet
+	id           string
+	users        map[int]*actor.PIDSet
+	playing      bool
+	config       RoomConfig
+	master       *actor.PID
+	seed         int64
+	nextSequence int
+	mapSequence  map[int]*actor.PID
 }
 
 func New(id string, master *actor.PID, config RoomConfig) *Actor {
 	result := &Actor{
-		id:            id,
-		users:         make(map[int]*actor.PIDSet),
-		playing:       false,
-		config:        config,
-		master:        master,
-		preparedUsers: actor.NewPIDSet(),
+		id:           id,
+		users:        make(map[int]*actor.PIDSet),
+		playing:      false,
+		config:       config,
+		master:       master,
+		seed:         0,
+		nextSequence: 0,
+		mapSequence:  make(map[int]*actor.PID),
 	}
 
 	for i := 0; i < len(config.Team); i++ {
@@ -75,17 +78,22 @@ func (state *Actor) getUsers(ctx actor.Context) {
 
 			// 각각의 유저들의 정보를 요청
 			userStateFuture := ctx.RequestFuture(pid, &msg.RequestGetUserState{}, time.Hour)
-			ctx.AwaitFuture(userStateFuture, func(res interface{}, err error) {
-				if err != nil {
+			ctx.AwaitFuture(userStateFuture, func(res interface{}, e error) {
+				if e != nil {
 					log.Fatalf("Failed to handle, message : %#v.", ctx.Message())
 					return
 				}
 
 				// 해당 유저 정보를 응답 메시지에 저장
 				x := res.(*msg.ResponseGetUserState)
+				seq, err := state.pid2Sequence(x.User.PID)
+				if err != nil {
+					seq = -1
+				}
 				users = append(users, msg.UserState{
-					User: x.User,
-					Team: teams[x.PID],
+					User:     x.User,
+					Team:     teams[x.PID],
+					Sequence: seq,
 				})
 				gathered++
 
@@ -179,6 +187,16 @@ func (state *Actor) assertPlay(sender *actor.PID) uint32 {
 	return enum.ResultCode.None
 }
 
+func (state *Actor) pid2Sequence(actor *actor.PID) (int, exception.Error) {
+	for seq, pid := range state.mapSequence {
+		if pid == actor {
+			return seq, nil
+		}
+	}
+
+	return 0, exception.New(enum.ResultCode.InvalidUser)
+}
+
 func (state *Actor) Receive(ctx actor.Context) {
 	switch m := ctx.Message().(type) {
 
@@ -229,7 +247,6 @@ func (state *Actor) Receive(ctx actor.Context) {
 
 		state.users[i].Add(m.Sender)
 		usersFuture := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
-
 		ctx.AwaitFuture(usersFuture, func(res interface{}, err error) {
 			if err != nil {
 				log.Fatalf("Failed to handle, message : %#v.", ctx.Message())
@@ -371,30 +388,33 @@ func (state *Actor) Receive(ctx actor.Context) {
 
 	case *msg.Ready:
 		sender := ctx.Sender()
-		state.preparedUsers.Add(sender)
+		state.mapSequence[state.nextSequence] = sender
+		state.nextSequence++
 
+		sequences := make(map[int]string)
 		usersFuture := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
 		ctx.AwaitFuture(usersFuture, func(res interface{}, err error) {
 			usersResponse := res.(*msg.ResponseGetUsers)
 
-			readyState := []string{}
 			users := []response.User{}
 			for _, user := range usersResponse.Users {
-				if state.preparedUsers.Contains(user.PID) {
-					readyState = append(readyState, user.ID)
-				}
-
 				users = append(users, response.User{
 					Id:   user.ID,
 					Team: int32(user.Team),
 				})
+
+				seq, err := state.pid2Sequence(user.PID)
+				if err != nil {
+					continue
+				}
+
+				sequences[seq] = user.ID
 			}
 
 			state.selects().ForEach(func(i int, pid *actor.PID) {
 				ctx.Send(pid, &response.Ready{
-					Seed:       state.seed,
-					Users:      users,
-					ReadyState: readyState,
+					Seed:  state.seed,
+					Users: users,
 				})
 			})
 		})

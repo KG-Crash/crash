@@ -143,6 +143,7 @@ namespace Protocol.Response
 
         public string Id { get; set; }
         public int Team { get; set; }
+        public int Sequence { get; set; }
 
         public User()
         { }
@@ -151,14 +152,16 @@ namespace Protocol.Response
         {
             this.Id = obj.Id;
             this.Team = obj.Team;
+            this.Sequence = obj.Sequence;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.User> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
             var _id = builder.CreateString(this.Id);
             var _team = this.Team;
+            var _sequence = this.Sequence;
 
-            return FlatBuffer.Response.User.CreateUser(builder, _id, _team);
+            return FlatBuffer.Response.User.CreateUser(builder, _id, _team, _sequence);
         }
 
         public byte[] Serialize()
@@ -725,7 +728,6 @@ namespace Protocol.Response
 
         public long Seed { get; set; }
         public List<User> Users { get; set; }
-        public List<string> ReadyState { get; set; }
         public uint Error { get; set; }
 
         public Ready()
@@ -735,7 +737,6 @@ namespace Protocol.Response
         {
             this.Seed = obj.Seed;
             this.Users = Enumerable.Range(0, obj.UsersLength).Select(x => new User(obj.Users(x).Value)).ToList();
-            this.ReadyState = Enumerable.Range(0, obj.ReadyStateLength).Select(x => obj.ReadyState(x)).ToList();
             this.Error = obj.Error;
         }
 
@@ -743,10 +744,9 @@ namespace Protocol.Response
         {
             var _seed = this.Seed;
             var _users = FlatBuffer.Response.Ready.CreateUsersVector(builder, this.Users.Select(x => x.ToFlatBuffer(builder)).ToArray());
-            var _readyState = FlatBuffer.Response.Ready.CreateReadyStateVector(builder, this.ReadyState.Select(x => builder.CreateString(x)).ToArray());
             var _error = this.Error;
 
-            return FlatBuffer.Response.Ready.CreateReady(builder, _seed, _users, _readyState, _error);
+            return FlatBuffer.Response.Ready.CreateReady(builder, _seed, _users, _error);
         }
 
         public byte[] Serialize()

@@ -296,8 +296,9 @@ func (obj *CreateRoom) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type User struct {
-	Id   string
-	Team int32
+	Id       string
+	Team     int32
+	Sequence int32
 }
 
 func (obj *User) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
@@ -306,6 +307,7 @@ func (obj *User) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	source.UserStart(builder)
 	source.UserAddId(builder, _id)
 	source.UserAddTeam(builder, obj.Team)
+	source.UserAddSequence(builder, obj.Sequence)
 
 	return source.UserEnd(builder)
 }
@@ -313,6 +315,7 @@ func (obj *User) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 func (obj *User) parse(x *source.User) *User {
 	obj.Id = string(x.Id())
 	obj.Team = x.Team()
+	obj.Sequence = x.Sequence()
 
 	return obj
 }
@@ -983,10 +986,9 @@ func (obj *GameStart) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type Ready struct {
-	Seed       int64
-	Users      []User
-	ReadyState []string
-	Error      uint32
+	Seed  int64
+	Users []User
+	Error uint32
 }
 
 func (obj *Ready) users(builder *flatbuffers.Builder, users []User) flatbuffers.UOffsetT {
@@ -1003,28 +1005,12 @@ func (obj *Ready) users(builder *flatbuffers.Builder, users []User) flatbuffers.
 	return builder.EndVector(_size)
 }
 
-func (obj *Ready) readyState(builder *flatbuffers.Builder, readyState []string) flatbuffers.UOffsetT {
-	_size := len(readyState)
-	offsets := make([]flatbuffers.UOffsetT, _size)
-	for i, x := range readyState {
-		offsets[_size-i-1] = builder.CreateString(x)
-	}
-
-	builder.StartVector(4, _size, 4)
-	for _, offset := range offsets {
-		builder.PrependUOffsetT(offset)
-	}
-	return builder.EndVector(_size)
-}
-
 func (obj *Ready) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	_users := obj.users(builder, obj.Users)
-	_readyState := obj.readyState(builder, obj.ReadyState)
 
 	source.ReadyStart(builder)
 	source.ReadyAddSeed(builder, obj.Seed)
 	source.ReadyAddUsers(builder, _users)
-	source.ReadyAddReadyState(builder, _readyState)
 	source.ReadyAddError(builder, obj.Error)
 
 	return source.ReadyEnd(builder)
@@ -1041,11 +1027,6 @@ func (obj *Ready) parse(x *source.Ready) *Ready {
 		user := User{}
 		user.parse(_user)
 		obj.Users = append(obj.Users, user)
-	}
-
-	obj.ReadyState = []string{}
-	for i := 0; i < x.ReadyStateLength(); i++ {
-		obj.ReadyState = append(obj.ReadyState, string(x.ReadyState(i)))
 	}
 	obj.Error = x.Error()
 

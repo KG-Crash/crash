@@ -58,25 +58,8 @@ func (rcv *Ready) UsersLength() int {
 	return 0
 }
 
-func (rcv *Ready) ReadyState(j int) []byte {
-	o := flatbuffers.UOffsetT(rcv._tab.Offset(8))
-	if o != 0 {
-		a := rcv._tab.Vector(o)
-		return rcv._tab.ByteVector(a + flatbuffers.UOffsetT(j*4))
-	}
-	return nil
-}
-
-func (rcv *Ready) ReadyStateLength() int {
-	o := flatbuffers.UOffsetT(rcv._tab.Offset(8))
-	if o != 0 {
-		return rcv._tab.VectorLen(o)
-	}
-	return 0
-}
-
 func (rcv *Ready) Error() uint32 {
-	o := flatbuffers.UOffsetT(rcv._tab.Offset(10))
+	o := flatbuffers.UOffsetT(rcv._tab.Offset(8))
 	if o != 0 {
 		return rcv._tab.GetUint32(o + rcv._tab.Pos)
 	}
@@ -84,11 +67,11 @@ func (rcv *Ready) Error() uint32 {
 }
 
 func (rcv *Ready) MutateError(n uint32) bool {
-	return rcv._tab.MutateUint32Slot(10, n)
+	return rcv._tab.MutateUint32Slot(8, n)
 }
 
 func ReadyStart(builder *flatbuffers.Builder) {
-	builder.StartObject(4)
+	builder.StartObject(3)
 }
 func ReadyAddSeed(builder *flatbuffers.Builder, seed int64) {
 	builder.PrependInt64Slot(0, seed, 0)
@@ -99,14 +82,8 @@ func ReadyAddUsers(builder *flatbuffers.Builder, users flatbuffers.UOffsetT) {
 func ReadyStartUsersVector(builder *flatbuffers.Builder, numElems int) flatbuffers.UOffsetT {
 	return builder.StartVector(4, numElems, 4)
 }
-func ReadyAddReadyState(builder *flatbuffers.Builder, readyState flatbuffers.UOffsetT) {
-	builder.PrependUOffsetTSlot(2, flatbuffers.UOffsetT(readyState), 0)
-}
-func ReadyStartReadyStateVector(builder *flatbuffers.Builder, numElems int) flatbuffers.UOffsetT {
-	return builder.StartVector(4, numElems, 4)
-}
 func ReadyAddError(builder *flatbuffers.Builder, error uint32) {
-	builder.PrependUint32Slot(3, error, 0)
+	builder.PrependUint32Slot(2, error, 0)
 }
 func ReadyEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()

@@ -31,18 +31,19 @@ func New(id string, conn net.Conn) *Actor {
 	}
 }
 
-func toUserResponse(user msg.UserState) response.User {
+func toProtocol(user msg.UserState) response.User {
 	return response.User{
-		Id:   user.ID,
-		Team: int32(user.Team),
+		Id:       user.ID,
+		Team:     int32(user.Team),
+		Sequence: -1,
 	}
 }
 
-func toUserResponses(users []msg.UserState) []response.User {
+func toProtocols(users []msg.UserState) []response.User {
 	result := []response.User{}
 
 	for _, user := range users {
-		result = append(result, toUserResponse(user))
+		result = append(result, toProtocol(user))
 	}
 
 	return result
@@ -76,7 +77,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 
 				result := &response.EnterRoom{
 					User:   state.ID,
-					Users:  toUserResponses(enterRoom.Users),
+					Users:  toProtocols(enterRoom.Users),
 					Master: enterRoom.Master.ID,
 				}
 
