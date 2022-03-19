@@ -25,7 +25,7 @@ type _ResultCode struct {
 }
 
 type _ActionKind struct {
-	None         uint32
+	HeartBeat    uint32
 	Pause        uint32
 	Speed        uint32
 	Upgrade      uint32
@@ -152,7 +152,7 @@ func init() {
 	}
 
 	ActionKind = _ActionKind{
-		None:         1,
+		HeartBeat:    1,
 		Pause:        2,
 		Speed:        3,
 		Upgrade:      4,

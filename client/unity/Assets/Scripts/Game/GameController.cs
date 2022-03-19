@@ -179,6 +179,9 @@ namespace Game
         {
             switch ((Shared.ActionKind)action.Id)
             {
+                case ActionKind.HeartBeat:
+                    // hearbeat 용
+                    break;
                 case ActionKind.Pause:
                     paused = true;
                     break;
@@ -196,15 +199,8 @@ namespace Game
         private void OnUpdateFrame(Frame f)
         {
             Debug.Log($"InputTurn({InputTurn}) > OutputTurn({OutputTurn}) + 2");
-            
-            EnqueueAction(new Protocol.Request.Action
-            {
-                Frame = InputFrame,
-                Id = 0,
-                Param1 = (uint)(TPS - InputFrame),
-                Param2 = (uint)InputFrame
-            });
-            
+
+            EnqueueHeartBeat();
             _player.UpdateUpgrade(f);
             OnUpdateFrameDebug(f);
         }

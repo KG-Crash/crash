@@ -28,7 +28,7 @@ namespace Shared
 
     public enum ActionKind
     {
-        None,
+        HeartBeat,
         Pause,
         Speed,
         Upgrade,
