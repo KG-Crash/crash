@@ -266,8 +266,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			return
 		}
 
-		ctx.Send(state.Room, &msg.Action{
-			Sender:  ctx.Self(),
+		ctx.Request(state.Room, &msg.Action{
 			UID:     state.ID,
 			Actions: ptc.Actions,
 			Turn:    ptc.Turn,
@@ -283,8 +282,7 @@ func (state *Actor) onReceiveFlatBuffer(ctx actor.Context, p protocol.Protocol) 
 			return
 		}
 
-		ctx.Send(state.Room, &msg.InGameChat{
-			Sender:  ctx.Self(),
+		ctx.Request(state.Room, &msg.InGameChat{
 			UID:     state.ID,
 			Message: ptc.Message,
 			Frame:   ptc.Frame,

@@ -101,19 +101,19 @@ namespace KG.Collection
         }
     }
 
-    public class ActionBuffer : IEnumerable<KeyValuePair<string, TurnBuffer>>
+    public class ActionBuffer : IEnumerable<KeyValuePair<int, TurnBuffer>>
     {
-        private readonly Dictionary<string, TurnBuffer> _buffers = new Dictionary<string, TurnBuffer>();
+        private readonly Dictionary<int, TurnBuffer> _buffers = new Dictionary<int, TurnBuffer>();
 
         #region implemented methods
-        public IEnumerator<KeyValuePair<string, TurnBuffer>> GetEnumerator() => _buffers.GetEnumerator();
+        public IEnumerator<KeyValuePair<int, TurnBuffer>> GetEnumerator() => _buffers.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => _buffers.GetEnumerator();
         #endregion
 
-        public TurnBuffer this[string key] => _buffers[key];
+        public TurnBuffer this[int key] => _buffers[key];
 
-        public void Add(string userId, int turnId, int frameId, IEnumerable<IProtocol> protocols)
+        public void Add(int userId, int turnId, int frameId, IEnumerable<IProtocol> protocols)
         {
             if (_buffers.ContainsKey(userId) == false)
                 _buffers.Add(userId, new TurnBuffer());
@@ -121,7 +121,7 @@ namespace KG.Collection
             _buffers[userId].Add(turnId, frameId, protocols);
         }
 
-        public void Add(string userId, int turnId, int frameId, IProtocol protocol)
+        public void Add(int userId, int turnId, int frameId, IProtocol protocol)
         {
             if (_buffers.ContainsKey(userId) == false)
                 _buffers.Add(userId, new TurnBuffer());
@@ -129,7 +129,7 @@ namespace KG.Collection
             _buffers[userId].Add(turnId, frameId, protocol);
         }
 
-        public Dictionary<string, FrameBuffer> Peek(int turnId)
+        public Dictionary<int, FrameBuffer> Peek(int turnId)
         {
             return _buffers.ToDictionary(x => x.Key, x => x.Value.Peek(turnId));
         }
@@ -142,7 +142,7 @@ namespace KG.Collection
             return Peek(turnId).All(x => x.Value != null);
         }
 
-        public Dictionary<string, FrameBuffer> Pop(int turnId)
+        public Dictionary<int, FrameBuffer> Pop(int turnId)
         {
             if (IsReady(turnId) == false)
                 return null;

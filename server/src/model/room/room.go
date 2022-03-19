@@ -27,8 +27,8 @@ type Actor struct {
 	config       RoomConfig
 	master       *actor.PID
 	seed         int64
-	nextSequence int
-	mapSequence  map[int]*actor.PID
+	nextSequence int32
+	mapSequence  map[int32]*actor.PID
 }
 
 func New(id string, master *actor.PID, config RoomConfig) *Actor {
@@ -40,7 +40,7 @@ func New(id string, master *actor.PID, config RoomConfig) *Actor {
 		master:       master,
 		seed:         0,
 		nextSequence: 0,
-		mapSequence:  make(map[int]*actor.PID),
+		mapSequence:  make(map[int32]*actor.PID),
 	}
 
 	for i := 0; i < len(config.Team); i++ {
@@ -69,12 +69,12 @@ func (state *Actor) selects() *actor.PIDSet {
 func (state *Actor) getUsers(ctx actor.Context) {
 	var master *msg.User = nil
 	users := []msg.UserState{}
-	teams := map[*actor.PID]int{}
+	teams := map[*actor.PID]int32{}
 	gathered := 0
 	requests := state.selects().Len()
 	for team, pidSet := range state.users {
 		pidSet.ForEach(func(i int, pid *actor.PID) {
-			teams[pid] = team
+			teams[pid] = int32(team)
 
 			// 각각의 유저들의 정보를 요청
 			userStateFuture := ctx.RequestFuture(pid, &msg.RequestGetUserState{}, time.Hour)
@@ -86,10 +86,7 @@ func (state *Actor) getUsers(ctx actor.Context) {
 
 				// 해당 유저 정보를 응답 메시지에 저장
 				x := res.(*msg.ResponseGetUserState)
-				seq, err := state.pid2Sequence(x.User.PID)
-				if err != nil {
-					seq = -1
-				}
+				seq := state.pid2Sequence(x.User.PID)
 				users = append(users, msg.UserState{
 					User:     x.User,
 					Team:     teams[x.PID],
@@ -187,14 +184,14 @@ func (state *Actor) assertPlay(sender *actor.PID) uint32 {
 	return enum.ResultCode.None
 }
 
-func (state *Actor) pid2Sequence(actor *actor.PID) (int, exception.Error) {
+func (state *Actor) pid2Sequence(actor *actor.PID) int32 {
 	for seq, pid := range state.mapSequence {
 		if pid == actor {
-			return seq, nil
+			return seq
 		}
 	}
 
-	return 0, exception.New(enum.ResultCode.InvalidUser)
+	return -1
 }
 
 func (state *Actor) Receive(ctx actor.Context) {
@@ -391,7 +388,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 		state.mapSequence[state.nextSequence] = sender
 		state.nextSequence++
 
-		sequences := make(map[int]string)
+		sequences := make(map[int32]string)
 		usersFuture := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
 		ctx.AwaitFuture(usersFuture, func(res interface{}, err error) {
 			usersResponse := res.(*msg.ResponseGetUsers)
@@ -403,11 +400,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 					Team: int32(user.Team),
 				})
 
-				seq, err := state.pid2Sequence(user.PID)
-				if err != nil {
-					continue
-				}
-
+				seq := state.pid2Sequence(user.PID)
 				sequences[seq] = user.ID
 			}
 
@@ -420,15 +413,16 @@ func (state *Actor) Receive(ctx actor.Context) {
 		})
 
 	case *msg.Action:
-		if err := state.assertPlay(m.Sender); err != enum.ResultCode.None {
-			ctx.Send(m.Sender, &response.ActionQueue{
+		sender := ctx.Sender()
+		if err := state.assertPlay(sender); err != enum.ResultCode.None {
+			ctx.Send(sender, &response.ActionQueue{
 				Error: err,
 			})
 			return
 		}
 
 		result := &response.ActionQueue{
-			User:    m.UID,
+			User:    state.pid2Sequence(sender),
 			Actions: []response.Action{},
 			Turn:    m.Turn,
 		}
@@ -446,8 +440,9 @@ func (state *Actor) Receive(ctx actor.Context) {
 		})
 
 	case *msg.InGameChat:
-		if err := state.assertPlay(m.Sender); err != enum.ResultCode.None {
-			ctx.Send(m.Sender, &response.ActionQueue{
+		sender := ctx.Sender()
+		if err := state.assertPlay(sender); err != enum.ResultCode.None {
+			ctx.Send(sender, &response.ActionQueue{
 				Error: err,
 			})
 			return
@@ -457,7 +452,7 @@ func (state *Actor) Receive(ctx actor.Context) {
 			ctx.Send(pid, &response.InGameChat{
 				Turn:    m.Turn,
 				Frame:   m.Frame,
-				User:    m.UID,
+				User:    state.pid2Sequence(pid),
 				Message: m.Message,
 			})
 		})

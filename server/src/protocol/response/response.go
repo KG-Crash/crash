@@ -704,19 +704,18 @@ func (obj *Whisper) Deserialize(bytes []byte) protocol.Protocol {
 type InGameChat struct {
 	Turn    int32
 	Frame   int32
-	User    string
+	User    int32
 	Message string
 	Error   uint32
 }
 
 func (obj *InGameChat) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
-	_user := builder.CreateString(obj.User)
 	_message := builder.CreateString(obj.Message)
 
 	source.InGameChatStart(builder)
 	source.InGameChatAddTurn(builder, obj.Turn)
 	source.InGameChatAddFrame(builder, obj.Frame)
-	source.InGameChatAddUser(builder, _user)
+	source.InGameChatAddUser(builder, obj.User)
 	source.InGameChatAddMessage(builder, _message)
 	source.InGameChatAddError(builder, obj.Error)
 
@@ -726,7 +725,7 @@ func (obj *InGameChat) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT
 func (obj *InGameChat) parse(x *source.InGameChat) *InGameChat {
 	obj.Turn = x.Turn()
 	obj.Frame = x.Frame()
-	obj.User = string(x.User())
+	obj.User = x.User()
 	obj.Message = string(x.Message())
 	obj.Error = x.Error()
 
@@ -831,7 +830,7 @@ func (obj *Action) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type ActionQueue struct {
-	User    string
+	User    int32
 	Actions []Action
 	Turn    int32
 	Error   uint32
@@ -852,11 +851,10 @@ func (obj *ActionQueue) actions(builder *flatbuffers.Builder, actions []Action) 
 }
 
 func (obj *ActionQueue) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
-	_user := builder.CreateString(obj.User)
 	_actions := obj.actions(builder, obj.Actions)
 
 	source.ActionQueueStart(builder)
-	source.ActionQueueAddUser(builder, _user)
+	source.ActionQueueAddUser(builder, obj.User)
 	source.ActionQueueAddActions(builder, _actions)
 	source.ActionQueueAddTurn(builder, obj.Turn)
 	source.ActionQueueAddError(builder, obj.Error)
@@ -865,7 +863,7 @@ func (obj *ActionQueue) create(builder *flatbuffers.Builder) flatbuffers.UOffset
 }
 
 func (obj *ActionQueue) parse(x *source.ActionQueue) *ActionQueue {
-	obj.User = string(x.User())
+	obj.User = x.User()
 
 	obj.Actions = []Action{}
 	for i := 0; i < x.ActionsLength(); i++ {

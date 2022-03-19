@@ -25,7 +25,8 @@ namespace Network
         private readonly Bootstrap _bootstrap = new Bootstrap();
         private IChannel _channel = null;
 
-        public string id { get; set; }
+        public string uuid { get; set; }
+        public int id { get; set; } = -1;
         public long seed { get; set; }
         public bool Connected => _channel?.Active ?? false;
 

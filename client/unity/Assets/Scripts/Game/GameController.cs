@@ -193,7 +193,8 @@ namespace Game
         }
         private void OnUpdateIngameChat(Protocol.Response.InGameChat chat)
         {
-            _chatManager.RecvMessage(chat.Message, chat.User.Substring(0,8));
+            // TODO : 시퀀스로 바뀌면서 이거 수정좀 해야함
+            _chatManager.RecvMessage(chat.Message, $"{chat.User}");
         }
 
         private void OnUpdateFrame(Frame f)

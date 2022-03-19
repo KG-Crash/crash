@@ -65,6 +65,8 @@ namespace Game
                 _logger = new FileLogger($"log/{DateTime.Now}.txt".Replace(":", "_"));
             }
 
+            Client.Instance.id = response.Users.FirstOrDefault(x => x.Id == Client.Instance.uuid)?.Sequence ?? -1;
+
             // team : users
             var users = response.Users
                 .GroupBy(x => x.Team)
@@ -72,7 +74,7 @@ namespace Game
 
             // random seed
             Client.Instance.seed = response.Seed;
-            Debug.Log($"OnReady, myname is {Client.Instance.id}"); 
+            Debug.Log($"OnReady, myname is {Client.Instance.uuid}"); 
 
             foreach (var user in response.Users)
             {

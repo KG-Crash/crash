@@ -137,14 +137,12 @@ type ResponseReady struct {
 }
 
 type Action struct {
-	Sender  *actor.PID
 	UID     string
 	Actions []request.Action
 	Turn    int32
 }
 
 type InGameChat struct {
-	Sender  *actor.PID
 	UID     string
 	Message string
 	Frame   int32
@@ -162,8 +160,8 @@ type User struct {
 
 type UserState struct {
 	User
-	Team     int
-	Sequence int
+	Team     int32
+	Sequence int32
 }
 
 type RequestGetUserState struct{}

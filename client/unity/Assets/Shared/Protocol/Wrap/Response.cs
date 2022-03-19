@@ -491,7 +491,7 @@ namespace Protocol.Response
 
         public int Turn { get; set; }
         public int Frame { get; set; }
-        public string User { get; set; }
+        public int User { get; set; }
         public string Message { get; set; }
         public uint Error { get; set; }
 
@@ -511,7 +511,7 @@ namespace Protocol.Response
         {
             var _turn = this.Turn;
             var _frame = this.Frame;
-            var _user = builder.CreateString(this.User);
+            var _user = this.User;
             var _message = builder.CreateString(this.Message);
             var _error = this.Error;
 
@@ -615,7 +615,7 @@ namespace Protocol.Response
     {
         public uint Identity => (uint)Protocol.Response.Identity.ACTION_QUEUE;
 
-        public string User { get; set; }
+        public int User { get; set; }
         public List<Action> Actions { get; set; }
         public int Turn { get; set; }
         public uint Error { get; set; }
@@ -633,7 +633,7 @@ namespace Protocol.Response
 
         public FlatBuffers.Offset<FlatBuffer.Response.ActionQueue> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _user = builder.CreateString(this.User);
+            var _user = this.User;
             var _actions = FlatBuffer.Response.ActionQueue.CreateActionsVector(builder, this.Actions.Select(x => x.ToFlatBuffer(builder)).ToArray());
             var _turn = this.Turn;
             var _error = this.Error;

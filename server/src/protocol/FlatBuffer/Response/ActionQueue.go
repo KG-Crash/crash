@@ -26,12 +26,16 @@ func (rcv *ActionQueue) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *ActionQueue) User() []byte {
+func (rcv *ActionQueue) User() int32 {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
-		return rcv._tab.ByteVector(o + rcv._tab.Pos)
+		return rcv._tab.GetInt32(o + rcv._tab.Pos)
 	}
-	return nil
+	return 0
+}
+
+func (rcv *ActionQueue) MutateUser(n int32) bool {
+	return rcv._tab.MutateInt32Slot(4, n)
 }
 
 func (rcv *ActionQueue) Actions(obj *Action, j int) bool {
@@ -81,8 +85,8 @@ func (rcv *ActionQueue) MutateError(n uint32) bool {
 func ActionQueueStart(builder *flatbuffers.Builder) {
 	builder.StartObject(4)
 }
-func ActionQueueAddUser(builder *flatbuffers.Builder, user flatbuffers.UOffsetT) {
-	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(user), 0)
+func ActionQueueAddUser(builder *flatbuffers.Builder, user int32) {
+	builder.PrependInt32Slot(0, user, 0)
 }
 func ActionQueueAddActions(builder *flatbuffers.Builder, actions flatbuffers.UOffsetT) {
 	builder.PrependUOffsetTSlot(1, flatbuffers.UOffsetT(actions), 0)
