@@ -89,39 +89,6 @@ namespace Game
             Debug.Log($"현재 {TimeSpeed} 배속");
 	        TimeSpeed = Fix64.One * times;
         }
-		[BuildCommand("setfps")]
-		public void SetFPS(int fps)
-		{
-			if (!IsNetworkMode)
-				FPS = fps;
-		}
-		
-		[BuildCommand("refreshfps")]
-		public void RefreshFPS()
-		{
-			if (!IsNetworkMode)
-				FPS = Shared.Const.Time.FPS;
-		}
-
-		[BuildCommand("settps")]
-		public void SetTPS(int tps)
-		{
-			if (!IsNetworkMode)
-				TPS = tps;
-		}
-
-		[BuildCommand("refreshtps")]
-		public void RefreshTPS()
-		{
-			if (!IsNetworkMode)
-				TPS = Shared.Const.Time.TPS;
-		}
-
-		[BuildCommand("togglepause")]
-		public void TogglePause()
-		{
-			paused = !paused;
-		}
 
 		[BuildCommand("pause")]
 		public void SetPause(bool pause)
