@@ -93,19 +93,5 @@ namespace Game
             paused = false;
             return true;
         }
-
-        public void SendResume()
-        {
-            _ = Client.Send(new Protocol.Request.Resume());
-        }
-
-        public void ReservePause()
-        {
-            EnqueueAction(new Protocol.Request.Action
-            {
-                Frame = InputFrame,
-                Id = (int)Shared.ActionKind.Pause
-            });
-        }
     }
 }

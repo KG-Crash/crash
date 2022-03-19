@@ -60,7 +60,7 @@ namespace Game
                 }
                 else
                 {
-                    ReservePause();
+                    EnqueuePause();
                 }
             }
 

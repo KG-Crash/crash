@@ -126,7 +126,7 @@ namespace Game
 		[BuildCommand("pause")]
 		public void SetPause(bool pause)
 		{
-			paused = pause;
+            paused = pause;
 		}
 	}
 }

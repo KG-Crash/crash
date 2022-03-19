@@ -15,5 +15,14 @@ namespace Game
                 Param2 = 0
             });
         }
+        
+        public void EnqueuePause()
+        {
+            EnqueueAction(new Protocol.Request.Action
+            {
+                Frame = InputFrame,
+                Id = (int)Shared.ActionKind.Pause
+            });
+        }
     }
 }
