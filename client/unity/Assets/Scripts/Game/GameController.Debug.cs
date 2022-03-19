@@ -63,6 +63,19 @@ namespace Game
                     ReservePause();
                 }
             }
+
+            if (Input.GetKeyUp(KeyCode.F2))
+            {
+                EnqueueSpeed(1);
+            }
+            if (Input.GetKeyUp(KeyCode.F3))
+            {
+                EnqueueSpeed(2);
+            }
+            if (Input.GetKeyUp(KeyCode.F4))
+            {
+                EnqueueSpeed(3);
+            }
         }
 
         void OnUpdateFrameDebug(Frame f)

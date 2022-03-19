@@ -86,8 +86,8 @@ namespace Game
         [BuildCommand("faster")]
         public void Faster(int times = 2)
         {
-            GameController.TimeSpeed *= times;
-            Debug.Log($"현재 {GameController.TimeSpeed} 배속");
+            Debug.Log($"현재 {TimeSpeed} 배속");
+	        TimeSpeed = Fix64.One * times;
         }
 		[BuildCommand("setfps")]
 		public void SetFPS(int fps)

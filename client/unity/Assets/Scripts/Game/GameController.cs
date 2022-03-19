@@ -182,6 +182,10 @@ namespace Game
                 case ActionKind.Pause:
                     paused = true;
                     break;
+                case ActionKind.Speed:
+                    Debug.Log($"현재 {TimeSpeed} 배속");
+                    TimeSpeed = Fix64.One * action.Param1.LOWORD();
+                    break;
             }
         }
         private void OnUpdateIngameChat(Protocol.Response.InGameChat chat)
