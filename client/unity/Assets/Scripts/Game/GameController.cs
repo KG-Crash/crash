@@ -164,18 +164,18 @@ namespace Game
                 }
                 foreach(var action in actions.Select(x => x as Protocol.Response.Action))
                 {
-                    OnUpdateAction(action);
+                    OnUpdateAction(userId, action);
                 }
                 foreach (var chat in chats.Select(x => x as Protocol.Response.InGameChat))
                 {
-                    OnUpdateIngameChat(chat);
+                    OnUpdateIngameChat(userId, chat);
                 }
             }
 
             OutputTurn++;
         }
 
-        private void OnUpdateAction(Protocol.Response.Action action)
+        private void OnUpdateAction(int userId, Protocol.Response.Action action)
         {
             switch ((Shared.ActionKind)action.Id)
             {
@@ -191,10 +191,13 @@ namespace Game
                     break;
             }
         }
-        private void OnUpdateIngameChat(Protocol.Response.InGameChat chat)
+
+        private void OnUpdateIngameChat(int userId, Protocol.Response.InGameChat chat)
         {
-            // TODO : 시퀀스로 바뀌면서 이거 수정좀 해야함
-            _chatManager.RecvMessage(chat.Message, $"{chat.User}");
+            if (uuidTable.TryGetValue(userId, out var name) == false)
+                return;
+
+            _chatManager.RecvMessage(chat.Message, $"{name}");
         }
 
         private void OnUpdateFrame(Frame f)

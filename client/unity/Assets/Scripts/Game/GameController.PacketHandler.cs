@@ -4,6 +4,7 @@ using Network;
 using Newtonsoft.Json;
 using Protocol.Response;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -14,6 +15,8 @@ namespace Game
     {
         private FileLogger _logger;
         private ActionBuffer _actions = new ActionBuffer();
+        
+        public Dictionary<int, string> uuidTable { get; private set; } = new Dictionary<int, string>();
 
         
         [FlatBufferEvent]
@@ -65,6 +68,7 @@ namespace Game
                 _logger = new FileLogger($"log/{DateTime.Now}.txt".Replace(":", "_"));
             }
 
+            uuidTable = response.Users.ToDictionary(x => x.Sequence, x => x.Id);
             Client.Instance.id = response.Users.FirstOrDefault(x => x.Id == Client.Instance.uuid)?.Sequence ?? -1;
 
             // team : users

@@ -5,6 +5,7 @@ namespace Game
 {
     public partial class GameController
     {
+        #region 송신
         public void EnqueueHeartBeat()
         {
             EnqueueAction(new Protocol.Request.Action
@@ -35,5 +36,24 @@ namespace Game
                 Id = (int)Shared.ActionKind.Pause
             });
         }
+
+        public void EnqueueUpgrade(Ability ability)
+        {
+            EnqueueAction(new Protocol.Request.Action
+            { 
+                Frame = InputFrame,
+                Id = (int)Shared.ActionKind.Pause,
+                Param1 = ActionExtension.HIWORD((uint)ability),
+                Param2 = 0
+            });
+        }
+        #endregion
+
+        #region 수신
+        public void OnActionPause(int frame, uint param1, uint param2)
+        {
+            var upgradeType = (Ability)param1.HIWORD();
+        }
+        #endregion
     }
 }

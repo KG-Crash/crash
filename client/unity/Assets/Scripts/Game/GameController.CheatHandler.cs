@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using FixMath.NET;
+using Shared;
 using UnityEngine;
 
 
@@ -22,6 +23,8 @@ namespace Game
         [BuildCommand("spawn unit")]
         public void SpawnUnit(int unitOriginId, uint count, int playerNumber = -1)
         {
+            // TODO : 로직은 GameController.Action.cs에 정의하고 (액션 프로토콜을 수신할 때)
+            // 여기서는 EnqueueAction만 한다.
             Fix64 _startRadian = Fix64.Zero;
             FixVector2 rot;
 
@@ -52,6 +55,8 @@ namespace Game
         [BuildCommand("attack to")]
         public void AttackTo(int targetPlayerNumber, params int[] unitOriginIds)
         {
+            // TODO : 로직은 GameController.Action.cs에 정의하고 (액션 프로토콜을 수신할 때)
+            // 여기서는 EnqueueAction만 한다.
             if (_playerID == targetPlayerNumber)
                 return;
 
@@ -95,5 +100,14 @@ namespace Game
 		{
             paused = pause;
 		}
+
+        [BuildCommand("upgrade")]
+        public void Upgrade(string value)
+        {
+            if (Enum.TryParse<Ability>(value, out var ability) == false)
+                return;
+
+            EnqueueUpgrade(ability);
+        }
 	}
 }
