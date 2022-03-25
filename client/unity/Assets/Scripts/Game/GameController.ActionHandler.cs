@@ -1,8 +1,12 @@
 using FixMath.NET;
 using Shared;
+using UnityEngine;
+using Action = Protocol.Response.Action;
 
 namespace Game
 {
+
+    
     public partial class GameController
     {
         #region 송신
@@ -17,13 +21,13 @@ namespace Game
             });
         }
         
-        public void EnqueueSpeed(uint times)
+        public void EnqueueSpeed(int times)
         {
             EnqueueAction(new Protocol.Request.Action()
             {
                 Frame = InputFrame,
                 Id = (int) ActionKind.Speed,
-                Param1 = ActionExtension.LOWORD(times),
+                Param1 = ActionExtension.LOWORD((uint)times),
                 Param2 = 0
             });
         }
@@ -50,10 +54,41 @@ namespace Game
         #endregion
 
         #region 수신
-        public void OnActionPause(int frame, uint param1, uint param2)
+        
+        [ActionHandler(ActionKind.HeartBeat)]
+        public void OnActionHeartBeat(Action action, ActionHandleParam actionHandleParam)
         {
-            var upgradeType = (Ability)param1.HIWORD();
+            // hearbeat 용
         }
+        
+        [ActionHandler(ActionKind.Pause)]
+        public void OnActionPause(Action action, ActionHandleParam actionHandleParam)
+        {
+            paused = true;
+        }
+        
+        [ActionHandler(ActionKind.Speed)]
+        public void OnActionSpeed(Action action, ActionHandleParam actionHandleParam)
+        {
+            Debug.Log($"현재 {TimeSpeed} 배속");
+            TimeSpeed = Fix64.One * action.Param1.LOWORD();
+        }
+        
+        [ActionHandler(ActionKind.Upgrade)]
+        public void OnActionUpgrade(Action action, ActionHandleParam actionHandleParam)
+        {
+        }
+        
+        [ActionHandler(ActionKind.AttackPlayer)]
+        public void OnActionAttackPlayer(Action action, ActionHandleParam actionHandleParam)
+        {
+        }
+
+        [ActionHandler(ActionKind.Spawn)]
+        public void OnActionSpawn(Action action, ActionHandleParam actionHandleParam)
+        {
+        }
+        
         #endregion
     }
 }

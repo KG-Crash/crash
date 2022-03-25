@@ -5,6 +5,7 @@ using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace Game
@@ -70,6 +71,10 @@ namespace Game
             Actions = new List<Protocol.Request.Action>()
         };
 
+        private Dictionary<ActionKind, MethodInfo[]> _actionHandleMethodDict;
+        private ActionHandleParam _actionHandleParam;
+        private object[] _actionMethodParam;
+
         [NonSerialized] private int _playerID;
         [NonSerialized] private uint _playerTeamID;
         [NonSerialized] private Team _allPlayerByTeam;
@@ -122,6 +127,9 @@ namespace Game
             // 레디에서 이름 보내야 하지 않을까?
             _ = Client.Send(new Protocol.Request.Ready{ });
 
+            _actionHandleMethodDict = MethodExtractor.ExtractActionHandleMethod<GameController>();
+            _actionMethodParam = new object[2];
+            
             InitializeUniRx();
         }
 
@@ -177,19 +185,18 @@ namespace Game
 
         private void OnUpdateAction(int userId, Protocol.Response.Action action)
         {
-            switch ((Shared.ActionKind)action.Id)
+            var actionKind = (ActionKind)action.Id;
+            var methods = _actionHandleMethodDict[actionKind];
+
+            _actionMethodParam[0] = action;
+            _actionMethodParam[1] = _actionHandleParam; 
+            
+            for (var i = 0; i < methods.Length; i++)
             {
-                case ActionKind.HeartBeat:
-                    // hearbeat 용
-                    break;
-                case ActionKind.Pause:
-                    paused = true;
-                    break;
-                case ActionKind.Speed:
-                    Debug.Log($"현재 {TimeSpeed} 배속");
-                    TimeSpeed = Fix64.One * action.Param1.LOWORD();
-                    break;
+                methods[i].Invoke(this, _actionMethodParam);
             }
+            
+            Debug.Assert(methods.Length > 0, $"{actionKind} 처리 메소드가 없음");
         }
 
         private void OnUpdateIngameChat(int userId, Protocol.Response.InGameChat chat)

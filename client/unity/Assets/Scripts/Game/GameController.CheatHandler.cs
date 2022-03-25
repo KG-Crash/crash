@@ -92,13 +92,20 @@ namespace Game
         public void Faster(int times = 2)
         {
             Debug.Log($"현재 {TimeSpeed} 배속");
-	        TimeSpeed = Fix64.One * times;
+            EnqueueSpeed(times);
         }
 
 		[BuildCommand("pause")]
-		public void SetPause(bool pause)
+		public void Pause(bool pause)
 		{
-            paused = pause;
+            if (pause)
+            {
+                EnqueuePause();   
+            }
+            else
+            {
+                SendResume();
+            }
 		}
 
         [BuildCommand("upgrade")]
