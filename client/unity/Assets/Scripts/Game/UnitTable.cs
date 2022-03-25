@@ -4,42 +4,43 @@ using System.Linq;
 using FixMath.NET;
 using KG;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Game
 {
     [CreateAssetMenu(fileName = "UnitTable", menuName = "Crash/UnitTable", order = 0)]
     public class UnitTable : ScriptableObject
     {
-        [SerializeField] private SerializableDictionary<int, Unit> _unitOriginDict;
+        [FormerlySerializedAs("_unitOriginDict")] [SerializeField] private SerializableDictionary<int, Unit> _unitTypeDict;
 
-        public Unit GetOriginUnit(int unitOriginID)
+        public Unit GetUnitByType(int unitType)
         {
-            return _unitOriginDict[unitOriginID];
+            return _unitTypeDict[unitType];
         }
 
-        public void SetOriginUnit(int unitOriginID, Unit unit)
+        public void SetUnitByType(int unitType, Unit unit)
         {
-            _unitOriginDict[unitOriginID] = unit;
+            _unitTypeDict[unitType] = unit;
         }
 
         public int GetNewKey()
         {
-            return _unitOriginDict.Count > 0 ? _unitOriginDict.Keys.Max() + 1: 0;
+            return _unitTypeDict.Count > 0 ? _unitTypeDict.Keys.Max() + 1: 0;
         }
         
-        public void RemoveKey(int unitOriginID)
+        public void RemoveKey(int unitType)
         {
-            _unitOriginDict.Remove(unitOriginID);
+            _unitTypeDict.Remove(unitType);
         }
 
         public void Clear()
         {
-            _unitOriginDict.Clear();
+            _unitTypeDict.Clear();
         }
 
         public IEnumerable<KeyValuePair<int, Unit>> GetEnumerable()
         {
-            return _unitOriginDict;
+            return _unitTypeDict;
         }
     }
 }

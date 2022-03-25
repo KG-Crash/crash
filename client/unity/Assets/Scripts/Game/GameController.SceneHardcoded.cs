@@ -97,33 +97,33 @@ namespace Game
             return _spawnPositions[index].rotation.eulerAngles;
         }
         
-        public Unit SpawnUnitToPlayerStart(int spawnUnitOriginID, Player ownPlayer, TemporalPlaceContext context)
+        public Unit SpawnUnitToPlayerStart(int spawnUnitType, Player ownPlayer, TemporalPlaceContext context)
         {
             if (!context.isValid)
                 return null;
 
-            var newUnit = _unitFactory.CreateNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this, _unitParent);
+            var newUnit = _unitFactory.CreateNewUnit(spawnUnitType, _unitPrefabTable, _map, ownPlayer, this, _unitParent);
             ownPlayer.units.Add(newUnit);
             TemporalPlaceContext.PlaceUnit(_map, context, newUnit, GetSpawnPosition(ownPlayer.spawnIndex));
 
             return newUnit;
         }
 
-        public Unit SpawnUnitToPosition(int spawnUnitOriginID, Player ownPlayer, FixVector3 centerPosition, TemporalPlaceContext context)
+        public Unit SpawnUnitToPosition(int spawnUnitType, Player ownPlayer, FixVector3 centerPosition, TemporalPlaceContext context)
         {
             if (!context.isValid)
                 return null;
             
-            var newUnit = _unitFactory.CreateNewUnit(spawnUnitOriginID, _unitPrefabTable, _map, ownPlayer, this, _unitParent);
+            var newUnit = _unitFactory.CreateNewUnit(spawnUnitType, _unitPrefabTable, _map, ownPlayer, this, _unitParent);
             ownPlayer.units.Add(newUnit);
             TemporalPlaceContext.PlaceUnit(_map, context, newUnit, centerPosition);
 
             return newUnit;
         }
 
-        public Unit SpawnUnitToPosition(int spawnUnitOriginID, uint playerID, FixVector3 centerPosition, TemporalPlaceContext context)
+        public Unit SpawnUnitToPosition(int spawnUnitType, uint playerID, FixVector3 centerPosition, TemporalPlaceContext context)
         {
-            return SpawnUnitToPosition(spawnUnitOriginID, GetPlayer(playerID), centerPosition, context);
+            return SpawnUnitToPosition(spawnUnitType, GetPlayer(playerID), centerPosition, context);
         }
 
         #endregion 유닛 스폰 로직 

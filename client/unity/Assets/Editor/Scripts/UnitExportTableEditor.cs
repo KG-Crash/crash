@@ -362,7 +362,7 @@ public class UnitExportTableEditor : Editor
         }
     }
 
-    public static void SetUnitInHierarchy(GameObject instance, int originID,
+    public static void SetUnitInHierarchy(GameObject instance, int unitType,
         int maxAttackCount, MaterialContext materialContext, GameObject hightlightPrefab)
     {
         var unit = instance.AddComponent<Unit>();
@@ -393,7 +393,7 @@ public class UnitExportTableEditor : Editor
         }
 
         unit.deadMaterials = deadMaterials.ToArray();
-        unit.unitOriginID = originID;
+        unit.unitType = unitType;
     }
 
     public static void SetUnitInAsset(GameObject unitPrefab, AnimatorOverrideController overrideController)
@@ -448,13 +448,13 @@ public class UnitExportTableEditor : Editor
     public class PrefabContext
     {
         public string prefabParentPath { get; set; }
-        public Dictionary<string, int> unitPathToID { get; private set; }
+        public Dictionary<string, int> unitPathToType { get; private set; }
         private UnitTable unitTable;
 
         public PrefabContext(UnitTable unitTable)
         {
             this.unitTable = unitTable;
-            unitPathToID = unitTable.GetEnumerable().ToDictionary(x => AssetDatabase.GetAssetPath(x.Value), x => x.Key);
+            unitPathToType = unitTable.GetEnumerable().ToDictionary(x => AssetDatabase.GetAssetPath(x.Value), x => x.Key);
         }
 
         public void InstantiateAndSave(string sourcePrefabPath, string fileName, Action<GameObject, int> setUnitInHierarchy, Action<GameObject> setUnitInAsset)
@@ -467,17 +467,17 @@ public class UnitExportTableEditor : Editor
                 return;
             }
 
-            var id = (int) 0;
-            if (unitPathToID.ContainsKey(newPrefabAssetPath))
+            var unitType = (int) 0;
+            if (unitPathToType.ContainsKey(newPrefabAssetPath))
             {
-                id = unitPathToID[newPrefabAssetPath];
+                unitType = unitPathToType[newPrefabAssetPath];
             }
             else
             {
-                id = unitTable.GetNewKey();
+                unitType = unitTable.GetNewKey();
             }
 
-            setUnitInHierarchy.Invoke(newObjectInHierarchy, id);
+            setUnitInHierarchy.Invoke(newObjectInHierarchy, unitType);
             
             var newUnitPrefabGO = PrefabUtility.SaveAsPrefabAsset(newObjectInHierarchy, newPrefabAssetPath);
             DestroyImmediate(newObjectInHierarchy);
@@ -485,7 +485,7 @@ public class UnitExportTableEditor : Editor
             setUnitInAsset.Invoke(newUnitPrefabGO);
 
             var newUnit = newUnitPrefabGO.GetComponent<Unit>();
-            unitTable.SetOriginUnit(id, newUnit);
+            unitTable.SetUnitByType(unitType, newUnit);
         }
     }
 
@@ -553,9 +553,9 @@ public class UnitExportTableEditor : Editor
                             var fileName = sourcePrefabPath.GetLastPath();
 
                             prefabContext.InstantiateAndSave(sourcePrefabPath, fileName,
-                                (o, id) =>
+                                (o, unitType) =>
                                 {
-                                    SetUnitInHierarchy(o, id, maxAttackCount, materialContext,
+                                    SetUnitInHierarchy(o, unitType, maxAttackCount, materialContext,
                                         projectConfigs._unitHightPrefab);
                                 }, 
                                 o =>
@@ -622,9 +622,9 @@ public class UnitExportTableEditor : Editor
                         var maxAttackCount = GetSameNameClipCount(sourceAnimClips, "Attack");
                         
                         prefabContext.InstantiateAndSave(prefabPath, prefabFilePath,
-                            (o, id) =>
+                            (o, unitType) =>
                             { 
-                                SetUnitInHierarchy(o, id, maxAttackCount, materialContext,
+                                SetUnitInHierarchy(o, unitType, maxAttackCount, materialContext,
                                     projectConfigs._unitHightPrefab);
                             }, 
                             o =>

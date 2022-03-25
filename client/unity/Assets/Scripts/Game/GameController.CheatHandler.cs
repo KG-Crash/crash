@@ -21,7 +21,7 @@ namespace Game
     public partial class GameController
     {
         [BuildCommand("spawn unit")]
-        public void SpawnUnit(int unitOriginId, uint count, int playerNumber = -1)
+        public void SpawnUnit(int unitType, uint count, int playerNumber = -1)
         {
             // TODO : 로직은 GameController.Action.cs에 정의하고 (액션 프로토콜을 수신할 때)
             // 여기서는 EnqueueAction만 한다.
@@ -37,23 +37,23 @@ namespace Game
             var positionWS = ScreenMiddlePositionToWorldPosition();
             Player player;
 
-            Debug.Log($"유닛 스폰 유닛id : {unitOriginId} + 갯수 : { count}");
+            Debug.Log($"유닛 스폰 유닛id : {unitType} + 갯수 : { count}");
             if (playerNumber == -1)
             {
                 player = GetPlayer((uint)_playerID);
                 for (int i = 0; i < count; i++)
-                    SpawnUnitToPosition(unitOriginId, player, positionWS, ctx);
+                    SpawnUnitToPosition(unitType, player, positionWS, ctx);
             }
             else
             {
                 player = GetPlayer((uint)playerNumber);
                 for (int i = 0; i < count; i++)
-                    SpawnUnitToPlayerStart(unitOriginId, player, ctx);
+                    SpawnUnitToPlayerStart(unitType, player, ctx);
             }
         }
 
         [BuildCommand("attack to")]
-        public void AttackTo(int targetPlayerNumber, params int[] unitOriginIds)
+        public void AttackTo(int targetPlayerNumber, params int[] unitTypes)
         {
             // TODO : 로직은 GameController.Action.cs에 정의하고 (액션 프로토콜을 수신할 때)
             // 여기서는 EnqueueAction만 한다.
@@ -61,7 +61,7 @@ namespace Game
                 return;
 
             Debug.Log($"어택땅 타겟 플레이어 : {targetPlayerNumber}");
-            foreach (var unitID in unitOriginIds)
+            foreach (var unitID in unitTypes)
             {
                 Debug.Log(unitID);
             }
@@ -69,7 +69,7 @@ namespace Game
             Player player = GetPlayer((uint)targetPlayerNumber);
             var targetPosition = GetSpawnPosition(player.spawnIndex);
 
-            if (unitOriginIds.Length == 0)
+            if (unitTypes.Length == 0)
             {
                 player.targetPlayerID = (uint)targetPlayerNumber;
             }
@@ -77,9 +77,9 @@ namespace Game
             {
                 foreach (var unit in player.units)
                 {
-                    for (int i = 0; i < unitOriginIds.Length; i++)
+                    for (int i = 0; i < unitTypes.Length; i++)
                     {
-                        if (unit.unitOriginID == unitOriginIds[i])
+                        if (unit.unitType == unitTypes[i])
                         {
                             unit.MoveTo(targetPosition);
                         }

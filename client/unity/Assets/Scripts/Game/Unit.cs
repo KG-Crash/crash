@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using KG;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Game
 {
@@ -32,10 +33,11 @@ namespace Game
             void OnIdle(Unit unit);
         }
 
-        public Shared.Table.Unit table => Table.From<TableUnit>()[this._unitOriginID];
-        public List<Shared.Table.Skill> skills => Table.From<TableSkill>().Values.Where(x => x.Unit == this.unitOriginID).ToList();
+        public Shared.Table.Unit table => Table.From<TableUnit>()[this._unitType];
+        public List<Shared.Table.Skill> skills => Table.From<TableSkill>().Values.Where(x => x.Unit == this.unitType).ToList();
 
-        [SerializeField] private int _unitOriginID;
+        [FormerlySerializedAs("_unitOriginID")]
+        [SerializeField] private int _unitType;
         [SerializeField] private GameObject _highlighted;
         [SerializeField] public Animator animator;
 
@@ -64,16 +66,16 @@ namespace Game
             set => _selectable = value;
         }
 
-        public int unitOriginID
+        public int unitType
         {
-            get => _unitOriginID;
-            set => _unitOriginID = value;
+            get => _unitType;
+            set => _unitType = value;
         }
 
-        public uint unitID
+        public uint unitUniqueID
         {
-            get => _unitID;
-            set => _unitID = value;
+            get => _unitUniqueID;
+            set => _unitUniqueID = value;
         }
 
         public int damage
@@ -84,7 +86,7 @@ namespace Game
                 if (owner.advanced.TryGetValue(Advanced.UPGRADE_WEAPON, out var advanced))
                     damage += advanced;
 
-                var additional = owner.AdditionalStat(unitID);
+                var additional = owner.AdditionalStat(unitUniqueID);
                 if (additional.TryGetValue(StatType.Damage, out var x))
                     damage += x;
 
@@ -100,7 +102,7 @@ namespace Game
                 if (owner.advanced.TryGetValue(Advanced.UPGRADE_ARMOR, out var advanced))
                     armor += advanced;
 
-                var additional = owner.AdditionalStat(unitID);
+                var additional = owner.AdditionalStat(unitUniqueID);
                 if (additional.TryGetValue(StatType.Armor, out var x))
                     armor += x;
 
@@ -116,7 +118,7 @@ namespace Game
                 if (owner.advanced.TryGetValue(Advanced.UPGRADE_SPEED, out var advanced))
                     speed += advanced;
 
-                var additional = owner.AdditionalStat(unitID);
+                var additional = owner.AdditionalStat(unitUniqueID);
                 if (additional.TryGetValue(StatType.Speed, out var x))
                     speed += x;
 
@@ -131,7 +133,7 @@ namespace Game
             {
                 var attackSpeed = table.AttackSpeed;
 
-                var additional = owner.AdditionalStat(unitID);
+                var additional = owner.AdditionalStat(unitUniqueID);
                 if (additional.TryGetValue(StatType.AttackSpeed, out var x))
                     attackSpeed += x;
 
@@ -145,7 +147,7 @@ namespace Game
             {
                 var attackRange = table.AttackRange;
 
-                var additional = owner.AdditionalStat(unitID);
+                var additional = owner.AdditionalStat(unitUniqueID);
                 if (additional.TryGetValue(StatType.AttackRange, out var x))
                     attackRange += x;
 
@@ -169,7 +171,7 @@ namespace Game
             get
             {
                 var hp = table.Hp;
-                var additional = owner.AdditionalStat(unitID);
+                var additional = owner.AdditionalStat(unitUniqueID);
                 if (additional.TryGetValue(StatType.Hp, out var x))
                     hp += x;
 
@@ -239,7 +241,7 @@ namespace Game
 
         [SerializeField] private uint _teamID;
         [SerializeField] private bool _selectable = true;
-        [SerializeField] private uint _unitID;
+        [SerializeField] private uint _unitUniqueID;
         [SerializeField] private Fix64 _hp;
         [SerializeField] private Player _owner;
         [NonSerialized] private KG.Map _map;
@@ -339,7 +341,7 @@ namespace Game
         {
             InitAnimation();
             LoadMaterials();
-            this.unitID = unitID;
+            this.unitUniqueID = unitID;
             this._map = map;
             this._owner = owner;
             this._listener = listener;
@@ -686,7 +688,7 @@ namespace Game
 
         public override string ToString()
         {
-            return $"{base.ToString()}({nameof(unitID)}={unitID}, {nameof(unitOriginID)}={unitOriginID})";
+            return $"{base.ToString()}({nameof(unitUniqueID)}={unitUniqueID}, {nameof(unitType)}={unitType})";
         }
     }
 }
