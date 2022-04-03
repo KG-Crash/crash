@@ -212,7 +212,7 @@ namespace Game
             Debug.Log($"InputTurn({InputTurn}) > OutputTurn({OutputTurn}) + 2");
 
             EnqueueHeartBeat();
-            _player.UpdateUpgrade(f);
+            _player.upgrade.Update(f);
             OnUpdateFrameDebug(f);
         }
 

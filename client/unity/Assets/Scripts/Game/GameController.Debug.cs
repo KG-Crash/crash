@@ -81,23 +81,23 @@ namespace Game
         void OnUpdateFrameDebug(Frame f)
         {
             if (Input.GetKeyUp(KeyCode.Alpha1))
-                _player.StartUpgrade(Ability.UPGRADE_1, f.currentFrame);
+                _player.upgrade.Start(Ability.UPGRADE_1, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha2))
-                _player.StartUpgrade(Ability.UPGRADE_2, f.currentFrame);
+                _player.upgrade.Start(Ability.UPGRADE_2, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha3))
-                _player.StartUpgrade(Ability.UPGRADE_3, f.currentFrame);
+                _player.upgrade.Start(Ability.UPGRADE_3, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha4))
-                _player.StartUpgrade(Ability.UPGRADE_4, f.currentFrame);
+                _player.upgrade.Start(Ability.UPGRADE_4, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha5))
-                _player.StartUpgrade(Ability.UPGRADE_5, f.currentFrame);
+                _player.upgrade.Start(Ability.UPGRADE_5, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha6))
-                _player.StartUpgrade(Ability.UPGRADE_6, f.currentFrame);
+                _player.upgrade.Start(Ability.UPGRADE_6, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha7))
-                _player.StartUpgrade(Ability.UPGRADE_7, f.currentFrame);
+                _player.upgrade.Start(Ability.UPGRADE_7, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha8))
-                _player.StartUpgrade(Ability.UPGRADE_8, f.currentFrame);
+                _player.upgrade.Start(Ability.UPGRADE_8, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha9))
-                _player.StartUpgrade(Ability.UPGRADE_9, f.currentFrame);
+                _player.upgrade.Start(Ability.UPGRADE_9, f.currentFrame);
         }
     }
 }

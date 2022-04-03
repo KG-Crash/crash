@@ -237,7 +237,7 @@ namespace Game
             }
         }
 
-        public List<Skill> activeSkills => skills.Where(x => owner.abilities.HasFlag(x.Condition)).ToList();
+        public List<Skill> activeSkills => skills.Where(x => owner.upgrade.abilities.HasFlag(x.Condition)).ToList();
 
         [SerializeField] private uint _teamID;
         [SerializeField] private bool _selectable = true;

@@ -3,7 +3,6 @@ using Shared.Table;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace Game
 {
@@ -110,13 +109,10 @@ namespace Game
         }
 
         public IPlayerListener listener { get; private set; }
-        
+
+        public Upgrade upgrade { get; private set; }
+
         #region Upgrade
-        /// <summary>
-        /// 업그레이드 상태
-        /// </summary>
-        public Ability abilities { get; private set; } = Ability.NONE;
-        
         /// <summary>
         /// 누적되는 업그레이드 상태
         /// </summary>
@@ -134,60 +130,19 @@ namespace Game
             this.listener = listener;
             this.playerID = playerID;
             this.teamID = teamID;
+            this.upgrade = new Upgrade(this);
         }
 
         public Dictionary<StatType, int> AdditionalStat(uint unitID)
         {
             return Shared.Table.Table
                     .From<TableUnitUpgradeAbility>()
-                    .Where(x => abilities.HasFlag(x.Key))
+                    .Where(x => upgrade.abilities.HasFlag(x.Key))
                     .SelectMany(x => x.Value)
                     .Where(x => x.Unit == unitID)
                     .SelectMany(x => x.Additional)
                     .GroupBy(x => x.Key)
                     .ToDictionary(x => x.Key, x => x.Sum(x => x.Value));
-        }
-
-        public Ability SetAbilityFlag(Ability ability)
-        {
-            abilities |= ability;
-            return abilities;
-        }
-        
-        private Dictionary<Ability, int> _upgradeStartFrame = new Dictionary<Ability, int>();
-
-        public void StartUpgrade(Ability ability, int currentFrame)
-        {
-            if (ability == Ability.NONE)
-            {
-                return;
-            }
-            
-            if (!_upgradeStartFrame.ContainsKey(ability))
-            {
-                _upgradeStartFrame.Add(ability, currentFrame);   
-                Debug.Log($"StartUpgrade({ability}), After {Table.From<TableUnitUpgradeCost>()[ability].Time}ms");
-            }
-        }
-
-        public void UpdateUpgrade(Frame f)
-        {
-            List<Ability> completeList = new List<Ability>();
-            
-            foreach (var k in _upgradeStartFrame.Keys)
-            {
-                if (_upgradeStartFrame[k] + Table.From<TableUnitUpgradeCost>()[k].Time / GameController.TimeDelta < f.currentFrame)
-                {
-                    completeList.Add(k);
-                }
-            }
-
-            foreach (var ability in completeList)
-            {
-                _upgradeStartFrame.Remove(ability);
-                SetAbilityFlag(ability);
-                listener?.OnFinishUpgrade(ability);
-            }
         }
 
         public override string ToString()
