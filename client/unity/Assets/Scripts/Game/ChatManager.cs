@@ -49,19 +49,19 @@ namespace Game
             _input.ActivateInputField();
             _input.text = "";
 
-            resultMsg = msg;
+            resultMsg = CheatManager.ParseMessage(msg, _gameController);
 
-            _gameController.EnqueueChatAction(resultMsg);
+            if(resultMsg != "")
+                _gameController.EnqueueChatAction(resultMsg);
 
             return true;
         }
 
         public void RecvMessage(string msg, string user)
         {
-            string resultMsg = "";
+            string resultMsg = msg;
 
-            if (GameController.IsNetworkMode) 
-                resultMsg = CheatManager.ParseMessage(msg, _gameController);
+            
 
             _chatLog.text += $"\n {user}  :  {resultMsg}";
             _scrollRect.verticalNormalizedPosition = 0.0f;
