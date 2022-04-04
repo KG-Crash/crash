@@ -21,71 +21,27 @@ namespace Game
     public partial class GameController
     {
         [BuildCommand("spawn unit")]
-        public void SpawnUnit(int unitType, uint count, int playerNumber = -1)
+        public void SpawnUnit(int unitType, uint count, int? x = null, int? y = null)
         {
             // TODO : 로직은 GameController.Action.cs에 정의하고 (액션 프로토콜을 수신할 때)
             // 여기서는 EnqueueAction만 한다.
-            Fix64 _startRadian = Fix64.Zero;
-            FixVector2 rot;
 
-            if (playerNumber == -1)
-                rot = GetSpawnRotation(_player.spawnIndex);
-            else
-                rot = GetSpawnRotation(playerNumber);
-
-            var ctx = new TemporalPlaceContext();
-            var positionWS = ScreenMiddlePositionToWorldPosition();
-            Player player;
-
-            Debug.Log($"유닛 스폰 유닛id : {unitType} + 갯수 : { count}");
-            if (playerNumber == -1)
+            for (int i = 0; i < count; i++)
             {
-                player = GetPlayer((uint)_playerID);
-                for (int i = 0; i < count; i++)
-                    SpawnUnitToPosition(unitType, player, positionWS, ctx);
-            }
-            else
-            {
-                player = GetPlayer((uint)playerNumber);
-                for (int i = 0; i < count; i++)
-                    SpawnUnitToPlayerStart(unitType, player, ctx);
+                if(x is null || y is null) 
+                    EnqueueSpawn((uint)unitType, count, new FixVector2(_spawnPositions[_playerID].position));
+                else
+                    EnqueueSpawn((uint)unitType, count, new FixVector2(_spawnPositions[_playerID].position) + new FixVector2((int)x,(int)y));
             }
         }
 
         [BuildCommand("attack to")]
-        public void AttackTo(int targetPlayerNumber, params int[] unitTypes)
+        public void AttackTo(int targetPlayerNumber)
         {
             // TODO : 로직은 GameController.Action.cs에 정의하고 (액션 프로토콜을 수신할 때)
             // 여기서는 EnqueueAction만 한다.
-            if (_playerID == targetPlayerNumber)
-                return;
 
-            Debug.Log($"어택땅 타겟 플레이어 : {targetPlayerNumber}");
-            foreach (var unitID in unitTypes)
-            {
-                Debug.Log(unitID);
-            }
-
-            Player player = GetPlayer((uint)targetPlayerNumber);
-            var targetPosition = GetSpawnPosition(player.spawnIndex);
-
-            if (unitTypes.Length == 0)
-            {
-                player.targetPlayerID = (uint)targetPlayerNumber;
-            }
-            else
-            {
-                foreach (var unit in player.units)
-                {
-                    for (int i = 0; i < unitTypes.Length; i++)
-                    {
-                        if (unit.unitType == unitTypes[i])
-                        {
-                            unit.MoveTo(targetPosition);
-                        }
-                    }
-                }
-            }
+            EnqueueAttack((uint)targetPlayerNumber);
         }
 
         [BuildCommand("faster")]

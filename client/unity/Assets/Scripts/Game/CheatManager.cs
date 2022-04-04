@@ -88,8 +88,12 @@ namespace Game
                                     arrayParamList.Add((int)convertedParam);
                                 }
                                 else
-                                {
-                                    convertedParam = Convert.ChangeType(param, paramInfos[i].ParameterType);
+                                {                                    
+                                    if (param is null) 
+                                        convertedParam = null;
+                                    else
+                                        convertedParam = Convert.ChangeType(param, paramInfos[i].ParameterType);
+
                                     paramListToCall.Add(convertedParam);
                                 }
                             }
@@ -113,7 +117,8 @@ namespace Game
             else
                 methodInfo.Invoke(gameController, (object[])null);
 
-            msg = methodInfo.GetCustomAttribute<BuildCommandAttribute>().command + " Cheat enable";
+            //msg = methodInfo.GetCustomAttribute<BuildCommandAttribute>().command + " Cheat enable";
+            msg = "";
             return msg;
         }
 

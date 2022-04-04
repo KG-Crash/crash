@@ -51,6 +51,27 @@ namespace Game
                 Param2 = 0
             });
         }
+
+        public void EnqueueSpawn(uint unitType, uint count, FixVector2 pos)
+        {
+            EnqueueAction(new Protocol.Request.Action
+            {
+                Frame = InputFrame,
+                Id = (int)Shared.ActionKind.Spawn,
+                Param1 = ActionExtension.LOWORD(unitType),
+                Param2 = (uint)ActionExtension.HIWORD((uint)pos.x) | ActionExtension.HIWORD((uint)pos.y)
+            });
+        }
+
+        public void EnqueueAttack(uint playerID)
+        {
+            EnqueueAction(new Protocol.Request.Action
+            {
+                Frame = InputFrame,
+                Id = (int)Shared.ActionKind.AttackPlayer,
+                Param1 = ActionExtension.HIWORD(playerID)
+            });
+        }
         #endregion
 
         #region 수신
@@ -82,13 +103,36 @@ namespace Game
         [ActionHandler(ActionKind.AttackPlayer)]
         public void OnActionAttackPlayer(Action action, ActionHandleParam actionHandleParam)
         {
+            var targetPlayerNumber = action.Param1.LOWORD();
+            var playerID = 0; // temp
+            if (_playerID == targetPlayerNumber)
+                return;            
+
+            Player player = GetPlayer((uint)playerID);
+
+            player.targetPlayerID = (uint)targetPlayerNumber;
         }
 
         [ActionHandler(ActionKind.Spawn)]
         public void OnActionSpawn(Action action, ActionHandleParam actionHandleParam)
         {
+            Debug.Log("on spawn unit ");
+            var unitType = action.Param1.LOWORD();
+            var x = action.Param2.HIWORD();
+            var y = action.Param2.LOWORD();
+            var playerId = 0; // temp
+
+            Fix64 _startRadian = Fix64.Zero;
+            FixVector2 rot = GetSpawnRotation(playerId);            
+
+            var ctx = new TemporalPlaceContext();
+            var position = new FixVector2((int)x, (int)y); 
+            Player player = GetPlayer((uint)playerId);
+
+            //SpawnUnitToPosition(unitType, player, position, ctx);
+            SpawnUnitToPlayerStart(unitType, player, ctx);
         }
-        
         #endregion
+        
     }
 }
