@@ -22,8 +22,19 @@ namespace KG.Util
 
         public FileLogger(string path)
         {
-            _stream = File.Open(path, FileMode.OpenOrCreate);
-            _writer = new StreamWriter(_stream);
+            try
+            {
+                var root = Path.GetDirectoryName(path);
+                if (Directory.Exists(root) == false)
+                    Directory.CreateDirectory(root);
+
+                _stream = File.Open(path, FileMode.OpenOrCreate);
+                _writer = new StreamWriter(_stream);
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogError(e.Message);
+            }
         }
 
         public void Dispose()

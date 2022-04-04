@@ -88,3 +88,4 @@ server/ssh
 # Crash
 
 */unity_instance_*
+client/unity/log
