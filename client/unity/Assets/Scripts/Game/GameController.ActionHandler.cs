@@ -104,7 +104,8 @@ namespace Game
         public void OnActionAttackPlayer(Action action, ActionHandleParam actionHandleParam)
         {
             var targetPlayerNumber = action.Param1.LOWORD();
-            var playerID = 0; // temp
+            var playerID = actionHandleParam.userId; 
+
             if (_playerID == targetPlayerNumber)
                 return;            
 
@@ -120,7 +121,7 @@ namespace Game
             var unitType = action.Param1.LOWORD();
             var x = action.Param2.HIWORD();
             var y = action.Param2.LOWORD();
-            var playerId = 0; // temp
+            var playerId = actionHandleParam.userId;
 
             Fix64 _startRadian = Fix64.Zero;
             FixVector2 rot = GetSpawnRotation(playerId);            
