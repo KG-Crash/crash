@@ -128,6 +128,7 @@ namespace Game
             _ = Client.Send(new Protocol.Request.Ready{ });
 
             _actionHandleMethodDict = MethodExtractor.ExtractActionHandleMethod<GameController>();
+            _actionHandleParam = new ActionHandleParam();
             _actionMethodParam = new object[2];
             
             InitializeUniRx();
@@ -188,6 +189,8 @@ namespace Game
             var actionKind = (ActionKind)action.Id;
             var methods = _actionHandleMethodDict[actionKind];
 
+            _actionHandleParam.userId = userId;
+            
             _actionMethodParam[0] = action;
             _actionMethodParam[1] = _actionHandleParam; 
             

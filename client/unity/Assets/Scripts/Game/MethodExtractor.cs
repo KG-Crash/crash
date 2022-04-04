@@ -7,8 +7,9 @@ using UnityEngine;
 
 namespace Game
 {
-    public struct ActionHandleParam
+    public class ActionHandleParam
     {
+        public int userId;
     }
     
     public class ActionHandlerAttribute : Attribute
