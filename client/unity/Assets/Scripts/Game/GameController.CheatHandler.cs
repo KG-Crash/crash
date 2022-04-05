@@ -23,24 +23,18 @@ namespace Game
         [BuildCommand("spawn unit")]
         public void SpawnUnit(int unitType, uint count, int? x = null, int? y = null)
         {
-            // TODO : 로직은 GameController.Action.cs에 정의하고 (액션 프로토콜을 수신할 때)
-            // 여기서는 EnqueueAction만 한다.
-
-            for (int i = 0; i < count; i++)
-            {
-                if(x is null || y is null) 
-                    EnqueueSpawn((uint)unitType, count, new FixVector2(_spawnPositions[_playerID].position));
-                else
-                    EnqueueSpawn((uint)unitType, count, new FixVector2(_spawnPositions[_playerID].position) + new FixVector2((int)x,(int)y));
-            }
+            //for (int i = 0; i < count; i++)
+            //{
+            //    if (x is null || y is null)
+            //        EnqueueSpawn((uint)unitType, count, new FixVector2(_spawnPositions[_playerID].position));
+            //    else
+            //        EnqueueSpawn((uint)unitType, count, new FixVector2(_spawnPositions[_playerID].position) + new FixVector2((int)x, (int)y));
+            //}
         }
 
         [BuildCommand("attack to")]
         public void AttackTo(int targetPlayerNumber)
         {
-            // TODO : 로직은 GameController.Action.cs에 정의하고 (액션 프로토콜을 수신할 때)
-            // 여기서는 EnqueueAction만 한다.
-
             EnqueueAttack((uint)targetPlayerNumber);
         }
 

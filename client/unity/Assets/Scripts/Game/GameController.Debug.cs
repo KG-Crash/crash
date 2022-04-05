@@ -8,7 +8,7 @@ namespace Game
     {
         [Header("Debug")]
         public int _spawnUnitOriginID = 0;
-        public uint _spawnPlayerID = 0;
+        public int _spawnPlayerID = 0;
 
         public FixVector3 ScreenPositionToWorldPosition(Vector2 ss)
         {
@@ -45,11 +45,11 @@ namespace Game
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                _player.targetPlayerID = 1;
+                _me.target = _teams.Find(1);
             }
             else if (Input.GetKeyUp(KeyCode.Space))
             {
-                _player.targetPlayerID = null;
+                _me.target = null;
             }
             
             if (Input.GetKeyUp(KeyCode.F1))
@@ -81,23 +81,23 @@ namespace Game
         void OnUpdateFrameDebug(Frame f)
         {
             if (Input.GetKeyUp(KeyCode.Alpha1))
-                _player.upgrade.Start(Ability.UPGRADE_1, f.currentFrame);
+                _me.upgrade.Start(Ability.UPGRADE_1, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha2))
-                _player.upgrade.Start(Ability.UPGRADE_2, f.currentFrame);
+                _me.upgrade.Start(Ability.UPGRADE_2, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha3))
-                _player.upgrade.Start(Ability.UPGRADE_3, f.currentFrame);
+                _me.upgrade.Start(Ability.UPGRADE_3, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha4))
-                _player.upgrade.Start(Ability.UPGRADE_4, f.currentFrame);
+                _me.upgrade.Start(Ability.UPGRADE_4, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha5))
-                _player.upgrade.Start(Ability.UPGRADE_5, f.currentFrame);
+                _me.upgrade.Start(Ability.UPGRADE_5, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha6))
-                _player.upgrade.Start(Ability.UPGRADE_6, f.currentFrame);
+                _me.upgrade.Start(Ability.UPGRADE_6, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha7))
-                _player.upgrade.Start(Ability.UPGRADE_7, f.currentFrame);
+                _me.upgrade.Start(Ability.UPGRADE_7, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha8))
-                _player.upgrade.Start(Ability.UPGRADE_8, f.currentFrame);
+                _me.upgrade.Start(Ability.UPGRADE_8, f.currentFrame);
             if (Input.GetKeyUp(KeyCode.Alpha9))
-                _player.upgrade.Start(Ability.UPGRADE_9, f.currentFrame);
+                _me.upgrade.Start(Ability.UPGRADE_9, f.currentFrame);
         }
     }
 }

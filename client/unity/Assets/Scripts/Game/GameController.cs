@@ -75,10 +75,8 @@ namespace Game
         private ActionHandleParam _actionHandleParam;
         private object[] _actionMethodParam;
 
-        [NonSerialized] private int _playerID;
-        [NonSerialized] private uint _playerTeamID;
-        [NonSerialized] private Team _allPlayerByTeam;
-        [NonSerialized] private Player _player;
+        [NonSerialized] private Player _me;
+        [NonSerialized] private TeamCollection _teams;
         [NonSerialized] private ProjectilePool _projectilePool;
         [NonSerialized] private ChatManager _chatManager;
 
@@ -92,22 +90,6 @@ namespace Game
         [SerializeField] private ProjectileTable _projectilehPrefabTable;
         [SerializeField] private bool _networkMode;
        
-        private static uint playerIDStepper = 0;
-
-        public Player GetPlayer(uint playerID)
-        {
-            return _allPlayerByTeam.GetPlayer(playerID);
-        }
-        
-        private Player AddNewPlayer(uint teamID, int spawnIndex)
-        {
-            var newPlayer = new Player(playerIDStepper++, teamID, this);
-            _allPlayerByTeam.AddPlayer(teamID, newPlayer);
-            newPlayer.spawnIndex = spawnIndex;
-            
-            return newPlayer;
-        }
-
         private void Awake()
         {
             Handler.Bind(this, Dispatcher.Instance);
@@ -119,7 +101,6 @@ namespace Game
             Application.targetFrameRate = FPS;
             
             InitInput();
-            OnLoadScene();
             
             _projectilePool = new ProjectilePool(_projectilehPrefabTable, 15, this, _poolOffset);
             _chatManager = this.gameObject.GetComponent<ChatManager>();
@@ -137,6 +118,7 @@ namespace Game
         private void Start()
         {
             Application.targetFrameRate = FPS;
+            _teams = new TeamCollection(this, this);
         }
 
         private void OnUpdate()
@@ -215,7 +197,7 @@ namespace Game
             Debug.Log($"InputTurn({InputTurn}) > OutputTurn({OutputTurn}) + 2");
 
             EnqueueHeartBeat();
-            _player.upgrade.Update(f);
+            _me.upgrade.Update(f);
             OnUpdateFrameDebug(f);
         }
 

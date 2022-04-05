@@ -62,27 +62,47 @@ namespace Game
             // 준비가 완료된 유저는 0 based의 Sequence가 발급됨
             // 준비가 안되면 -1로 설정됨
             var allReady = response.Users.All(x => x.Sequence != -1);
-            if (allReady)
+            if (allReady == false)
+                return true;
+
+            try
             {
                 ready = true;
                 _logger = new FileLogger($"log/{DateTime.Now}.txt".Replace(":", "_"));
+
+                uuidTable = response.Users.ToDictionary(x => x.Sequence, x => x.Id);
+                Client.Instance.id = response.Users.FirstOrDefault(x => x.Id == Client.Instance.uuid)?.Sequence ?? -1;
+
+                // team : users
+                var users = response.Users
+                    .GroupBy(x => x.Team)
+                    .ToDictionary(x => x.Key, x => x.ToList());
+
+
+                // 팀, 플레이어 구성
+                foreach (var pair in users)
+                {
+                    var team = _teams.Add(pair.Key); // team id
+                    foreach (var user in pair.Value)
+                    {
+                        team.players.Add(user.Sequence, user.Sequence);
+                    }
+                }
+
+                _me = _teams.Find(Client.Instance.id);
+
+                // random seed
+                Client.Instance.seed = response.Seed;
+                Debug.Log($"OnReady, myname is {Client.Instance.uuid}");
+
+                foreach (var user in response.Users)
+                {
+                    Debug.Log($"OnReady, user.Id={user.Id}");
+                }
             }
-
-            uuidTable = response.Users.ToDictionary(x => x.Sequence, x => x.Id);
-            Client.Instance.id = response.Users.FirstOrDefault(x => x.Id == Client.Instance.uuid)?.Sequence ?? -1;
-
-            // team : users
-            var users = response.Users
-                .GroupBy(x => x.Team)
-                .ToDictionary(x => x.Key, x => x.ToList());
-
-            // random seed
-            Client.Instance.seed = response.Seed;
-            Debug.Log($"OnReady, myname is {Client.Instance.uuid}"); 
-
-            foreach (var user in response.Users)
+            catch (Exception e)
             {
-                Debug.Log($"OnReady, user.Id={user.Id}");
+                UnityEngine.Debug.Log(e.Message);
             }
 
             return true;

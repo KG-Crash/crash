@@ -2,10 +2,8 @@ using FixMath.NET;
 using Shared;
 using Shared.Table;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using KG;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -50,15 +48,8 @@ namespace Game
                 _highlighted.transform.SetParent(transform);
             }
         }
-        
-        public uint playerID
-        {
-            get => owner.playerID;
-        }
-        public uint teamID
-        {
-            get => owner.teamID;
-        }
+
+        public Team team => owner.team;
 
         public bool selectable
         {
@@ -516,7 +507,7 @@ namespace Game
         private Unit SearchEnemyIn(Fix64 searchRadius)
         {
             return GetNearUnitsIn(searchRadius)
-                .Where(x => !IsNullOrDead(x) && x.teamID != this.teamID)
+                .Where(x => !IsNullOrDead(x) && x.team != this.team)
                 .OrderBy(x => (x.position - position).sqrMagnitude)
                 .FirstOrDefault(x => ContainsRange(x.position, searchRadius));
         }

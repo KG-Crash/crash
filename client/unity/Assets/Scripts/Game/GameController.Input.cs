@@ -53,7 +53,7 @@ namespace Game
         {
             var positionWS = ScreenPositionToWorldPosition(positionSS);
 
-            SpawnUnitToPosition(_spawnUnitOriginID, _spawnPlayerID, positionWS, new GameController.TemporalPlaceContext());
+            // SpawnUnitToPosition(_spawnUnitOriginID, _spawnPlayerID, positionWS, new GameController.TemporalPlaceContext());
         }
 
         public void OnUpKey()
