@@ -19,7 +19,6 @@ namespace Game
         [SerializeField] private Text _chatLog;
         [SerializeField] private InputField _input;
         [SerializeField] private ScrollRect _scrollRect;
-        [SerializeField] private string _name;
 
         private GameController _gameController;
 
@@ -28,7 +27,6 @@ namespace Game
         {
             _gameController = this.gameObject.GetComponent<GameController>();
             _scrollRect.verticalNormalizedPosition = 0.0f;
-            _name = "ME";
         }
 
         // Update is called once per frame
@@ -44,14 +42,14 @@ namespace Game
                 return false;
 
             string msg = _input.text;
-            string resultMsg = "";
+            string resultMsg = string.Empty;
 
             _input.ActivateInputField();
-            _input.text = "";
+            _input.text = string.Empty;
 
             resultMsg = CheatManager.ParseMessage(msg, _gameController);
 
-            if(resultMsg != "")
+            if(!string.IsNullOrEmpty(resultMsg))
                 _gameController.EnqueueChatAction(resultMsg);
 
             return true;
@@ -59,9 +57,7 @@ namespace Game
 
         public void RecvMessage(string msg, string user)
         {
-            string resultMsg = msg;
-
-            
+            string resultMsg = msg;            
 
             _chatLog.text += $"\n {user}  :  {resultMsg}";
             _scrollRect.verticalNormalizedPosition = 0.0f;

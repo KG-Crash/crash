@@ -35,7 +35,7 @@ namespace Game
                 defaultParamQuantity = 0;
                 hasLastArrayParam = false;
 
-                if (!match.Groups["command"].ToString().Equals(""))
+                if( !string.IsNullOrEmpty(match.Groups["command"].ToString()))
                 {
                     matchedParams = Array.Empty<object>();
                     methodInfo = method;
@@ -53,7 +53,7 @@ namespace Game
                         arrayParamList = new List<int>();
                     }
 
-                    if (!match.Groups["param"].ToString().Equals(""))
+                    if (!string.IsNullOrEmpty(match.Groups["param"].ToString()))
                         matchedParams = match.Groups["param"].ToString().Split();
 
                     if (paramInfos.Length - matchedParams.Length > defaultParamQuantity + Convert.ToInt32(hasLastArrayParam))
@@ -117,8 +117,7 @@ namespace Game
             else
                 methodInfo.Invoke(gameController, (object[])null);
 
-            //msg = methodInfo.GetCustomAttribute<BuildCommandAttribute>().command + " Cheat enable";
-            msg = "";
+            msg = string.Empty;
             return msg;
         }
 
