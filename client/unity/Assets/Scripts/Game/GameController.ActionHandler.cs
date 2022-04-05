@@ -104,34 +104,31 @@ namespace Game
         public void OnActionAttackPlayer(Action action, ActionHandleParam actionHandleParam)
         {
             var targetPlayerNumber = action.Param1.LOWORD();
-            var playerID = actionHandleParam.userId; 
+            if (actionHandleParam.userId == targetPlayerNumber)
+                return;
 
-            if (_playerID == targetPlayerNumber)
-                return;            
-
-            Player player = GetPlayer((uint)playerID);
-
-            player.targetPlayerID = (uint)targetPlayerNumber;
+            var attacker = _teams.Find(actionHandleParam.userId);
+            attacker.target = _teams.Find(targetPlayerNumber);
         }
 
         [ActionHandler(ActionKind.Spawn)]
         public void OnActionSpawn(Action action, ActionHandleParam actionHandleParam)
         {
-            Debug.Log("on spawn unit ");
-            var unitType = action.Param1.LOWORD();
-            var x = action.Param2.HIWORD();
-            var y = action.Param2.LOWORD();
-            var playerId = actionHandleParam.userId;
+            //Debug.Log("on spawn unit ");
+            //var unitType = action.Param1.LOWORD();
+            //var x = action.Param2.HIWORD();
+            //var y = action.Param2.LOWORD();
+            //var playerId = actionHandleParam.userId;
 
-            Fix64 _startRadian = Fix64.Zero;
-            FixVector2 rot = GetSpawnRotation(playerId);            
+            //Fix64 _startRadian = Fix64.Zero;
+            //FixVector2 rot = GetSpawnRotation(playerId);            
 
-            var ctx = new TemporalPlaceContext();
-            var position = new FixVector2((int)x, (int)y); 
-            Player player = GetPlayer((uint)playerId);
+            //var ctx = new TemporalPlaceContext();
+            //var position = new FixVector2((int)x, (int)y); 
+            //Player player = GetPlayer((uint)playerId);
 
-            //SpawnUnitToPosition(unitType, player, position, ctx);
-            SpawnUnitToPlayerStart(unitType, player, ctx);
+            ////SpawnUnitToPosition(unitType, player, position, ctx);
+            //SpawnUnitToPlayerStart(unitType, player, ctx);
         }
         #endregion
         
