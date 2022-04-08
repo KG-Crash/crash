@@ -1,4 +1,5 @@
 using FixMath.NET;
+using Game.Service;
 using Module;
 using Network;
 using Shared;
@@ -40,7 +41,19 @@ namespace Game
         }
     }
 
-    public partial class GameController : MonoBehaviour
+    public static class LockStep
+    {
+        public class Pair
+        {
+            public int In { get; set; }
+            public int Out { get; set; }
+        }
+
+        public static Pair Frame { get; private set; } = new Pair();
+        public static Pair Turn { get; private set; } = new Pair();
+    }
+
+    public partial class GameController : MonoBehaviour, ActionService.Listener
     {   
         public static int FPS { get; set; }
         public static int TPS { get; set; }
@@ -52,24 +65,18 @@ namespace Game
         public static bool ready { get; set; }
         public static bool waitPacket { get; set; }
         
-        public static int InputFrame { get; private set; }
-        public static int InputTurn { get; private set; }
-        public static int InputTotalFrame => InputFrame + InputTurn * Shared.Const.Time.FramePerTurn;
+        public static int InputTotalFrame => LockStep.Frame.In + LockStep.Turn.In * Shared.Const.Time.FramePerTurn;
 
         public static Frame InputFrameChunk => new Frame()
-            {currentFrame = InputFrame, currentTurn = InputTurn, deltaTime = TimeDelta};
+            {currentFrame = LockStep.Frame.In, currentTurn = LockStep.Turn.In, deltaTime = TimeDelta};
         
-        public static int OutputFrame { get; private set; }
-        public static int OutputTurn { get; private set; }
-        public static int OutputTotalFrame => OutputFrame + OutputTurn * Shared.Const.Time.FramePerTurn;
+        public static int OutputTotalFrame => LockStep.Frame.Out + LockStep.Turn.Out * Shared.Const.Time.FramePerTurn;
 
         public static Frame OutputFrameChunk => new Frame()
-            {currentFrame = OutputFrame, currentTurn = OutputTurn, deltaTime = TimeDelta};
+            {currentFrame = LockStep.Frame.Out, currentTurn = LockStep.Turn.Out, deltaTime = TimeDelta};
 
-        private readonly Protocol.Request.ActionQueue _actionQueue = new Protocol.Request.ActionQueue 
-        {
-            Actions = new List<Protocol.Request.Action>()
-        };
+
+        public ActionService ActionService { get; private set; }
 
         private Dictionary<ActionKind, MethodInfo[]> _actionHandleMethodDict;
         private ActionHandleParam _actionHandleParam;
@@ -78,7 +85,7 @@ namespace Game
         [NonSerialized] private Player _me;
         [NonSerialized] private TeamCollection _teams;
         [NonSerialized] private ProjectilePool _projectilePool;
-        [NonSerialized] private ChatManager _chatManager;
+        [NonSerialized] private ChatService _chatManager;
 
         [Header("Miscellaneous")] 
         [SerializeField] private Transform _poolOffset; 
@@ -103,7 +110,7 @@ namespace Game
             InitInput();
             
             _projectilePool = new ProjectilePool(_projectilehPrefabTable, 15, this, _poolOffset);
-            _chatManager = this.gameObject.GetComponent<ChatManager>();
+            _chatManager = this.gameObject.GetComponent<ChatService>();
 
             // 레디에서 이름 보내야 하지 않을까?
             _ = Client.Send(new Protocol.Request.Ready{ });
@@ -119,6 +126,7 @@ namespace Game
         {
             Application.targetFrameRate = FPS;
             _teams = new TeamCollection(this, this);
+            ActionService = new ActionService(this);
         }
 
         private void OnUpdate()
@@ -130,43 +138,14 @@ namespace Game
                 return;
             }
             
-            Debug.Log($"InputTurn({InputTurn}) > OutputTurn({OutputTurn}) + 2");
-            waitPacket = InputTurn > OutputTurn + 2;
+            Debug.Log($"LockStep.Turn.In({LockStep.Turn.In}) > LockStep.Turn.Out({LockStep.Turn.Out}) + 2");
+            waitPacket = LockStep.Turn.In > LockStep.Turn.Out + 2;
 
-            var buffers = _actions.Pop(OutputTurn);
-            if (buffers == null)
-                return;
-
-            foreach (var pair in buffers)
-            {
-                var userId = pair.Key;
-                var buffer = pair.Value;
-
-                var protocols = buffer.Protocols.GroupBy(x => x.GetType())
-                    .ToDictionary(x => x.Key, x => x.ToList());
-
-                if(protocols.TryGetValue(typeof(Protocol.Response.Action), out var actions) == false)
-                {
-                    actions = new List<Protocol.IProtocol>();
-                }
-                if(protocols.TryGetValue(typeof(Protocol.Response.InGameChat), out var chats) == false)
-                {
-                    chats = new List<Protocol.IProtocol>();
-                }
-                foreach(var action in actions.Select(x => x as Protocol.Response.Action))
-                {
-                    OnUpdateAction(userId, action);
-                }
-                foreach (var chat in chats.Select(x => x as Protocol.Response.InGameChat))
-                {
-                    OnUpdateIngameChat(userId, chat);
-                }
-            }
-
-            OutputTurn++;
+            if(ActionService.Update())
+                LockStep.Turn.Out++;
         }
 
-        private void OnUpdateAction(int userId, Protocol.Response.Action action)
+        public void OnAction(int userId, Protocol.Response.Action action)
         {
             var actionKind = (ActionKind)action.Id;
             var methods = _actionHandleMethodDict[actionKind];
@@ -184,7 +163,7 @@ namespace Game
             Debug.Assert(methods.Length > 0, $"{actionKind} 처리 메소드가 없음");
         }
 
-        private void OnUpdateIngameChat(int userId, Protocol.Response.InGameChat chat)
+        public void OnChat(int userId, Protocol.Response.InGameChat chat)
         {
             if (uuidTable.TryGetValue(userId, out var name) == false)
                 return;
@@ -194,7 +173,7 @@ namespace Game
 
         private void OnUpdateFrame(Frame f)
         {
-            Debug.Log($"InputTurn({InputTurn}) > OutputTurn({OutputTurn}) + 2");
+            Debug.Log($"LockStep.Turn.In({LockStep.Turn.In}) > LockStep.Turn.Out({LockStep.Turn.Out}) + 2");
 
             EnqueueHeartBeat();
             _me.upgrade.Update(f);
@@ -203,49 +182,26 @@ namespace Game
 
         private void OnLateUpdateFrame(Frame f)
         {
-            Debug.Log($"InputTurn({InputTurn}) > OutputTurn({OutputTurn}) + 2");
+            Debug.Log($"LockStep.Turn.In({LockStep.Turn.In}) > LockStep.Turn.Out({LockStep.Turn.Out}) + 2");
             
-            if (++InputFrame >= Shared.Const.Time.FramePerTurn)
+            if (++LockStep.Frame.In >= Shared.Const.Time.FramePerTurn)
             {
-                OnTurnChanged(InputTurn++);
-                InputFrame = 0;
+                if (IsNetworkMode)
+                {
+                    ActionService.Flush();
+                    Debug.Log($"send queue : {LockStep.Turn.In}");
+                }
+
+                LockStep.Turn.In++;
+                LockStep.Frame.In = 0;
             }
             
-            waitPacket = InputTurn > OutputTurn + 2;
+            waitPacket = LockStep.Turn.In > LockStep.Turn.Out + 2;
         }
 
         private void OnDestroy()
         {
             ClearInput();
-        }
-
-        private void OnTurnChanged(int turn)
-        {
-
-            if (IsNetworkMode)
-            {
-                _actionQueue.Turn = turn;
-                _ = Client.Send(_actionQueue);
-                Debug.Log($"send queue : {turn}");
-            }
-            _actionQueue.Actions.Clear();
-        }
-
-        public void EnqueueAction(Protocol.Request.Action action)
-        {
-            action.Frame = InputFrame;
-            _actionQueue.Actions.Add(action);
-        }
-
-        public void EnqueueChatAction(string massage)
-        {
-            _ = Client.Send(new Protocol.Request.InGameChat
-            {
-                Turn = InputTurn,
-                Frame = InputFrame,
-                Message = massage
-
-            });
         }
     }
 }

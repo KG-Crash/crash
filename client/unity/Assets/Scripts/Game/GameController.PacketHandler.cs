@@ -14,7 +14,6 @@ namespace Game
     public partial class GameController
     {
         private FileLogger _logger;
-        private ActionBuffer _actions = new ActionBuffer();
         
         public Dictionary<int, string> uuidTable { get; private set; } = new Dictionary<int, string>();
 
@@ -29,9 +28,7 @@ namespace Game
 
             Debug.Log($"receive queue : {response.Turn}, {response.User}, me?={response.User==Client.Instance.id}");
 
-            foreach (var x in response.Actions.GroupBy(x => x.Frame))
-                _actions.Add(response.User, response.Turn, x.Key, x.Select(x => x));
-
+            ActionService.Receive(response);
             return true;
         }
 
@@ -44,10 +41,8 @@ namespace Game
             }
 
             Debug.Log($"chat receive queue : {response.Turn}, {response.User},{response.Message} me?={response.User == Client.Instance.id}");
-            
-            _actions.Add(response.User, response.Turn, response.Frame, response);
-            
 
+            ActionService.Receive(response);
             return true;
         }
 

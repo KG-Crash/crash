@@ -5,28 +5,26 @@ using Action = Protocol.Response.Action;
 
 namespace Game
 {
-
-    
     public partial class GameController
     {
         #region 송신
         public void EnqueueHeartBeat()
         {
-            EnqueueAction(new Protocol.Request.Action
+            ActionService.Send(new Protocol.Request.Action
             {
-                Frame = InputFrame,
+                Frame = LockStep.Frame.In,
                 Id = (int)ActionKind.HeartBeat,
-                Param1 = (uint)(TPS - InputFrame),
-                Param2 = (uint)InputFrame
+                Param1 = (uint)(TPS - LockStep.Frame.In),
+                Param2 = (uint)LockStep.Frame.In
             });
         }
         
         public void EnqueueSpeed(int times)
         {
-            EnqueueAction(new Protocol.Request.Action()
+            ActionService.Send(new Protocol.Request.Action
             {
-                Frame = InputFrame,
-                Id = (int) ActionKind.Speed,
+                Frame = LockStep.Frame.In,
+                Id = (int)ActionKind.Speed,
                 Param1 = ActionExtension.LOWORD((uint)times),
                 Param2 = 0
             });
@@ -34,18 +32,18 @@ namespace Game
         
         public void EnqueuePause()
         {
-            EnqueueAction(new Protocol.Request.Action
+            ActionService.Send(new Protocol.Request.Action
             {
-                Frame = InputFrame,
+                Frame = LockStep.Frame.In,
                 Id = (int)Shared.ActionKind.Pause
             });
         }
 
         public void EnqueueUpgrade(Ability ability)
         {
-            EnqueueAction(new Protocol.Request.Action
+            ActionService.Send(new Protocol.Request.Action
             { 
-                Frame = InputFrame,
+                Frame = LockStep.Frame.In,
                 Id = (int)Shared.ActionKind.Pause,
                 Param1 = ActionExtension.HIWORD((uint)ability),
                 Param2 = 0
@@ -54,9 +52,9 @@ namespace Game
 
         public void EnqueueSpawn(uint unitType, uint count, FixVector2 pos)
         {
-            EnqueueAction(new Protocol.Request.Action
+            ActionService.Send(new Protocol.Request.Action
             {
-                Frame = InputFrame,
+                Frame = LockStep.Frame.In,
                 Id = (int)Shared.ActionKind.Spawn,
                 Param1 = ActionExtension.LOWORD(unitType),
                 Param2 = (uint)ActionExtension.HIWORD((uint)pos.x) | ActionExtension.HIWORD((uint)pos.y)
@@ -65,9 +63,9 @@ namespace Game
 
         public void EnqueueAttack(uint playerID)
         {
-            EnqueueAction(new Protocol.Request.Action
+            ActionService.Send(new Protocol.Request.Action
             {
-                Frame = InputFrame,
+                Frame = LockStep.Frame.In,
                 Id = (int)Shared.ActionKind.AttackPlayer,
                 Param1 = ActionExtension.HIWORD(playerID)
             });

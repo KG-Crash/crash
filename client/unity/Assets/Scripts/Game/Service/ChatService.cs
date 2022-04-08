@@ -1,18 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using System;
-using System.Text.RegularExpressions;
-using System.Reflection;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Threading.Tasks;
-using Network;
-using Protocol.Request;
 
-namespace Game
+namespace Game.Service
 {
-    public class ChatManager : MonoBehaviour
+    public class ChatService : MonoBehaviour
     {
         [SerializeField] public bool _useCheat;
 
@@ -36,22 +27,21 @@ namespace Game
                 SendMessage();
         }
 
-        public async Task<bool> SendMessage()
+        public bool SendMessage()
         {
-            if (_input.text.Equals(" ") || _input.text.Equals(""))
+            if (string.IsNullOrEmpty(_input.text.Trim()))
                 return false;
 
-            string msg = _input.text;
-            string resultMsg = string.Empty;
+            var msg = _input.text;
 
             _input.ActivateInputField();
             _input.text = string.Empty;
 
-            resultMsg = CheatManager.ParseMessage(msg, _gameController);
+            var resultMsg = CheatService.ParseMessage(msg, _gameController);
+            if (string.IsNullOrEmpty(resultMsg))
+                return true;
 
-            if(!string.IsNullOrEmpty(resultMsg))
-                _gameController.EnqueueChatAction(resultMsg);
-
+            _gameController.ActionService.Send(resultMsg);
             return true;
         }
 

@@ -1,14 +1,13 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
-namespace Game
+namespace Game.Service
 {
-    public class CheatManager
+    public class CheatService
     {
         static public string ParseMessage(string msg, GameController gameController)
         {
