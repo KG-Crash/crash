@@ -39,11 +39,11 @@ public static class UnitGizmoDrawer
             Gizmos.DrawLine(new Vector3(cellBox.maxX, 0, cellBox.minY), new Vector3(cellBox.maxX, 0, cellBox.maxY));
         }
         
-        var targetStr = Unit.IsNullOrDead(unit._target) ? unit._target == null? "null": $"dead({unit._target.unitUniqueID})" : unit._target.unitUniqueID.ToString();
+        var targetStr = Unit.IsNullOrDead(unit._target) ? unit._target == null? "null": $"dead({unit._target.uniqueID})" : unit._target.uniqueID.ToString();
         var destStr = unit._cellPath.Count > 0
             ? $"{unit._cellPath.Find(x => true).center.ToString("0.##", true)} -> {unit._cellPath.FindLast(x => true).center.ToString("0.##", true)}"
             : "none";
 
-        Handles.Label(unit.transform.position, $"{unit.unitUniqueID},{unit.hp},{unit._currentState},{targetStr},{destStr}");
+        Handles.Label(unit.position, $"{unit.uniqueID},{unit.hp},{unit._currentState},{targetStr},{destStr}");
     }
 }

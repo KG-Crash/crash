@@ -1,8 +1,6 @@
-using System;
+using KG;
 using System.Collections.Generic;
 using System.Linq;
-using FixMath.NET;
-using KG;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -11,14 +9,14 @@ namespace Game
     [CreateAssetMenu(fileName = "UnitTable", menuName = "Crash/UnitTable", order = 0)]
     public class UnitTable : ScriptableObject
     {
-        [FormerlySerializedAs("_unitOriginDict")] [SerializeField] private SerializableDictionary<int, Unit> _unitTypeDict;
+        [FormerlySerializedAs("_unitOriginDict")] [SerializeField] private SerializableDictionary<int, UnitActor> _unitTypeDict;
 
-        public Unit GetUnitByType(int unitType)
+        public UnitActor GetUnitByType(int unitType)
         {
             return _unitTypeDict[unitType];
         }
 
-        public void SetUnitByType(int unitType, Unit unit)
+        public void SetUnitByType(int unitType, UnitActor unit)
         {
             _unitTypeDict[unitType] = unit;
         }
@@ -38,7 +36,7 @@ namespace Game
             _unitTypeDict.Clear();
         }
 
-        public IEnumerable<KeyValuePair<int, Unit>> GetEnumerable()
+        public IEnumerable<KeyValuePair<int, UnitActor>> GetEnumerable()
         {
             return _unitTypeDict;
         }

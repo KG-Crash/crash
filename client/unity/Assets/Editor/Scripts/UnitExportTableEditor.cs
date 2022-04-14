@@ -365,7 +365,7 @@ public class UnitExportTableEditor : Editor
     public static void SetUnitInHierarchy(GameObject instance, int unitType,
         int maxAttackCount, MaterialContext materialContext, GameObject hightlightPrefab)
     {
-        var unit = instance.AddComponent<Unit>();
+        var unit = instance.AddComponent<UnitActor>();
         var highlightGO =
             (GameObject) PrefabUtility.InstantiatePrefab(hightlightPrefab);
         unit.highlighted = highlightGO;
@@ -393,7 +393,6 @@ public class UnitExportTableEditor : Editor
         }
 
         unit.deadMaterials = deadMaterials.ToArray();
-        unit.unitType = unitType;
     }
 
     public static void SetUnitInAsset(GameObject unitPrefab, AnimatorOverrideController overrideController)
@@ -484,7 +483,7 @@ public class UnitExportTableEditor : Editor
             
             setUnitInAsset.Invoke(newUnitPrefabGO);
 
-            var newUnit = newUnitPrefabGO.GetComponent<Unit>();
+            var newUnit = newUnitPrefabGO.GetComponent<UnitActor>();
             unitTable.SetUnitByType(unitType, newUnit);
         }
     }

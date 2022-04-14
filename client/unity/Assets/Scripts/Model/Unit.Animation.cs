@@ -15,12 +15,12 @@ namespace Game
         }
     }
 
-    public partial class Unit
-    {        
+    public partial class UnitActor
+    {
         [Header("Animation")]
         [SerializeField] private int _maxAttackAnimCount;
 
-        public static string animEndFuncName => nameof(OnAnimEnd);
+        public static string AnimEndFuncName => nameof(OnAnimEnd);
         
         public void InitAnimation()
         {
@@ -67,7 +67,7 @@ namespace Game
 
             SetFadeAlpha(0.0f);
             
-            listener?.OnClear(this);
+            _listener?.OnClear(this);
         }
     }
 }

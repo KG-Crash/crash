@@ -49,7 +49,7 @@ namespace Game
                 direction = diff / magnitude;
 
                 // TODO : 이거는 나중에 동기화 때 처리해야 할 문제 (Time.deltaTime을 사용하지 않아야 함)
-                transform.LookAt(new FixVector3(dst.position.x, this.transform.position.y, dst.position.y));
+                _listener?.OnLookAt(this, new FixVector3(dst.position.x, position.y, dst.position.y));
 
                 arrived = magnitude < (speed * f.deltaTime) || magnitude < (Fix64)_stopMoveDistance + (Fix64)Shared.Const.Character.MoveEpsilon;
             }

@@ -82,6 +82,8 @@ namespace Game
         private ActionHandleParam _actionHandleParam;
         private object[] _actionMethodParam;
 
+        public Dictionary<Unit, UnitActor> unitActorMaps { get; private set; } = new Dictionary<Unit, UnitActor>();
+
         [NonSerialized] private Player _me;
         [NonSerialized] private TeamCollection _teams;
         [NonSerialized] private ProjectilePool _projectilePool;

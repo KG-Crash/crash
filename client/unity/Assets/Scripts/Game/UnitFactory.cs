@@ -1,6 +1,4 @@
 using UnityEngine;
-using UniRx;
-using UniRx.Triggers;
 
 namespace Game
 {
@@ -8,14 +6,11 @@ namespace Game
     {
         private uint _sequence = 0;
         
-        public Unit CreateNewUnit(int unitType, UnitTable unitTable, KG.Map map, Player owner, Unit.Listener listener, Transform parent)
+        public UnitActor CreateNewUnit(int unitType, UnitTable unitTable, Transform parent, UnitActor.Listener listener)
         {
             var unitByType = unitTable.GetUnitByType(unitType);
             var unit = Object.Instantiate(unitByType, parent);
-            unit.Init(_sequence++, map, owner, listener);
-            
-            var frameUpdateDisposable = GameController.updateFrameStream.Subscribe(unit.OnUpdateFrame);
-            unit.OnDestroyAsObservable().Subscribe(_ => frameUpdateDisposable.Dispose());
+            unit.Init(listener);
             
             return unit;
         }

@@ -59,7 +59,8 @@ namespace Game
         private void InitProjectile(Projectile projectile, Unit attacker, Unit target)
 		{
             projectile.gameObject.SetActive(true);
-            projectile.transform.SetParent(attacker.transform);
+            // TODO : 유닛과 똑같이 해야할듯? ㅋㅋ
+            //projectile.transform.SetParent(attacker.transform);
             projectile.position = attacker.position;
             projectile.fireUnit = attacker;
             projectile.owner = attacker.owner;

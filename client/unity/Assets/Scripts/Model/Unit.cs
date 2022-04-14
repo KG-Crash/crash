@@ -4,18 +4,12 @@ using Shared.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UniRx;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Game
 {
-    public interface ISelectable
-    {
-        bool selectable { get; set; }
-        Bounds bounds { get; }
-    }
-    
-    public partial class Unit : MonoBehaviour, ISelectable
+    public partial class Unit
     {
         public interface Listener
         {
@@ -23,31 +17,25 @@ namespace Game
             void OnHeal(Unit me, Unit you, Fix64 heal);
             void OnDamaged(Unit me, Unit you, Fix64 damage);
             void OnDead(Unit unit, Unit from);
+            void OnRemove(Unit unit);
             void OnOwnerChanged(Player before, Player after, Unit unit);
             void OnStartMove(Unit unit);
             void OnEndMove(Unit unit);
-            void OnClear(Unit unit);
             void OnFireProjectile(Unit me, Unit you, int projectileOriginID);
             void OnIdle(Unit unit);
+            void OnPositionChanging(Unit me, FixVector2 from, FixVector2 to);
+            void OnPositionChanged(Unit me, FixVector2 before, FixVector2 after);
+            void OnUpdate(Unit me, Frame f);
+            void OnHPChanging(Unit me, int from, int to);
+            void OnHPChanged(Unit me, int before, int after);
+            void OnSpawned(Unit me);
+            void OnLookAt(Unit me, FixVector3 direction);
         }
 
-        public Shared.Table.Unit table => Table.From<TableUnit>()[this._unitType];
-        public List<Shared.Table.Skill> skills => Table.From<TableSkill>().Values.Where(x => x.Unit == this.unitType).ToList();
+        public Shared.Table.Unit table => Table.From<TableUnit>()[_type];
+        public List<Shared.Table.Skill> skills => Table.From<TableSkill>().Values.Where(x => x.Unit == type).ToList();
 
-        [FormerlySerializedAs("_unitOriginID")]
-        [SerializeField] private int _unitType;
-        [SerializeField] private GameObject _highlighted;
-        [SerializeField] public Animator animator;
-
-        public GameObject highlighted
-        {
-            get => _highlighted;
-            set 
-            {
-                _highlighted = value;
-                _highlighted.transform.SetParent(transform);
-            }
-        }
+        private int _type;
 
         public Team team => owner.team;
 
@@ -57,16 +45,16 @@ namespace Game
             set => _selectable = value;
         }
 
-        public int unitType
+        public int type
         {
-            get => _unitType;
-            set => _unitType = value;
+            get => _type;
+            set => _type = value;
         }
 
-        public uint unitUniqueID
+        public uint uniqueID
         {
-            get => _unitUniqueID;
-            set => _unitUniqueID = value;
+            get => _uniqueID;
+            set => _uniqueID = value;
         }
 
         public int damage
@@ -77,7 +65,7 @@ namespace Game
                 if (owner.advanced.TryGetValue(Advanced.UPGRADE_WEAPON, out var advanced))
                     damage += advanced;
 
-                var additional = owner.AdditionalStat(unitUniqueID);
+                var additional = owner.AdditionalStat(uniqueID);
                 if (additional.TryGetValue(StatType.Damage, out var x))
                     damage += x;
 
@@ -93,7 +81,7 @@ namespace Game
                 if (owner.advanced.TryGetValue(Advanced.UPGRADE_ARMOR, out var advanced))
                     armor += advanced;
 
-                var additional = owner.AdditionalStat(unitUniqueID);
+                var additional = owner.AdditionalStat(uniqueID);
                 if (additional.TryGetValue(StatType.Armor, out var x))
                     armor += x;
 
@@ -109,7 +97,7 @@ namespace Game
                 if (owner.advanced.TryGetValue(Advanced.UPGRADE_SPEED, out var advanced))
                     speed += advanced;
 
-                var additional = owner.AdditionalStat(unitUniqueID);
+                var additional = owner.AdditionalStat(uniqueID);
                 if (additional.TryGetValue(StatType.Speed, out var x))
                     speed += x;
 
@@ -124,7 +112,7 @@ namespace Game
             {
                 var attackSpeed = table.AttackSpeed;
 
-                var additional = owner.AdditionalStat(unitUniqueID);
+                var additional = owner.AdditionalStat(uniqueID);
                 if (additional.TryGetValue(StatType.AttackSpeed, out var x))
                     attackSpeed += x;
 
@@ -138,7 +126,7 @@ namespace Game
             {
                 var attackRange = table.AttackRange;
 
-                var additional = owner.AdditionalStat(unitUniqueID);
+                var additional = owner.AdditionalStat(uniqueID);
                 if (additional.TryGetValue(StatType.AttackRange, out var x))
                     attackRange += x;
 
@@ -162,7 +150,7 @@ namespace Game
             get
             {
                 var hp = table.Hp;
-                var additional = owner.AdditionalStat(unitUniqueID);
+                var additional = owner.AdditionalStat(uniqueID);
                 if (additional.TryGetValue(StatType.Hp, out var x))
                     hp += x;
 
@@ -180,8 +168,10 @@ namespace Game
             get => _hp;
             set 
             {
+                _listener?.OnHPChanging(this, this._hp, value);
+                var before = this._hp;
                 _hp = value;
-                SetTintByHP(_hp, maxhp);
+                _listener?.OnHPChanged(this, before, value);
             }
         }
 
@@ -201,7 +191,7 @@ namespace Game
             get => _owner;
             set
             {
-                var before = this._owner;
+                var before = _owner;
                 _owner = value;
                 _listener?.OnOwnerChanged(before, _owner, this);
             }
@@ -232,7 +222,7 @@ namespace Game
 
         [SerializeField] private uint _teamID;
         [SerializeField] private bool _selectable = true;
-        [SerializeField] private uint _unitUniqueID;
+        [SerializeField] private uint _uniqueID;
         [SerializeField] private Fix64 _hp;
         [SerializeField] private Player _owner;
         [NonSerialized] private KG.Map _map;
@@ -252,27 +242,25 @@ namespace Game
         public FixVector3 position
         {
             get => _position;
-            set => SetPosition(value, false);
-        }
-
-        public void SetPosition(FixVector3 value, bool refreshTransform)
-        {
-            _position = value;
-            this.region = this.map[this.position]?.region;
-
-            // 길찾기 경로에서 현재 경로 제거
-            this._regionPath.Remove(this.region);
-
-            if (refreshTransform)
+            set
             {
-                transform.position = value;   
+                _position = value;
+                region = map[position]?.region;
+
+                // 길찾기 경로에서 현재 경로 제거
+                _regionPath.Remove(region);
+
+                listener?.OnPositionChanging(this, position, value);
+                var before = position;
+                position = value;
+                listener?.OnPositionChanged(this, before, value);
             }
         }
 
-        public FixVector2 size => new FixVector2(new Fix64(this.table.Width) / new Fix64(10000), new Fix64(this.table.Height) / new Fix64(10000));
+        public FixVector2 size => new FixVector2(new Fix64(table.Width) / new Fix64(10000), new Fix64(table.Height) / new Fix64(10000));
 
-        public FixRect collisionBox => GetCollisionBox(this.position);
-        public IEnumerable<KG.Map.Cell> collisionCells => GetCollisionCells(this.position);
+        public FixRect collisionBox => GetCollisionBox(position);
+        public IEnumerable<KG.Map.Cell> collisionCells => GetCollisionCells(position);
 
         public bool IsDead => _currentState == UnitState.Dead || _hp == Fix64.Zero;
 
@@ -304,11 +292,11 @@ namespace Game
             var max = new FixVector2(collisionBox.maxX, collisionBox.maxY);
 
             var cells = new List<KG.Map.Cell>();
-            var begin = this.map[min];
+            var begin = map[min];
             if (begin == null)
                 yield break;
 
-            var end = this.map[max];
+            var end = map[max];
             if (end == null)
                 yield break;
 
@@ -316,7 +304,7 @@ namespace Game
             {
                 for (int col = begin.col; col <= end.col; col++)
                 {
-                    yield return this.map[row, col];
+                    yield return map[row, col];
                 }
             }
 
@@ -328,27 +316,20 @@ namespace Game
             return GetCollisionCells(cell.position).All(x => x.walkable);
         }
 
-        public void Init(uint unitID, KG.Map map, Player owner, Unit.Listener listener)
+        public Unit(uint unitID, KG.Map map, Player owner, FixVector3 position, Listener listener)
         {
-            InitAnimation();
-            LoadMaterials();
-            this.unitUniqueID = unitID;
-            this._map = map;
-            this._owner = owner;
-            this._listener = listener;
+            uniqueID = unitID;
+            _map = map;
+            _owner = owner;
+            _listener = listener;
             hp = maxhp;
-            
+
             _lastAttackFrame = -attackSpeed / new Fix64(1000) / GameController.TimeDelta;
-        }
 
-        public void OnUpdateFrame(Frame f)
-        {
-            // float 캐스팅
-            animator.Update(f.deltaTime);
-            UpdateBounds();
-            Action(f);
+            GameController.updateFrameStream.Subscribe(Action);
 
-            this.transform.position = this.position;
+            _listener?.OnSpawned(this);
+            this.position = position;
         }
 
         private void TransitionTo(UnitState state)
@@ -502,12 +483,14 @@ namespace Game
                     }
                     break;
             }
+
+            _listener?.OnUpdate(this, f);
         }
 
         private Unit SearchEnemyIn(Fix64 searchRadius)
         {
             return GetNearUnitsIn(searchRadius)
-                .Where(x => !IsNullOrDead(x) && x.team != this.team)
+                .Where(x => !IsNullOrDead(x) && x.team != team)
                 .OrderBy(x => (x.position - position).sqrMagnitude)
                 .FirstOrDefault(x => ContainsRange(x.position, searchRadius));
         }
@@ -518,11 +501,6 @@ namespace Game
             TransitionTo(UnitState.Idle);
 
             UnityEngine.Debug.Log("stop moving");
-        }
-
-        public void Selected(bool select)
-        {
-            if (_highlighted) _highlighted.SetActive(select);
         }
 
         public void MoveTo(FixVector3 position)
@@ -607,19 +585,23 @@ namespace Game
 
             var damage = CalculateDamage(unit);
 
-            if (this.attackType == AttackType.Immediately)
+            if (attackType == AttackType.Immediately)
             {
                 unit.AddHP(-damage, this);
                 listener?.OnAttack(this, unit, damage);
             }
             else
-                listener?.OnFireProjectile(this, unit, this.projectileId);
+            {
+                listener?.OnFireProjectile(this, unit, projectileId);
+            }
 
             
             _lastAttackFrame = currentFrame;
 
             _attackers.Clear();
-            transform.LookAt(unit.position);
+
+            // TODO: 컨트롤러에서 맵핑된 유닛 액터 처리
+            //transform.LookAt(unit.position);
             return true;
         }
 
@@ -633,31 +615,31 @@ namespace Game
 
         private IEnumerable<Unit> GetNearUnits()
         {
-            if (this.region == null)
+            if (region == null)
                 return Enumerable.Empty<Unit>();
 
 
-            var nodes = new List<KG.Map.Region> { this.region };
-            nodes.AddRange(this._map.regions[this.region].edges.Select(x => x.data));
+            var nodes = new List<KG.Map.Region> { region };
+            nodes.AddRange(_map.regions[region].edges.Select(x => x.data));
 
             return nodes.SelectMany(x => x.units).Except(new[] { this });
         }
 
         private IEnumerable<Unit> GetNearUnitsIn(Fix64 range)
         {
-            if (this.region == null)
+            if (region == null)
                 return Enumerable.Empty<Unit>();
 
             var regionSize = _map.regionDiagSize;
             var nodes = new HashSet<KG.Map.Region>();
             var q = new Queue<KG.Map.Region>();
-            q.Enqueue(this.region);
+            q.Enqueue(region);
 
             while (q.Count > 0)
             {
                 var currentRegion = q.Dequeue();
 
-                if ((this.region.centroid.center - currentRegion.centroid.center).sqrMagnitude < (range + regionSize) *
+                if ((region.centroid.center - currentRegion.centroid.center).sqrMagnitude < (range + regionSize) *
                     (range + regionSize)
                     &&
                     !nodes.Contains(currentRegion))
@@ -679,7 +661,13 @@ namespace Game
 
         public override string ToString()
         {
-            return $"{base.ToString()}({nameof(unitUniqueID)}={unitUniqueID}, {nameof(unitType)}={unitType})";
+            return $"{base.ToString()}({nameof(uniqueID)}={uniqueID}, {nameof(type)}={type})";
+        }
+
+        public void Destroy()
+        {
+            _owner.units.Delete(this);
+            _listener?.OnRemove(this);
         }
     }
 }

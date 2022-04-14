@@ -37,11 +37,11 @@ namespace Game
             {
                 // unit.owner.units.Delete 하면 안됨
                 // OnOwnerChanged가 2번 호출됨
-                unit.owner.units._units.Remove(unit.unitUniqueID);
+                unit.owner.units._units.Remove(unit.uniqueID);
             }
 
             unit.owner = this._owner;
-            _units.Add(unit.unitUniqueID, unit);
+            _units.Add(unit.uniqueID, unit);
         }
 
         public void AddRange(IEnumerable<Unit> units)
@@ -60,8 +60,8 @@ namespace Game
 
         public void Delete(Unit unit)
         {
-            // unit.owner = null;
-            _units.Remove(unit.unitUniqueID);
+            unit.owner = null;
+            _units.Remove(unit.uniqueID);
         }
 
         public Dictionary<uint, Unit>.ValueCollection Values => _units.Values;

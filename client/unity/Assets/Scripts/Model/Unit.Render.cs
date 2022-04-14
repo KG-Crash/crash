@@ -11,7 +11,7 @@ namespace Game
         Renderer[] renderers { get; }
     }
 
-    public partial class Unit : IRenderable 
+    public partial class UnitActor : IRenderable 
     {
         [Header("Render")]
         [SerializeField] private Renderer[] _rendereres;
@@ -47,7 +47,7 @@ namespace Game
                 .SelectMany(renderer => Enumerable.Range(0, renderer.sharedMaterials.Length)).ToArray();
         }
         
-        private void UpdateBounds()
+        public void UpdateBounds()
         {
             _totalBounds = new Bounds();
             foreach (var renderer in _rendereres)
@@ -63,7 +63,7 @@ namespace Game
             }
         }
 
-        private void SetTintByHP(Fix64 curhp, Fix64 maxhp)
+        public void SetTintByHP(Fix64 curhp, Fix64 maxhp)
         {
             var normalizedHp = curhp / maxhp;
 

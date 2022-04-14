@@ -37,50 +37,5 @@ namespace Game
         {
             return _focus;
         }
-        
-        public static void IntersectUnits(Plane[] frustum, IEnumerable<Unit> sourceUnits, List<Unit> unitList)
-        {                  
-            foreach (var unit in sourceUnits)
-            {
-                if (!unit.selectable) continue;
-                
-                if (GeometryUtility.TestPlanesAABB(frustum, unit.bounds))
-                {
-                    unitList.Add(unit);
-                }
-            }
-        }
-        
-        public static void IntersectUnits(Ray ray, IEnumerable<Unit> sourceUnits, List<Unit> outUnitList)
-        {
-            foreach (var unit in sourceUnits)
-            {
-                if (!unit.selectable) continue;
-                
-                if (unit.bounds.IntersectRay(ray))
-                {
-                    outUnitList.Add(unit);
-                }
-            }
-        }
-        
-        public static Unit IntersectNearestUnit(Ray ray, IEnumerable<Unit> sourceUnits)
-        {
-            var nearestDistance = float.PositiveInfinity;
-            Unit selectedUnit = null;
-            
-            foreach (var unit in sourceUnits)
-            {
-                if (!unit.selectable) continue;
-                
-                if (unit.bounds.IntersectRay(ray, out var distance) && distance < nearestDistance)
-                {
-                    distance = nearestDistance;
-                    selectedUnit = unit;
-                }
-            }
-
-            return selectedUnit;
-        }
     }
 }
