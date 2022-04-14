@@ -10,14 +10,15 @@ namespace Game
             if (from != null)
                 from.owner.exp += (uint)unit.killScore;
 
-            if (unitActorMaps.TryGetValue(unit, out var actor) == false)
+            if (unitActorMaps.TryGetValue(unit, out var x) == false)
                 return;
 
+            var actor = x as UnitActor;
             actor.animator.SetTrigger("Dead");
             unit.Destroy();
         }
 
-        public void OnRemove(Unit unit)
+        public void OnRemove(LogicalObject unit)
         {
             unitActorMaps.Remove(unit);
         }
@@ -31,9 +32,10 @@ namespace Game
 
         public void OnAttack(Unit me, Unit you, Fix64 damage)
         {
-            if (unitActorMaps.TryGetValue(me, out var myActor) == false)
+            if (unitActorMaps.TryGetValue(me, out var x) == false)
                 return;
 
+            var myActor = x as UnitActor;
             var maxAttackCount = myActor.animator.GetInteger("MaxAttack");
             var randAttackIndex = Random.Range(0, maxAttackCount);
             myActor.animator.SetInteger("AttackIndex", randAttackIndex);
@@ -56,34 +58,38 @@ namespace Game
 
         public void OnStartMove(Unit unit)
         {
-            if (unitActorMaps.TryGetValue(unit, out var actor) == false)
+            if (unitActorMaps.TryGetValue(unit, out var x) == false)
                 return;
 
+            var actor = x as UnitActor;
             actor.animator.SetFloat("Forward", 2);
             actor.animator.SetTrigger("Move");
         }
 
         public void OnEndMove(Unit unit)
         {
-            if (unitActorMaps.TryGetValue(unit, out var actor) == false)
+            if (unitActorMaps.TryGetValue(unit, out var x) == false)
                 return;
 
+            var actor = x as UnitActor;
             actor.animator.SetFloat("Forward", 0);
         }
 
         public void OnIdle(Unit unit)
         {
-            if (unitActorMaps.TryGetValue(unit, out var actor) == false)
+            if (unitActorMaps.TryGetValue(unit, out var x) == false)
                 return;
 
+            var actor = x as UnitActor;
             actor.animator.SetTrigger("Idle");
         }
 
         public void OnStop(Unit unit)
         {
-            if (unitActorMaps.TryGetValue(unit, out var actor) == false)
+            if (unitActorMaps.TryGetValue(unit, out var x) == false)
                 return;
 
+            var actor = x as UnitActor;
             actor.animator.SetTrigger("Idle");
         }
 
@@ -94,32 +100,34 @@ namespace Game
 
         public void OnFireProjectile(Unit me, Unit you, int projectileOriginID)
 		{
-            if (unitActorMaps.TryGetValue(me, out var actor) == false)
+            if (unitActorMaps.TryGetValue(me, out var x) == false)
                 return;
 
+            var actor = x as UnitActor;
             var projectile = _projectilePool.GetProjectile(projectileOriginID, me, you);
             fireHistory.Add(projectile.projectileID, you);
             actor.animator.SetTrigger("Attack");
 		}
 
-        public void OnPositionChanging(Unit me, FixVector2 from, FixVector2 to)
+        public void OnPositionChanging(LogicalObject me, FixVector2 from, FixVector2 to)
         {
 
         }
 
-        public void OnPositionChanged(Unit me, FixVector2 before, FixVector2 after)
+        public void OnPositionChanged(LogicalObject me, FixVector2 before, FixVector2 after)
         {
-            if (unitActorMaps.TryGetValue(me, out var actor) == false)
+            if (unitActorMaps.TryGetValue(me, out var x) == false)
                 return;
 
-            actor.transform.position = after;
+            x.position = after;
         }
 
         public void OnUpdate(Unit me, Frame f)
         {
-            if (unitActorMaps.TryGetValue(me, out var actor) == false)
+            if (unitActorMaps.TryGetValue(me, out var x) == false)
                 return;
 
+            var actor = x as UnitActor;
             // float 캐스팅
             actor.animator.Update(f.deltaTime);
             actor.UpdateBounds();
@@ -131,9 +139,10 @@ namespace Game
 
         public void OnHPChanged(Unit me, int before, int after)
         {
-            if (unitActorMaps.TryGetValue(me, out var actor) == false)
+            if (unitActorMaps.TryGetValue(me, out var x) == false)
                 return;
 
+            var actor = x as UnitActor;
             actor.SetTintByHP(me.hp, me.maxhp);
         }
 
@@ -148,9 +157,10 @@ namespace Game
 
         public void OnLookAt(Unit me, FixVector3 direction)
         {
-            if (unitActorMaps.TryGetValue(me, out var actor) == false)
+            if (unitActorMaps.TryGetValue(me, out var x) == false)
                 return;
 
+            var actor = x as UnitActor;
             actor.transform.LookAt(direction);
         }
     }

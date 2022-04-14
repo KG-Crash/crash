@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using FixMath.NET;
+using UnityEngine;
 
 namespace Game
 {
@@ -8,7 +9,7 @@ namespace Game
         Bounds bounds { get; }
     }
 
-    public partial class UnitActor : MonoBehaviour
+    public partial class UnitActor : MonoBehaviour, IActor
     {
         public interface Listener
         {
@@ -29,6 +30,8 @@ namespace Game
                 _highlighted.transform.SetParent(transform);
             }
         }
+
+        public FixVector3 position { set => this.position = value; }
 
         public void Init(Listener listener)
         {

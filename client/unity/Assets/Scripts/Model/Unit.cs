@@ -9,22 +9,19 @@ using UnityEngine;
 
 namespace Game
 {
-    public partial class Unit
+    public partial class Unit : LogicalObject
     {
-        public interface Listener
+        public new interface Listener : LogicalObject.Listener
         {
             void OnAttack(Unit me, Unit you, Fix64 damage);
             void OnHeal(Unit me, Unit you, Fix64 heal);
             void OnDamaged(Unit me, Unit you, Fix64 damage);
             void OnDead(Unit unit, Unit from);
-            void OnRemove(Unit unit);
             void OnOwnerChanged(Player before, Player after, Unit unit);
             void OnStartMove(Unit unit);
             void OnEndMove(Unit unit);
             void OnFireProjectile(Unit me, Unit you, int projectileOriginID);
             void OnIdle(Unit unit);
-            void OnPositionChanging(Unit me, FixVector2 from, FixVector2 to);
-            void OnPositionChanged(Unit me, FixVector2 before, FixVector2 after);
             void OnUpdate(Unit me, Frame f);
             void OnHPChanging(Unit me, int from, int to);
             void OnHPChanged(Unit me, int before, int after);
@@ -32,10 +29,8 @@ namespace Game
             void OnLookAt(Unit me, FixVector3 direction);
         }
 
-        public Shared.Table.Unit table => Table.From<TableUnit>()[_type];
+        public Shared.Table.Unit table => Table.From<TableUnit>()[type];
         public List<Shared.Table.Skill> skills => Table.From<TableSkill>().Values.Where(x => x.Unit == type).ToList();
-
-        private int _type;
 
         public Team team => owner.team;
 
@@ -45,19 +40,13 @@ namespace Game
             set => _selectable = value;
         }
 
-        public int type
-        {
-            get => _type;
-            set => _type = value;
-        }
-
         public uint uniqueID
         {
             get => _uniqueID;
             set => _uniqueID = value;
         }
 
-        public int damage
+        public override int damage
         {
             get
             {
@@ -89,7 +78,7 @@ namespace Game
             }
         }
 
-        public Fix64 speed
+        public override Fix64 speed
         {
             get
             {
@@ -238,22 +227,17 @@ namespace Game
             _attackers.Add(unit);
         }
 
-        private FixVector3 _position;
-        public FixVector3 position
+        public override FixVector3 position 
         {
-            get => _position;
+            get => base.position;
             set
             {
-                _position = value;
                 region = map[position]?.region;
 
                 // 길찾기 경로에서 현재 경로 제거
                 _regionPath.Remove(region);
 
-                listener?.OnPositionChanging(this, position, value);
-                var before = position;
-                position = value;
-                listener?.OnPositionChanged(this, before, value);
+                base.position = value;
             }
         }
 
@@ -316,7 +300,7 @@ namespace Game
             return GetCollisionCells(cell.position).All(x => x.walkable);
         }
 
-        public Unit(uint unitID, KG.Map map, Player owner, FixVector3 position, Listener listener)
+        public Unit(uint unitID, KG.Map map, Player owner, FixVector3 position, Listener listener) : base(listener)
         {
             uniqueID = unitID;
             _map = map;
@@ -664,10 +648,10 @@ namespace Game
             return $"{base.ToString()}({nameof(uniqueID)}={uniqueID}, {nameof(type)}={type})";
         }
 
-        public void Destroy()
+        public override void Destroy()
         {
             _owner.units.Delete(this);
-            _listener?.OnRemove(this);
+            base.Destroy();
         }
     }
 }
