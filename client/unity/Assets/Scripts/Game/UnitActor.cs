@@ -12,8 +12,8 @@ namespace Game
     public partial class UnitActor : MonoBehaviour, IActor
     {
         public interface Listener
-        {
-            void OnClear(UnitActor actor);
+        {            
+            void OnClear(UnitActor unitActor);
         }
 
         private Listener _listener;
@@ -32,6 +32,18 @@ namespace Game
         }
 
         public FixVector3 position { set => this.position = value; }
+        
+        public void LookAt(FixVector3 worldPosition)
+        {
+            transform.LookAt(worldPosition);
+        }
+
+        public Transform parent => transform.parent;
+        
+        public void SetParent(Transform parent)
+        {
+            transform.SetParent(parent);
+        }
 
         public void Init(Listener listener)
         {

@@ -11,12 +11,12 @@ namespace Game
     {
         [FormerlySerializedAs("_unitOriginDict")] [SerializeField] private SerializableDictionary<int, UnitActor> _unitTypeDict;
 
-        public UnitActor GetUnitByType(int unitType)
+        public UnitActor GetUnit(int unitType)
         {
             return _unitTypeDict[unitType];
         }
 
-        public void SetUnitByType(int unitType, UnitActor unit)
+        public void SetUnit(int unitType, UnitActor unit)
         {
             _unitTypeDict[unitType] = unit;
         }

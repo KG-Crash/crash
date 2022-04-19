@@ -18,10 +18,10 @@ namespace Game
     public partial class GameController
     {
         public static IObservable<Frame> updateFrameStream => Observable.EveryUpdate().Where(_ => ready && !paused && !waitPacket)
-            .Select(_ => InputFrameChunk);
+            .Select(_ => OutputFrameChunk);
 
         public static IObservable<Frame> lateUpdateFrameStream => Observable.EveryLateUpdate().Where(_ => ready && !paused && !waitPacket)
-            .Select(_ => InputFrameChunk);
+            .Select(_ => OutputFrameChunk);
 
         private void InitializeUniRx()
         {

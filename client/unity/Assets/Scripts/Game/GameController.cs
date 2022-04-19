@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Game
 {
@@ -86,7 +87,7 @@ namespace Game
 
         [NonSerialized] private Player _me;
         [NonSerialized] private TeamCollection _teams;
-        [NonSerialized] private ProjectilePool _projectilePool;
+        [NonSerialized] private ProjectileActorPool _projectileActorPool;
         [NonSerialized] private ChatService _chatManager;
 
         [Header("Miscellaneous")] 
@@ -94,7 +95,7 @@ namespace Game
         [SerializeField] private Transform _focusTransform;
         
         [SerializeField] private KG.Map _map;
-        [SerializeField] private UnitFactory _unitFactory;
+        [FormerlySerializedAs("_unitFactory")] [SerializeField] private UnitActorFactory unitActorFactory;
         [SerializeField] private UnitTable _unitPrefabTable;
         [SerializeField] private ProjectileTable _projectilehPrefabTable;
         [SerializeField] private bool _networkMode;
@@ -111,7 +112,7 @@ namespace Game
             
             InitInput();
             
-            _projectilePool = new ProjectilePool(_projectilehPrefabTable, 15, this, _poolOffset);
+            _projectileActorPool = new ProjectileActorPool(_projectilehPrefabTable, 15, this, _poolOffset);
             _chatManager = this.gameObject.GetComponent<ChatService>();
 
             // 레디에서 이름 보내야 하지 않을까?

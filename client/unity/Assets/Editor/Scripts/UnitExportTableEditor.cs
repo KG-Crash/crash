@@ -484,7 +484,7 @@ public class UnitExportTableEditor : Editor
             setUnitInAsset.Invoke(newUnitPrefabGO);
 
             var newUnit = newUnitPrefabGO.GetComponent<UnitActor>();
-            unitTable.SetUnitByType(unitType, newUnit);
+            unitTable.SetUnit(unitType, newUnit);
         }
     }
 

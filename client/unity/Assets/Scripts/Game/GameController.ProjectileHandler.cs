@@ -1,19 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
+using FixMath.NET;
 using UnityEngine;
 
 namespace Game
 {
-    public partial class GameController : Projectile.Listener
+    public partial class GameController : Projectile.Listener, ProjectileActor.Listener
     {
-        public Dictionary<uint, Unit> fireHistory { get; set; } = new Dictionary<uint, Unit>(); // <projectileID, targetUnit>
+        // <projectileID, targetUnit>
+        public Dictionary<Projectile, Unit> fireHistory { get; set; } = new Dictionary<Projectile, Unit>();
 
+        public void OnSpawned(Projectile projectile)
+        {
+            if (!unitActorMaps.TryGetValue(projectile.owner, out var unitActor))
+                return;
+            
+            var actor = _projectileActorPool.GetProjectileActor(projectile.type);
+            actor.SetParent(unitActor.parent);
+            actor.position = projectile.position;
+            unitActorMaps.Add(projectile, actor);
+        }
+        
         public void OnProjectileReach(Projectile projectile, Unit target)
         {
-            if (projectile.currentState != Shared.ProjectileState.Hit)
-                return;
-
-            if (fireHistory.TryGetValue(projectile.projectileID, out var fireUnit))
+            if (fireHistory.TryGetValue(projectile, out var fireUnit))
             {
                 if (!Unit.IsNullOrDead(fireUnit))
                 {
@@ -23,10 +33,16 @@ namespace Game
                     var damage = projectile.damage;
                     fireUnit.AddHP(-damage, fireUnit);
                 }
-            } 
+                
+                fireHistory.Remove(projectile);
+            }
 
-            _projectilePool.ReturnProjectile(projectile);
-            fireHistory.Remove(projectile.projectileID);
+            if (projectile.owner != null)
+                projectile.owner.projectiles.Remove(projectile.uniqueID);
+
+            var actor = unitActorMaps[projectile];
+            if (actor is ProjectileActor projectileActor) 
+                _projectileActorPool.ReturnProjectile(projectile.type, projectileActor);
         }
     }
 }

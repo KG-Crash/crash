@@ -89,7 +89,7 @@ namespace Game
             this.spawnIndex = spawnIndex;
         }
 
-        public Dictionary<StatType, int> AdditionalStat(uint unitID)
+        public Dictionary<StatType, int> AdditionalStat(int unitID)
         {
             return Shared.Table.Table
                     .From<TableUnitUpgradeAbility>()

@@ -93,7 +93,7 @@ namespace Game
                     }
                     else
                     {
-                        _blockedFrame = GameController.InputTotalFrame;
+                        _blockedFrame = f.currentFrame;
                     }
 
                     position = old;
@@ -141,7 +141,7 @@ namespace Game
                 if (end == null)
                     throw new ClientException(ClientExceptionCode.InvalidCellAccess, $"end, _map[{position}] == null");
 
-                if (this.table.Flyable)
+                if (this.info.Flyable)
                 {
                     _cellPath = new List<KG.Map.Cell> { end };
                     return true;

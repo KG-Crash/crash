@@ -14,12 +14,11 @@ namespace Game
             void OnRemove(LogicalObject unit);
             void OnPositionChanging(LogicalObject me, FixVector2 from, FixVector2 to);
             void OnPositionChanged(LogicalObject me, FixVector2 before, FixVector2 after);
+            void OnLookAt(LogicalObject me, FixVector3 direction);
         }
 
-
         private Listener _listener;
-
-
+        
         public int type { get; set; }
 
         public abstract int damage { get; }

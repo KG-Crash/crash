@@ -20,16 +20,15 @@ namespace Game
             void OnOwnerChanged(Player before, Player after, Unit unit);
             void OnStartMove(Unit unit);
             void OnEndMove(Unit unit);
-            void OnFireProjectile(Unit me, Unit you, int projectileOriginID);
+            void OnFireProjectile(Unit fireUnit, Unit you, int projectileOriginID);
             void OnIdle(Unit unit);
             void OnUpdate(Unit me, Frame f);
             void OnHPChanging(Unit me, int from, int to);
             void OnHPChanged(Unit me, int before, int after);
             void OnSpawned(Unit me);
-            void OnLookAt(Unit me, FixVector3 direction);
         }
 
-        public Shared.Table.Unit table => Table.From<TableUnit>()[type];
+        public Shared.Table.Unit info => Table.From<TableUnit>()[type];
         public List<Shared.Table.Skill> skills => Table.From<TableSkill>().Values.Where(x => x.Unit == type).ToList();
 
         public Team team => owner.team;
@@ -50,11 +49,11 @@ namespace Game
         {
             get
             {
-                var damage = table.Damage;
+                var damage = info.Damage;
                 if (owner.advanced.TryGetValue(Advanced.UPGRADE_WEAPON, out var advanced))
                     damage += advanced;
 
-                var additional = owner.AdditionalStat(uniqueID);
+                var additional = owner.AdditionalStat(type);
                 if (additional.TryGetValue(StatType.Damage, out var x))
                     damage += x;
 
@@ -66,11 +65,11 @@ namespace Game
         {
             get
             {
-                var armor = table.Armor;
+                var armor = info.Armor;
                 if (owner.advanced.TryGetValue(Advanced.UPGRADE_ARMOR, out var advanced))
                     armor += advanced;
 
-                var additional = owner.AdditionalStat(uniqueID);
+                var additional = owner.AdditionalStat(type);
                 if (additional.TryGetValue(StatType.Armor, out var x))
                     armor += x;
 
@@ -82,11 +81,11 @@ namespace Game
         {
             get
             {
-                var speed = table.Speed;
+                var speed = info.Speed;
                 if (owner.advanced.TryGetValue(Advanced.UPGRADE_SPEED, out var advanced))
                     speed += advanced;
 
-                var additional = owner.AdditionalStat(uniqueID);
+                var additional = owner.AdditionalStat(type);
                 if (additional.TryGetValue(StatType.Speed, out var x))
                     speed += x;
 
@@ -99,9 +98,9 @@ namespace Game
         {
             get
             {
-                var attackSpeed = table.AttackSpeed;
+                var attackSpeed = info.AttackSpeed;
 
-                var additional = owner.AdditionalStat(uniqueID);
+                var additional = owner.AdditionalStat(type);
                 if (additional.TryGetValue(StatType.AttackSpeed, out var x))
                     attackSpeed += x;
 
@@ -113,9 +112,9 @@ namespace Game
         {
             get
             {
-                var attackRange = table.AttackRange;
+                var attackRange = info.AttackRange;
 
-                var additional = owner.AdditionalStat(uniqueID);
+                var additional = owner.AdditionalStat(type);
                 if (additional.TryGetValue(StatType.AttackRange, out var x))
                     attackRange += x;
 
@@ -125,21 +124,20 @@ namespace Game
 
         public AttackType attackType
         {
-            get => table.AttackType;
+            get => info.AttackType;
         }
 
-        public int projectileId
+        public int projectileType
         {
-            get => table.ProjectileID;
+            get => info.ProjectileID;
         }
-
 
         public Fix64 maxhp
         {
             get
             {
-                var hp = table.Hp;
-                var additional = owner.AdditionalStat(uniqueID);
+                var hp = info.Hp;
+                var additional = owner.AdditionalStat(type);
                 if (additional.TryGetValue(StatType.Hp, out var x))
                     hp += x;
 
@@ -149,7 +147,7 @@ namespace Game
 
         public Fix64 visibleRange
         {
-            get => table.VisibleRange;
+            get => info.VisibleRange;
         }
 
         public Fix64 hp
@@ -166,7 +164,7 @@ namespace Game
 
         public int killScore
         {
-            get => table.KillScore;
+            get => info.KillScore;
         }
 
         public Listener listener
@@ -207,6 +205,8 @@ namespace Game
             }
         }
 
+        public ProjectileCollection projectiles;
+
         public List<Skill> activeSkills => skills.Where(x => owner.upgrade.abilities.HasFlag(x.Condition)).ToList();
 
         [SerializeField] private uint _teamID;
@@ -241,7 +241,7 @@ namespace Game
             }
         }
 
-        public FixVector2 size => new FixVector2(new Fix64(table.Width) / new Fix64(10000), new Fix64(table.Height) / new Fix64(10000));
+        public FixVector2 size => new FixVector2(new Fix64(info.Width) / new Fix64(10000), new Fix64(info.Height) / new Fix64(10000));
 
         public FixRect collisionBox => GetCollisionBox(position);
         public IEnumerable<KG.Map.Cell> collisionCells => GetCollisionCells(position);
@@ -300,13 +300,15 @@ namespace Game
             return GetCollisionCells(cell.position).All(x => x.walkable);
         }
 
-        public Unit(uint unitID, KG.Map map, Player owner, FixVector3 position, Listener listener) : base(listener)
+        public Unit(uint uniqueID, int type, KG.Map map, Player owner, FixVector3 position, Projectile.Listener listener) : base(listener)
         {
-            uniqueID = unitID;
+            this.type = type;
+            this.uniqueID = uniqueID;
             _map = map;
             _owner = owner;
             _listener = listener;
             hp = maxhp;
+            projectiles = new ProjectileCollection(this, listener);
 
             _lastAttackFrame = -attackSpeed / new Fix64(1000) / GameController.TimeDelta;
 
@@ -515,9 +517,9 @@ namespace Game
         {
             var result = (Fix64)(damage - unit.armor);
 
-            if (table.Type == UnitType.Explosive)
+            if (info.Type == UnitType.Explosive)
             {
-                switch (unit.table.Size)
+                switch (unit.info.Size)
                 {
                     case UnitSize.Small:
                         return result;
@@ -530,9 +532,9 @@ namespace Game
                 }
             }
 
-            if (table.Type == UnitType.Concussive)
+            if (info.Type == UnitType.Concussive)
             {
-                switch (unit.table.Size)
+                switch (unit.info.Size)
                 {
                     case UnitSize.Large:
                         return result;
@@ -576,7 +578,7 @@ namespace Game
             }
             else
             {
-                listener?.OnFireProjectile(this, unit, projectileId);
+                listener?.OnFireProjectile(this, unit, projectileType);
             }
 
             

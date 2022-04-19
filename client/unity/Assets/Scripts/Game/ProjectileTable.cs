@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using KG;
 using UnityEngine;
 
 namespace Game
@@ -6,15 +8,16 @@ namespace Game
     [CreateAssetMenu(fileName = "ProjectileTable", menuName = "Crash/ProjectileTable", order = 1)]
     public class ProjectileTable : ScriptableObject
     {
-        [SerializeField] private Projectile[] _projectileOrigin;
-        public Projectile[] projectileOrigin
-		{
-            get => _projectileOrigin; 
-		}
+        [SerializeField] private SerializableDictionary<int, ProjectileActor> _projectiles;
 
-        public Projectile GetOrigin(int projectileOriginID)
+        public ProjectileActor GetProjectileActor(int projectileOriginID)
         {
-            return Array.Find(_projectileOrigin, projetile => projetile.projectileOriginID == projectileOriginID);
+            return _projectiles[projectileOriginID];
+        }
+        
+        public IEnumerable<KeyValuePair<int, ProjectileActor>> GetEnumerable()
+        {
+            return _projectiles;
         }
     }
 }

@@ -98,20 +98,24 @@ namespace Game
             DestroyImmediate(actor.gameObject);
         }
 
-        public void OnFireProjectile(Unit me, Unit you, int projectileOriginID)
+        // TODO :: 무지성 시퀀스 어케함?
+        public static uint SEQUENCE = 0; 
+        
+        public void OnFireProjectile(Unit fireUnit, Unit target, int projectileOriginID)
 		{
-            if (unitActorMaps.TryGetValue(me, out var x) == false)
+            if (unitActorMaps.TryGetValue(fireUnit, out var x) == false)
                 return;
 
             var actor = x as UnitActor;
-            var projectile = _projectilePool.GetProjectile(projectileOriginID, me, you);
-            fireHistory.Add(projectile.projectileID, you);
             actor.animator.SetTrigger("Attack");
+            
+            // TODO :: Projectile 오브젝트까지 풀링을 해야하는가?
+            var projectile = fireUnit.projectiles.Add(SEQUENCE++, target);
+            fireHistory.Add(projectile, target);
 		}
 
         public void OnPositionChanging(LogicalObject me, FixVector2 from, FixVector2 to)
         {
-
         }
 
         public void OnPositionChanged(LogicalObject me, FixVector2 before, FixVector2 after)
@@ -151,17 +155,16 @@ namespace Game
             if (unitActorMaps.ContainsKey(me))
                 return;
 
-            var actor = _unitFactory.CreateNewUnit(me.type, _unitPrefabTable, null, this);
+            var actor = unitActorFactory.CreateUnitActor(me.type, _unitPrefabTable, null, this);
             unitActorMaps.Add(me, actor);
         }
 
-        public void OnLookAt(Unit me, FixVector3 direction)
+        public void OnLookAt(LogicalObject me, FixVector3 direction)
         {
-            if (unitActorMaps.TryGetValue(me, out var x) == false)
+            if (unitActorMaps.TryGetValue(me, out var actor) == false)
                 return;
 
-            var actor = x as UnitActor;
-            actor.transform.LookAt(direction);
+            actor.LookAt(direction);
         }
     }
 }
