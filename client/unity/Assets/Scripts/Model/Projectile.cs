@@ -13,8 +13,6 @@ namespace Game
             void OnSpawned(Projectile projectile);
         }
 
-        public static uint SEQUENCE = 0;
-
         public Projectile(uint uniqueID, Unit from, Unit to, Listener listener) : base(listener)
         {
             this.uniqueID = uniqueID;
