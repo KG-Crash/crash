@@ -22,12 +22,12 @@ namespace Game
         }
     }
 
-    public class TypeMethods
+    public class TargetMethods
     {
         public object target;
         public Dictionary<ActionKind, MethodInfo[]> actions;
 
-        public TypeMethods(object target, Dictionary<ActionKind, MethodInfo[]> actions)
+        public TargetMethods(object target, Dictionary<ActionKind, MethodInfo[]> actions)
         {
             this.target = target;
             this.actions = actions;
@@ -36,13 +36,13 @@ namespace Game
     
     public static class ActionHandler
     {        
-        private static Dictionary<Type, TypeMethods> _actionHandleMethodDict;
+        private static Dictionary<Type, TargetMethods> _actionHandleMethodDict;
         private static ActionHandleParam _actionHandleParam;
         private static object[] _actionMethodParam;
 
         static ActionHandler()
         {
-            _actionHandleMethodDict = new Dictionary<Type, TypeMethods>();
+            _actionHandleMethodDict = new Dictionary<Type, TargetMethods>();
             _actionHandleParam = new ActionHandleParam();
             _actionMethodParam = new object[2];
         }
@@ -50,7 +50,7 @@ namespace Game
         public static void Bind<T>(T target) where T : class
         {
             var actions = ActionHandleExtractor.ExtractActionHandles<T>();
-            _actionHandleMethodDict.Add(typeof(T), new TypeMethods(target, actions));
+            _actionHandleMethodDict.Add(typeof(T), new TargetMethods(target, actions));
         }
 
         public static void Execute<T>(int userId, Protocol.Response.Action action) where T : class
