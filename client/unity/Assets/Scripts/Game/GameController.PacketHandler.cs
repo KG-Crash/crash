@@ -45,11 +45,6 @@ namespace Game
             ActionService.Receive(response);
             return true;
         }
-
-        public void OnActionSelf(ActionQueue myAction)
-        {
-            
-        }
         
         [FlatBufferEvent]
         public async Task<bool> OnReady(Ready response)
