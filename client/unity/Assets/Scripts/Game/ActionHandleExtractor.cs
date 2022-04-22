@@ -7,24 +7,9 @@ using UnityEngine;
 
 namespace Game
 {
-    public class ActionHandleParam
+    public static class ActionHandleExtractor
     {
-        public int userId;
-    }
-    
-    public class ActionHandlerAttribute : Attribute
-    {
-        public ActionKind kind { get; private set; }
-
-        public ActionHandlerAttribute(ActionKind kind)
-        {
-            this.kind = kind;
-        }
-    }
-
-    public static class MethodExtractor
-    {
-        public static Dictionary<ActionKind, MethodInfo[]> ExtractActionHandleMethod<Target>() where Target : class
+        public static Dictionary<ActionKind, MethodInfo[]> ExtractActionHandles<Target>() where Target : class
         {
             var values = (ActionKind[]) Enum.GetValues(typeof(ActionKind));
             var methodDict =

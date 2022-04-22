@@ -79,9 +79,6 @@ namespace Game
 
         public ActionService ActionService { get; private set; }
 
-        private Dictionary<ActionKind, MethodInfo[]> _actionHandleMethodDict;
-        private ActionHandleParam _actionHandleParam;
-        private object[] _actionMethodParam;
 
         public Dictionary<LogicalObject, IActor> unitActorMaps { get; private set; } = new Dictionary<LogicalObject, IActor>();
 
@@ -103,6 +100,7 @@ namespace Game
         private void Awake()
         {
             Handler.Bind(this, Dispatcher.Instance);
+            ActionHandler.Bind(this);
 
             FPS = Shared.Const.Time.FPS;
             TPS = Shared.Const.Time.TPS;
@@ -117,10 +115,6 @@ namespace Game
 
             // 레디에서 이름 보내야 하지 않을까?
             _ = Client.Send(new Protocol.Request.Ready{ });
-
-            _actionHandleMethodDict = MethodExtractor.ExtractActionHandleMethod<GameController>();
-            _actionHandleParam = new ActionHandleParam();
-            _actionMethodParam = new object[2];
             
             InitializeUniRx();
         }
@@ -150,20 +144,7 @@ namespace Game
 
         public void OnAction(int userId, Protocol.Response.Action action)
         {
-            var actionKind = (ActionKind)action.Id;
-            var methods = _actionHandleMethodDict[actionKind];
-
-            _actionHandleParam.userId = userId;
-            
-            _actionMethodParam[0] = action;
-            _actionMethodParam[1] = _actionHandleParam; 
-            
-            for (var i = 0; i < methods.Length; i++)
-            {
-                methods[i].Invoke(this, _actionMethodParam);
-            }
-            
-            Debug.Assert(methods.Length > 0, $"{actionKind} 처리 메소드가 없음");
+            ActionHandler.Execute<GameController>(userId, action);
         }
 
         public void OnChat(int userId, Protocol.Response.InGameChat chat)
