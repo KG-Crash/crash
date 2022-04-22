@@ -4,13 +4,10 @@ namespace Game
 {
     public partial class GameController : IInputSubscriber
     {       
-        private GameUI _ui;
         private Vector2 _lastPositionSS;
         
         private void InitInput()
         {
-            _ui = GetComponent<GameUI>();
-            
             InputBridge._instance.Register(this);
         }
 

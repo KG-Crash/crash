@@ -1797,7 +1797,6 @@ MonoBehaviour:
   _focus: {fileID: 606488634}
   _lights:
   - {fileID: 1857948908}
-  _units: []
 --- !u!4 &370223807
 Transform:
   m_ObjectHideFlags: 0
@@ -4209,7 +4208,6 @@ GameObject:
   - component: {fileID: 1122248843}
   - component: {fileID: 1122248845}
   - component: {fileID: 1122248847}
-  - component: {fileID: 1122248848}
   - component: {fileID: 1122248849}
   - component: {fileID: 1122248850}
   m_Layer: 0
@@ -4259,34 +4257,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _spawnUnitOriginID: 0
   _spawnPlayerID: 0
-  _unitParent: {fileID: 592720869}
-  _spawnPositions:
-  - {fileID: 1074358150}
-  - {fileID: 435399228}
-  - {fileID: 1820750459}
-  - {fileID: 1774961044}
-  - {fileID: 230457425}
-  - {fileID: 685684699}
   _poolOffset: {fileID: 598182162}
   _focusTransform: {fileID: 606488634}
   _map: {fileID: 1442949749}
-  _unitFactory: {fileID: 1122248849}
+  unitActorFactory: {fileID: 1122248849}
   _unitPrefabTable: {fileID: 11400000, guid: 90bd777a778c3ef40941d1163ecba028, type: 2}
   _projectilehPrefabTable: {fileID: 11400000, guid: cc0c122d377e12141b81dcb0f6272455, type: 2}
   _networkMode: 1
---- !u!114 &1122248848
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1122248842}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e31bd47343774484f998dc9bb3017d00, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _uiImage: {fileID: 1267856889}
 --- !u!114 &1122248849
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4315,7 +4292,6 @@ MonoBehaviour:
   _chatLog: {fileID: 1612677424}
   _input: {fileID: 781797551}
   _scrollRect: {fileID: 1940785040}
-  _name: 
 --- !u!1001 &1154649189
 PrefabInstance:
   m_ObjectHideFlags: 0
