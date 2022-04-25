@@ -7,7 +7,7 @@ namespace Game
 {
     public class Projectile : LogicalObject
     {
-        public interface Listener : Unit.Listener
+        public new interface Listener : LogicalObject.Listener
         {
             void OnProjectileReach(Projectile projectile, Unit target);
             void OnSpawned(Projectile projectile);

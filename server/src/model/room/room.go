@@ -388,7 +388,6 @@ func (state *Actor) Receive(ctx actor.Context) {
 		state.mapSequence[state.nextSequence] = sender
 		state.nextSequence++
 
-		sequences := make(map[int32]string)
 		usersFuture := ctx.RequestFuture(ctx.Self(), &msg.RequestGetUsers{}, time.Hour)
 		ctx.AwaitFuture(usersFuture, func(res interface{}, err error) {
 			usersResponse := res.(*msg.ResponseGetUsers)
@@ -396,12 +395,10 @@ func (state *Actor) Receive(ctx actor.Context) {
 			users := []response.User{}
 			for _, user := range usersResponse.Users {
 				users = append(users, response.User{
-					Id:   user.ID,
-					Team: int32(user.Team),
+					Id:       user.ID,
+					Sequence: state.pid2Sequence(user.PID),
+					Team:     int32(user.Team),
 				})
-
-				seq := state.pid2Sequence(user.PID)
-				sequences[seq] = user.ID
 			}
 
 			state.selects().ForEach(func(i int, pid *actor.PID) {

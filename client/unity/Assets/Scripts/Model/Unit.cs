@@ -11,7 +11,7 @@ namespace Game
 {
     public partial class Unit : LogicalObject
     {
-        public new interface Listener : LogicalObject.Listener
+        public new interface Listener : Projectile.Listener
         {
             void OnAttack(Unit me, Unit you, Fix64 damage);
             void OnHeal(Unit me, Unit you, Fix64 heal);
@@ -308,7 +308,7 @@ namespace Game
             _owner = owner;
             _listener = listener;
             hp = maxhp;
-            projectiles = new ProjectileCollection(this, null); // TODO : 투사체 리스너 어떻게 할지 고민
+            projectiles = new ProjectileCollection(this, _listener);
 
             _lastAttackFrame = -attackSpeed / new Fix64(1000) / GameController.TimeDelta;
 

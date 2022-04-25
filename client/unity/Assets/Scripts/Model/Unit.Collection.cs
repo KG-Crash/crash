@@ -7,6 +7,8 @@ namespace Game
 {
     public class UnitCollection : IEnumerable<Unit>
     {
+        public static uint SEUQENCE = 0;
+
         private readonly Player _owner;
         private readonly Dictionary<uint, Unit> _units = new Dictionary<uint, Unit>();
         private Unit.Listener _listener;
@@ -37,7 +39,7 @@ namespace Game
 
         public void Add(int type, Map map, FixVector2 position)
         {
-            var unit = new Unit(0, type, map, _owner, position, _listener);
+            var unit = new Unit(SEUQENCE++, type, map, _owner, position, _listener);
 
             if (unit.owner != null)
             {
