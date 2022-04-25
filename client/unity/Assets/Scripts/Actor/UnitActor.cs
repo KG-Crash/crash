@@ -31,7 +31,7 @@ namespace Game
             }
         }
 
-        public FixVector3 position { set => this.position = value; }
+        public FixVector3 position { set => transform.position = value; }
         
         public void LookAt(FixVector3 worldPosition)
         {

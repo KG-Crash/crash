@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using FixMath.NET;
+using KG;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Game
@@ -7,10 +9,12 @@ namespace Game
     {
         private readonly Player _owner;
         private readonly Dictionary<uint, Unit> _units = new Dictionary<uint, Unit>();
+        private Unit.Listener _listener;
 
-        public UnitCollection(Player owner)
+        public UnitCollection(Player owner, Unit.Listener listener)
         {
             _owner = owner;
+            _listener = listener;
         }
 
         public Unit this[uint i]
@@ -31,8 +35,10 @@ namespace Game
             }
         }
 
-        public void Add(Unit unit)
+        public void Add(int type, Map map, FixVector2 position)
         {
+            var unit = new Unit(0, type, map, _owner, position, _listener);
+
             if (unit.owner != null)
             {
                 // unit.owner.units.Delete 하면 안됨
@@ -42,14 +48,6 @@ namespace Game
 
             unit.owner = this._owner;
             _units.Add(unit.uniqueID, unit);
-        }
-
-        public void AddRange(IEnumerable<Unit> units)
-        {
-            foreach (var unit in units)
-            {
-                Add(unit);
-            }
         }
 
         public void Delete(uint unitId)

@@ -135,7 +135,6 @@ namespace Game
                 return;
             }
             
-            Debug.Log($"LockStep.Turn.In({LockStep.Turn.In}) > LockStep.Turn.Out({LockStep.Turn.Out}) + 2");
             waitPacket = LockStep.Turn.In > LockStep.Turn.Out + 2;
 
             if(ActionService.Update())
@@ -157,8 +156,6 @@ namespace Game
 
         private void OnUpdateFrame(Frame f)
         {
-            Debug.Log($"LockStep.Turn.In({LockStep.Turn.In}) > LockStep.Turn.Out({LockStep.Turn.Out}) + 2");
-
             EnqueueHeartBeat();
             _me.upgrade.Update(f);
             OnUpdateFrameDebug(f);

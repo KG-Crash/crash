@@ -106,7 +106,7 @@ namespace Game
             if (unitActorMaps.TryGetValue(fireUnit, out var x) == false)
                 return;
 
-            var actor = (UnitActor) x;
+            var actor = x as UnitActor;
             actor.animator.SetTrigger("Attack");
             
             // TODO :: Projectile 오브젝트까지 풀링을 해야하는가?

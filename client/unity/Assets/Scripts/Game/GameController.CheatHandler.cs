@@ -23,13 +23,17 @@ namespace Game
         [BuildCommand("spawn unit")]
         public void SpawnUnit(int unitType, uint count, int? x = null, int? y = null)
         {
-            //for (int i = 0; i < count; i++)
-            //{
-            //    if (x is null || y is null)
-            //        EnqueueSpawn((uint)unitType, count, new FixVector2(_spawnPositions[_playerID].position));
-            //    else
-            //        EnqueueSpawn((uint)unitType, count, new FixVector2(_spawnPositions[_playerID].position) + new FixVector2((int)x, (int)y));
-            //}
+            for (int i = 0; i < count; i++)
+            {
+                if (x.HasValue == false)
+                    x = 0;
+
+                if (y.HasValue == false)
+                    y = 0;
+
+                EnqueueSpawn(unitType, new FixVector2(Fix64.One * x.Value, Fix64.One * y.Value));
+                // TODO: spawn position 복구해야함
+            }
         }
 
         [BuildCommand("attack to")]

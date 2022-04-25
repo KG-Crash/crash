@@ -81,7 +81,7 @@ namespace Game
 
         public Player(int id, Team team, int spawnIndex, Listener listener)
         {
-            units = new UnitCollection(this);
+            units = new UnitCollection(this, listener);
             this.listener = listener;
             this.id = id;
             this.upgrade = new Upgrade(this);

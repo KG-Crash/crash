@@ -50,13 +50,13 @@ namespace Game
             });
         }
 
-        public void EnqueueSpawn(uint unitType, uint count, FixVector2 pos)
+        public void EnqueueSpawn(int type, FixVector2 pos)
         {
             ActionService.Send(new Protocol.Request.Action
             {
                 Frame = LockStep.Frame.In,
                 Id = (int)Shared.ActionKind.Spawn,
-                Param1 = ActionExtension.LOWORD(unitType),
+                Param1 = ActionExtension.LOWORD((uint)type),
                 Param2 = (uint)ActionExtension.HIWORD((uint)pos.x) | ActionExtension.HIWORD((uint)pos.y)
             });
         }
@@ -112,11 +112,14 @@ namespace Game
         [ActionHandler(ActionKind.Spawn)]
         public void OnActionSpawn(Action action, ActionHandleParam actionHandleParam)
         {
-            //Debug.Log("on spawn unit ");
-            //var unitType = action.Param1.LOWORD();
-            //var x = action.Param2.HIWORD();
-            //var y = action.Param2.LOWORD();
-            //var playerId = actionHandleParam.userId;
+            Debug.Log("on spawn unit ");
+            var unitType = action.Param1.LOWORD();
+            var x = action.Param2.HIWORD();
+            var y = action.Param2.LOWORD();
+            var playerId = actionHandleParam.userId;
+
+            var player = _teams.Find(playerId);
+            player.units.Add(unitType, _map, new FixVector2(Fix64.One * x, Fix64.One * y));
 
             //Fix64 _startRadian = Fix64.Zero;
             //FixVector2 rot = GetSpawnRotation(playerId);            

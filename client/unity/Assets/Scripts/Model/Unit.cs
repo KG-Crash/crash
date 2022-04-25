@@ -300,7 +300,7 @@ namespace Game
             return GetCollisionCells(cell.position).All(x => x.walkable);
         }
 
-        public Unit(uint uniqueID, int type, KG.Map map, Player owner, FixVector3 position, Projectile.Listener listener) : base(listener)
+        public Unit(uint uniqueID, int type, KG.Map map, Player owner, FixVector3 position, Listener listener) : base(listener)
         {
             this.type = type;
             this.uniqueID = uniqueID;
@@ -308,7 +308,7 @@ namespace Game
             _owner = owner;
             _listener = listener;
             hp = maxhp;
-            projectiles = new ProjectileCollection(this, listener);
+            projectiles = new ProjectileCollection(this, null); // TODO : 투사체 리스너 어떻게 할지 고민
 
             _lastAttackFrame = -attackSpeed / new Fix64(1000) / GameController.TimeDelta;
 
