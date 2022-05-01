@@ -4264,6 +4264,13 @@ MonoBehaviour:
   _unitPrefabTable: {fileID: 11400000, guid: 90bd777a778c3ef40941d1163ecba028, type: 2}
   _projectilehPrefabTable: {fileID: 11400000, guid: cc0c122d377e12141b81dcb0f6272455, type: 2}
   _networkMode: 1
+  _spawnPositions:
+  - {fileID: 1074358150}
+  - {fileID: 435399228}
+  - {fileID: 1820750459}
+  - {fileID: 1774961044}
+  - {fileID: 230457425}
+  - {fileID: 685684699}
 --- !u!114 &1122248849
 MonoBehaviour:
   m_ObjectHideFlags: 0

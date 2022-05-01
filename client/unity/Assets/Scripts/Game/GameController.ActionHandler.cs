@@ -25,7 +25,7 @@ namespace Game
             {
                 Frame = LockStep.Frame.In,
                 Id = (int)ActionKind.Speed,
-                Param1 = ActionExtension.LOWORD((uint)times),
+                Param1 = ActionExtension.TOWORD(0, (ushort)times),
                 Param2 = 0
             });
         }
@@ -45,7 +45,7 @@ namespace Game
             { 
                 Frame = LockStep.Frame.In,
                 Id = (int)Shared.ActionKind.Pause,
-                Param1 = ActionExtension.HIWORD((uint)ability),
+                Param1 = ActionExtension.TOWORD(0, (ushort)ability),
                 Param2 = 0
             });
         }
@@ -56,8 +56,8 @@ namespace Game
             {
                 Frame = LockStep.Frame.In,
                 Id = (int)Shared.ActionKind.Spawn,
-                Param1 = ActionExtension.LOWORD((uint)type),
-                Param2 = (uint)ActionExtension.HIWORD((uint)pos.x) | ActionExtension.HIWORD((uint)pos.y)
+                Param1 = ActionExtension.TOWORD(0, (ushort)type),
+                Param2 = ActionExtension.TOWORD(pos)
             });
         }
 
@@ -67,7 +67,7 @@ namespace Game
             {
                 Frame = LockStep.Frame.In,
                 Id = (int)Shared.ActionKind.AttackPlayer,
-                Param1 = ActionExtension.HIWORD(playerID)
+                Param1 = ActionExtension.TOWORD(0, (ushort)playerID)
             });
         }
         #endregion
@@ -114,22 +114,13 @@ namespace Game
         {
             Debug.Log("on spawn unit ");
             var unitType = action.Param1.LOWORD();
-            var x = action.Param2.HIWORD();
-            var y = action.Param2.LOWORD();
+            var pos = action.Param2.WORD2POS();
             var playerId = actionHandleParam.userId;
-
             var player = _teams.Find(playerId);
-            player.units.Add(unitType, _map, new FixVector2(Fix64.One * x, Fix64.One * y));
 
-            //Fix64 _startRadian = Fix64.Zero;
-            //FixVector2 rot = GetSpawnRotation(playerId);            
-
-            //var ctx = new TemporalPlaceContext();
-            //var position = new FixVector2((int)x, (int)y); 
-            //Player player = GetPlayer((uint)playerId);
-
-            ////SpawnUnitToPosition(unitType, player, position, ctx);
-            //SpawnUnitToPlayerStart(unitType, player, ctx);
+            // var ctx = new TemporalPlaceContext();
+            
+            player.units.Add(unitType, _map, pos);
         }
         #endregion
         
