@@ -24,17 +24,16 @@ namespace Game
         [BuildCommand("spawn unit")]
         public void SpawnUnit(int unitType, uint count, int? x = null, int? y = null)
         {
-            FixVector2 spawnPos;
+            FixVector2 spawnCenterPos;
             if (x.HasValue == false || y.HasValue == false)
             {
                 var mySpawnPos = (FixVector3)_spawnPositions[Client.Instance.id].position;
-                spawnPos = new FixVector2(mySpawnPos.x, mySpawnPos.z);
+                spawnCenterPos = new FixVector2(mySpawnPos.x, mySpawnPos.z);
             }
             else
-                spawnPos = new FixVector2(Fix64.One *x.Value, Fix64.One *y.Value);
+                spawnCenterPos = new FixVector2(Fix64.One *x.Value, Fix64.One *y.Value);
 
-            for (int i = 0; i < count; i++)
-                EnqueueSpawn(unitType, spawnPos);
+            EnqueueSpawn(unitType, count, spawnCenterPos);
         }
 
         [BuildCommand("attack to")]

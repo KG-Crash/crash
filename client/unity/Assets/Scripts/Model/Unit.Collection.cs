@@ -39,7 +39,9 @@ namespace Game
 
         public void Add(int type, Map map, FixVector2 position)
         {
+            var ctx = new TemporalPlaceContext();
             var unit = new Unit(SEUQENCE++, type, map, _owner, position, _listener);
+            TemporalPlaceContext.PlaceUnit(map, ctx, unit, position);
 
             if (unit.owner != null)
             {

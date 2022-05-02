@@ -50,13 +50,13 @@ namespace Game
             });
         }
 
-        public void EnqueueSpawn(int type, FixVector2 pos)
+        public void EnqueueSpawn(int type, uint count, FixVector2 pos)
         {
             ActionService.Send(new Protocol.Request.Action
             {
                 Frame = LockStep.Frame.In,
                 Id = (int)Shared.ActionKind.Spawn,
-                Param1 = ActionExtension.TOWORD(0, (ushort)type),
+                Param1 = ActionExtension.TOWORD((ushort)count, (ushort)type),
                 Param2 = ActionExtension.TOWORD(pos)
             });
         }
@@ -114,13 +114,13 @@ namespace Game
         {
             Debug.Log("on spawn unit ");
             var unitType = action.Param1.LOWORD();
+            var count = action.Param1.HIWORD();
             var pos = action.Param2.WORD2POS();
             var playerId = actionHandleParam.userId;
             var player = _teams.Find(playerId);
-
-            // var ctx = new TemporalPlaceContext();
             
-            player.units.Add(unitType, _map, pos);
+            for (var i = 0; i < count; i++)
+                player.units.Add(unitType, _map, pos);
         }
         #endregion
         

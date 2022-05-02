@@ -232,7 +232,7 @@ namespace Game
             get => base.position;
             set
             {
-                region = map[position]?.region;
+                region = map[value]?.region;
 
                 // 길찾기 경로에서 현재 경로 제거
                 _regionPath.Remove(region);
@@ -253,6 +253,14 @@ namespace Game
             return unit == null || unit.IsDead;
         }
 
+        public static FixRect GetCollisionBox(int type, FixVector2 position)
+        {
+            var info = Table.From<TableUnit>()[type];
+            var size = new FixVector2(new Fix64(info.Width) / new Fix64(10000), new Fix64(info.Height) / new Fix64(10000));
+            var half = size / new Fix64(2);
+            return new FixRect(position.x - half.x, position.y - half.y, size.x, size.y);
+        }
+
         public FixRect GetCollisionBox(FixVector2 position)
         {
             var size = this.size;
@@ -269,9 +277,14 @@ namespace Game
             return collisionBox.Padding(padding);
         }
 
-        private IEnumerable<KG.Map.Cell> GetCollisionCells(FixVector2 position)
+        public IEnumerable<KG.Map.Cell> GetCollisionCells(FixVector2 position)
         {
-            var collisionBox = GetCollisionBox(position);
+            return GetCollisionCells(map, type, position);
+        }
+
+        public static IEnumerable<KG.Map.Cell> GetCollisionCells(KG.Map map, int type, FixVector2 position)
+        {
+            var collisionBox = GetCollisionBox(type, position);
             var min = new FixVector2(collisionBox.minX, collisionBox.minY);
             var max = new FixVector2(collisionBox.maxX, collisionBox.maxY);
 
