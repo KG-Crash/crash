@@ -12,104 +12,97 @@ namespace Game.Service
         static public string ParseMessage(string msg, GameController gameController)
         {
             List<object> paramListToCall = new List<object>();
-            object[] matchedParams = Array.Empty<object>();
 
-            Regex regex;
-            Match match;
-            String command;
-
-            ParameterInfo[] paramInfos;
             MethodInfo methodInfo = null;
 
-            int defaultParamQuantity;
-            bool hasLastArrayParam;
-            List<int> arrayParamList = null;
+            List<int> arrayTypeParamList = null;
 
             foreach (var method in GetCommandMethodInfos())
             {
-                command = method.GetCustomAttribute<BuildCommandAttribute>().command;
-                regex = new Regex("(?<command>" + command + ")" + @"\s*(?<param>.*)\s*");
-                match = regex.Match(msg);
+                var command = method.GetCustomAttribute<BuildCommandAttribute>().command;
+                var regex = new Regex("(?<command>" + command + ")" + @"\s*(?<param>.*)\s*");
+                var match = regex.Match(msg);
 
-                defaultParamQuantity = 0;
-                hasLastArrayParam = false;
+                int defaultParamQuantity = 0;
+                bool hasLastArrayParam = false;
 
-                if( !string.IsNullOrEmpty(match.Groups["command"].ToString()))
+                if (string.IsNullOrEmpty(match.Groups["command"].ToString()))
+                    continue;
+
+                var matchedParams = Array.Empty<object>();
+                var paramInfos = methodInfo.GetParameters();
+
+                methodInfo = method;
+
+                if (paramInfos.Length == 0)
+                    break;
+
+                foreach (var param in paramInfos)
                 {
-                    matchedParams = Array.Empty<object>();
-                    methodInfo = method;
-                    paramInfos = methodInfo.GetParameters();
+                    if (param.HasDefaultValue)
+                        defaultParamQuantity++;
+                }
 
-                    foreach (var param in paramInfos)
+                if (paramInfos.Length > 0 && paramInfos.Last().ParameterType.IsArray)
+                {
+                    hasLastArrayParam = true;
+                    arrayTypeParamList = new List<int>();
+                }
+
+                if (!string.IsNullOrEmpty(match.Groups["param"].ToString()))
+                    matchedParams = match.Groups["param"].ToString().Split();
+
+                if (paramInfos.Length - matchedParams.Length > defaultParamQuantity + Convert.ToInt32(hasLastArrayParam))
+                    return msg;
+
+
+
+                try
+                {
+                    int loopCount = matchedParams.Length + defaultParamQuantity;
+
+                    if (matchedParams.Length == paramInfos.Length && defaultParamQuantity > 0)
+                        loopCount = matchedParams.Length;
+
+                    for (int i = 0; i < loopCount; i++)
                     {
-                        if (param.HasDefaultValue)
-                            defaultParamQuantity++;
-                    }
+                        object param = null;
+                        object convertedParam = null;
 
-                    if (paramInfos.Length > 0 && paramInfos.Last().ParameterType.IsArray)
-                    {
-                        hasLastArrayParam = true;
-                        arrayParamList = new List<int>();
-                    }
+                        if (i >= matchedParams.Length)
+                            param = paramInfos[i].DefaultValue;
+                        else
+                            param = matchedParams[i];
 
-                    if (!string.IsNullOrEmpty(match.Groups["param"].ToString()))
-                        matchedParams = match.Groups["param"].ToString().Split();
 
-                    if (paramInfos.Length - matchedParams.Length > defaultParamQuantity + Convert.ToInt32(hasLastArrayParam))
-                        return msg;
-
-                    if (paramInfos.Length == 0)
-                        break;
-                    else
-                    {
-                        try
+                        if (i >= paramInfos.Length - 1 && arrayTypeParamList != null)
                         {
-                            int loopCount = matchedParams.Length + defaultParamQuantity;
-
-                            if (matchedParams.Length == paramInfos.Length && defaultParamQuantity > 0)
-                                loopCount = matchedParams.Length;
-
-                            for (int i = 0; i < loopCount; i++)
-                            {
-                                object param = null;
-                                object convertedParam = null;
-
-                                if (i >= matchedParams.Length)
-                                    param = paramInfos[i].DefaultValue;
-                                else
-                                    param = matchedParams[i];
-
-
-                                if (i >= paramInfos.Length - 1 && arrayParamList != null)
-                                {
-                                    Debug.Log(i.GetType());
-                                    convertedParam = Convert.ChangeType(param, i.GetType());
-                                    arrayParamList.Add((int)convertedParam);
-                                }
-                                else
-                                {                                    
-                                    if (param is null) 
-                                        convertedParam = null;
-                                    else
-                                        convertedParam = Convert.ChangeType(param, paramInfos[i].ParameterType);
-
-                                    paramListToCall.Add(convertedParam);
-                                }
-                            }
+                            Debug.Log(i.GetType());
+                            convertedParam = Convert.ChangeType(param, i.GetType());
+                            arrayTypeParamList.Add((int)convertedParam);
                         }
-                        catch (FormatException e)
+                        else
                         {
-                            return msg;
+                            if (param is null)
+                                convertedParam = null;
+                            else
+                                convertedParam = Convert.ChangeType(param, paramInfos[i].ParameterType);
+
+                            paramListToCall.Add(convertedParam);
                         }
                     }
                 }
+                catch (FormatException e)
+                {
+                    return msg;
+                }
             }
 
-            if (methodInfo == null)
+            if (methodInfo is null)
                 return msg;
 
-            if (arrayParamList != null)
-                paramListToCall.Add(arrayParamList.ToArray());
+            if (arrayTypeParamList != null)
+                paramListToCall.Add(arrayTypeParamList.ToArray());
 
             if (paramListToCall.Count > 0)
                 methodInfo.Invoke(gameController, paramListToCall.ToArray());
