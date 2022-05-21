@@ -162,12 +162,12 @@ namespace Game
             unitActorMaps.Add(me, actor);
         }
 
-        public void OnLookAt(LogicalObject me, FixVector3 direction)
+        public void OnLookAt(LogicalObject me, FixVector3 worldPosition)
         {
             if (unitActorMaps.TryGetValue(me, out var actor) == false)
                 return;
 
-            actor.LookAt(direction);
+            actor.LookAt(worldPosition);
         }
     }
 }

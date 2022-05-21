@@ -598,9 +598,7 @@ namespace Game
             _lastAttackFrame = currentFrame;
 
             _attackers.Clear();
-
-            // TODO: 컨트롤러에서 맵핑된 유닛 액터 처리
-            //transform.LookAt(unit.position);
+            _listener?.OnLookAt(this, unit.position);
             return true;
         }
 
