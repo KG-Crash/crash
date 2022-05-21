@@ -56,12 +56,14 @@ namespace Game
             return projectile;
         }
 
-        public void Remove(uint id)
+        public void Append(Projectile projectile)
         {
-            if (this._projectiles.ContainsKey(id) == false)
-                return;
+            _projectiles.Add(projectile.uniqueID, projectile);
+        }
 
-            this._projectiles.Remove(id);
+        public void Delete(Projectile projectile)
+        {
+            _projectiles.Remove(projectile.uniqueID);
         }
     }
 }

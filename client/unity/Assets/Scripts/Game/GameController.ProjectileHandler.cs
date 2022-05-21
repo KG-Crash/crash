@@ -8,10 +8,19 @@ namespace Game
     public partial class GameController : Projectile.Listener, ProjectileActor.Listener
     {
         // <projectileID, targetUnit>
-        public Dictionary<Projectile, Unit> fireHistory { get; set; } = new Dictionary<Projectile, Unit>();
+        public Dictionary<Projectile, Unit> _fireHistory { get; set; }
+        public ProjectileCollection _projectiles;
+
+        private void InitializeProjectileHandle()
+        {
+            _fireHistory = new Dictionary<Projectile, Unit>();
+            _projectiles = new ProjectileCollection(null, this);
+        }
 
         public void OnSpawned(Projectile projectile)
         {
+            _projectiles.Append(projectile);
+
             if (!unitActorMaps.TryGetValue(projectile.owner, out var unitActor))
                 return;
             
@@ -23,7 +32,9 @@ namespace Game
         
         public void OnProjectileReach(Projectile projectile, Unit target)
         {
-            if (fireHistory.TryGetValue(projectile, out var fireUnit))
+            _projectiles.Delete(projectile);
+            
+            if (_fireHistory.TryGetValue(projectile, out var fireUnit))
             {
                 if (!Unit.IsNullOrDead(fireUnit))
                 {
@@ -34,11 +45,11 @@ namespace Game
                     fireUnit.AddHP(-damage, fireUnit);
                 }
                 
-                fireHistory.Remove(projectile);
+                _fireHistory.Remove(projectile);
             }
 
             if (projectile.owner != null)
-                projectile.owner.projectiles.Remove(projectile.uniqueID);
+                projectile.owner.projectiles.Delete(projectile);
 
             var actor = unitActorMaps[projectile];
             if (actor is ProjectileActor projectileActor) 

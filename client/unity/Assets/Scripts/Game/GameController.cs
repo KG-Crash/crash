@@ -130,6 +130,7 @@ namespace Game
             _ = Client.Send(new Protocol.Request.Ready{ });
             
             InitializeUniRx();
+            InitializeProjectileHandle();
         }
 
         private void Start()

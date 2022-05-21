@@ -37,11 +37,15 @@ namespace Game
             return projectile;
 		}
 
-        public ProjectileActor GetProjectileActor(int type) 
-		{
-            var projectile = _objectQueueDict[type].Count > 0 ? _objectQueueDict[type].Dequeue() : CreateNewProjectile(type);
-            projectile.gameObject.SetActive(true);
-            return projectile;
+        public ProjectileActor GetProjectileActor(int type)
+        {
+	        if (!_objectQueueDict.ContainsKey(type))
+	        {
+		        return null;
+	        }
+	        var projectileActor = _objectQueueDict[type].Count > 0 ? _objectQueueDict[type].Dequeue() : CreateNewProjectile(type);
+			projectileActor.gameObject.SetActive(true);
+            return projectileActor;
         }
         
         public void ReturnProjectile(int type, ProjectileActor projectileActor)

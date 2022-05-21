@@ -10,6 +10,9 @@ namespace Game
             if (from != null)
                 from.owner.exp += (uint)unit.killScore;
 
+            foreach (var projectile in unit.projectiles.Values)
+                projectile.owner = null;
+            
             if (unitActorMaps.TryGetValue(unit, out var x) == false)
                 return;
 
@@ -111,7 +114,7 @@ namespace Game
             
             // TODO :: Projectile 오브젝트까지 풀링을 해야하는가?
             var projectile = fireUnit.projectiles.Add(SEQUENCE++, target);
-            fireHistory.Add(projectile, target);
+            _fireHistory.Add(projectile, target);
 		}
 
         public void OnPositionChanging(LogicalObject me, FixVector2 from, FixVector2 to)
