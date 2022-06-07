@@ -11,22 +11,34 @@ namespace Game
 {
     public partial class Unit : LogicalObject
     {
-        public new interface Listener : Projectile.Listener
-        {
-            void OnAttack(Unit me, Unit you, Fix64 damage);
-            void OnHeal(Unit me, Unit you, Fix64 heal);
-            void OnDamaged(Unit me, Unit you, Fix64 damage);
-            void OnDead(Unit unit, Unit from);
-            void OnOwnerChanged(Player before, Player after, Unit unit);
-            void OnStartMove(Unit unit);
-            void OnEndMove(Unit unit);
-            void OnFireProjectile(Unit fireUnit, Unit you, int projectileOriginID);
-            void OnIdle(Unit unit);
-            void OnUpdate(Unit me, Frame f);
-            void OnHPChanging(Unit me, int from, int to);
-            void OnHPChanged(Unit me, int before, int after);
-            void OnSpawned(Unit me);
-        }
+        public delegate void AttackHandler(Unit me, Unit you, Fix64 damage);
+        public delegate void HealHandler(Unit me, Unit you, Fix64 heal);
+        public delegate void DamagedHandler(Unit me, Unit you, Fix64 damage);
+        public delegate void DeadHandler(Unit unit, Unit from);
+        public delegate void OwnerChangedHandler(Player before, Player after, Unit unit);
+        public delegate void StartMoveHandler(Unit unit);
+        public delegate void EndMoveHandler(Unit unit);
+        public delegate void FireProjectileHandler(Unit fireUnit, Unit you, int projectileOriginID);
+        public delegate void IdleHandler(Unit unit);
+        public delegate void UpdateHandler(Unit me, Frame f);
+        public delegate void HPChangingHandler(Unit me, int from, int to);
+        public delegate void HPChangedHandler(Unit me, int before, int after);
+        public delegate void SpawnedHandler(Unit me);
+
+        public event AttackHandler OnAttack;
+        public event HealHandler OnHeal;
+        public event DamagedHandler OnDamaged;
+        public event DeadHandler OnDead;
+        public event OwnerChangedHandler OnOwnerChanged;
+        public event StartMoveHandler OnStartMove;
+        public event EndMoveHandler OnEndMove;
+        public event FireProjectileHandler OnFireProjectile;
+        public event IdleHandler OnIdle;
+        public event UpdateHandler OnUpdate;
+        public event HPChangingHandler OnHPChanging;
+        public event HPChangedHandler OnHPChanged;
+        public event SpawnedHandler OnSpawned;
+
 
         public Shared.Table.Unit info => Table.From<TableUnit>()[type];
         public List<Shared.Table.Skill> skills => Table.From<TableSkill>().Values.Where(x => x.Unit == type).ToList();
@@ -155,22 +167,16 @@ namespace Game
             get => _hp;
             set 
             {
-                _listener?.OnHPChanging(this, this._hp, value);
+                OnHPChanging?.Invoke(this, this._hp, value);
                 var before = this._hp;
                 _hp = value;
-                _listener?.OnHPChanged(this, before, value);
+                OnHPChanged?.Invoke(this, before, value);
             }
         }
 
         public int killScore
         {
             get => info.KillScore;
-        }
-
-        public Listener listener
-        {
-            get => _listener;
-            set => _listener = value;
         }
 
         public Player owner
@@ -180,7 +186,7 @@ namespace Game
             {
                 var before = _owner;
                 _owner = value;
-                _listener?.OnOwnerChanged(before, _owner, this);
+                OnOwnerChanged?.Invoke(before, _owner, this);
             }
         }
 
@@ -215,7 +221,6 @@ namespace Game
         [SerializeField] private Fix64 _hp;
         [SerializeField] private Player _owner;
         [NonSerialized] private KG.Map _map;
-        [NonSerialized] private Listener _listener;
         
         [NonSerialized] public UnitState _currentState;
         [NonSerialized] public Unit _target;
@@ -313,21 +318,20 @@ namespace Game
             return GetCollisionCells(cell.position).All(x => x.walkable);
         }
 
-        public Unit(uint uniqueID, int type, KG.Map map, Player owner, FixVector3 position, Listener listener) : base(listener)
+        public Unit(uint uniqueID, int type, KG.Map map, Player owner, FixVector3 position)
         {
             this.type = type;
             this.uniqueID = uniqueID;
             _map = map;
             _owner = owner;
-            _listener = listener;
             hp = maxhp;
-            projectiles = new ProjectileCollection(this, _listener);
+            projectiles = new ProjectileCollection(this);
 
             _lastAttackFrame = -attackSpeed / new Fix64(1000) / GameController.TimeDelta;
 
             GameController.updateFrameStream.Subscribe(Action);
 
-            _listener?.OnSpawned(this);
+            OnSpawned?.Invoke(this);
             this.position = position;
         }
 
@@ -342,15 +346,15 @@ namespace Game
             _currentState = state;
             
             if (prevState == UnitState.Move)
-                listener?.OnEndMove(this);
+                OnEndMove?.Invoke(this);
 
             switch (_currentState)
             {
                 case UnitState.Idle:
-                    listener?.OnIdle(this);
+                    OnIdle?.Invoke(this);
                     break;
                 case UnitState.Move:
-                    listener?.OnStartMove(this);
+                    OnStartMove?.Invoke(this);
                     break;
                 case UnitState.Attack:
                     Attack(_target);
@@ -483,7 +487,7 @@ namespace Game
                     break;
             }
 
-            _listener?.OnUpdate(this, f);
+            OnUpdate?.Invoke(this, f);
         }
 
         private Unit SearchEnemyIn(Fix64 searchRadius)
@@ -568,9 +572,9 @@ namespace Game
             hp = Fix64.Clamp(Fix64.Zero, maxhp, hp + value);
 
             if (value < Fix64.Zero)
-                listener?.OnDamaged(this, from, -value);
+                OnDamaged?.Invoke(this, from, -value);
             else
-                listener?.OnHeal(this, from, value);
+                OnHeal?.Invoke(this, from, value);
 
             if (_hp <= Fix64.Zero)
                 Die(from);
@@ -587,25 +591,25 @@ namespace Game
             if (attackType == AttackType.Immediately)
             {
                 unit.AddHP(-damage, this);
-                listener?.OnAttack(this, unit, damage);
+                OnAttack?.Invoke(this, unit, damage);
             }
             else
             {
-                listener?.OnFireProjectile(this, unit, projectileType);
+                OnFireProjectile?.Invoke(this, unit, projectileType);
             }
 
             
             _lastAttackFrame = currentFrame;
 
             _attackers.Clear();
-            _listener?.OnLookAt(this, unit.position);
+            OnLookAt?.Invoke(this, unit.position);
             return true;
         }
 
         public void Die(Unit from)
         {
             _currentState = UnitState.Dead;
-            listener?.OnDead(this, from);
+            OnDead?.Invoke(this, from);
             owner.units.Delete(this);
             region.units.Remove(this);
         }

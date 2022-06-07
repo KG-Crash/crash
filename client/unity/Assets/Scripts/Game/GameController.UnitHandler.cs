@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game
 {
-    public partial class GameController : Unit.Listener, UnitActor.Listener
+    public partial class GameController
     {
         public void OnDead(Unit unit, Unit from)
         {
@@ -158,7 +158,7 @@ namespace Game
             if (unitActorMaps.ContainsKey(me))
                 return;
 
-            var actor = unitActorFactory.CreateUnitActor(me.type, _unitPrefabTable, null, this);
+            var actor = unitActorFactory.CreateUnitActor(me.type, _unitPrefabTable, null);
             unitActorMaps.Add(me, actor);
         }
 

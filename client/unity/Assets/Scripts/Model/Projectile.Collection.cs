@@ -37,13 +37,11 @@ namespace Game
 
         #region private fields
         private Unit _unit;
-        private Projectile.Listener _listener;
         #endregion
 
-        public ProjectileCollection(Unit unit, Projectile.Listener listener)
+        public ProjectileCollection(Unit unit)
         {
             _unit = unit;
-            _listener = listener;
         }
 
         public Projectile Add(uint id, Unit target)
@@ -51,7 +49,7 @@ namespace Game
             if (this._projectiles.ContainsKey(id))
                 throw new Exception("asd");
 
-            var projectile = new Projectile(id, _unit, target, _listener);
+            var projectile = new Projectile(id, _unit, target);
             this._projectiles.Add(id, projectile);
             return projectile;
         }

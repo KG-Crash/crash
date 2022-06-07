@@ -11,12 +11,10 @@ namespace Game
 
         private readonly Player _owner;
         private readonly Dictionary<uint, Unit> _units = new Dictionary<uint, Unit>();
-        private Unit.Listener _listener;
 
-        public UnitCollection(Player owner, Unit.Listener listener)
+        public UnitCollection(Player owner)
         {
             _owner = owner;
-            _listener = listener;
         }
 
         public Unit this[uint i]
@@ -40,7 +38,7 @@ namespace Game
         public void Add(int type, Map map, FixVector2 position)
         {
             var ctx = new TemporalPlaceContext();
-            var unit = new Unit(SEUQENCE++, type, map, _owner, position, _listener);
+            var unit = new Unit(SEUQENCE++, type, map, _owner, position);
             TemporalPlaceContext.PlaceUnit(map, ctx, unit, position);
 
             if (unit.owner != null)

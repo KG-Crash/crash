@@ -7,13 +7,13 @@ namespace Game
 {
     public class Projectile : LogicalObject
     {
-        public new interface Listener : LogicalObject.Listener
-        {
-            void OnProjectileReach(Projectile projectile, Unit target);
-            void OnSpawned(Projectile projectile);
-        }
+        public delegate void ReachHandler(Projectile projectile, Unit target);
+        public delegate void SpawnedHandler(Projectile projectile);
 
-        public Projectile(uint uniqueID, Unit from, Unit to, Listener listener) : base(listener)
+        public event ReachHandler OnReach;
+        public event SpawnedHandler OnSpawned;
+
+        public Projectile(uint uniqueID, Unit from, Unit to)
         {
             this.uniqueID = uniqueID;
             type = from.projectileType;
@@ -23,7 +23,7 @@ namespace Game
             info = Table.From<TableProjectile>()[type];
             currentState = ProjectileState.Shoot;
             
-            listener?.OnSpawned(this);
+            OnSpawned?.Invoke(this);
             GameController.updateFrameStream.Subscribe(Action);
             // TODO :: 풀링을 핟면 Disable 해야함.
             // Disable();
@@ -33,7 +33,6 @@ namespace Game
         public int type { get; private set; }
         public uint uniqueID { get; private set; }
 
-        public Listener listener { get; set; }
         public FixVector3 position { get; set; }
 
         public Shared.Table.Projectile info { get; private set; }
@@ -104,7 +103,7 @@ namespace Game
         {
             currentState = ProjectileState.Hit;
             
-            listener?.OnProjectileReach(this, target);
+            OnReach?.Invoke(this, target);
         }
 
         private void DeltaMove(Fix64 delta)
@@ -118,7 +117,7 @@ namespace Game
             if (magnitude != Fix64.Zero)
             {
                 var direction = diff / magnitude;
-                listener?.OnLookAt(this, moveTarget.Value);
+                OnLookAt?.Invoke(this, moveTarget.Value); // 이거 뭐냐
 
                 var arrived = magnitude < (speed * delta);
                 if (arrived)

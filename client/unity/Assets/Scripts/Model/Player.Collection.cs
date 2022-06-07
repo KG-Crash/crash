@@ -37,13 +37,11 @@ namespace Game
 
         #region private fields
         private Team _team;
-        private Player.Listener _listener;
         #endregion
 
-        public PlayerCollection(Team team, Player.Listener listener)
+        public PlayerCollection(Team team)
         {
             _team = team;
-            _listener = listener;
         }
 
         public Player Add(int id, int spawnIndex)
@@ -51,7 +49,7 @@ namespace Game
             if (this._players.ContainsKey(id))
                 throw new Exception("asd");
 
-            var player = new Player(id, _team, spawnIndex, _listener);
+            var player = new Player(id, _team, spawnIndex);
             this._players.Add(id, player);
             return player;
         }

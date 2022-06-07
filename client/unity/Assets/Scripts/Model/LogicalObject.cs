@@ -1,24 +1,19 @@
 ﻿using FixMath.NET;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Game
 {
     public abstract class LogicalObject
     {
-        public interface Listener
-        {
-            void OnRemove(LogicalObject unit);
-            void OnPositionChanging(LogicalObject me, FixVector2 from, FixVector2 to);
-            void OnPositionChanged(LogicalObject me, FixVector2 before, FixVector2 after);
-            void OnLookAt(LogicalObject me, FixVector3 worldPosition);
-        }
+        public delegate void RemoveHandler(LogicalObject unit);
+        public delegate void PositionChangingHandler(LogicalObject me, FixVector2 from, FixVector2 to);
+        public delegate void PositionChangedHandler(LogicalObject me, FixVector2 before, FixVector2 after);
+        public delegate void LookAtHandler(LogicalObject me, FixVector3 worldPosition);
 
-        private Listener _listener;
-        
+        public event RemoveHandler OnRemove;
+        public event PositionChangingHandler OnPositionChanging;
+        public event PositionChangedHandler OnPositionChanged;
+        public event LookAtHandler OnLookAt;
+
         public int type { get; set; }
 
         public abstract int damage { get; }
@@ -30,21 +25,19 @@ namespace Game
             get => _position;
             set
             {
-                _listener?.OnPositionChanging(this, position, value);
+                OnPositionChanging?.Invoke(this, position, value);
                 var before = position;
                 _position = value;
-                _listener?.OnPositionChanged(this, before, value);
+                OnPositionChanged?.Invoke(this, before, value);
             }
         }
 
-        protected LogicalObject(Listener listener)
-        {
-            _listener = listener;
-        }
+        protected LogicalObject()
+        { }
 
         public virtual void Destroy()
         {
-            _listener?.OnRemove(this);
+            OnRemove?.Invoke(this);
         }
     }
 }

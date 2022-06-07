@@ -7,12 +7,13 @@ namespace Game
 {
     public class Player
     {
-        public interface Listener : Unit.Listener
-        {
-            void OnFinishUpgrade(Ability ability);
-            void OnAttackTargetChanged(Player attacker, Player target);
-            void OnPlayerLevelChanged(Player player, uint level);
-        }
+        public delegate void FinishUpgradeHandler(Ability ability);
+        public delegate void AttackTargetChangedHandler(Player attacker, Player target);
+        public delegate void LevelChangedHandler(Player player, uint level);
+
+        public event FinishUpgradeHandler OnFinishUpgrade;
+        public event AttackTargetChangedHandler OnAttackTargetChanged;
+        public event LevelChangedHandler OnLevelChanged;
 
         public int id { get; private set; }
         public int spawnIndex { get; private set; }
@@ -24,7 +25,7 @@ namespace Game
             set
             {
                 if (_target != value)
-                    listener?.OnAttackTargetChanged(this, value);
+                    OnAttackTargetChanged?.Invoke(this, value);
 
                 _target = value;
             }
@@ -57,11 +58,9 @@ namespace Game
             set
             {
                 _level = value;
-                listener?.OnPlayerLevelChanged(this, _level);
+                OnLevelChanged?.Invoke(this, _level);
             }
         }
-
-        public Listener listener { get; private set; }
 
         public Upgrade upgrade { get; private set; }
 
@@ -79,10 +78,9 @@ namespace Game
 
         public Team team { get; private set; }
 
-        public Player(int id, Team team, int spawnIndex, Listener listener)
+        public Player(int id, Team team, int spawnIndex)
         {
-            units = new UnitCollection(this, listener);
-            this.listener = listener;
+            units = new UnitCollection(this);
             this.id = id;
             this.upgrade = new Upgrade(this);
             this.team = team;

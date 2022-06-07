@@ -11,12 +11,9 @@ namespace Game
 
     public partial class UnitActor : MonoBehaviour, IActor
     {
-        public interface Listener
-        {            
-            void OnClear(UnitActor unitActor);
-        }
+        public delegate void ClearHandler(UnitActor unitActor);
 
-        private Listener _listener;
+        public event ClearHandler OnClear;
 
         [SerializeField] private GameObject _highlighted;
         [SerializeField] public Animator animator;
@@ -45,12 +42,10 @@ namespace Game
             transform.SetParent(parent);
         }
 
-        public void Init(Listener listener)
+        public void Init()
         {
             InitAnimation();
             LoadMaterials();
-
-            _listener = listener;
         }
     }
 }
