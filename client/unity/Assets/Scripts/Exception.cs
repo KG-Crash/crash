@@ -1,6 +1,5 @@
+using Shared.Type;
 using System;
-using FixMath.NET;
-using Shared;
 
 public class ClientException : Exception
 {

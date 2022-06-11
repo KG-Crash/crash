@@ -1,7 +1,7 @@
 {
   "0": {
     "Id": 0,
-    "Speed": 3,
-    "Targeting": true
+    "Targeting": true,
+    "Speed": 3
   }
 }

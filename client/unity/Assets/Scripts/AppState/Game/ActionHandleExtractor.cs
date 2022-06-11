@@ -1,8 +1,8 @@
+using Shared.Type;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Shared;
 using UnityEngine;
 
 namespace Game

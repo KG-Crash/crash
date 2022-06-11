@@ -1,19 +1,19 @@
-// DO NOT MODIFY
+// DO NOT MODIFY DIRECTLY
 
-namespace Shared
+using System;
+
+namespace Shared.Type
 {
-    {% for enumName, enumSet in dataSet.items() -%}
-    public enum {{ enumName }}
+    public enum {{ name }}
     {
-        {% for name, value in enumSet.items() -%}
-        {{ name }}{% if value != 'default' %} = 0x{{ '%08X' % value }}{% endif %}
-        {%- if not loop.last -%},{%- endif %}
+        {% for scope, item in items.items() -%}
+        {{ scope }}
+        {%- if item.index is not none %} = 0x{{ '%08x' % item.index }}{% endif %}
+        {%- if not loop.last -%}
+        ,{% endif %}
+        {%- if item.desc is not none %} // {{ item.desc }}{% endif %}
         {%- if not loop.last %}
-        {% endif %}
+        {% endif -%}
         {%- endfor %}
     }
-    {%- if not loop.last %}
-
-    {% endif %}
-    {%- endfor %}
 }
