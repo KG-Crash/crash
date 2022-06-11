@@ -1,26 +1,24 @@
 // DO NOT MODIFY
 
+using System;
+
 namespace Shared.Const
 {
-    {%- for name, constSet in dataSet.items() %}
-    public static class {{ name }}
+    {%- for scope, props in items.items() %}
+    public static class {{ scope }}
     {
-        {% for key, const in constSet.items() -%}
-        {%- set prefix = "" -%}
-        {%- set suffix = "" -%}
-        {%- if const.type == 'string' -%}
-            {%- set prefix = '"' -%}
-            {%- set suffix = '"' -%}
-            {%- if '\n' in const.value -%}
-                {%- set prefix = '@"'-%}
-            {%- endif-%}
+        {%- for prop_name, prop_conf in props.items() %}
+        public static readonly {{ prop_conf.type.pure }} {{ prop_name }} =
+        {%- if prop_conf.value is none %} null;
+        {%- elif prop_conf.type.enum %} {{ prop_conf.type.based }}.{{ prop_conf.value }};
+        {%- elif prop_conf.type.based == 'DateTime' %} DateTime.Parse("{{ prop_conf.value }}");
+        {%- elif prop_conf.type.based == 'TimeSpan' %} TimeSpan.Parse("{{ prop_conf.value }}");
+        {%- elif prop_conf.type.based == 'string' %} {% if '\n' in prop_conf.value %}@{% endif %}"{{ prop_conf.value }}";
+        {%- else %} {{ prop_conf.value }};
         {%- endif -%}
-        public static readonly {{ const.type }} {{ key }} = {{ prefix }}{% if const.value is none %}null{% else %}{{ const.value }}{% endif %}{{ suffix }};
-        {%- if not loop.last %}
-        {% endif %}
         {%- endfor %}
     }
     {%- if not loop.last %}
-    {% endif %}
+    {% endif -%}
     {%- endfor %}
 }

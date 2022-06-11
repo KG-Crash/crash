@@ -1,15 +1,15 @@
 // DO NOT MODIFY
 
 using Newtonsoft.Json;
+using Shared.Type;
 using System;
 using System.Collections.Generic;
 
-namespace Shared.Table
+namespace Shared.Table{% if usage == 'common' %}.Common{% endif %}
 {
-    {% for name, data in dataSet.items() -%}
-    public class {{ name }}
+    public class {{ name }}{% if usage != 'common' %} : Shared.Table.Common.{{ name }}{% endif %}
     {
-        {% for property in data.properties -%}
+        {% for property in properties -%}
         {% if property.key -%}
         [Key]
         {%- endif %}
@@ -18,23 +18,4 @@ namespace Shared.Table
         {% endif -%}
         {%- endfor %}
     }
-    {%- if not loop.last %}
-
-    {% endif -%}
-    {%- endfor %}
-
-    {% for name, data in dataSet.items() -%}
-    [Table("json/{{ name }}.json")]
-    public partial class Table{{ name }} : {% if data.primary -%}
-    BaseDict<{{ data.primary }}, {{ name }}>
-    {%- elif data.index -%}
-    BaseDict<{{ data.index }}, List<{{ name }}>>
-    {%- else -%}
-    BaseList<{{ name }}>
-    {%- endif %}
-    { }
-    {%- if not loop.last %}
-
-    {% endif -%}
-    {%- endfor %}
 }

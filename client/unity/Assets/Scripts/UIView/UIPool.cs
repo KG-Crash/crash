@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Shared;
+using Shared.Type;
 using UnityEngine;
 
 public class UIPool : MonoBehaviour

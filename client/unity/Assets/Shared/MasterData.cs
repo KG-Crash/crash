@@ -109,7 +109,7 @@ namespace Shared.Table
 
     public static class Table
     {
-        private static Dictionary<Type, BaseTable> _loadedTableDict = new Dictionary<Type, BaseTable>();
+        private static Dictionary<System.Type, BaseTable> _loadedTableDict = new Dictionary<System.Type, BaseTable>();
 
         static Table()
         {

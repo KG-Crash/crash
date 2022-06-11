@@ -1,6 +1,7 @@
 using FixMath.NET;
 using Shared;
 using Shared.Table;
+using Shared.Type;
 using System;
 using System.Collections.Generic;
 using System.Linq;

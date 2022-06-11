@@ -1,5 +1,7 @@
 // DO NOT MODIFY
 
+using System;
+
 namespace Shared.Const
 {
     public static class Portal
@@ -16,7 +18,7 @@ namespace Shared.Const
     
     public static class Input
     {
-        public static readonly double CameraMoveDelta = 10;
+        public static readonly double CameraMoveDelta = 10.0;
         public static readonly double DragDelta = 0.1;
         public static readonly double ScrollDelta = 0.1;
     }

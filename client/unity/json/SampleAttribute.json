@@ -1,14 +1,14 @@
 {
   "그룹키3": {
+    "GroupKey": "그룹키3",
     "GroupField1": null,
     "GroupField2": null,
-    "GroupField3": null,
-    "GroupKey": "그룹키3"
+    "GroupField3": null
   },
   "그룹키4": {
+    "GroupKey": "그룹키4",
     "GroupField1": null,
     "GroupField2": null,
-    "GroupField3": null,
-    "GroupKey": "그룹키4"
+    "GroupField3": null
   }
 }

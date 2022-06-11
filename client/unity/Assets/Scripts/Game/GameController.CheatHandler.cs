@@ -1,15 +1,13 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using FixMath.NET;
 using Network;
-using Shared;
+using Shared.Type;
+using System;
 using UnityEngine;
 
 
 namespace Game
 {
-	[AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method)]
 	public class BuildCommandAttribute : Attribute
 	{
 		public string command { get; private set; }

@@ -4,26 +4,29 @@
         "nullable": "?",
         "relation": "$",
         "percentage": "%",
-        "unknown": "~"
+        "ordered": "~",
+        "strongRef": "!"
     },
-    "usage": {
-        "server": "go",
-        "client": "cs"
-    },
-    "primitives": 
-    [
-        "int", "long", "double", "float", "string", "bool", "DateTime", "TimeSpan", "Dsl", "Point"
+    "primitive": [
+        "int",
+        "long",
+        "double",
+        "float",
+        "string",
+        "bool",
+        "DateTime",
+        "TimeSpan",
+        "Dsl",
+        "DateRange"
     ],
-    "regex":
-    {
+    "regex": {
         "group": "^\\((?P<type>.+)\\)$",
         "list": "^List<(?P<type>.+)>$",
-        "array": "^\\[(?P<type>.*)\\]$",
         "map": "^\\s*{\\s*(?P<key>[.\\S]+)\\s*:\\s*(?P<value>[.\\S]+)\\s*}\\s*$",
         "dict": "^Dictionary<(?P<key>.+),\\s*(?P<value>.+)>$",
-        "const": "Const:(?P<table>[a-zA-Z]+):(?P<name>[a-zA-Z]+)",
-        "dsl": "^(?P<header>\\w+)\\((?P<parameters>.*)\\)$",
-        "point": "^\\((?P<x>\\d),\\s?(?P<y>\\d)\\)$"
+        "array": "^\\[(?P<type>.*)\\]$",
+        "const": "Const:(?P<table>[a-zA-Z_]+):(?P<name>[a-zA-Z_]+)",
+        "dsl": "^(?P<header>\\w+)\\((?P<parameters>.*)\\)$"
     },
     "file":
     {

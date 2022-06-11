@@ -1,6 +1,6 @@
 using FixMath.NET;
-using Shared;
 using Shared.Table;
+using Shared.Type;
 using UniRx;
 
 namespace Game
