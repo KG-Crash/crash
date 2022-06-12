@@ -12,7 +12,7 @@ namespace Game
         public event RemoveHandler OnRemove;
         public event PositionChangingHandler OnPositionChanging;
         public event PositionChangedHandler OnPositionChanged;
-        public event LookAtHandler OnLookAt;
+        public abstract event LookAtHandler OnLookAt;
 
         public int type { get; set; }
 

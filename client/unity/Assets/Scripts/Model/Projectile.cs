@@ -12,6 +12,7 @@ namespace Game
 
         public event ReachHandler OnReach;
         public event SpawnedHandler OnSpawned;
+        public override event LookAtHandler OnLookAt;
 
         public Projectile(uint uniqueID, Unit from, Unit to)
         {

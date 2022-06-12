@@ -8,7 +8,6 @@ namespace Game
     public class TeamCollection : IReadOnlyDictionary<int, Team>
     {
         private Dictionary<int, Team> _teams = new Dictionary<int, Team>();
-        private Team.Listener _listener;
 
         #region override method
         public Team this[int key]
@@ -42,10 +41,9 @@ namespace Game
         public List<Player> allPlayers => this.SelectMany(x => x.Value.players.Values).ToList();
         #endregion
 
-        public TeamCollection(GameController owner, Team.Listener listener)
+        public TeamCollection(GameController owner)
         {
             this.owner = owner;
-            _listener = listener;
         }
 
         public Team Add(int id)
@@ -53,7 +51,7 @@ namespace Game
             if (this._teams.ContainsKey(id))
                 throw new Exception("asd");
 
-            var team = new Team(id, _listener);
+            var team = new Team(id);
             _teams.Add(id, team);
             return team;
         }

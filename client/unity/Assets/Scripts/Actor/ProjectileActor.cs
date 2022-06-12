@@ -10,12 +10,6 @@ namespace Game
 {
     public class ProjectileActor : MonoBehaviour, IActor
     {
-        public interface Listener
-        {
-        }
-
-        public Listener listener { get; private set; }
-
         public FixVector3 position
         {
             set => transform.position = value;
@@ -33,9 +27,8 @@ namespace Game
             transform.SetParent(parent);
         }
 
-        public void Init(Listener listener)
+        public void Init()
         {
-            this.listener = listener;
         }
     }
 }

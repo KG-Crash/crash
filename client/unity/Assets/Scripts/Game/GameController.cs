@@ -2,11 +2,8 @@ using FixMath.NET;
 using Game.Service;
 using Module;
 using Network;
-using Shared;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -123,7 +120,7 @@ namespace Game
             
             InitInput();
             
-            _projectileActorPool = new ProjectileActorPool(_projectilehPrefabTable, 15, this, _poolOffset);
+            _projectileActorPool = new ProjectileActorPool(_projectilehPrefabTable, 15, _poolOffset);
             _chatManager = this.gameObject.GetComponent<ChatService>();
 
             // 레디에서 이름 보내야 하지 않을까?
@@ -136,7 +133,7 @@ namespace Game
         private void Start()
         {
             Application.targetFrameRate = FPS;
-            _teams = new TeamCollection(this, this);
+            _teams = new TeamCollection(this);
             ActionService = new ActionService(this);
         }
 

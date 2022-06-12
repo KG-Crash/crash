@@ -11,14 +11,12 @@ namespace Game
         private Dictionary<int, Queue<ProjectileActor>> _objectQueueDict;
         private ProjectileTable _prefabTable;
         private uint _initialCreateQuantity;
-        private ProjectileActor.Listener _listener;
         private Transform _poolOffset;
 
-        public ProjectileActorPool(ProjectileTable table, uint len, ProjectileActor.Listener listener, Transform poolOffset)
+        public ProjectileActorPool(ProjectileTable table, uint len, Transform poolOffset)
 		{
             _initialCreateQuantity = len;
             _prefabTable = table;
-            _listener = listener;
             _poolOffset = poolOffset;
             _objectQueueDict = new Dictionary<int, Queue<ProjectileActor>>();
 
@@ -32,7 +30,7 @@ namespace Game
 
         private ProjectileActor CreateNewProjectile(int type)
 		{
-            var projectile = ProjectileActorFactory.CreateProjectileActor(type, _prefabTable, _listener);
+            var projectile = ProjectileActorFactory.CreateProjectileActor(type, _prefabTable);
             ClearProjectile(projectile);
             return projectile;
 		}

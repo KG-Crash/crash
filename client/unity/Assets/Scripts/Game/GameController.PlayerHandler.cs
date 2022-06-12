@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game
 {
-    public partial class GameController : Team.Listener
+    public partial class GameController
     {
         public void OnFinishUpgrade(Ability ability)
         {

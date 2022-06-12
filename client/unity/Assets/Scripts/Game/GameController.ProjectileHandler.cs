@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Game
 {
-    public partial class GameController : Projectile.Listener, ProjectileActor.Listener
+    public partial class GameController
     {
         // <projectileID, targetUnit>
         public Dictionary<Projectile, Unit> _fireHistory { get; set; }
@@ -14,7 +14,7 @@ namespace Game
         private void InitializeProjectileHandle()
         {
             _fireHistory = new Dictionary<Projectile, Unit>();
-            _projectiles = new ProjectileCollection(null, this);
+            _projectiles = new ProjectileCollection(null);
         }
 
         public void OnSpawned(Projectile projectile)

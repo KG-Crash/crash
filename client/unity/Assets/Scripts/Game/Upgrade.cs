@@ -8,6 +8,7 @@ namespace Game
     public class Upgrade
     {
         private Dictionary<Ability, int> _startFrames = new Dictionary<Ability, int>();
+        public event Player.FinishUpgradeHandler OnFinishUpgrade;
 
         public Player owner { get; private set; }
         public Ability abilities { get; private set; } = Ability.NONE;
@@ -35,7 +36,7 @@ namespace Game
                 this.abilities |= ability;
                 this._startFrames.Remove(ability);
 
-                this.owner.listener?.OnFinishUpgrade(ability);
+                OnFinishUpgrade?.Invoke(ability);
             }
         }
 

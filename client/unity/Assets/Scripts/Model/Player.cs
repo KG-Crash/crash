@@ -85,6 +85,11 @@ namespace Game
             this.upgrade = new Upgrade(this);
             this.team = team;
             this.spawnIndex = spawnIndex;
+
+            upgrade.OnFinishUpgrade += ability => 
+            {
+                OnFinishUpgrade?.Invoke(ability);
+            };
         }
 
         public Dictionary<StatType, int> AdditionalStat(int unitID)

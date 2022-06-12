@@ -67,7 +67,7 @@ namespace Game
 
             SetFadeAlpha(0.0f);
             
-            _listener?.OnClear(this);
+            OnClear?.Invoke(this);
         }
     }
 }

@@ -38,7 +38,7 @@ namespace Game
         public event HPChangingHandler OnHPChanging;
         public event HPChangedHandler OnHPChanged;
         public event SpawnedHandler OnSpawned;
-
+        public override event LookAtHandler OnLookAt;
 
         public Shared.Table.Unit info => Table.From<TableUnit>()[type];
         public List<Shared.Table.Skill> skills => Table.From<TableSkill>().Values.Where(x => x.Unit == type).ToList();
