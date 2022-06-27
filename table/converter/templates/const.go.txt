@@ -1,20 +1,20 @@
 // DO NOT MODIFY
 
 package constant
-{% for name, constSet in dataSet.items() %}
+{% for name, const_set in items.items() %}
 type _{{ name }} struct {
-	{%- for key, const in constSet.items() %}
+	{%- for key, const in const_set.items() %}
     {{ key }} {{ const.type }}
     {%- endfor %}
 }
 {% endfor %}
-{% for name, constSet in dataSet.items() -%}
+{% for name, const_set in items.items() -%}
 var {{ name }} _{{ name }}
 {% endfor %}
 func init() {
-    {% for name, constSet in dataSet.items() -%}
+    {% for name, const_set in items.items() -%}
     {{ name }} = _{{ name }}{
-        {% for key, const in constSet.items() %}
+        {% for key, const in const_set.items() %}
         {%- set quote = "" -%}
         {%- if const.type == 'string' -%}
             {%- if '\n' in const.value -%}
