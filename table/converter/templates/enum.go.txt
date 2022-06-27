@@ -2,33 +2,27 @@
 
 package enum
 
-{% for enumName, enumSet in dataSet.items() -%}
-type _{{ enumName }} struct {
-    {% for name, desc in enumSet.items() -%}
-    {{ name }} uint32
+type _{{ name }} struct {
+    {% for prop_name, prop_conf in properties.items() -%}
+    {{ prop_name }} uint32
     {%- if not loop.last %}
     {% endif %}
     {%- endfor %}
 }
-{%- if not loop.last %}
-{% endif %}
-{% endfor %}
 
-{% for enumName, enumSet in dataSet.items() -%}
-var {{ enumName }} _{{ enumName }}
-{% endfor %}
+var {{ name }} _{{ name }}
 
 func init() {
-    {% for enumName, enumSet in dataSet.items() -%}
-    {{ enumName }} = _{{ enumName }} {
-        {% for name, value in enumSet.items() -%}
-        {{ name }}: {% if value != 'default' %}0x{{ '%08X' % value }}{% else %}{{ loop.index }}{% endif %},
+    {{ name }} = _{{ name }} {
+        {% for prop_name, prop_conf in properties.items() -%}
+        {% if prop_conf.index is none -%}
+        {{ prop_name }}: {{ loop.index }}
+        {%- else -%}
+        {{ prop_name }}: 0x{{ '%08X' % prop_conf.index }}
+        {%- endif -%}
+        ,
         {%- if not loop.last %}
         {% endif %}
         {%- endfor %}
     }
-    {%- if not loop.last %}
-
-    {% endif %}
-    {%- endfor %}
 }

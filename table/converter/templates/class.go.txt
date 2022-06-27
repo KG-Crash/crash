@@ -3,33 +3,25 @@
 package table
 
 import (
-	"io/ioutil"
 	"encoding/json"
+	"io/ioutil"
 )
 
 func init() {
-    {% for name in dataSet %}
-    if data, err := ioutil.ReadFile("json/{{ name }}.json"); err == nil {
+	if data, err := ioutil.ReadFile("json/{{ name }}.json"); err == nil {
 		json.Unmarshal(data, &Table{{ name }})
 	}
-    {% endfor %}
 }
 
-{% for name, data in dataSet.items() %}
-type {{ name }} struct { {% for property in data.properties %}
+type {{ name }} struct { {% for property in properties %}
     {{ property.name }} {{ property.type }}
     {%- endfor %}
 }
 
-var Table{{ name }} {% if data.primary -%}
-map[{{ data.primary }}]{{ name }}
-{%- elif data.index -%}
-map[{{ data.index }}][]{{ name }}
+var Table{{ name }} {% if primary is not none -%}
+map[{{ primary }}]{{ name }}
+{%- elif index -%}
+map[{{ index }}][]{{ name }}
 {%- else -%}
 [] {{ name }}
 {%- endif -%}
-{%- if not loop.last %}
-
-
-{% endif -%}
-{% endfor %}
