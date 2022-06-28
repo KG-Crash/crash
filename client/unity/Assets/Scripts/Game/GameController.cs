@@ -5,10 +5,13 @@ using Network;
 using Shared;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Zenject;
+using Object = UnityEngine.Object;
 
 namespace Game
 {
@@ -66,7 +69,8 @@ namespace Game
         public static Pair Turn { get; private set; } = new Pair();
     }
 
-    public partial class GameController : MonoBehaviour, ActionService.Listener
+    
+    public partial class GameController : ActionService.Listener, IInitializable, ITickable, IDisposable, ILateTickable
     {   
         public static int FPS { get; set; }
         public static int TPS { get; set; }
@@ -98,49 +102,62 @@ namespace Game
         [NonSerialized] private TeamCollection _teams;
         [NonSerialized] private ProjectileActorPool _projectileActorPool;
         [NonSerialized] private ChatService _chatManager;
+        [NonSerialized] private UnitActorFactory unitActorFactory;
+        
+        private KG.Map map;
+        private UnitTable unitTable;
+        private ProjectileTable projectileTable;
 
-        [Header("Miscellaneous")] 
-        [SerializeField] private Transform _poolOffset; 
-        [SerializeField] private Transform _focusTransform;
+        private bool networkMode;
+        private Transform[] spawnPositions;
+        private Transform projectilePoolParent; 
+        private Transform focusTransform;
         
-        [SerializeField] private KG.Map _map;
-        [FormerlySerializedAs("_unitFactory")] [SerializeField] private UnitActorFactory unitActorFactory;
-        [SerializeField] private UnitTable _unitPrefabTable;
-        [SerializeField] private ProjectileTable _projectilehPrefabTable;
-        [SerializeField] private bool _networkMode;
-        [SerializeField] private Transform[] _spawnPositions;
-        
-        private void Awake()
+        public GameController(
+            Dispatcher dispatcher, 
+            KG.Map map, UnitTable unitTable, ProjectileTable projectileTable, 
+            bool networkMode,  Transform[] spawnPositions, Transform projectilePoolParent, Transform focusTransform)
         {
-            Handler.Bind(this, Dispatcher.Instance);
+            this.map = map;
+            this.unitTable = unitTable;
+            this.projectileTable = projectileTable;
+            
+            this.networkMode = networkMode;
+            this.spawnPositions = spawnPositions;
+            this.projectilePoolParent = projectilePoolParent;
+            this.focusTransform = focusTransform;
+            
+            Handler.Bind(this, dispatcher);
             ActionHandler.Bind(this);
 
+            unitActorFactory = new UnitActorFactory();
+            
             FPS = Shared.Const.Time.FPS;
             TPS = Shared.Const.Time.TPS;
-            IsNetworkMode = _networkMode;
+            IsNetworkMode = networkMode;
 
             Application.targetFrameRate = FPS;
             
             InitInput();
             
-            _projectileActorPool = new ProjectileActorPool(_projectilehPrefabTable, 15, this, _poolOffset);
-            _chatManager = this.gameObject.GetComponent<ChatService>();
+            _projectileActorPool = new ProjectileActorPool(projectileTable, 15, this, this.projectilePoolParent);
 
             // 레디에서 이름 보내야 하지 않을까?
             _ = Client.Send(new Protocol.Request.Ready{ });
             
-            InitializeUniRx();
             InitializeProjectileHandle();
         }
 
-        private void Start()
+        public void Initialize()
         {
+            _chatManager = Object.FindObjectOfType<ChatService>();
+
             Application.targetFrameRate = FPS;
             _teams = new TeamCollection(this, this);
             ActionService = new ActionService(this);
         }
 
-        private void OnUpdate()
+        public void Tick()
         {
             OnUpdateAlwaysDebug();
 
@@ -151,21 +168,16 @@ namespace Game
             
             waitPacket = LockStep.Turn.In > LockStep.Turn.Out + 2;
 
-            if(ActionService.Update())
+            if (ActionService.Update())
                 LockStep.Turn.Out++;
+
+            if (!waitPacket)
+                OnUpdateFrame(OutputFrameChunk);
         }
 
-        public void OnAction(int userId, Protocol.Response.Action action)
+        public void Dispose()
         {
-            ActionHandler.Execute<GameController>(userId, action);
-        }
-
-        public void OnChat(int userId, Protocol.Response.InGameChat chat)
-        {
-            if (uuidTable.TryGetValue(userId, out var name) == false)
-                return;
-
-            _chatManager.RecvMessage(chat.Message, $"{name}");
+            ClearInput();
         }
 
         private void OnUpdateFrame(Frame f)
@@ -173,6 +185,11 @@ namespace Game
             EnqueueHeartBeat();
             _me.upgrade.Update(f);
             OnUpdateFrameDebug(f);
+        }
+
+        public void LateTick()
+        {
+            OnLateUpdateFrame(OutputFrameChunk);
         }
 
         private void OnLateUpdateFrame(Frame f)
@@ -193,10 +210,18 @@ namespace Game
             
             waitPacket = LockStep.Turn.In > LockStep.Turn.Out + 2;
         }
-
-        private void OnDestroy()
+        
+        public void OnAction(int userId, Protocol.Response.Action action)
         {
-            ClearInput();
+            ActionHandler.Execute<GameController>(userId, action);
+        }
+
+        public void OnChat(int userId, Protocol.Response.InGameChat chat)
+        {
+            if (uuidTable.TryGetValue(userId, out var name) == false)
+                return;
+
+            _chatManager.RecvMessage(chat.Message, $"{name}");
         }
     }
 }

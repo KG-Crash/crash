@@ -1,13 +1,13 @@
-using Network;
-using Protocol.Request;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class Test : MonoBehaviour
+public class LobbyUIInstaller : MonoBehaviour
 {
     // Start is called before the first frame update
-    async void Start()
+    void Start()
     {
-        await UIView.Show<IntroView>();
+        
     }
 
     // Update is called once per frame

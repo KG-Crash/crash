@@ -733,6 +733,92 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: e276ab82df399eb408d15d07c0492244, type: 3}
+--- !u!1 &181232141
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 181232144}
+  - component: {fileID: 181232143}
+  - component: {fileID: 181232142}
+  m_Layer: 0
+  m_Name: Context
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &181232142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 181232141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40847d98ca00ff1459e84cfc5f3a8466, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  projectilePoolParent: {fileID: 598182162}
+  focusTransform: {fileID: 606488634}
+  map: {fileID: 1442949749}
+  networkMode: 1
+  spawnPositions:
+  - {fileID: 1074358150}
+  - {fileID: 435399228}
+  - {fileID: 1820750459}
+  - {fileID: 1774961044}
+  - {fileID: 230457425}
+  - {fileID: 685684699}
+--- !u!114 &181232143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 181232141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89715ad69b973a14899afa2c6730b30b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _scriptableObjectInstallers: []
+  _monoInstallers: []
+  _installerPrefabs: []
+  _autoRun: 1
+  OnPreInstall:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPostInstall:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPreResolve:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPostResolve:
+    m_PersistentCalls:
+      m_Calls: []
+  _parentNewObjectsUnderSceneContext: 0
+  _contractNames: []
+  _parentContractNames: []
+--- !u!4 &181232144
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 181232141}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &202108269
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4208,7 +4294,6 @@ GameObject:
   - component: {fileID: 1122248843}
   - component: {fileID: 1122248845}
   - component: {fileID: 1122248847}
-  - component: {fileID: 1122248849}
   - component: {fileID: 1122248850}
   m_Layer: 0
   m_Name: Master
@@ -4257,32 +4342,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _spawnUnitOriginID: 0
   _spawnPlayerID: 0
-  _poolOffset: {fileID: 598182162}
-  _focusTransform: {fileID: 606488634}
-  _map: {fileID: 1442949749}
-  unitActorFactory: {fileID: 1122248849}
-  _unitPrefabTable: {fileID: 11400000, guid: 90bd777a778c3ef40941d1163ecba028, type: 2}
-  _projectilehPrefabTable: {fileID: 11400000, guid: cc0c122d377e12141b81dcb0f6272455, type: 2}
-  _networkMode: 1
-  _spawnPositions:
-  - {fileID: 1074358150}
-  - {fileID: 435399228}
-  - {fileID: 1820750459}
-  - {fileID: 1774961044}
-  - {fileID: 230457425}
-  - {fileID: 685684699}
---- !u!114 &1122248849
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1122248842}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd7dba43dc3440d7b4c39f288a04e953, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1122248850
 MonoBehaviour:
   m_ObjectHideFlags: 0

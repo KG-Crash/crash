@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Zenject;
 
 public class RoomListListener : KG.ScrollView.IListener<string>
 {
@@ -95,7 +96,7 @@ public class ChatLogListener : KG.ScrollView.IListener<string>
     }
 }
 
-public partial class LobbyController : MonoBehaviour
+public partial class LobbyController : IInitializable
 {
     [FlatBufferEvent]
     public async Task<bool> OnLogin(Login response)

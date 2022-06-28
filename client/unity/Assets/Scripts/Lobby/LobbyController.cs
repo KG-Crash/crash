@@ -1,23 +1,21 @@
+using System.Threading.Tasks;
 using Module;
 using Network;
 using UnityEngine;
+using Zenject;
 
-public partial class LobbyController : MonoBehaviour
+public partial class LobbyController : IInitializable
 {
-    private void Awake()
+    private UI.IntroView introView;
+    
+    public LobbyController(Dispatcher dispatcher, UI.IntroView introView)
     {
-        Handler.Bind(this, Dispatcher.Instance);
+        Handler.Bind(this, dispatcher);
+        this.introView = introView;
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public void Initialize()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        UIView.Show(introView).Wait();
     }
 }

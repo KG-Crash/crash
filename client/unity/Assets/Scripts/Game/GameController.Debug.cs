@@ -6,10 +6,6 @@ namespace Game
 {
     public partial class GameController
     {
-        [Header("Debug")]
-        public int _spawnUnitOriginID = 0;
-        public int _spawnPlayerID = 0;
-
         public FixVector3 ScreenPositionToWorldPosition(Vector2 ss)
         {
             var objs = UnityResources._instance.Get("Objects");

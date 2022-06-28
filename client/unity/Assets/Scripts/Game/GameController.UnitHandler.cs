@@ -98,7 +98,7 @@ namespace Game
 
         public void OnClear(UnitActor actor)
         {
-            DestroyImmediate(actor.gameObject);
+            Object.DestroyImmediate(actor.gameObject);
         }
 
         // TODO :: 무지성 시퀀스 어케함?
@@ -158,7 +158,7 @@ namespace Game
             if (unitActorMaps.ContainsKey(me))
                 return;
 
-            var actor = unitActorFactory.CreateUnitActor(me.type, _unitPrefabTable, null, this);
+            var actor = unitActorFactory.CreateUnitActor(me.type, unitTable, null, this);
             unitActorMaps.Add(me, actor);
         }
 

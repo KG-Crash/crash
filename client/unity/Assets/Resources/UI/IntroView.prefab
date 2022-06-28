@@ -2372,19 +2372,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3906953984892350626}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 580368163389173547}
-        m_TargetAssemblyTypeName: IntroView, Client
-        m_MethodName: OnConnect
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: localhost:8000
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &3906953985127291288
 GameObject:
   m_ObjectHideFlags: 0
@@ -2436,6 +2424,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8227a6e2f7b3fd047a3cbc7ee92764be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  connectButton: {fileID: 3906953984892350627}
 --- !u!1 &3906953986202454452
 GameObject:
   m_ObjectHideFlags: 0

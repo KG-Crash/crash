@@ -24,7 +24,7 @@ public class GameRoomView : UIView
     {
         await Client.Send(new Chat 
         {
-            Message = "¾È³ç" 
+            Message = "ì•ˆë…•" 
         });
     }
 

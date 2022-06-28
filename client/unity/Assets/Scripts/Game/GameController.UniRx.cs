@@ -19,21 +19,5 @@ namespace Game
     {
         public static IObservable<Frame> updateFrameStream => Observable.EveryUpdate().Where(_ => ready && !paused && !waitPacket)
             .Select(_ => OutputFrameChunk);
-
-        public static IObservable<Frame> lateUpdateFrameStream => Observable.EveryLateUpdate().Where(_ => ready && !paused && !waitPacket)
-            .Select(_ => OutputFrameChunk);
-
-        private void InitializeUniRx()
-        {
-            var updateDisposable = updateFrameStream.Subscribe(OnUpdateFrame);
-            var lateUpdateDisposable = lateUpdateFrameStream.Subscribe(OnLateUpdateFrame);
-            
-            this.UpdateAsObservable().Subscribe(_ => OnUpdate());
-            this.OnDestroyAsObservable().Subscribe(_ =>
-            {
-                updateDisposable.Dispose();
-                lateUpdateDisposable.Dispose();
-            });
-        }
     }
 }

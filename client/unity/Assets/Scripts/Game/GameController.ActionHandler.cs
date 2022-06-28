@@ -120,7 +120,7 @@ namespace Game
             var player = _teams.Find(playerId);
             
             for (var i = 0; i < count; i++)
-                player.units.Add(unitType, _map, pos);
+                player.units.Add(unitType, map, pos);
         }
         #endregion
         

@@ -12,7 +12,6 @@ public class LobbyView : UIView
 
     private DateTime _lastUpdatedRefreshDate = DateTime.Now;
 
-    // Start is called before the first frame update
     public KG.ScrollView gameRoomList;
 
     public override void Start()

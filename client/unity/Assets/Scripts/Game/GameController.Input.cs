@@ -48,9 +48,6 @@ namespace Game
 
         public void OnReleaseAltBtn(Vector2 positionSS)
         {
-            var positionWS = ScreenPositionToWorldPosition(positionSS);
-
-            // SpawnUnitToPosition(_spawnUnitOriginID, _spawnPlayerID, positionWS, new GameController.TemporalPlaceContext());
         }
 
         public void OnUpKey()

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,20 +19,16 @@ public abstract class UIView : MonoBehaviour
 {
     private static readonly Stack<UIView> _uiViewStack = new Stack<UIView>();
 
+    public event Func<Task> onLoad;
+
     public UIView()
     { }
 
-    // Start is called before the first frame update
-    public virtual void Start()
-    {
-        
-    }
+    public virtual void Start() 
+    { }
 
-    // Update is called once per frame
-    public virtual void Update()
-    {
-        
-    }
+    public virtual void Update() 
+    { }
 
     public virtual async Task OnLoad()
     { }
@@ -41,8 +38,12 @@ public abstract class UIView : MonoBehaviour
 
     public static async Task<T> Show<T>(bool hideBackView = false) where T : UIView
     {
-        var x = UIPool.Get<T>();
-        x.gameObject.SetActive(true);
+        return await Show<T>(UIPool.Get<T>(), hideBackView);
+    }
+    
+    public static async Task<T> Show<T>(T view, bool hideBackView = false) where T : UIView 
+    {
+        view.gameObject.SetActive(true);
 
         if (hideBackView && _uiViewStack.Count > 0)
         {
@@ -50,10 +51,12 @@ public abstract class UIView : MonoBehaviour
             backView?.gameObject.SetActive(false);
         }
 
-        _uiViewStack.Push(x);
-        await x.OnLoad();
+        _uiViewStack.Push(view);
+        
+        if (view.onLoad != null)
+            await view.onLoad();
 
-        return x;
+        return view;
     }
 
     public static T Get<T>() where T : UIView
