@@ -38,11 +38,11 @@ namespace Game
         #endregion
 
         #region properties
-        public GameController owner { get; private set; }
+        public GameState owner { get; private set; }
         public List<Player> allPlayers => this.SelectMany(x => x.Value.players.Values).ToList();
         #endregion
 
-        public TeamCollection(GameController owner, Team.Listener listener)
+        public TeamCollection(GameState owner, Team.Listener listener)
         {
             this.owner = owner;
             _listener = listener;

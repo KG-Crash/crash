@@ -494,6 +494,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e09df0f5a24537647a49fb665830a672, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  createGameRoomButton: {fileID: 3005826465176312525}
   gameRoomList: {fileID: 9157211378129718337}
 --- !u!1 &4736873440927997773
 GameObject:
@@ -846,6 +847,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 484a3569a6cbe614e9309feb4acd0e63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _layoutGroup: {fileID: 793278715387739448}
   prefab: {fileID: 4842988240898563682, guid: 4cc720e41f7403543b4282a2c1e2293d, type: 3}
 --- !u!1 &6260548331342211062
 GameObject:
@@ -1006,7 +1008,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000009536743, y: 0.0003889367}
+  m_AnchoredPosition: {x: 0.000009536743, y: 0.0000027030321}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &793278715387739448
@@ -1155,16 +1157,4 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6253990370071950427}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 4341495522419295699}
-        m_TargetAssemblyTypeName: LobbyView, Client
-        m_MethodName: OnCreateGameRoom
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []

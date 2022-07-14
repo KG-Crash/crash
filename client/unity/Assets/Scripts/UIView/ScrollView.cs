@@ -14,19 +14,14 @@ namespace KG
             void OnDestroyed(UIBehaviour item);
         }
 
+        [SerializeField]
         private HorizontalOrVerticalLayoutGroup _layoutGroup;
         public UIBehaviour prefab;
-
-        public void Start()
-        {
-            _layoutGroup = GetComponentInChildren<HorizontalOrVerticalLayoutGroup>() ??
-                throw new System.Exception($"Prefab {this.name} dose not contains layout group. You have to add layout group in [Scroll View/Viewport/Contents].");
-        }
 
         public void Refresh<T>(IListener<T> listener)
         {
             if(listener == null)
-                throw new System.Exception("지랄 니은");
+                throw new System.ArgumentNullException("Refresh<T>(IListener<T> listener) == null");
 
             foreach (Transform item in _layoutGroup.transform)
             {

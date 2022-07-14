@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Game
 {
-    public class UnitActorFactory : MonoBehaviour
+    public class UnitActorFactory
     {
         public UnitActor CreateUnitActor(int unitType, UnitTable unitTable, Transform parent, UnitActor.Listener listener)
         {

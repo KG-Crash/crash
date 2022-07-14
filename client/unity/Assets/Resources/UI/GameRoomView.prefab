@@ -321,19 +321,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 523792323784637892}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 5824045161352966200}
-        m_TargetAssemblyTypeName: GameRoomView, Client
-        m_MethodName: OnGameStart
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &717063907689100129
 GameObject:
   m_ObjectHideFlags: 0
@@ -492,6 +480,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 484a3569a6cbe614e9309feb4acd0e63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _layoutGroup: {fileID: 3347765403219340465}
   prefab: {fileID: 7268188690920176593, guid: d5bf491b24d9c49428f80626cf4902d6, type: 3}
 --- !u!1 &978826391623383580
 GameObject:
@@ -865,6 +854,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 361e52c01f36ee9488015773a657f972, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  roomExitButton: {fileID: 555628437687443331}
+  gameStartButton: {fileID: 1960985569628875471}
   userNameList: {fileID: 4242648907244806603}
   chatLogList: {fileID: 3345304444216191543}
 --- !u!114 &7031328750343677934
@@ -883,7 +874,6 @@ MonoBehaviour:
   _chatLog: {fileID: 9064168314186984211}
   _input: {fileID: 6648139017718404433}
   _scrollRect: {fileID: 8589727112061789210}
-  _name: ME
 --- !u!1 &2417313918218209859
 GameObject:
   m_ObjectHideFlags: 0
@@ -1688,19 +1678,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2106713505003151356}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 5824045161352966200}
-        m_TargetAssemblyTypeName: GameRoomView, Client
-        m_MethodName: OnExit
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &4971397045011319572
 GameObject:
   m_ObjectHideFlags: 0
@@ -1949,6 +1927,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 484a3569a6cbe614e9309feb4acd0e63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _layoutGroup: {fileID: 3112387121193813870}
   prefab: {fileID: 7268188690920176593, guid: aa61f9f072fc70e4fa7886e6e4df39a6, type: 3}
 --- !u!1 &5314287190800435677
 GameObject:

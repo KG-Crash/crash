@@ -231,7 +231,7 @@ namespace Game
 
         private bool TryUpdateMovePath()
         {
-            if (_blockedFrame != null && (GameController.InputTotalFrame - _blockedFrame.Value) * GameController.TimeDelta < 1)
+            if (_blockedFrame != null && (GameState.InputTotalFrame - _blockedFrame.Value) * GameState.TimeDelta < 1)
                 return false;
             if (_destStack.Count == 0)
                 return false;
@@ -247,7 +247,7 @@ namespace Game
             }
             else
             {
-                _blockedFrame = GameController.InputTotalFrame;
+                _blockedFrame = GameState.InputTotalFrame;
             }
             
             return false;

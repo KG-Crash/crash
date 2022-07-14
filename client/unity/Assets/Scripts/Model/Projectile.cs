@@ -24,7 +24,7 @@ namespace Game
             currentState = ProjectileState.Shoot;
             
             listener?.OnSpawned(this);
-            GameController.updateFrameStream.Subscribe(Action);
+            GameState.updateFrameStream.Subscribe(Action);
             // TODO :: 풀링을 핟면 Disable 해야함.
             // Disable();
             Shoot();

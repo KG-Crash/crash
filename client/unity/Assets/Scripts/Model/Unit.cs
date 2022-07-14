@@ -323,9 +323,9 @@ namespace Game
             hp = maxhp;
             projectiles = new ProjectileCollection(this, _listener);
 
-            _lastAttackFrame = -attackSpeed / new Fix64(1000) / GameController.TimeDelta;
+            _lastAttackFrame = -attackSpeed / new Fix64(1000) / GameState.TimeDelta;
 
-            GameController.updateFrameStream.Subscribe(Action);
+            GameState.updateFrameStream.Subscribe(Action);
 
             _listener?.OnSpawned(this);
             this.position = position;
@@ -578,8 +578,8 @@ namespace Game
 
         public bool Attack(Unit unit)
         {
-            var currentFrame = GameController.InputTotalFrame;
-            if ((currentFrame - _lastAttackFrame) * GameController.TimeDelta < attackSpeed / new Fix64(1000))
+            var currentFrame = GameState.InputTotalFrame;
+            if ((currentFrame - _lastAttackFrame) * GameState.TimeDelta < attackSpeed / new Fix64(1000))
                 return false;
 
             var damage = CalculateDamage(unit);

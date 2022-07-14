@@ -56,12 +56,10 @@ namespace Network
                 //UnityEngine.Debug.LogError(e.Message);
             }
         }
-
-        public static void Bind<T>(T t, IDispatchable dispatcher = null) where T : class
+        
+        private static IEnumerable<MethodInfo> GetMethods(Type type)
         {
-            _ist.Value._dispatcher = dispatcher;
-
-            var methods = typeof(T).GetMethods().Where(x =>
+            return type.GetMethods().Where(x =>
             {
                 if (x.GetCustomAttribute<FlatBufferEventAttribute>() == null)
                     return false;
@@ -78,6 +76,13 @@ namespace Network
 
                 return true;
             });
+        }
+        
+        public static void Bind(object classInstance, IDispatchable dispatcher = null)
+        {
+            _ist.Value._dispatcher = dispatcher;
+
+            var methods = GetMethods(classInstance.GetType());
 
             foreach (var method in methods)
             {
@@ -91,11 +96,33 @@ namespace Network
                     _ist.Value._allocators.Add((Identity)instance.Identity, allocator);
 
                     var delegateType = Expression.GetDelegateType(parameters.Select(x => x.ParameterType).Concat(new[] { method.ReturnType }).ToArray());
-                    var createdDelegate = method.CreateDelegate(delegateType, t);
+                    var createdDelegate = method.CreateDelegate(delegateType, classInstance);
                     _ist.Value._bindedEvents.Add((Identity)instance.Identity, new Func<IProtocol, Task<bool>>((protocol) =>
                     {
                         return createdDelegate.DynamicInvoke(Convert.ChangeType(protocol, protocolType)) as Task<bool>;
                     }));
+                }
+                catch (Exception e)
+                {
+                    //UnityEngine.Debug.Log(e.Message);
+                }
+            }
+        }
+
+        public static void Unbind(object classInstance)
+        {
+            var methods = GetMethods(classInstance.GetType());
+            
+            foreach (var method in methods)
+            {
+                try
+                {
+                    var parameters = method.GetParameters();
+                    var protocolType = parameters[0].ParameterType;
+                    var instance = Activator.CreateInstance(protocolType) as IProtocol;
+
+                    _ist.Value._allocators.Remove((Identity) instance.Identity);
+                    _ist.Value._bindedEvents.Remove((Identity) instance.Identity);
                 }
                 catch (Exception e)
                 {
