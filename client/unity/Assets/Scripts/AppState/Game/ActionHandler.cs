@@ -53,6 +53,11 @@ namespace Game
             _actionHandleMethodDict.Add(typeof(T), new TargetMethods(target, actions));
         }
 
+        public static void Unbind<T>() where T : class
+        {
+            _actionHandleMethodDict.Remove(typeof(T));
+        }
+
         public static void Execute<T>(int userId, Protocol.Response.Action action) where T : class
         {
             if (!_actionHandleMethodDict.TryGetValue(typeof(T), out var targetAndAction))

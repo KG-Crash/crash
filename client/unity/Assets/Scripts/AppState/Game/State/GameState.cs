@@ -83,6 +83,8 @@ public partial class GameState : AppState
     [ClearMethod]
     public void Clear()
     {
+        Handler.Unbind(this);
+        ActionHandler.Unbind<GameState>();
         ClearInput();
     }
 }
