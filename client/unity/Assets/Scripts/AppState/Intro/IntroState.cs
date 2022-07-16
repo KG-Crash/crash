@@ -21,7 +21,6 @@ public partial class IntroState : AppState
     {
         var view = GetView<IntroView>();
         view.startButtonClick.RemoveListener(OnConnectAsync);
-        _ = UIView.Close();
     }
 
     private async void OnConnectAsync()

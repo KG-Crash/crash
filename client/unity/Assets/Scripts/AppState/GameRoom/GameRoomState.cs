@@ -30,7 +30,6 @@ public partial class GameRoomState : AppState
         var view = GetView<GameRoomView>();
         view.roomExitButtonClick.RemoveListener(OnExit);
         view.gameStartButtonClick.RemoveListener(OnGameStart);
-        _ = UIView.Close();
     }
     
     private async void OnGameStart()

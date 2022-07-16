@@ -29,7 +29,6 @@ public partial class GameRoomState
 
         if (isMine)
         {
-            await UIView.Close();
             await MoveStateAsync<LobbyState>();
         }
         else

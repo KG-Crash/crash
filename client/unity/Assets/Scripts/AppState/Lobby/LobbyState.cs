@@ -29,12 +29,6 @@ public partial class LobbyState : AppState
     {
         var view = GetView<LobbyView>();
         view.createGameRoomButtonClick.RemoveListener(OnCreateGameRoom);
-        _ = UIView.Close();
-        
-        if (nextState is GameRoomState)
-        {
-            
-        }
     }
     
     public async Task Refresh() => await Client.Send(new RoomList { });
