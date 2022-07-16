@@ -26,6 +26,11 @@ public class AppStateService
             throw new Exception($"not valid state = {_binds.First(kv => !kv.Value.valid).Key.GetType().Name}");
     }
 
+    public T Get<T>() where T : AppState
+    {
+        return _appStates[typeof(T)] as T;
+    }
+
     public async Task<AppState> LoadEntrySceneAsync(StateTransition transition = null)
     {
         var entryState = GetEntryScene();

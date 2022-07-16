@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: GameState
   m_EditorClassIdentifier: Client::GameState
-  _sceneName: 
+  _sceneName: OnlineScene
   _entryScene: 0
   _spawnUnitOriginID: 0
   _spawnPlayerID: 0
-  _unitPrefabTable: {fileID: 0}
-  _projectilehPrefabTable: {fileID: 0}
+  _unitPrefabTable: {fileID: 11400000, guid: 90bd777a778c3ef40941d1163ecba028, type: 2}
+  _projectilehPrefabTable: {fileID: 11400000, guid: cc0c122d377e12141b81dcb0f6272455, type: 2}

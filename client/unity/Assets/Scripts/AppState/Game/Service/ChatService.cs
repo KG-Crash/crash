@@ -16,7 +16,7 @@ namespace Game.Service
         // Start is called before the first frame update
         void Start()
         {
-            _gameState = this.gameObject.GetComponent<GameState>();
+            _gameState = EntryPoint.appStateService.Get<GameState>();
             _scrollRect.verticalNormalizedPosition = 0.0f;
         }
 
