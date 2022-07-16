@@ -46,20 +46,21 @@ public class AppStateBinds
 
     public static AppStateBinds GetBinds(AppState state)
     {
+        var type = state.GetType();
         var bindFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase;
-        var allMethods = state.GetType().GetMethods(bindFlags);
+        var allMethods = type.GetMethods(bindFlags);
         
         var binds = new AppStateBinds()
         {
-            autoFlatBufferBind = state.GetType().GetCustomAttributes()
+            autoFlatBufferBind = type.GetCustomAttributes()
                 .Where(attr => attr is AutoBindAttribute)
                 .Select(attr => (attr as AutoBindAttribute).FlatBuffer)
                 .FirstOrDefault(),
-            uiViewTypes = state.GetType().GetCustomAttributes()
+            uiViewTypes = type.GetCustomAttributes()
                 .Where(attr => attr is UIBindAttribute)
                 .Select(attr => (attr as UIBindAttribute).Type)
                 .ToArray(),
-            showBeforeInit = state.GetType().GetCustomAttributes()
+            showBeforeInit = type.GetCustomAttributes()
                 .Where(attr => attr is UIBindAttribute)
                 .Select(attr => (attr as UIBindAttribute).ShowBeforeInit)
                 .ToArray(),

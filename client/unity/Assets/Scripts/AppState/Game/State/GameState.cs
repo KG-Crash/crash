@@ -29,7 +29,6 @@ public partial class GameState : AppState
     private Player _me;
     private TeamCollection _teams;
     private ProjectileActorPool _projectileActorPool;
-
     private UnitActorFactory unitActorFactory;
 
     [InitializeMethod]
@@ -78,14 +77,25 @@ public partial class GameState : AppState
         Application.targetFrameRate = FPS;
         _teams = new TeamCollection(this, this);
         actionService = new ActionService(this);
+
+        LockStep.Reset();
     }
 
     [ClearMethod]
     public void Clear()
     {
+        Destroy(context);
+
         Handler.Unbind(this);
         ActionHandler.Unbind<GameState>();
         ClearInput();
+        
+        actionService = null;
+        _teams = null;
+        _projectileActorPool = null;
+        unitActorFactory = null;
+        
+        unitActorMaps.Clear();
     }
 }
 
