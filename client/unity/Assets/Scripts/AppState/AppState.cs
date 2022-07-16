@@ -14,26 +14,28 @@ public abstract class AppState : ScriptableObject
     [SerializeField] private bool _entryScene;
     
     // Contexts
-    private Dictionary<Type, UIView> _views = new Dictionary<Type, UIView>();
+    private Dictionary<Type, UIView> _uiViews = new Dictionary<Type, UIView>();
+    private UIStack _uiStack = new UIStack();
     private List<Coroutine> _coroutines = new List<Coroutine>();
     protected Scene _scene;
 
     public void Register(UIView[] views, Scene scene)
     {
-        Array.ForEach(views, view => _views.Add(view.GetType(), view));
-        _scene = scene;
+        Array.ForEach(views, view => _uiViews.Add(view.GetType(), view));
+        _uiStack.Clear();
+        _scene = scene;        
     }
 
     public void ClearViews()
     {
-        _views.Clear();
+        _uiViews.Clear();
     }
 
     public T GetView<T>() where T : UIView
     {
         var type = typeof(T);
-        if (_views.ContainsKey(type))
-            return _views[type] as T;
+        if (_uiViews.ContainsKey(type))
+            return _uiViews[type] as T;
         else
             return null;
     }
@@ -41,22 +43,38 @@ public abstract class AppState : ScriptableObject
     public bool TryGetView<T>(out T view) where T : UIView
     {
         var type = typeof(T);
-        if (_views.ContainsKey(type))
-            view = _views[type] as T;
+        if (_uiViews.ContainsKey(type))
+            view = _uiViews[type] as T;
         else
             view = null;
 
         return view != null;
     }
-
+    
     public T ShowView<T>(bool hideBackView = false) where T : UIView
     {
         var view = GetView<T>();
         if (view == null)
             throw new ClientException(ClientExceptionCode.NotFoundUIAttribute, $"not exist UI attribute in {typeof(T).Name}");
         
-        _ = UIView.Show(view, hideBackView);
+        return ShowView<T>(view, hideBackView);
+    }
+
+    public T ShowView<T>(T view, bool hideBackView = false) where T : UIView
+    {
+        _ = _uiStack.Show(view, hideBackView);
         return view;
+    }
+
+    public async Task CloseView<T>(bool showBackView) where T : UIView
+    {
+        var view = GetView<T>();
+        await CloseView<T>(view, showBackView);
+    }
+
+    public async Task CloseView<T>(UIView view, bool showBackView) where T : UIView
+    {
+        await _uiStack.Close<T>(view);
     }
     
     public string sceneName => _sceneName;

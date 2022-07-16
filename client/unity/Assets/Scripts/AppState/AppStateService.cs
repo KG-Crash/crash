@@ -16,11 +16,14 @@ public class AppStateService
     private Dictionary<Type, AppState> _appStates;
     private Dictionary<AppState, AppStateBinds> _binds;
     private AppState _current;
+    
+    private UIPool _uiPool;
 
-    public AppStateService(AppState[] appStates)
+    public AppStateService(AppState[] appStates, UIPool uiPool)
     {
         _appStates = appStates.ToDictionary(x => x.GetType(), x => x);
         _binds = appStates.ToDictionary(state => state, AppStateBinds.GetBinds);
+        _uiPool = uiPool;
 
         if (_binds.Any(kv => !kv.Value.valid))
             throw new Exception($"not valid state = {_binds.First(kv => !kv.Value.valid).Key.GetType().Name}");
@@ -48,14 +51,14 @@ public class AppStateService
         
         // 2. create & register ui & scene
         var refViewTypes = _binds[entryState].uiViewTypes;
-        var instancedViews = refViewTypes.Select(UIPool.Reserve).ToArray();
+        var instancedViews = refViewTypes.Select(_uiPool.Reserve).ToArray();
         entryState.Register(instancedViews, SceneManager.GetActiveScene());
         
         // 3. show before initialize
         var showBeforeInit = _binds[entryState].showBeforeInit;
         for (var i = 0; i < showBeforeInit.Length; i++)
             if (showBeforeInit[i])
-                _ = UIView.Show(instancedViews[i]); 
+                _ = entryState.ShowView(instancedViews[i]); 
         
         // 4. initialize appstate
         bind.InvokeInitializeMethod(entryState, transition);
@@ -92,7 +95,7 @@ public class AppStateService
             _current.ClearViews();
             var refViewTypes = _binds[_current].uiViewTypes;
             for (var i = 0; i < refViewTypes.Length; i++)
-                UIPool.Remove(refViewTypes[i]);
+                _uiPool.Remove(refViewTypes[i]);
         }
 
         // 3. unbind flatbuffer
@@ -121,14 +124,14 @@ public class AppStateService
         {
             // 1. create & register ui & scene
             var refViewTypes = _binds[moveAppState].uiViewTypes;
-            var instancedViews = refViewTypes.Select(UIPool.Reserve).ToArray();
+            var instancedViews = refViewTypes.Select(_uiPool.Reserve).ToArray();
             moveAppState.Register(instancedViews, SceneManager.GetActiveScene());
                     
             // 2. show before initialize
             var showBeforeInit = _binds[moveAppState].showBeforeInit;
             for (var i = 0; i < showBeforeInit.Length; i++)
                 if (showBeforeInit[i])
-                    _ = UIView.Show(instancedViews[i]); 
+                    _ = moveAppState.ShowView(instancedViews[i]); 
         }
         
         // 3. initialize appstate
