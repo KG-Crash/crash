@@ -90,13 +90,6 @@ public partial class GameState : AppState
         ActionHandler.Unbind<GameState>();
         ClearInput();
         
-        actionService = null;
-        _teams = null;
-        _projectileActorPool = null;
-        unitActorFactory = null;
-        
         unitActorMaps.Clear();
     }
 }
-
-
