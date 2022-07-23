@@ -1,20 +1,22 @@
 // DO NOT MODIFY
 
 package enum
-
-type _{{ name }} struct {
-    {% for prop_name, prop_conf in properties.items() -%}
+{% for scope, props in enums.items() %}
+type _{{ scope }} struct {
+    {% for prop_name, prop_conf in props.items() -%}
     {{ prop_name }} uint32
     {%- if not loop.last %}
     {% endif %}
     {%- endfor %}
 }
 
-var {{ name }} _{{ name }}
+var {{ scope }} _{{ scope }}
+{% endfor %}
 
 func init() {
-    {{ name }} = _{{ name }} {
-        {% for prop_name, prop_conf in properties.items() -%}
+    {% for scope, props in enums.items() %}
+    {{ scope }} = _{{ scope }} {
+        {% for prop_name, prop_conf in props.items() -%}
         {% if prop_conf.index is none -%}
         {{ prop_name }}: {{ loop.index }}
         {%- else -%}
@@ -25,4 +27,7 @@ func init() {
         {% endif %}
         {%- endfor %}
     }
+    {%- if not loop.last %}
+    {% endif -%}
+    {%- endfor %}
 }

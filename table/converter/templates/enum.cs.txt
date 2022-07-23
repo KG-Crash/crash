@@ -4,16 +4,21 @@ using System;
 
 namespace Shared.Type
 {
-    public enum {{ name }}
+    {% for scope, props in enums.items() -%}
+    public enum {{ scope }}
     {
-        {% for scope, item in items.items() -%}
-        {{ scope }}
-        {%- if item.index is not none %} = 0x{{ '%08x' % item.index }}{% endif %}
+        {% for prop_name, prop_conf in props.items() -%}
+        {{ prop_name }}
+        {%- if prop_conf.index is not none %} = 0x{{ '%08x' % prop_conf.index }}{% endif %}
         {%- if not loop.last -%}
         ,{% endif %}
-        {%- if item.desc is not none %} // {{ item.desc }}{% endif %}
+        {%- if prop_conf.desc is not none %} // {{ prop_conf.desc }}{% endif %}
         {%- if not loop.last %}
         {% endif -%}
         {%- endfor %}
     }
+    {%- if not loop.last %}
+    
+    {% endif -%}
+    {%- endfor %}
 }
