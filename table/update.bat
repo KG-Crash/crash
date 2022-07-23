@@ -26,10 +26,9 @@ ROBOCOPY class\cs\client ..\..\..\client\unity\Assets\Shared\Table\Client  /E /N
 ROBOCOPY class\cs\common ..\..\..\client\unity\Assets\Shared\Table\Common  /E /NFL /NDL /NJH /NJS /nc /ns /np
 COPY bind\cs\client\Table.cs ..\..\..\client\unity\Assets\Shared\Table
 
-RMDIR /s /q ..\..\..\client\unity\Assets\Shared\Enum
-ROBOCOPY enum\cs ..\..\..\client\unity\Assets\Shared\Enum  /E /NFL /NDL /NJH /NJS /nc /ns /np
-
+COPY enum\cs\Enum.cs ..\..\..\client\unity\Assets\Shared
 COPY const\cs\client\Const.cs ..\..\..\client\unity\Assets\Shared
+
 RMDIR /s /q ..\..\..\client\unity\json
 ROBOCOPY json\client ..\..\..\client\unity\json /E /NFL /NDL /NJH /NJS /nc /ns /np
 pause

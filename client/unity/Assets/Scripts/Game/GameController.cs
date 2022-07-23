@@ -67,7 +67,7 @@ namespace Game
     }
 
     public partial class GameController : MonoBehaviour, ActionService.Listener
-    {   
+    {
         public static int FPS { get; set; }
         public static int TPS { get; set; }
         public static bool IsNetworkMode { get; set; }
