@@ -8,8 +8,11 @@ public static class EntryPoint
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void AfterSceneLoad()
     {
+        var option = CrashResources.LoadOption();
         uiPool = new UIPool(CrashResources.LoadUICanvasPrefab());
         appStateService = new AppStateService(CrashResources.LoadAppStates(), uiPool);
-        _ = appStateService.LoadEntrySceneAsync();
+        
+        if (option.moveEntrySceneWhenStart)
+            _ = appStateService.LoadEntrySceneAsync();
     }
 }

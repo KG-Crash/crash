@@ -4,7 +4,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-public static class CrashAppStateGenerater
+public static class CrashResourcesGenerater
 {
     private const string appStatePath = "Assets/Resources/AppState/"; 
     
@@ -28,5 +28,16 @@ public static class CrashAppStateGenerater
             AssetDatabase.CreateAsset(obj, path);
             AssetDatabase.ImportAsset(path);
         }
+    }
+
+    private const string optionPath = "Assets/Resources/CrashOption.asset";
+
+    [MenuItem("Crash/Generate Option")]
+    [InitializeOnLoadMethod]
+    private static void GenerateOption()
+    {
+        var obj = ScriptableObject.CreateInstance<CrashOption>();
+        AssetDatabase.CreateAsset(obj, optionPath);
+        AssetDatabase.ImportAsset(optionPath);
     }
 }
