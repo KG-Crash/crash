@@ -29,15 +29,18 @@ public static class CrashResourcesGenerater
             AssetDatabase.ImportAsset(path);
         }
     }
+    
+    private const string optionPath = "Assets/Resources/CrashAppSettings.asset";
 
-    private const string optionPath = "Assets/Resources/CrashOption.asset";
-
-    [MenuItem("Crash/Generate Option")]
+    [MenuItem("Crash/Generate CrashAppSettings")]
     [InitializeOnLoadMethod]
     private static void GenerateOption()
     {
-        var obj = ScriptableObject.CreateInstance<CrashOption>();
-        AssetDatabase.CreateAsset(obj, optionPath);
-        AssetDatabase.ImportAsset(optionPath);
+        if (AssetDatabase.LoadAssetAtPath<CrashAppSettings>(optionPath) == null)
+        {
+            var obj = ScriptableObject.CreateInstance<CrashAppSettings>();
+            AssetDatabase.CreateAsset(obj, optionPath);
+            AssetDatabase.ImportAsset(optionPath);
+        }
     }
 }

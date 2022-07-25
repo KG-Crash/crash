@@ -10,6 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d8d6aa44450440d9b76373c9dbc88b5, type: 3}
-  m_Name: CrashOption
+  m_Name: CrashAppSettings
   m_EditorClassIdentifier: 
-  _moveEntrySceneWhenStart: 0
+  _moveEntrySceneWhenStart: 1
+  _uiBundleName: Dummy
