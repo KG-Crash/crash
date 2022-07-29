@@ -32,7 +32,7 @@ public partial class LobbyState
     [FlatBufferEvent]
     public async Task<bool> OnRoomList(RoomList response)
     {
-        var uiView = GetView<LobbyView>();
+        var uiView = GetView<LobbyPanel>();
         var listener = new RoomListListener(response);
         uiView.gameRoomList.Refresh(listener);
         return true;

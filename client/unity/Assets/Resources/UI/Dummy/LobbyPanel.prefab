@@ -453,7 +453,7 @@ GameObject:
   - component: {fileID: 4341495522419295700}
   - component: {fileID: 4341495522419295699}
   m_Layer: 5
-  m_Name: LobbyView
+  m_Name: LobbyPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -494,8 +494,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e09df0f5a24537647a49fb665830a672, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  createGameRoomButton: {fileID: 3005826465176312525}
-  gameRoomList: {fileID: 9157211378129718337}
+  _createGameRoomButton: {fileID: 3005826465176312525}
+  _gameRoomList: {fileID: 9157211378129718337}
 --- !u!1 &4736873440927997773
 GameObject:
   m_ObjectHideFlags: 0
@@ -1008,7 +1008,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000009536743, y: 0.0000027030321}
+  m_AnchoredPosition: {x: 0.000009536743, y: 0.000016392001}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &793278715387739448

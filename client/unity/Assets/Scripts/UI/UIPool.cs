@@ -10,11 +10,21 @@ public class UIPool
 {
     private readonly Dictionary<Type, UIView> _pool = new Dictionary<Type, UIView>();
     private Canvas canvas;
+    private string uiBundleName;
 
-    public UIPool(Canvas canvas)
+    public UIPool(Canvas canvas, string uiBundleName)
     {
         this.canvas = Object.Instantiate(canvas);
+        this.uiBundleName = uiBundleName;
         Object.DontDestroyOnLoad(this.canvas);
+    }
+
+    public string GetPath(Type type)
+    {
+        if (string.IsNullOrEmpty(uiBundleName))
+            return $"UI/{type.Name}";
+        else
+            return $"UI/{uiBundleName}/{type.Name}";
     }
     
     public T Reserve<T>() where T : UIView
@@ -29,7 +39,8 @@ public class UIPool
     
         if (_pool.ContainsKey(type) == false)
         {
-            var viewPrefab = Resources.Load<UIView>($"UI/{type.Name}");
+            var path = GetPath(type);
+            var viewPrefab = Resources.Load<UIView>(path);
             if (viewPrefab == null)
                 throw new ClientException(ClientExceptionCode.NotFoundUIAttribute, "Not found UI Prefab.");
             
@@ -61,7 +72,8 @@ public class UIPool
         
         if (_pool.ContainsKey(type) == false)
         {
-            var viewPrefab = Resources.Load<UIView>($"UI/{type.Name}");
+            var path = GetPath(type);
+            var viewPrefab = Resources.Load<UIView>(path);
             if (viewPrefab == null)
                 return null;
                 // throw new ClientException(ClientExceptionCode.NotFoundUIAttribute, "Not found UI Prefab.");

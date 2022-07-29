@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 3906953985127291295}
   - component: {fileID: 580368163389173547}
   m_Layer: 5
-  m_Name: IntroView
+  m_Name: IntroPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -7,7 +7,7 @@ using UnityEngine;
 using System.Threading.Tasks;
 using Protocol.Request;
 
-[UIBind(typeof(LobbyView), true)]
+[UIBind(typeof(LobbyPanel), true)]
 [AutoBindAttribute(flatBuffer: true)]
 public partial class LobbyState : AppState
 {
@@ -17,7 +17,7 @@ public partial class LobbyState : AppState
     [InitializeMethod]
     public void Initialize()
     {
-        var view = GetView<LobbyView>();
+        var view = GetView<LobbyPanel>();
         view.createGameRoomButtonClick.AddListener(OnCreateGameRoom);
         _ = Refresh();
         
@@ -27,7 +27,7 @@ public partial class LobbyState : AppState
     [ClearMethod]
     public void Clear(AppState nextState)
     {
-        var view = GetView<LobbyView>();
+        var view = GetView<LobbyPanel>();
         view.createGameRoomButtonClick.RemoveListener(OnCreateGameRoom);
     }
     

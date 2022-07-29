@@ -810,7 +810,7 @@ GameObject:
   - component: {fileID: 5824045161352966200}
   - component: {fileID: 7031328750343677934}
   m_Layer: 5
-  m_Name: GameRoomView
+  m_Name: GameRoomPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -854,10 +854,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 361e52c01f36ee9488015773a657f972, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomExitButton: {fileID: 555628437687443331}
-  gameStartButton: {fileID: 1960985569628875471}
-  userNameList: {fileID: 4242648907244806603}
-  chatLogList: {fileID: 3345304444216191543}
+  _roomExitButton: {fileID: 555628437687443331}
+  _gameStartButton: {fileID: 1960985569628875471}
+  _userNameList: {fileID: 4242648907244806603}
+  _chatLogList: {fileID: 3345304444216191543}
 --- !u!114 &7031328750343677934
 MonoBehaviour:
   m_ObjectHideFlags: 0

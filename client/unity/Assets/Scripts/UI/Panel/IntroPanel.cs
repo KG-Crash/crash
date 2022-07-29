@@ -7,7 +7,7 @@ using UnityEngine.Events;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class IntroView : UIView
+public class IntroPanel : UIView
 {
     [SerializeField] private Button _startButton;
 

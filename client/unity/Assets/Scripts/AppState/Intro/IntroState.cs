@@ -4,14 +4,14 @@ using Module;
 using Network;
 using UnityEngine;
 
-[UIBind(typeof(IntroView), true)]
+[UIBind(typeof(IntroPanel), true)]
 [AutoBindAttribute(flatBuffer: true)]
 public partial class IntroState : AppState
 {
     [InitializeMethod]
     public void Initialize()
     {
-        var view = GetView<IntroView>();
+        var view = GetView<IntroPanel>();
         view.startButtonClick.AddListener(OnConnectAsync);
         _ = Client.Instance.Disconnect();
     }
@@ -19,7 +19,7 @@ public partial class IntroState : AppState
     [ClearMethod]
     public void Clear()
     {
-        var view = GetView<IntroView>();
+        var view = GetView<IntroPanel>();
         view.startButtonClick.RemoveListener(OnConnectAsync);
     }
 

@@ -21,8 +21,8 @@ public static class CrashResources
         return Resources.Load<Canvas>(uiCanvasPrefabPath);
     }
 
-    public static CrashOption LoadOption()
+    public static CrashAppSettings LoadAppSettings()
     {
-        return Resources.Load<CrashOption>(nameof(CrashOption));
+        return Resources.Load<CrashAppSettings>(nameof(CrashAppSettings));
     }
 }

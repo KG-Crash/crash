@@ -5,14 +5,14 @@ using UnityEngine;
 using Protocol.Request;
 using GameRoom;
 
-[UIBind(typeof(GameRoomView), true)]
+[UIBind(typeof(GameRoomPanel), true)]
 [AutoBindAttribute(flatBuffer: true)]
 public partial class GameRoomState : AppState
 {
     [InitializeMethod]
     public void Initialize(GameRoomTransition transition)
     {
-        var view = GetView<GameRoomView>();
+        var view = GetView<GameRoomPanel>();
         view.userNameList.Refresh(new UserListListener(Client.Instance.uuid, transition.roomUsers));
         
         view.roomExitButtonClick.AddListener(OnExit);
@@ -27,7 +27,7 @@ public partial class GameRoomState : AppState
     [ClearMethod]
     public void Clear()
     {        
-        var view = GetView<GameRoomView>();
+        var view = GetView<GameRoomPanel>();
         view.roomExitButtonClick.RemoveListener(OnExit);
         view.gameStartButtonClick.RemoveListener(OnGameStart);
     }
