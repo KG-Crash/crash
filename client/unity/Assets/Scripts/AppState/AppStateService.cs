@@ -17,9 +17,9 @@ public class AppStateService
     private Dictionary<AppState, AppStateBinds> _binds;
     private AppState _current;
     
-    private UIPool _uiPool;
+    private KG.UIPool _uiPool;
 
-    public AppStateService(AppState[] appStates, UIPool uiPool)
+    public AppStateService(AppState[] appStates, KG.UIPool uiPool)
     {
         _appStates = appStates.ToDictionary(x => x.GetType(), x => x);
         _binds = appStates.ToDictionary(state => state, AppStateBinds.GetBinds);

@@ -3,6 +3,7 @@ using Protocol.Response;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KG;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -10,7 +11,7 @@ using UnityEngine.UI;
 
 namespace GameRoom
 {
-    public class UserListListener : KG.ScrollView.IListener<string>
+    public class UserListListener : KG.ScrollView.IListener<string, TextLabel>
     {
         private string _mine;
         private readonly List<string> _idList = new List<string>();
@@ -21,19 +22,17 @@ namespace GameRoom
             _idList = idList.ToList();
         }
 
-        public void OnCreated(string data, UIBehaviour item)
+        public void OnCreated(string data, TextLabel label)
         {
-            var text = item.GetComponent<Text>();
-            text.text = data;
+            label.text = data;
 
             var mine = (data == _mine);
             if (mine)
-                text.color = UnityEngine.Color.blue;
+                label.textColor = UnityEngine.Color.blue;
         }
 
-        public void OnDestroyed(UIBehaviour item)
+        public void OnDestroyed(TextLabel item)
         {
-
         }
 
         public IEnumerator<string> OnRefresh()

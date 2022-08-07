@@ -1,16 +1,11 @@
-using Network;
 using Protocol.Response;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using KG;
 
 namespace GameRoom
 {
-    public class ChatLogListener : KG.ScrollView.IListener<string>
+    public class ChatLogListener : KG.ScrollView.IListener<string, TextLabel>
     {
         private readonly Chat _response;
 
@@ -18,19 +13,17 @@ namespace GameRoom
         {
             _response = response;
         }
-        public void OnCreated(string data, UIBehaviour item)
+        public void OnCreated(string data, TextLabel label)
         {
-            var text = item.GetComponent<Text>();
-            text.text = data;
+            label.text = data;
 
             var mine = (data == _response.User);
             if (mine)
-                text.color = UnityEngine.Color.blue;
+                label.textColor = UnityEngine.Color.blue;
         }
 
-        public void OnDestroyed(UIBehaviour item)
+        public void OnDestroyed(TextLabel item)
         {
-
         }
 
         public IEnumerator<string> OnRefresh()

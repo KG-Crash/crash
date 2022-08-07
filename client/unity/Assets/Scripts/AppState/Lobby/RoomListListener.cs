@@ -3,6 +3,7 @@ using Protocol.Response;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using KG;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -10,7 +11,7 @@ using UnityEngine.UI;
 
 namespace Lobby
 {
-    public class RoomListListener : KG.ScrollView.IListener<string>
+    public class RoomListListener : KG.ScrollView.IListener<string, KG.ButtonSingle>
     {
         public RoomList roomList { get; private set; }
 
@@ -19,16 +20,23 @@ namespace Lobby
             roomList = response;
         }
 
-        public void OnCreated(string data, UIBehaviour item)
+        public void OnCreated(string data, KG.ButtonSingle button)
         {
-            item.GetComponent<GameRoomButton>().RoomId = data;
-
-            var button = item.GetComponent<Button>();
-            button.GetComponentInChildren<Text>().text = data;
+            button.onClick.AddListener(() => { OnEnterButtonClick(data); });
         }
 
-        public void OnDestroyed(UIBehaviour item)
-        { }
+        private async void OnEnterButtonClick(string RoomId)
+        {
+            await Client.Send(new Protocol.Request.EnterRoom
+            {
+                Id = RoomId
+            });
+        }
+
+        public void OnDestroyed(KG.ButtonSingle kgButton)
+        {
+            kgButton.onClick.RemoveAllListeners();
+        }
 
         public IEnumerator<string> OnRefresh()
         {

@@ -7,6 +7,7 @@ using Module;
 using Shared;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using KG;
 
 public abstract class AppState : ScriptableObject
 {

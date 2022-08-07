@@ -7,18 +7,18 @@ namespace KG
 {
     public class ScrollView : MonoBehaviour
     {
-        public interface IListener<T>
+        public interface IListener<T1, T2> where T2 : UIComponent 
         {
-            IEnumerator<T> OnRefresh();
-            void OnCreated(T data, UIBehaviour item);
-            void OnDestroyed(UIBehaviour item);
+            IEnumerator<T1> OnRefresh();
+            void OnCreated(T1 data, T2 uiComponent);
+            void OnDestroyed(T2 uiComponent);
         }
 
         [SerializeField]
         private HorizontalOrVerticalLayoutGroup _layoutGroup;
-        public UIBehaviour prefab;
+        public UIComponent prefab;
 
-        public void Refresh<T>(IListener<T> listener)
+        public void Refresh<T1, T2>(IListener<T1, T2> listener) where T2 : UIComponent
         {
             if(listener == null)
                 throw new System.ArgumentNullException("Refresh<T>(IListener<T> listener) == null");
@@ -32,7 +32,7 @@ namespace KG
             while (enumerator.MoveNext())
             {
                 var item = Instantiate(prefab, _layoutGroup.transform);
-                listener.OnCreated(enumerator.Current, item);
+                listener.OnCreated(enumerator.Current, item as T2);
             }
         }
     }

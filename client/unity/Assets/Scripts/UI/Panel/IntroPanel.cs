@@ -7,9 +7,12 @@ using UnityEngine.Events;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class IntroPanel : UIView
+namespace UI
 {
-    [SerializeField] private Button _startButton;
+    public class IntroPanel : KG.UIView
+    {
+        [SerializeField] private Button _startButton;
 
-    public UnityEvent startButtonClick => _startButton.onClick;
+        public UnityEvent startButtonClick => _startButton.onClick;
+    }
 }

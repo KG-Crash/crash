@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 using Protocol.Response;
 using System.Linq;
 using Lobby;
+using UI;
 
 public partial class LobbyState
 {
@@ -32,9 +33,7 @@ public partial class LobbyState
     [FlatBufferEvent]
     public async Task<bool> OnRoomList(RoomList response)
     {
-        var uiView = GetView<LobbyPanel>();
-        var listener = new RoomListListener(response);
-        uiView.gameRoomList.Refresh(listener);
+        GetView<LobbyPanel>().gameRoomList.Refresh(new RoomListListener(response));
         return true;
     }
 }

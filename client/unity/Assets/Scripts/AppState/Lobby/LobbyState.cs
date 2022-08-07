@@ -6,6 +6,7 @@ using Network;
 using UnityEngine;
 using System.Threading.Tasks;
 using Protocol.Request;
+using UI;
 
 [UIBind(typeof(LobbyPanel), true)]
 [AutoBindAttribute(flatBuffer: true)]

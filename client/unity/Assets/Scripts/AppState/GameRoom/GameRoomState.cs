@@ -4,6 +4,7 @@ using Network;
 using UnityEngine;
 using Protocol.Request;
 using GameRoom;
+using UI;
 
 [UIBind(typeof(GameRoomPanel), true)]
 [AutoBindAttribute(flatBuffer: true)]

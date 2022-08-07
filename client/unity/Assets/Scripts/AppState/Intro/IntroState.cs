@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Module;
 using Network;
 using UnityEngine;
+using UI;
 
 [UIBind(typeof(IntroPanel), true)]
 [AutoBindAttribute(flatBuffer: true)]
@@ -23,14 +24,21 @@ public partial class IntroState : AppState
         view.startButtonClick.RemoveListener(OnConnectAsync);
     }
 
-    private async void OnConnectAsync()
+    private async Task<bool> ConnectAsync()
     {
         var endpoint = "localhost:8000";
         var pair = endpoint.Split(':');
-        var connection = await Client.Instance.Connect(pair[0], int.Parse(pair[1]));
-        if (!connection)
+        return await Client.Instance.Connect(pair[0], int.Parse(pair[1]));
+    }
+
+    private async void OnConnectAsync()
+    {
+        while (!await ConnectAsync())
         {
-            // 실패 어찌?
+            var retry = await UI.Popup.Boolean("연결 실패, 다시 시도?", "ㄱㄱ", "ㄴㄴ");
+            
+            if (!retry) 
+                break;
         }
     }
 }
