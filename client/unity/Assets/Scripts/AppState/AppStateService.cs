@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using KG;
 using Module;
 using Network;
 using UnityEngine;
@@ -16,14 +17,18 @@ public class AppStateService
     private Dictionary<Type, AppState> _appStates;
     private Dictionary<AppState, AppStateBinds> _binds;
     private AppState _current;
-    
-    private KG.UIPool _uiPool;
+    private UIPool _uiPool;
+    private UIStack _uiStack;
 
     public AppStateService(AppState[] appStates, KG.UIPool uiPool)
     {
         _appStates = appStates.ToDictionary(x => x.GetType(), x => x);
         _binds = appStates.ToDictionary(state => state, AppStateBinds.GetBinds);
         _uiPool = uiPool;
+        _uiStack = new UIStack();
+        
+        foreach (var appState in appStates)
+            appState.Ctor(_uiStack);
 
         if (_binds.Any(kv => !kv.Value.valid))
             throw new Exception($"not valid state = {_binds.First(kv => !kv.Value.valid).Key.GetType().Name}");
@@ -92,6 +97,7 @@ public class AppStateService
         
         // 2. remove UI
         {
+            _uiStack.Clear();
             _current.ClearViews();
             var refViewTypes = _binds[_current].uiViewTypes;
             for (var i = 0; i < refViewTypes.Length; i++)

@@ -16,15 +16,19 @@ public abstract class AppState : ScriptableObject
     
     // Contexts
     private Dictionary<Type, UIView> _uiViews = new Dictionary<Type, UIView>();
-    private UIStack _uiStack = new UIStack();
     private List<Coroutine> _coroutines = new List<Coroutine>();
     protected Scene _scene;
+    private UIStack _uiStack = null;
 
+    public void Ctor(UIStack stack)
+    {
+        _uiStack = stack;
+    }
+    
     public void Register(UIView[] views, Scene scene)
     {
         Array.ForEach(views, view => _uiViews.Add(view.GetType(), view));
-        _uiStack.Clear();
-        _scene = scene;        
+        _scene = scene;
     }
 
     public void ClearViews()
