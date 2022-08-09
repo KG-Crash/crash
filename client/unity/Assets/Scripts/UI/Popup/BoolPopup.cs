@@ -32,6 +32,11 @@ namespace UI
             _noButton.onClick.RemoveListener(OnNo);
         }
 
+        private void OnDestroy()
+        {
+            utcs.TrySetCanceled();
+        }
+
         private void OnYes()
         {
             utcs.TrySetResult(true);
