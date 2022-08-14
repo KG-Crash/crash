@@ -1,26 +1,33 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net"
 	"os"
-	"os/signal"
-
-	"model/game"
-
-	"github.com/AsynkronIT/protoactor-go/actor"
+	"KG/session"
 )
 
 func main() {
-	log.SetFlags(log.Ldate | log.Ltime)
+	port := 3333
 
-	system := actor.NewActorSystem()
+	listen, err := net.Listen("tcp4", fmt.Sprintf(":%d", port))
+	if err != nil {
+		os.Exit(1)
+	}
+	defer listen.Close()
 
-	system.Root.Spawn(actor.PropsFromProducer(func() actor.Actor {
-		return game.New(Config.Port)
-	}))
+	for {
+		conn, err := listen.Accept()
+		if err != nil {
+			log.Fatalln(err)
+			continue
+		}
 
-	// Subscribe to signal to finish interaction
-	finish := make(chan os.Signal, 1)
-	signal.Notify(finish, os.Interrupt, os.Kill)
-	<-finish
+		x := session.New(conn)
+		go x.Handler()
+
+		// session := New(conn)
+		// go session.Handler()
+	}
 }
