@@ -1,6 +1,8 @@
 // DO NOT MODIFY
 
 using System;
+using System.Collections.Generic;
+using Shared.Type;
 
 namespace Shared.Const
 {

@@ -1,13 +1,12 @@
+using KG;
+using Module;
+using Shared.Type;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Module;
-using Shared;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using KG;
 
 public abstract class AppState : ScriptableObject
 {

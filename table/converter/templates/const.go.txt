@@ -1,40 +1,26 @@
 // DO NOT MODIFY
 
 package constant
-{% for name, const_set in items.items() %}
+
+import (
+	"enum"
+)
+
+{% for name, const_set in properties.items() %}
 type _{{ name }} struct {
 	{%- for key, const in const_set.items() %}
     {{ key }} {{ const.type }}
     {%- endfor %}
 }
 {% endfor %}
-{% for name, const_set in items.items() -%}
+{% for name, const_set in properties.items() -%}
 var {{ name }} _{{ name }}
 {% endfor %}
 func init() {
-    {% for name, const_set in items.items() -%}
-    {{ name }} = _{{ name }}{
-        {% for key, const in const_set.items() %}
-        {%- set quote = "" -%}
-        {%- if const.type == 'string' -%}
-            {%- if '\n' in const.value -%}
-                {%- set quote = '`'-%}
-            {%- else -%}
-                {%- set quote = '"' -%}
-            {%- endif-%}
-        {%- endif -%}
-        {{ key }}: {{ quote }}
-        {%- if const.value is none -%}
-            {%- if const.type == 'string' -%}""
-            {%- elif const.type == 'int' -%}0
-            {%- elif const.type == 'float32' -%}0.0
-            {%- else -%}nil{%- endif -%}
-        {%- else -%}
-        {{ const.value }}
-        {%- endif -%}
-        {{ quote }},
-        {%- if not loop.last %}
-        {% endif %}
+    {% for scope, const_set in properties.items() -%}
+    {{ scope }} = _{{ scope }}{
+        {% for prop_name, prop_conf in const_set.items() %}
+        {{ prop_name }}: {{ prop_conf.value }},
         {%- endfor %}
     }
     {%- if not loop.last %}

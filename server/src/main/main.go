@@ -1,14 +1,19 @@
 package main
 
 import (
+	"KG/session"
 	"fmt"
 	"log"
 	"net"
 	"os"
-	"KG/session"
+	"time"
 )
 
 func main() {
+
+	qwe := time.Now()
+	fmt.Println(qwe)
+
 	port := 3333
 
 	listen, err := net.Listen("tcp4", fmt.Sprintf(":%d", port))
@@ -26,8 +31,5 @@ func main() {
 
 		x := session.New(conn)
 		go x.Handler()
-
-		// session := New(conn)
-		// go session.Handler()
 	}
 }

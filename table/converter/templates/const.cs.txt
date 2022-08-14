@@ -1,21 +1,16 @@
 // DO NOT MODIFY
 
 using System;
+using System.Collections.Generic;
+using Shared.Type;
 
 namespace Shared.Const
 {
-    {%- for scope, props in items.items() %}
+    {%- for scope, props in properties.items() %}
     public static class {{ scope }}
     {
         {%- for prop_name, prop_conf in props.items() %}
-        public static readonly {{ prop_conf.type.pure }} {{ prop_name }} =
-        {%- if prop_conf.value is none %} null;
-        {%- elif prop_conf.type.enum %} {{ prop_conf.type.based }}.{{ prop_conf.value }};
-        {%- elif prop_conf.type.based == 'DateTime' %} DateTime.Parse("{{ prop_conf.value }}");
-        {%- elif prop_conf.type.based == 'TimeSpan' %} TimeSpan.Parse("{{ prop_conf.value }}");
-        {%- elif prop_conf.type.based == 'string' %} {% if '\n' in prop_conf.value %}@{% endif %}"{{ prop_conf.value }}";
-        {%- else %} {{ prop_conf.value }};
-        {%- endif -%}
+        public static readonly {{ prop_conf.type }} {{ prop_name }} = {{ prop_conf.value }};
         {%- endfor %}
     }
     {%- if not loop.last %}
