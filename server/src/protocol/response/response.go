@@ -203,18 +203,18 @@ func (obj *Room) parse(x *source.Room) *Room {
 	return obj
 }
 
-func (obj *Room) Identity() int {
+func (obj Room) Identity() int {
 	return ROOM
 }
 
-func (obj *Room) Serialize() []byte {
+func (obj Room) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *Room) Deserialize(bytes []byte) protocol.Protocol {
+func (obj Room) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsRoom(bytes, 0)
 	return obj.parse(root)
 }
@@ -241,18 +241,18 @@ func (obj *Login) parse(x *source.Login) *Login {
 	return obj
 }
 
-func (obj *Login) Identity() int {
+func (obj Login) Identity() int {
 	return LOGIN
 }
 
-func (obj *Login) Serialize() []byte {
+func (obj Login) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *Login) Deserialize(bytes []byte) protocol.Protocol {
+func (obj Login) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsLogin(bytes, 0)
 	return obj.parse(root)
 }
@@ -279,18 +279,18 @@ func (obj *CreateRoom) parse(x *source.CreateRoom) *CreateRoom {
 	return obj
 }
 
-func (obj *CreateRoom) Identity() int {
+func (obj CreateRoom) Identity() int {
 	return CREATE_ROOM
 }
 
-func (obj *CreateRoom) Serialize() []byte {
+func (obj CreateRoom) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *CreateRoom) Deserialize(bytes []byte) protocol.Protocol {
+func (obj CreateRoom) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsCreateRoom(bytes, 0)
 	return obj.parse(root)
 }
@@ -320,18 +320,18 @@ func (obj *User) parse(x *source.User) *User {
 	return obj
 }
 
-func (obj *User) Identity() int {
+func (obj User) Identity() int {
 	return USER
 }
 
-func (obj *User) Serialize() []byte {
+func (obj User) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *User) Deserialize(bytes []byte) protocol.Protocol {
+func (obj User) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsUser(bytes, 0)
 	return obj.parse(root)
 }
@@ -389,18 +389,18 @@ func (obj *EnterRoom) parse(x *source.EnterRoom) *EnterRoom {
 	return obj
 }
 
-func (obj *EnterRoom) Identity() int {
+func (obj EnterRoom) Identity() int {
 	return ENTER_ROOM
 }
 
-func (obj *EnterRoom) Serialize() []byte {
+func (obj EnterRoom) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *EnterRoom) Deserialize(bytes []byte) protocol.Protocol {
+func (obj EnterRoom) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsEnterRoom(bytes, 0)
 	return obj.parse(root)
 }
@@ -431,18 +431,18 @@ func (obj *LeaveRoom) parse(x *source.LeaveRoom) *LeaveRoom {
 	return obj
 }
 
-func (obj *LeaveRoom) Identity() int {
+func (obj LeaveRoom) Identity() int {
 	return LEAVE_ROOM
 }
 
-func (obj *LeaveRoom) Serialize() []byte {
+func (obj LeaveRoom) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *LeaveRoom) Deserialize(bytes []byte) protocol.Protocol {
+func (obj LeaveRoom) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsLeaveRoom(bytes, 0)
 	return obj.parse(root)
 }
@@ -468,18 +468,18 @@ func (obj *KickRoom) parse(x *source.KickRoom) *KickRoom {
 	return obj
 }
 
-func (obj *KickRoom) Identity() int {
+func (obj KickRoom) Identity() int {
 	return KICK_ROOM
 }
 
-func (obj *KickRoom) Serialize() []byte {
+func (obj KickRoom) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *KickRoom) Deserialize(bytes []byte) protocol.Protocol {
+func (obj KickRoom) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsKickRoom(bytes, 0)
 	return obj.parse(root)
 }
@@ -502,18 +502,18 @@ func (obj *KickedRoom) parse(x *source.KickedRoom) *KickedRoom {
 	return obj
 }
 
-func (obj *KickedRoom) Identity() int {
+func (obj KickedRoom) Identity() int {
 	return KICKED_ROOM
 }
 
-func (obj *KickedRoom) Serialize() []byte {
+func (obj KickedRoom) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *KickedRoom) Deserialize(bytes []byte) protocol.Protocol {
+func (obj KickedRoom) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsKickedRoom(bytes, 0)
 	return obj.parse(root)
 }
@@ -536,18 +536,18 @@ func (obj *DestroyedRoom) parse(x *source.DestroyedRoom) *DestroyedRoom {
 	return obj
 }
 
-func (obj *DestroyedRoom) Identity() int {
+func (obj DestroyedRoom) Identity() int {
 	return DESTROYED_ROOM
 }
 
-func (obj *DestroyedRoom) Serialize() []byte {
+func (obj DestroyedRoom) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *DestroyedRoom) Deserialize(bytes []byte) protocol.Protocol {
+func (obj DestroyedRoom) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsDestroyedRoom(bytes, 0)
 	return obj.parse(root)
 }
@@ -597,18 +597,18 @@ func (obj *RoomList) parse(x *source.RoomList) *RoomList {
 	return obj
 }
 
-func (obj *RoomList) Identity() int {
+func (obj RoomList) Identity() int {
 	return ROOM_LIST
 }
 
-func (obj *RoomList) Serialize() []byte {
+func (obj RoomList) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *RoomList) Deserialize(bytes []byte) protocol.Protocol {
+func (obj RoomList) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsRoomList(bytes, 0)
 	return obj.parse(root)
 }
@@ -639,18 +639,18 @@ func (obj *Chat) parse(x *source.Chat) *Chat {
 	return obj
 }
 
-func (obj *Chat) Identity() int {
+func (obj Chat) Identity() int {
 	return CHAT
 }
 
-func (obj *Chat) Serialize() []byte {
+func (obj Chat) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *Chat) Deserialize(bytes []byte) protocol.Protocol {
+func (obj Chat) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsChat(bytes, 0)
 	return obj.parse(root)
 }
@@ -685,18 +685,18 @@ func (obj *Whisper) parse(x *source.Whisper) *Whisper {
 	return obj
 }
 
-func (obj *Whisper) Identity() int {
+func (obj Whisper) Identity() int {
 	return WHISPER
 }
 
-func (obj *Whisper) Serialize() []byte {
+func (obj Whisper) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *Whisper) Deserialize(bytes []byte) protocol.Protocol {
+func (obj Whisper) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsWhisper(bytes, 0)
 	return obj.parse(root)
 }
@@ -732,18 +732,18 @@ func (obj *InGameChat) parse(x *source.InGameChat) *InGameChat {
 	return obj
 }
 
-func (obj *InGameChat) Identity() int {
+func (obj InGameChat) Identity() int {
 	return IN_GAME_CHAT
 }
 
-func (obj *InGameChat) Serialize() []byte {
+func (obj InGameChat) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *InGameChat) Deserialize(bytes []byte) protocol.Protocol {
+func (obj InGameChat) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsInGameChat(bytes, 0)
 	return obj.parse(root)
 }
@@ -770,18 +770,18 @@ func (obj *Resume) parse(x *source.Resume) *Resume {
 	return obj
 }
 
-func (obj *Resume) Identity() int {
+func (obj Resume) Identity() int {
 	return RESUME
 }
 
-func (obj *Resume) Serialize() []byte {
+func (obj Resume) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *Resume) Deserialize(bytes []byte) protocol.Protocol {
+func (obj Resume) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsResume(bytes, 0)
 	return obj.parse(root)
 }
@@ -813,18 +813,18 @@ func (obj *Action) parse(x *source.Action) *Action {
 	return obj
 }
 
-func (obj *Action) Identity() int {
+func (obj Action) Identity() int {
 	return ACTION
 }
 
-func (obj *Action) Serialize() []byte {
+func (obj Action) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *Action) Deserialize(bytes []byte) protocol.Protocol {
+func (obj Action) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsAction(bytes, 0)
 	return obj.parse(root)
 }
@@ -880,18 +880,18 @@ func (obj *ActionQueue) parse(x *source.ActionQueue) *ActionQueue {
 	return obj
 }
 
-func (obj *ActionQueue) Identity() int {
+func (obj ActionQueue) Identity() int {
 	return ACTION_QUEUE
 }
 
-func (obj *ActionQueue) Serialize() []byte {
+func (obj ActionQueue) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *ActionQueue) Deserialize(bytes []byte) protocol.Protocol {
+func (obj ActionQueue) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsActionQueue(bytes, 0)
 	return obj.parse(root)
 }
@@ -933,18 +933,18 @@ func (obj *Team) parse(x *source.Team) *Team {
 	return obj
 }
 
-func (obj *Team) Identity() int {
+func (obj Team) Identity() int {
 	return TEAM
 }
 
-func (obj *Team) Serialize() []byte {
+func (obj Team) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *Team) Deserialize(bytes []byte) protocol.Protocol {
+func (obj Team) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsTeam(bytes, 0)
 	return obj.parse(root)
 }
@@ -967,18 +967,18 @@ func (obj *GameStart) parse(x *source.GameStart) *GameStart {
 	return obj
 }
 
-func (obj *GameStart) Identity() int {
+func (obj GameStart) Identity() int {
 	return GAME_START
 }
 
-func (obj *GameStart) Serialize() []byte {
+func (obj GameStart) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *GameStart) Deserialize(bytes []byte) protocol.Protocol {
+func (obj GameStart) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsGameStart(bytes, 0)
 	return obj.parse(root)
 }
@@ -1031,18 +1031,18 @@ func (obj *Ready) parse(x *source.Ready) *Ready {
 	return obj
 }
 
-func (obj *Ready) Identity() int {
+func (obj Ready) Identity() int {
 	return READY
 }
 
-func (obj *Ready) Serialize() []byte {
+func (obj Ready) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj *Ready) Deserialize(bytes []byte) protocol.Protocol {
+func (obj Ready) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsReady(bytes, 0)
 	return obj.parse(root)
 }

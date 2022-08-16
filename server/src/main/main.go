@@ -1,26 +1,37 @@
 package main
 
 import (
+	"KG/handler"
 	"KG/session"
 	"fmt"
 	"log"
 	"net"
 	"os"
-	"time"
+	"protocol/request"
 )
+
+func OnRoomList(session *session.Session, req request.RoomList) {
+
+	fmt.Println(req)
+}
+
+func OnChat(session *session.Session, req request.Chat) {
+	fmt.Println(req)
+}
 
 func main() {
 
-	qwe := time.Now()
-	fmt.Println(qwe)
+	port := 8000
 
-	port := 3333
-
-	listen, err := net.Listen("tcp4", fmt.Sprintf(":%d", port))
+	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		os.Exit(1)
 	}
 	defer listen.Close()
+
+	handler_ist := handler.New()
+	handler.Register(handler_ist, OnRoomList)
+	handler.Register(handler_ist, OnChat)
 
 	for {
 		conn, err := listen.Accept()
@@ -29,7 +40,7 @@ func main() {
 			continue
 		}
 
-		x := session.New(conn)
-		go x.Handler()
+		sesion := session.New(conn, handler_ist)
+		go sesion.Loop()
 	}
 }

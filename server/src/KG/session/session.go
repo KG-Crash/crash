@@ -1,24 +1,28 @@
 package session
 
 import (
+	"KG/handler"
 	"encoding/binary"
 	"io"
 	"net"
+	"protocol/request"
 )
 
 type Session struct {
 	net.Conn
-	queue []byte
+	queue   []byte
+	handler *handler.Handler
 }
 
-func New(conn net.Conn) *Session {
+func New(conn net.Conn, handler *handler.Handler) *Session {
 	return &Session{
-		Conn:  conn,
-		queue: make([]byte, 0, 4096),
+		Conn:    conn,
+		queue:   make([]byte, 0, 4096),
+		handler: handler,
 	}
 }
 
-func (session *Session) Handler() {
+func (session *Session) Loop() {
 	for {
 		buffer := make([]byte, 4096)
 		numRead, err := session.Conn.Read(buffer)
@@ -37,6 +41,10 @@ func (session *Session) Handler() {
 				break
 			}
 
+			deserialized := request.Deserialize(size-4, session.queue[offset:])
+			session.handler.Channel <- handler.Message{
+				Session:  session,
+				Protocol: deserialized}
 			session.queue = session.queue[size+4:]
 		}
 	}
