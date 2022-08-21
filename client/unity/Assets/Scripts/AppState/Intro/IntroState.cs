@@ -15,6 +15,9 @@ public partial class IntroState : AppState
         var view = GetView<IntroPanel>();
         view.startButtonClick.AddListener(OnConnectAsync);
         _ = Client.Instance.Disconnect();
+
+        view.connectSpinner.SetActive(false);
+
     }
     
     [ClearMethod]
@@ -33,12 +36,20 @@ public partial class IntroState : AppState
 
     private async void OnConnectAsync()
     {
+        var view = GetView<IntroPanel>();
+        view.connectSpinner.SetActive(true);
         while (!await ConnectAsync())
         {
-            var retry = await UI.Popup.Boolean("연결 실패, 다시 시도?", "ㄱㄱ", "ㄴㄴ");
-            
-            if (!retry) 
+            var retry = await UI.Popup.Boolean("Connection Failed, Re?", "GO", "NO");
+
+
+            if (!retry)
+            {
+               
                 break;
+            }
+            view.connectSpinner.SetActive(false);
         }
+
     }
 }

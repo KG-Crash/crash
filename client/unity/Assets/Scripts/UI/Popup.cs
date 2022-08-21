@@ -9,7 +9,7 @@ namespace UI
     {
         public static async Task<bool> Boolean(string title, string yes, string no)
         {
-            var popup = EntryPoint.uiPool.Get<BoolPopup>();
+            var popup = EntryPoint.uiPool.Get<BoolPopupTMP>();
             popup.SetPopupTexts(title, yes, no);
             popup.SetActive(true);
             var response = await popup.Response();

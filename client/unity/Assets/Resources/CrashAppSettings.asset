@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: CrashAppSettings
   m_EditorClassIdentifier: 
   _moveEntrySceneWhenStart: 1
-  _uiBundleName: Dummy
+  _uiBundleName: White
