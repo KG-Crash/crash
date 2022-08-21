@@ -5,13 +5,17 @@ import (
 	"encoding/binary"
 	"io"
 	"net"
+	"protocol"
 	"protocol/request"
+
+	"github.com/google/uuid"
 )
 
 type Session struct {
 	net.Conn
 	queue   []byte
 	handler *handler.Handler
+	id      string
 }
 
 func New(conn net.Conn, handler *handler.Handler) *Session {
@@ -19,7 +23,26 @@ func New(conn net.Conn, handler *handler.Handler) *Session {
 		Conn:    conn,
 		queue:   make([]byte, 0, 4096),
 		handler: handler,
+		id:      uuid.NewString(),
 	}
+}
+
+func (session *Session) ID() string {
+	return session.id
+}
+
+func (session *Session) Send(res protocol.Protocol) {
+	serialized := res.Serialize()
+	size := uint32(len(serialized))
+
+	bytes := make([]byte, 8, 8+size)
+	binary.LittleEndian.PutUint32(bytes[:], uint32(4+len(serialized)))
+
+	identity := uint32(res.Identity())
+	binary.LittleEndian.PutUint32(bytes[4:], identity)
+
+	bytes = append(bytes, serialized...)
+	session.Conn.Write(bytes)
 }
 
 func (session *Session) Loop() {

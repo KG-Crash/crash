@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"protocol"
 )
 
@@ -42,6 +43,8 @@ func (handler *Handler) Invoke(session Session, ptc protocol.Protocol) {
 	id := ptc.Identity()
 	if fn, ok := handler.funcs[id]; ok {
 		fn(session, ptc)
+	} else {
+		fmt.Printf("invalid command %d", id)
 	}
 }
 

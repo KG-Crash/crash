@@ -1,6 +1,7 @@
 package main
 
 import (
+	"KG/context"
 	"KG/handler"
 	"KG/session"
 	"fmt"
@@ -8,15 +9,14 @@ import (
 	"net"
 	"os"
 	"protocol/request"
+	"protocol/response"
 )
 
-func OnRoomList(session *session.Session, req request.RoomList) {
-
-	fmt.Println(req)
-}
-
 func OnChat(session *session.Session, req request.Chat) {
-	fmt.Println(req)
+	session.Send(response.Chat{
+		User:    "",
+		Message: "",
+	})
 }
 
 func main() {
@@ -29,8 +29,10 @@ func main() {
 	}
 	defer listen.Close()
 
+	ctx := context.New()
+
 	handler_ist := handler.New()
-	handler.Register(handler_ist, OnRoomList)
+	handler.Register(handler_ist, ctx.OnRoomList)
 	handler.Register(handler_ist, OnChat)
 
 	for {
@@ -40,7 +42,10 @@ func main() {
 			continue
 		}
 
-		sesion := session.New(conn, handler_ist)
-		go sesion.Loop()
+		session := session.New(conn, handler_ist)
+		session.Send(response.Login{
+			Id: session.ID(),
+		})
+		go session.Loop()
 	}
 }
