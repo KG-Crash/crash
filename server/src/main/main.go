@@ -33,6 +33,7 @@ func main() {
 
 	handler_ist := handler.New()
 	handler.Register(handler_ist, ctx.OnRoomList)
+	handler.Register(handler_ist, ctx.OnCreateRoom)
 	handler.Register(handler_ist, OnChat)
 
 	for {

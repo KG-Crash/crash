@@ -34,3 +34,15 @@ func (ctx *Context) OnRoomList(session *session.Session, req request.RoomList) {
 		Rooms: rooms,
 	})
 }
+
+func (ctx *Context) OnCreateRoom(session *session.Session, req request.CreateRoom) {
+	room := room.New(session, room.Config{
+		Team:  req.Teams,
+		Title: req.Title,
+	})
+
+	ctx.Rooms[room.ID()] = &room
+	session.Send(response.CreateRoom{
+		Id: room.ID(),
+	})
+}
