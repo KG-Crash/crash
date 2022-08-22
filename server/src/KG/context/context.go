@@ -46,3 +46,39 @@ func (ctx *Context) OnCreateRoom(session *session.Session, req request.CreateRoo
 		Id: room.ID(),
 	})
 }
+
+func (ctx *Context) OnEnterRoom(session *session.Session, req request.EnterRoom) {
+	room, ok := ctx.Rooms[req.Id]
+	if !ok {
+		session.Send(response.EnterRoom{
+			Error: 1,
+		})
+		return
+	}
+
+	if err := room.Enter(session); err != nil {
+		session.Send(response.EnterRoom{
+			Error: 1,
+		})
+		return
+	}
+
+	res := response.EnterRoom{
+		User:   session.ID(),
+		Users:  []response.User{},
+		Master: room.Master.ID(),
+		Error:  0,
+	}
+
+	for team, users := range room.Users {
+		for _, user := range users {
+			res.Users = append(res.Users, response.User{
+				Id:       user.ID(),
+				Team:     int32(team),
+				Sequence: -1,
+			})
+		}
+	}
+
+	session.Send(res)
+}
