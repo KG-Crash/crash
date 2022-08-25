@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace Game.Service
 {
@@ -9,6 +10,7 @@ namespace Game.Service
 
         [SerializeField] private Text _chatLog;
         [SerializeField] private InputField _input;
+        [SerializeField] private TMP_InputField _inputTmp;
         [SerializeField] private ScrollRect _scrollRect;
 
         private GameState _gameState;
@@ -29,13 +31,13 @@ namespace Game.Service
 
         public bool SendMessage()
         {
-            if (string.IsNullOrEmpty(_input.text.Trim()))
+            if (string.IsNullOrEmpty(_inputTmp.text.Trim()))
                 return false;
 
-            var msg = _input.text;
+            var msg = _inputTmp.text;
 
-            _input.ActivateInputField();
-            _input.text = string.Empty;
+            _inputTmp.ActivateInputField();
+            _inputTmp.text = string.Empty;
 
             var resultMsg = CheatService.ParseMessage(msg, _gameState);
             if (string.IsNullOrEmpty(resultMsg))
