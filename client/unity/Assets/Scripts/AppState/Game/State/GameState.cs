@@ -4,11 +4,13 @@ using Game;
 using Game.Service;
 using Module;
 using Network;
+using UI;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 
-[AutoBindAttribute(flatBuffer: true)]
+[UIBind(typeof(GamePanel), true, typeof(UpgradePanel), false)]
+[AutoBind(flatBuffer: true)]
 public partial class GameState : AppState
 {
     [SerializeField] private UnitTable _unitPrefabTable;
