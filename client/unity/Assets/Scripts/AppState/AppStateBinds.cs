@@ -58,11 +58,11 @@ public class AppStateBinds
                 .FirstOrDefault(),
             uiViewTypes = type.GetCustomAttributes()
                 .Where(attr => attr is UIBindAttribute)
-                .Select(attr => (attr as UIBindAttribute).Type)
+                .SelectMany(attr => (attr as UIBindAttribute).TypeAndShow.Select(x => x.type))
                 .ToArray(),
             showBeforeInit = type.GetCustomAttributes()
                 .Where(attr => attr is UIBindAttribute)
-                .Select(attr => (attr as UIBindAttribute).ShowBeforeInit)
+                .SelectMany(attr => (attr as UIBindAttribute).TypeAndShow.Select(x => x.showBeforeInit))
                 .ToArray(),
             initMethod = allMethods.FirstOrDefault(method =>
             {

@@ -14,13 +14,26 @@ public class AutoBindAttribute : System.Attribute
 [System.AttributeUsage(AttributeTargets.Class)]
 public class UIBindAttribute : System.Attribute
 { 
-    public Type Type { get; private set; }
-    public bool ShowBeforeInit { get; private set; }
+    public (Type type, bool showBeforeInit)[] TypeAndShow { get; private set; }
 
-    public UIBindAttribute(Type type, bool showBeforeInit)
+    public UIBindAttribute(Type type, bool showBeforeInit = false)
     {
-        Type = type;
-        ShowBeforeInit = showBeforeInit;
+        TypeAndShow = new[] {(type, showBeforeInit)};
+    }
+    
+    public UIBindAttribute(Type t1, bool s1, Type t2, bool s2)
+    {
+        TypeAndShow = new [] {(t1, s1), (t2, s2)};
+    }
+    
+    public UIBindAttribute(Type t1, bool s1, Type t2, bool s2, Type t3, bool s3)
+    {
+        TypeAndShow = new [] {(t1, s1), (t2, s2), (t3, s3)};
+    }
+    
+    public UIBindAttribute(Type t1, bool s1, Type t2, bool s2, Type t3, bool s3, Type t4, bool s4)
+    {
+        TypeAndShow = new [] {(t1, s1), (t2, s2), (t3, s3), (t4, s4)};
     }
 }
 
