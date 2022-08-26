@@ -7,7 +7,7 @@ using GameRoom;
 using UI;
 
 [UIBind(typeof(GameRoomPanel), true)]
-[AutoBindAttribute(flatBuffer: true)]
+[AutoBind(flatBuffer: true)]
 public partial class GameRoomState : AppState
 {
     [InitializeMethod]

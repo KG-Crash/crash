@@ -9,7 +9,7 @@ using Protocol.Request;
 using UI;
 
 [UIBind(typeof(LobbyPanel), true)]
-[AutoBindAttribute(flatBuffer: true)]
+[AutoBind(flatBuffer: true)]
 public partial class LobbyState : AppState
 {
     private DateTime _lastUpdatedRefreshDate = DateTime.Now;
@@ -26,7 +26,7 @@ public partial class LobbyState : AppState
     }
 
     [ClearMethod]
-    public void Clear(AppState nextState)
+    public void Clear()
     {
         var view = GetView<LobbyPanel>();
         view.createGameRoomButtonClick.RemoveListener(OnCreateGameRoom);
