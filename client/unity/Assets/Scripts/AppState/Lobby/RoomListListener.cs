@@ -22,6 +22,7 @@ namespace Lobby
 
         public void OnCreated(string data, KG.ButtonSingle button)
         {
+            button.text = data;
             button.onClick.AddListener(() => { OnEnterButtonClick(data); });
         }
 
