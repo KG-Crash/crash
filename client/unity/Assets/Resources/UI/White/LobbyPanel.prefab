@@ -3315,7 +3315,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _layoutGroup: {fileID: 793278715387739448}
-  prefab: {fileID: 0}
+  prefab: {fileID: -1177658762341168992, guid: a4be552431542744b8a0b87ee760ae74, type: 3}
 --- !u!1 &5473486661826861132
 GameObject:
   m_ObjectHideFlags: 0
