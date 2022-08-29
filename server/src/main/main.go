@@ -3,21 +3,13 @@ package main
 import (
 	"KG/context"
 	"KG/handler"
-	"KG/session"
+	"KG/model"
 	"fmt"
 	"log"
 	"net"
 	"os"
-	"protocol/request"
 	"protocol/response"
 )
-
-func OnChat(session *session.Session, req request.Chat) {
-	session.Send(response.Chat{
-		User:    "",
-		Message: "",
-	})
-}
 
 func main() {
 
@@ -34,7 +26,10 @@ func main() {
 	handler_ist := handler.New()
 	handler.Register(handler_ist, ctx.OnRoomList)
 	handler.Register(handler_ist, ctx.OnCreateRoom)
-	handler.Register(handler_ist, OnChat)
+	handler.Register(handler_ist, ctx.OnEnterRoom)
+	handler.Register(handler_ist, ctx.OnChat)
+	handler.Register(handler_ist, ctx.OnGameStart)
+	handler.Register(handler_ist, ctx.OnReady)
 
 	for {
 		conn, err := listen.Accept()
@@ -43,7 +38,7 @@ func main() {
 			continue
 		}
 
-		session := session.New(conn, handler_ist)
+		session := model.NewSession(conn, handler_ist)
 		session.Send(response.Login{
 			Id: session.ID(),
 		})
