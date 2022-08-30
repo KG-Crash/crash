@@ -9,7 +9,6 @@ public static class CrashResourcesGenerater
     private const string appStatePath = "Assets/Resources/AppState/"; 
     
     [MenuItem("Crash/Generate All AppState")]
-    [InitializeOnLoadMethod]
     private static void GenerateAppStates()
     {
         var appStateTypes = System.AppDomain.CurrentDomain.GetAssemblies()
@@ -33,7 +32,6 @@ public static class CrashResourcesGenerater
     private const string optionPath = "Assets/Resources/CrashAppSettings.asset";
 
     [MenuItem("Crash/Generate CrashAppSettings")]
-    [InitializeOnLoadMethod]
     private static void GenerateOption()
     {
         if (AssetDatabase.LoadAssetAtPath<CrashAppSettings>(optionPath) == null)
