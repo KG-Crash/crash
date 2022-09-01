@@ -174,15 +174,15 @@ func NewRoom(master *Session, config RoomConfig) Room {
 }
 
 func (room *Room) GetAllUsers() []*Session {
-	users := []*Session{}
+	result := []*Session{}
 
 	for _, users := range room.Users {
 		for _, user := range users {
-			users = append(users, user)
+			result = append(result, user)
 		}
 	}
 
-	return users
+	return result
 }
 
 func (room *Room) IsPlayable() bool {
