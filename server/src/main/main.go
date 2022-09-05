@@ -30,6 +30,7 @@ func main() {
 	handler.Register(handler_ist, ctx.OnChat)
 	handler.Register(handler_ist, ctx.OnGameStart)
 	handler.Register(handler_ist, ctx.OnReady)
+	handler.Register(handler_ist, ctx.OnAction)
 
 	for {
 		conn, err := listen.Accept()

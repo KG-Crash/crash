@@ -107,7 +107,7 @@ func (ctx *Context) OnChat(session *model.Session, req request.Chat) {
 
 }
 
-func (ctx *Context) OnGameStart(session *model.Session, req request.Chat) {
+func (ctx *Context) OnGameStart(session *model.Session, req request.GameStart) {
 	if session.Room == nil {
 		session.Send(response.GameStart{
 			Error: 1,
@@ -149,30 +149,63 @@ func (ctx *Context) OnReady(session *model.Session, req request.Ready) {
 	}
 
 	next := len(room.Sequences)
-	room.Sequences[next] = session
+	room.Sequences[session] = next
 
 	res := response.Ready{
 		Seed:  room.Seed,
 		Users: []response.User{},
 	}
 
-	for seq, ready := range room.Sequences {
-		team, err := ready.GetTeam()
-		if err != nil {
-			session.Send(response.Ready{
-				Error: 1,
-			})
-			return
-		}
+	for team, users := range room.Users {
+		for _, user := range users {
+			seq, ok := room.Sequences[user]
+			if !ok {
+				seq = -1
+			}
 
-		res.Users = append(res.Users, response.User{
-			Id:       ready.ID(),
-			Team:     int32(team),
-			Sequence: int32(seq),
+			res.Users = append(res.Users, response.User{
+				Id:       user.ID(),
+				Team:     int32(team),
+				Sequence: int32(seq),
+			})
+		}
+	}
+
+	for ready, _ := range room.Sequences {
+		ready.Send(res)
+	}
+}
+
+func (ctx *Context) OnAction(session *model.Session, req request.ActionQueue) {
+	room := session.Room
+	if room == nil {
+		session.Send(response.ActionQueue{
+			Error: 1,
 		})
 	}
 
-	for _, ready := range room.Sequences {
-		ready.Send(res)
+	seq, ok := room.Sequences[session]
+	if !ok {
+		session.Send(response.ActionQueue{
+			Error: 1,
+		})
+	}
+	res := response.ActionQueue{
+		User:    int32(seq),
+		Actions: []response.Action{},
+		Turn:    req.Turn,
+	}
+
+	for _, action := range req.Actions {
+		res.Actions = append(res.Actions, response.Action{
+			Frame:  action.Frame,
+			Id:     action.Id,
+			Param1: action.Param1,
+			Param2: action.Param2,
+		})
+	}
+
+	for _, user := range room.GetAllUsers() {
+		user.Send(res)
 	}
 }

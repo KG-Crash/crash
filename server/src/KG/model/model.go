@@ -36,7 +36,7 @@ type Room struct {
 	Config    RoomConfig
 	Master    *Session
 	Seed      int64
-	Sequences map[int]*Session
+	Sequences map[*Session]int
 }
 
 func NewSession(conn net.Conn, handler *handler.Handler) *Session {
@@ -138,6 +138,7 @@ func (room *Room) nextTeamSequence() (int, error) {
 		}
 
 		result = team
+		min = count
 	}
 
 	if result == -1 {
@@ -161,12 +162,13 @@ func (room *Room) Enter(session *Session) error {
 func NewRoom(master *Session, config RoomConfig) Room {
 	seed, _ := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
 	room := Room{
-		Id:      uuid.NewString(),
-		Users:   map[int][]*Session{},
-		Playing: false,
-		Config:  config,
-		Master:  master,
-		Seed:    seed.Int64(),
+		Id:        uuid.NewString(),
+		Users:     map[int][]*Session{},
+		Playing:   false,
+		Config:    config,
+		Master:    master,
+		Seed:      seed.Int64(),
+		Sequences: map[*Session]int{},
 	}
 
 	room.Enter(master)
