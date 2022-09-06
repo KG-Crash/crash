@@ -103,6 +103,59 @@ func (ctx *Context) OnEnterRoom(session *model.Session, req request.EnterRoom) {
 	}
 }
 
+func (ctx *Context) OnLeaveRoom(session *model.Session, req request.LeaveRoom) {
+
+	room := session.Room
+	if room == nil {
+		session.Send(response.LeaveRoom{
+			Error: 1,
+		})
+		return
+	}
+
+	res := response.LeaveRoom{
+		User: session.ID(),
+	}
+
+	team, err := session.GetTeam()
+	if err != nil {
+		session.Send(response.LeaveRoom{
+			Error: 1,
+		})
+		return
+	}
+
+	master := room.Master
+	if master == nil {
+		session.Send(response.LeaveRoom{
+			Error: 1,
+		})
+		return
+	}
+
+	users := room.GetAllUsers()
+	if len(users) > 1 {
+		master = room.NextMaster()
+		room.Master = master
+
+		res.NewMaster = master.ID()
+	}
+
+	delete(room.Users[team], session.ID())
+	if len(room.Users[team]) == 0 {
+		delete(room.Users, team)
+	}
+
+	if len(room.Users) == 0 {
+		delete(ctx.Rooms, room.ID())
+	}
+
+	session.Room = nil
+	for _, user := range users {
+		user.Send(res)
+	}
+}
+
 func (ctx *Context) OnChat(session *model.Session, req request.Chat) {
 
 }

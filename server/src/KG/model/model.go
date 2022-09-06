@@ -31,7 +31,7 @@ type RoomConfig struct {
 
 type Room struct {
 	Id        string
-	Users     map[int][]*Session
+	Users     map[int]map[string]*Session
 	Playing   bool
 	Config    RoomConfig
 	Master    *Session
@@ -155,7 +155,11 @@ func (room *Room) Enter(session *Session) error {
 		return err
 	}
 
-	room.Users[team] = append(room.Users[team], session)
+	if room.Users[team] == nil {
+		room.Users[team] = map[string]*Session{}
+	}
+
+	room.Users[team][session.ID()] = session
 	return nil
 }
 
@@ -163,7 +167,7 @@ func NewRoom(master *Session, config RoomConfig) Room {
 	seed, _ := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
 	room := Room{
 		Id:        uuid.NewString(),
-		Users:     map[int][]*Session{},
+		Users:     map[int]map[string]*Session{},
 		Playing:   false,
 		Config:    config,
 		Master:    master,
@@ -185,6 +189,21 @@ func (room *Room) GetAllUsers() []*Session {
 	}
 
 	return result
+}
+
+func (room *Room) NextMaster() *Session {
+
+	for _, users := range room.Users {
+		for _, user := range users {
+			if room.Master == user {
+				continue
+			}
+
+			return user
+		}
+	}
+
+	return nil
 }
 
 func (room *Room) IsPlayable() bool {

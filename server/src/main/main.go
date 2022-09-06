@@ -27,6 +27,7 @@ func main() {
 	handler.Register(handler_ist, ctx.OnRoomList)
 	handler.Register(handler_ist, ctx.OnCreateRoom)
 	handler.Register(handler_ist, ctx.OnEnterRoom)
+	handler.Register(handler_ist, ctx.OnLeaveRoom)
 	handler.Register(handler_ist, ctx.OnChat)
 	handler.Register(handler_ist, ctx.OnGameStart)
 	handler.Register(handler_ist, ctx.OnReady)
