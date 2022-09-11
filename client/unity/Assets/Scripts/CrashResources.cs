@@ -13,7 +13,7 @@ public static class CrashResources
     {
         var type = typeof(AppState);
         return Assembly.GetAssembly(type).GetTypes()
-            .Where(type => !type.IsAbstract && type.IsSubclassOf(type))
+            .Where(t => !t.IsAbstract && t.IsSubclassOf(type))
             .Select(x => x.Name)
             .Select(typeName => Resources.Load<AppState>($"{appStatePathPrefix}{typeName}"))
             .ToArray();
