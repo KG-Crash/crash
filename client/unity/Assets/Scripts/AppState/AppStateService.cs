@@ -28,7 +28,7 @@ public class AppStateService
         _uiStack = new UIStack();
         
         foreach (var appState in appStates)
-            appState.Ctor(_uiStack);
+            appState.uiStack = _uiStack;
 
         if (_binds.Any(kv => !kv.Value.valid))
             throw new Exception($"not valid state = {_binds.First(kv => !kv.Value.valid).Key.GetType().Name}");
