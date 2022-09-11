@@ -20,10 +20,7 @@ public abstract class AppState : ScriptableObject
     protected Scene _scene;
     private UIStack _uiStack = null;
 
-    public void Ctor(UIStack stack)
-    {
-        _uiStack = stack;
-    }
+    public UIStack uiStack { set => _uiStack = value; }
     
     public void Register(UIView[] views, Scene scene)
     {
