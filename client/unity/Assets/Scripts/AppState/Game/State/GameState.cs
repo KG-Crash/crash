@@ -55,7 +55,6 @@ public partial class GameState : AppState
 
         unitActorFactory = new UnitActorFactory();
 
-        Handler.Bind(this, Dispatcher.Instance);
         ActionHandler.Bind(this);
 
         FPS = Shared.Const.Time.FPS;
@@ -81,14 +80,17 @@ public partial class GameState : AppState
         actionService = new ActionService(this);
 
         LockStep.Reset();
+        
+        InitializeGamePanel();
     }
 
     [ClearMethod]
     public void Clear()
     {
+        ClearGamePanel();
+        
         Destroy(context);
 
-        Handler.Unbind(this);
         ActionHandler.Unbind<GameState>();
         ClearInput();
         

@@ -17,24 +17,14 @@ public partial class GameState : IInputSubscriber
 
     public void OnPressMainBtn(Vector2 positionSS)
     {
-        _lastPositionSS = positionSS;
     }
 
     public void OnDragMainBtn(Vector2 positionSS)
     {
-        var unityObject = UnityResources._instance.Get("objects");
-        var focusTransform = unityObject.GetFocus();
-        var dragDelta = (float) Shared.Const.Input.DragDelta;
-
-        var deltaSS = (positionSS - _lastPositionSS) * dragDelta;
-        focusTransform.position += new Vector3(deltaSS.y, 0, -deltaSS.x);
-
-        _lastPositionSS = positionSS;
     }
 
     public void OnReleaseMainBtn(Vector2 positionSS)
     {
-        _lastPositionSS = positionSS;
     }
 
     public void OnPressAltBtn(Vector2 positionSS)

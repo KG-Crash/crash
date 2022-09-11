@@ -494,7 +494,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _layoutGroup: {fileID: 3347765403219340465}
-  prefab: {fileID: -3003211508510988280, guid: d5bf491b24d9c49428f80626cf4902d6, type: 3}
+  prefab: {fileID: -3003211508510988280, guid: 547189ade719fe944b5b69c9660e7b32, type: 3}
 --- !u!1 &1156784419307208773
 GameObject:
   m_ObjectHideFlags: 0
@@ -2068,7 +2068,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1318876339505944589}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.99999297
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2196,7 +2196,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _layoutGroup: {fileID: 3112387121193813870}
-  prefab: {fileID: 5486704719618584117, guid: aa61f9f072fc70e4fa7886e6e4df39a6, type: 3}
+  prefab: {fileID: 5486704719618584117, guid: 8cbe40634dbc6104994562a2eda62409, type: 3}
 --- !u!1 &5239169560441046146
 GameObject:
   m_ObjectHideFlags: 0
@@ -3034,7 +3034,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.00018355013}
+  m_AnchoredPosition: {x: 0, y: 0.00001598847}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &3112387121193813870

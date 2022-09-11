@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using Game;
+using UI;
 
 public partial class GameState
 {
@@ -89,6 +90,8 @@ public partial class GameState
             {
                 Debug.Log($"OnReady, user.Id={user.Id}");
             }
+            
+            ReadyGamePanel(response.Users.Count);
         }
         catch (Exception e)
         {
