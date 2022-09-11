@@ -6,16 +6,19 @@ using UnityEngine;
 public static class CrashResources
 {
     private const string appStatePathPrefix = "AppState/"; 
+    private const string uiCanvasPrefabPath = "UI/Canvas"; 
+    private const string unityTablePathPrefix = "Tables/"; 
+    
     public static AppState[] LoadAppStates()
     {
-        return Assembly.GetAssembly(typeof(AppState)).GetTypes()
-            .Where(type => !type.IsAbstract && type.IsSubclassOf(typeof(AppState)))
+        var type = typeof(AppState);
+        return Assembly.GetAssembly(type).GetTypes()
+            .Where(type => !type.IsAbstract && type.IsSubclassOf(type))
             .Select(x => x.Name)
             .Select(typeName => Resources.Load<AppState>($"{appStatePathPrefix}{typeName}"))
             .ToArray();
     }
     
-    private const string uiCanvasPrefabPath = "UI/Canvas"; 
     public static Canvas LoadUICanvasPrefab()
     {
         return Resources.Load<Canvas>(uiCanvasPrefabPath);
@@ -24,5 +27,15 @@ public static class CrashResources
     public static CrashAppSettings LoadAppSettings()
     {
         return Resources.Load<CrashAppSettings>(nameof(CrashAppSettings));
+    }
+
+    public static UnityTable[] LoadUnityTables()
+    {
+        var type = typeof(UnityTable);
+        return Assembly.GetAssembly(type).GetTypes()
+            .Where(t => !t.IsAbstract && t.IsSubclassOf(type))
+            .Select(x => x.Name)
+            .Select(typeName => Resources.Load<UnityTable>($"{unityTablePathPrefix}{typeName}"))
+            .ToArray();
     }
 }

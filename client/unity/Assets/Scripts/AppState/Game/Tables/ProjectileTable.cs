@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Game
 {
     [CreateAssetMenu(fileName = "ProjectileTable", menuName = "Crash/ProjectileTable", order = 1)]
-    public class ProjectileTable : ScriptableObject
+    public class ProjectileTable : UnityTable
     {
         [SerializeField] private SerializableDictionary<int, ProjectileActor> _projectiles;
 

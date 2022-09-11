@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 namespace Game
 {
     [CreateAssetMenu(fileName = "UnitTable", menuName = "Crash/UnitTable", order = 0)]
-    public class UnitTable : ScriptableObject
+    public class UnitTable : UnityTable
     {
         [FormerlySerializedAs("_unitOriginDict")] [SerializeField] private SerializableDictionary<int, UnitActor> _unitTypeDict;
 
