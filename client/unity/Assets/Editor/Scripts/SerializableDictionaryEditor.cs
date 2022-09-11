@@ -12,29 +12,22 @@ public class UnityDictionaryDrawer : PropertyDrawer
 
     private static DictKeyValue GetTypeOfObject(string obj)
     {
-        if (obj == "int")
+        switch (obj)
         {
-            return DictKeyValue.Integer;
-        }
-        else if (obj == "long")
-        {
-            return DictKeyValue.Long;
-        }
-        else if (obj == "float")
-        {
-            return DictKeyValue.Float;
-        }
-        else if (obj == "double")
-        {
-            return DictKeyValue.Double;
-        }
-        else if (obj == "string")
-        {
-            return DictKeyValue.String;
-        }
-        else
-        {
-            return DictKeyValue.Undef;
+            case "Int":
+                return DictKeyValue.Integer;
+            case "Enum":
+                return DictKeyValue.Enum;
+            case "Long":
+                return DictKeyValue.Long;
+            case "Float":
+                return DictKeyValue.Float;
+            case "Double":
+                return DictKeyValue.Double;
+            case "String":
+                return DictKeyValue.String;
+            default:
+                return DictKeyValue.Undef;
         }
     }
     
@@ -51,6 +44,16 @@ public class UnityDictionaryDrawer : PropertyDrawer
         
         switch (keyType)
         {
+            case DictKeyValue.Enum:
+                var maxEnumIndex = 0;
+                for (int i = 0; i < property.arraySize; i++)
+                {
+                    var e = property.GetArrayElementAtIndex(i);
+                    var keyIntValue = e.FindPropertyRelative("_key");
+                    maxEnumIndex = Math.Max(maxEnumIndex, keyIntValue.enumValueIndex);
+                }
+                elementKey.enumValueIndex = maxEnumIndex + 1;
+                break;
             case DictKeyValue.Integer:
                 var maxIntValue = int.MinValue;
                 for (int i = 0; i < property.arraySize; i++)
@@ -120,6 +123,7 @@ public class UnityDictionaryDrawer : PropertyDrawer
     {
         Undef,
         Integer,
+        Enum,
         Long,
         Float,
         Double,
