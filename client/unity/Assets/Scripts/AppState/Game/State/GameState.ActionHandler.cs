@@ -62,7 +62,7 @@ public partial class GameState
         });
     }
 
-    public void EnqueueAttack(uint playerID)
+    public void EnqueueAttackPlayer(uint playerID)
     {
         actionService.Send(new Protocol.Request.Action
         {

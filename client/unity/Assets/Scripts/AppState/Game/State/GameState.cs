@@ -67,9 +67,6 @@ public partial class GameState : AppState
 
         _projectileActorPool = new ProjectileActorPool(_projectilehPrefabTable, 15, this, poolOffset);
 
-        // 레디에서 이름 보내야 하지 않을까?
-        _ = Client.Send(new Protocol.Request.Ready { });
-
         context.UpdateAsObservable().Subscribe(_ => OnUpdate());
         context.LateUpdateAsObservable().Subscribe(_ => OnLateUpdate());
 
@@ -83,6 +80,8 @@ public partial class GameState : AppState
         
         InitializeGamePanel();
         InitializeUpgradePanel();
+
+        _ = Client.Send(new Protocol.Request.Ready { });
     }
 
     [ClearMethod]

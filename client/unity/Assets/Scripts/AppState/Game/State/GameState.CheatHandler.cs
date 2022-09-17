@@ -38,7 +38,7 @@ public partial class GameState
     [BuildCommand("attack to")]
     public void AttackTo(int targetPlayerNumber)
     {
-        EnqueueAttack((uint) targetPlayerNumber);
+        EnqueueAttackPlayer((uint) targetPlayerNumber);
     }
 
     [BuildCommand("faster")]
