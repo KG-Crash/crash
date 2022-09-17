@@ -1,8 +1,9 @@
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace KG
 {
-    public abstract class UIAutoComponent<T> : UIComponent where T : UIBehaviour
+    public abstract class UIAutoComponent<T> : UIComponent where T : MonoBehaviour
     {
         private T _instance;
 
@@ -17,7 +18,7 @@ namespace KG
         }
     }
     
-    public abstract class UIAutoComponent<T0, T1> : UIComponent where T0 : UIBehaviour where T1 : UIBehaviour
+    public abstract class UIAutoComponent<T0, T1> : UIComponent where T0 : MonoBehaviour where T1 : MonoBehaviour
     {
         private T0 _instance0;
         public T0 instance0

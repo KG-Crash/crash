@@ -7,6 +7,8 @@ public partial class GameState : Team.Listener
     public void OnFinishUpgrade(Ability ability)
     {
         Debug.Log($"OnFinishUpgrade({ability})");
+        
+        EnqueueUpgrade(ability);
     }
 
     public void OnAttackTargetChanged(Player player, Player target)

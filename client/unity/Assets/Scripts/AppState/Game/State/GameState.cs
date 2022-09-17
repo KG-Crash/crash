@@ -82,12 +82,14 @@ public partial class GameState : AppState
         LockStep.Reset();
         
         InitializeGamePanel();
+        InitializeUpgradePanel();
     }
 
     [ClearMethod]
     public void Clear()
     {
         ClearGamePanel();
+        ClearUpgradePanel();
         
         Destroy(context);
 

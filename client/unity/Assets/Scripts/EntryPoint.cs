@@ -8,6 +8,7 @@ public static class EntryPoint
 {
     public static AppStateService appStateService { get; private set; }
     public static KG.UIPool uiPool { get; private set; }
+    public static string uiBundleName => CrashResources.LoadAppSettings().uiBundleName;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void AfterSceneLoad()

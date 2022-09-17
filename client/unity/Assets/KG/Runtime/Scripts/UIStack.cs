@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace KG
 {
@@ -28,18 +29,23 @@ namespace KG
             return _uiViewStack.FirstOrDefault(x => x.GetType() == typeof(T)) as T;
         }
 
-        public async Task<UIView> CloseTopView()
+        public async Task<T> CloseTopView<T>() where T : UIView
         {
-            var view = _uiViewStack.Pop();
-            await view.Close();
-
-            if (_uiViewStack.Count > 0)
+            if (_uiViewStack.Peek() is T view && view)
             {
-                var backView = _uiViewStack.Peek();
-                backView?.gameObject.SetActive(true);
+                Debug.Assert(_uiViewStack.Pop() == view, "peek/pop result not equal.."); 
+                await view.Close();
+
+                if (_uiViewStack.Count > 0)
+                {
+                    var backView = _uiViewStack.Peek();
+                    backView?.gameObject.SetActive(true);
+                }
+
+                return view;
             }
 
-            return view;
+            return null;
         }
 
         public async Task<UIView> Close<T>() where T : UIView
