@@ -169,6 +169,19 @@ func (ctx *Context) OnLeaveRoom(session *model.Session, req request.LeaveRoom) {
 
 func (ctx *Context) OnChat(session *model.Session, req request.Chat) {
 
+	if session.Room == nil {
+		session.Send(response.Chat{
+			Error: 1,
+		})
+		return
+	}
+
+	for _, user := range session.Room.GetAllUsers() {
+		user.Send(response.Chat{
+			User:    session.ID(),
+			Message: req.Message,
+		})
+	}
 }
 
 func (ctx *Context) OnGameStart(session *model.Session, req request.GameStart) {
