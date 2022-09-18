@@ -1,5 +1,6 @@
-﻿using Network;
-using Protocol.Request;
+﻿#define CASE_KICK
+
+using Network;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -218,11 +219,7 @@ namespace console
 
             if (await Client.Instance.Connect("localhost", 8000))
             {
-                //await Client.Send(new RoomList { });
-                await Client.Send(new Protocol.Request.Chat
-                {
-                    Message = "하이요"
-                });
+                await Client.Send(new Protocol.Request.RoomList { });
             }
 
             Console.ReadLine();

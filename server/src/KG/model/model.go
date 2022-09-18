@@ -108,6 +108,8 @@ func (session *Session) Loop() {
 			session.queue = session.queue[size+4:]
 		}
 	}
+
+	session.handler.Exit <- session
 }
 
 func (room *Room) ID() string {

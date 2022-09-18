@@ -22,16 +22,18 @@ func main() {
 	defer listen.Close()
 
 	ctx := context.New()
-
-	handler_ist := handler.New()
-	handler.Register(handler_ist, ctx.OnRoomList)
-	handler.Register(handler_ist, ctx.OnCreateRoom)
-	handler.Register(handler_ist, ctx.OnEnterRoom)
-	handler.Register(handler_ist, ctx.OnLeaveRoom)
-	handler.Register(handler_ist, ctx.OnChat)
-	handler.Register(handler_ist, ctx.OnGameStart)
-	handler.Register(handler_ist, ctx.OnReady)
-	handler.Register(handler_ist, ctx.OnAction)
+	ist := handler.New()
+	handler.Register(ist, ctx.OnRoomList)
+	handler.Register(ist, ctx.OnCreateRoom)
+	handler.Register(ist, ctx.OnEnterRoom)
+	handler.Register(ist, ctx.OnLeaveRoom)
+	handler.Register(ist, ctx.OnChat)
+	handler.Register(ist, ctx.OnGameStart)
+	handler.Register(ist, ctx.OnReady)
+	handler.Register(ist, ctx.OnAction)
+	handler.Register(ist, ctx.OnWhisper)
+	handler.Register(ist, ctx.OnKick)
+	handler.RegisterExit(ist, ctx.OnExit)
 
 	for {
 		conn, err := listen.Accept()
@@ -40,7 +42,8 @@ func main() {
 			continue
 		}
 
-		session := model.NewSession(conn, handler_ist)
+		session := model.NewSession(conn, ist)
+		ctx.Sessions[session.ID()] = session
 		session.Send(response.Login{
 			Id: session.ID(),
 		})

@@ -3,6 +3,7 @@ package context
 import (
 	"KG/model"
 	"crypto/rand"
+	"errors"
 	"math"
 	"math/big"
 	"protocol/request"
@@ -103,42 +104,22 @@ func (ctx *Context) OnEnterRoom(session *model.Session, req request.EnterRoom) {
 	}
 }
 
-func (ctx *Context) OnLeaveRoom(session *model.Session, req request.LeaveRoom) {
-
+func (ctx *Context) Leave(session *model.Session) (*model.Session, error) {
 	room := session.Room
 	if room == nil {
-		session.Send(response.LeaveRoom{
-			Error: 1,
-		})
-		return
-	}
-
-	res := response.LeaveRoom{
-		User: session.ID(),
+		return nil, errors.New("")
 	}
 
 	team, err := session.GetTeam()
 	if err != nil {
-		session.Send(response.LeaveRoom{
-			Error: 1,
-		})
-		return
+		return nil, errors.New("")
 	}
 
-	master := room.Master
-	if master == nil {
-		session.Send(response.LeaveRoom{
-			Error: 1,
-		})
-		return
-	}
-
+	var master *model.Session = nil
 	users := room.GetAllUsers()
 	if len(users) > 1 {
 		master = room.NextMaster()
 		room.Master = master
-
-		res.NewMaster = master.ID()
 	}
 
 	delete(room.Users[team], session.ID())
@@ -151,6 +132,36 @@ func (ctx *Context) OnLeaveRoom(session *model.Session, req request.LeaveRoom) {
 	}
 
 	session.Room = nil
+	return master, nil
+}
+
+func (ctx *Context) OnLeaveRoom(session *model.Session, req request.LeaveRoom) {
+
+	room := session.Room
+	if room == nil {
+		session.Send(response.LeaveRoom{
+			Error: 1,
+		})
+		return
+	}
+
+	users := room.GetAllUsers()
+
+	master, err := ctx.Leave(session)
+	if err != nil {
+		session.Send(response.LeaveRoom{
+			Error: 1,
+		})
+		return
+	}
+
+	res := response.LeaveRoom{
+		User: session.ID(),
+	}
+	if master != nil {
+		res.NewMaster = master.ID()
+	}
+
 	for _, user := range users {
 		user.Send(res)
 	}
@@ -224,7 +235,7 @@ func (ctx *Context) OnReady(session *model.Session, req request.Ready) {
 		}
 	}
 
-	for ready, _ := range room.Sequences {
+	for ready := range room.Sequences {
 		ready.Send(res)
 	}
 }
@@ -261,4 +272,92 @@ func (ctx *Context) OnAction(session *model.Session, req request.ActionQueue) {
 	for _, user := range room.GetAllUsers() {
 		user.Send(res)
 	}
+}
+
+func (ctx *Context) OnWhisper(session *model.Session, req request.Whisper) {
+
+	to, ok := ctx.Sessions[req.User]
+	if !ok {
+		session.Send(response.Whisper{
+			Error: 1,
+		})
+		return
+	}
+
+	res := response.Whisper{
+		From:    session.ID(),
+		To:      to.ID(),
+		Message: req.Message,
+	}
+	session.Send(res)
+	to.Send(res)
+}
+
+func (ctx *Context) OnKick(session *model.Session, req request.KickRoom) {
+
+	if session.Room == nil {
+		session.Send(response.KickRoom{
+			Error: 1,
+		})
+		return
+	}
+
+	if session.Room.Master != session {
+		session.Send(response.KickRoom{
+			Error: 1,
+		})
+		return
+	}
+
+	target, ok := ctx.Sessions[req.User]
+	if !ok {
+		session.Send(response.KickRoom{
+			Error: 1,
+		})
+	}
+
+	users := session.Room.GetAllUsers()
+
+	_, err := ctx.Leave(target)
+	if err != nil {
+		session.Send(response.KickRoom{
+			Error: 1,
+		})
+	}
+
+	for _, user := range users {
+		if user == session {
+			user.Send(response.KickRoom{})
+		} else if user == target {
+			user.Send(response.KickedRoom{})
+		} else {
+			user.Send(response.LeaveRoom{
+				User: target.ID(),
+			})
+		}
+	}
+}
+
+func (ctx *Context) OnExit(session *model.Session) {
+	room := session.Room
+	if room != nil {
+		users := room.GetAllUsers()
+
+		master, _ := ctx.Leave(session)
+		res := response.LeaveRoom{
+			User: session.ID(),
+		}
+		if master != nil {
+			res.NewMaster = master.ID()
+		}
+		for _, user := range users {
+			if user == session {
+				continue
+			}
+
+			user.Send(res)
+		}
+	}
+
+	delete(ctx.Sessions, session.ID())
 }
