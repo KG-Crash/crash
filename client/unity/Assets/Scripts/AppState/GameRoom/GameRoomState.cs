@@ -14,7 +14,7 @@ public partial class GameRoomState : AppState
     public void Initialize(GameRoomTransition transition)
     {
         var view = GetView<GameRoomPanel>();
-        view.userNameList.Refresh(new UserListListener(Client.Instance.uuid, transition.roomUsers));
+        view.userNameList.Refresh(new UserListListenerWithButton(Client.Instance.uuid, transition.roomUsers));
         
         view.roomExitButtonClick.AddListener(OnExit);
         view.gameStartButtonClick.AddListener(OnGameStart);

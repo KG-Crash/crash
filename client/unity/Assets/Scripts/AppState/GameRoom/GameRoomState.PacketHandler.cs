@@ -67,7 +67,7 @@ public partial class GameRoomState
     public async Task<bool> OnEnterRoom(EnterRoom response)
     {
         var view = GetView<GameRoomPanel>();
-        view.userNameList.Refresh(new UserListListener(Client.Instance.uuid, response.Users.Select(x => x.Id)));
+        view.userNameList.Refresh(new UserListListenerWithButton(Client.Instance.uuid, response.Users.Select(x => x.Id)));
         return true;
     }
 }
