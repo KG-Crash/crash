@@ -20,9 +20,11 @@ public partial class LobbyState : AppState
     {
         var view = GetView<LobbyPanel>();
         view.createGameRoomButtonClick.AddListener(OnCreateGameRoom);
+        view.refreshButton.AddListener(OnRefreshRoom);
+        
         _ = Refresh();
         
-        StartCoroutine(RefreshRoom(REFRESH_ROOM_INTERVAL));
+        //StartCoroutine(RefreshRoom(REFRESH_ROOM_INTERVAL));
     }
 
     [ClearMethod]
@@ -30,6 +32,7 @@ public partial class LobbyState : AppState
     {
         var view = GetView<LobbyPanel>();
         view.createGameRoomButtonClick.RemoveListener(OnCreateGameRoom);
+        view.refreshButton.RemoveListener(OnRefreshRoom);
     }
     
     public async Task Refresh() => await Client.Send(new RoomList { });
@@ -45,6 +48,12 @@ public partial class LobbyState : AppState
             }
         });
     }
+
+    public async void OnRefreshRoom()
+    {
+        Refresh();
+    }
+
 
     public IEnumerator RefreshRoom(int seconds) 
     {

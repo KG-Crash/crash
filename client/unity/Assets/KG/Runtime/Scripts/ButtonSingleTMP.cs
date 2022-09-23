@@ -22,8 +22,12 @@ namespace KG
         } 
         public Color color
         {
-            get => instance1.startColor;
-            set => instance1.startColor=value;
+            get => instance1.normalText.color;
+            set
+            {
+                instance1.normalText.color = value;
+                instance1.UpdateUI();
+            }
         }
     }
 }
