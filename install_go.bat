@@ -1,11 +1,11 @@
 @ECHO OFF
 
-SET GO_DISTRIBUTION=1.16.4
+SET GO_DISTRIBUTION=1.19
 SET GO_INSTALLER_NAME=go%GO_DISTRIBUTION%.windows-amd64.msi
 
 CALL go version
 IF %ERRORLEVEL% NEQ 0 (
-	curl https://golang.org/dl/go%GO_DISTRIBUTION%.windows-amd64.msi -J -L -o %GO_INSTALLER_NAME%
+	curl https://go.dev/dl/go%GO_DISTRIBUTION%.windows-amd64.msi -J -L -o %GO_INSTALLER_NAME%
 	CALL %GO_INSTALLER_NAME%
 	IF %ERRORLEVEL% GTR 1 EXIT 1
 

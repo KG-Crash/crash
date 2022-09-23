@@ -1,0 +1,44 @@
+using System;
+using System.Collections.Generic;
+using WebUtil.Util;
+
+namespace MasterData.Types.Dsl.Parameter
+{
+    public class {{ name }}
+    {
+        {%- for property in properties %}
+        public {{ property.type.pure }} {{ property.name }} { get; set; }
+        {%- endfor %}
+
+        public static {{ name }} Parse(List<object> parameters)
+        {
+            return new {{ name }}
+            {
+                {%- for property in properties %}
+                {{ property.name }} =
+                {%- if property.type.nullable and property.type.based != 'string' %} (parameters.At({{ loop.index - 1 }}) == null) ? null :{% endif %}
+                {%- if property.type.enum %} ({{ property.type.pure }})System.Enum.Parse(typeof({{ property.type.based }}), parameters.At({{ loop.index - 1 }}){% if property.type.nullable %}?{% endif %}.ToString())
+                {%- elif property.type.based == 'string' %} parameters.At({{ loop.index - 1 }})?.ToString()
+                {%- else %} ({{ property.type.pure }})System.Convert.ChangeType(parameters.At({{ loop.index - 1 }}), typeof({{ property.type.based }}))
+                {%- endif -%}
+                {%- if not loop.last -%},{%- endif %}
+                {%- endfor %}
+            };
+        }
+
+        public Dsl ToDsl()
+        {
+            return new Dsl
+            {
+                Type = DslFunctionType.{{ name }},
+                Parameters = new List<object>
+                {
+                    {%- for property in properties %}
+                    {{ property.name }}
+                    {%- if not loop.last -%},{%- endif -%}
+                    {%- endfor %}
+                }
+            };
+        }
+    }
+}

@@ -1,6 +1,6 @@
-using Shared;
-using UnityEngine;
 using Game;
+using Shared.Type;
+using UnityEngine;
 
 public partial class GameState : Team.Listener
 {

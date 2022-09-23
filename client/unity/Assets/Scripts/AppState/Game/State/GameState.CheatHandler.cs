@@ -1,11 +1,8 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using FixMath.NET;
 using Network;
-using Shared;
+using Shared.Type;
+using System;
 using UnityEngine;
-using Game;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class BuildCommandAttribute : Attribute

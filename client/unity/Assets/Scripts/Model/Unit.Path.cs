@@ -1,9 +1,9 @@
+using FixMath.NET;
+using KG;
+using Shared.Type;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using FixMath.NET;
-using KG;
-using Shared;
 using UnityEngine;
 
 namespace Game

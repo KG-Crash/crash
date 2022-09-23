@@ -1,19 +1,24 @@
-// DO NOT MODIFY
+// DO NOT MODIFY DIRECTLY
 
-namespace Shared
+using System;
+
+namespace Shared.Type
 {
-    {% for enumName, enumSet in dataSet.items() -%}
-    public enum {{ enumName }}
+    {% for scope, props in enums.items() -%}
+    public enum {{ scope }}
     {
-        {% for name, value in enumSet.items() -%}
-        {{ name }}{% if value != 'default' %} = 0x{{ '%08X' % value }}{% endif %}
-        {%- if not loop.last -%},{%- endif %}
+        {% for prop_name, prop_conf in props.items() -%}
+        {{ prop_name }}
+        {%- if prop_conf.index is not none %} = 0x{{ '%08x' % prop_conf.index }}{% endif %}
+        {%- if not loop.last -%}
+        ,{% endif %}
+        {%- if prop_conf.desc is not none %} // {{ prop_conf.desc }}{% endif %}
         {%- if not loop.last %}
-        {% endif %}
+        {% endif -%}
         {%- endfor %}
     }
     {%- if not loop.last %}
-
-    {% endif %}
+    
+    {% endif -%}
     {%- endfor %}
 }

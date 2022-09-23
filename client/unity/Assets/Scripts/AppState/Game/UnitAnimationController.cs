@@ -1,5 +1,4 @@
-using System.Collections;
-using Shared;
+using Shared.Type;
 using UnityEngine;
 
 namespace Game

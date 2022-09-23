@@ -1,7 +1,9 @@
-using NetworkShared;
+using Newtonsoft.Json;
+using Shared.Type;
+using System;
 using System.Collections.Generic;
 
-namespace MasterData.{{ usage }}
+namespace Shared.Table
 {
     {% for table in tables -%}
     [Table("json/{{ table.name }}.json")]

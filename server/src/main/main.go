@@ -1,26 +1,53 @@
 package main
 
 import (
+	"KG/context"
+	"KG/handler"
+	"KG/model"
+	"fmt"
 	"log"
+	"net"
 	"os"
-	"os/signal"
-
-	"model/game"
-
-	"github.com/AsynkronIT/protoactor-go/actor"
+	"protocol/response"
 )
 
 func main() {
-	log.SetFlags(log.Ldate | log.Ltime)
 
-	system := actor.NewActorSystem()
+	port := 8000
 
-	system.Root.Spawn(actor.PropsFromProducer(func() actor.Actor {
-		return game.New(Config.Port)
-	}))
+	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	if err != nil {
+		os.Exit(1)
+	}
+	defer listen.Close()
+	fmt.Println("server is running")
 
-	// Subscribe to signal to finish interaction
-	finish := make(chan os.Signal, 1)
-	signal.Notify(finish, os.Interrupt, os.Kill)
-	<-finish
+	ctx := context.New()
+	ist := handler.New()
+	handler.Register(ist, ctx.OnRoomList)
+	handler.Register(ist, ctx.OnCreateRoom)
+	handler.Register(ist, ctx.OnEnterRoom)
+	handler.Register(ist, ctx.OnLeaveRoom)
+	handler.Register(ist, ctx.OnChat)
+	handler.Register(ist, ctx.OnGameStart)
+	handler.Register(ist, ctx.OnReady)
+	handler.Register(ist, ctx.OnAction)
+	handler.Register(ist, ctx.OnWhisper)
+	handler.Register(ist, ctx.OnKick)
+	handler.RegisterExit(ist, ctx.OnExit)
+
+	for {
+		conn, err := listen.Accept()
+		if err != nil {
+			log.Fatalln(err)
+			continue
+		}
+
+		session := model.NewSession(conn, ist)
+		ctx.Sessions[session.ID()] = session
+		session.Send(response.Login{
+			Id: session.ID(),
+		})
+		go session.Loop()
+	}
 }

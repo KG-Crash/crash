@@ -1,26 +1,19 @@
 // DO NOT MODIFY
 
+using System;
+using System.Collections.Generic;
+using Shared.Type;
+
 namespace Shared.Const
 {
-    {%- for name, constSet in dataSet.items() %}
-    public static class {{ name }}
+    {%- for scope, props in properties.items() %}
+    public static class {{ scope }}
     {
-        {% for key, const in constSet.items() -%}
-        {%- set prefix = "" -%}
-        {%- set suffix = "" -%}
-        {%- if const.type == 'string' -%}
-            {%- set prefix = '"' -%}
-            {%- set suffix = '"' -%}
-            {%- if '\n' in const.value -%}
-                {%- set prefix = '@"'-%}
-            {%- endif-%}
-        {%- endif -%}
-        public static readonly {{ const.type }} {{ key }} = {{ prefix }}{% if const.value is none %}null{% else %}{{ const.value }}{% endif %}{{ suffix }};
-        {%- if not loop.last %}
-        {% endif %}
+        {%- for prop_name, prop_conf in props.items() %}
+        public static readonly {{ prop_conf.type }} {{ prop_name }} = {{ prop_conf.value }};
         {%- endfor %}
     }
     {%- if not loop.last %}
-    {% endif %}
+    {% endif -%}
     {%- endfor %}
 }

@@ -1,6 +1,8 @@
-// DO NOT MODIFY
+// DO NOT MODIFY DIRECTLY
 
-namespace Shared
+using System;
+
+namespace Shared.Type
 {
     public enum ClientExceptionCode
     {
@@ -10,32 +12,32 @@ namespace Shared
         NotFoundUIAttribute,
         NotContainUIScript
     }
-
+    
     public enum ResultCode
     {
-        None,
-        InvalidUser,
-        NoPrivilege,
-        AlreadyPlaying,
-        NotEnoughUsers,
-        NotEnoughTeams,
-        NotFoundGameRoom,
-        AlreadyEnteredGameRoom,
-        NotEnteredAnyGameRoom,
-        FullUsers,
+        None, // 유효하지 않은 유저
+        InvalidUser, // 권한이 없음
+        NoPrivilege, // 이미 게임 진행중
+        AlreadyPlaying, // 유저 수 부족
+        NotEnoughUsers, // 팀 수 부족
+        NotEnoughTeams, // 게임 룸을 찾을 수 없음
+        NotFoundGameRoom, // 이미 게임룸 참여중
+        AlreadyEnteredGameRoom, // 게임 룸에 참여중이 아님
+        NotEnteredAnyGameRoom, // 유저 다 찼음
+        FullUsers, // 게임중이 아님
         NotPlayingState
     }
-
+    
     public enum ActionKind
     {
-        HeartBeat,
-        Pause,
-        Speed,
-        Upgrade,
-        AttackPlayer,
+        HeartBeat, // 일시정지 세팅
+        Pause, // 배속
+        Speed, // 업그레이드
+        Upgrade, // 플레이어 위치로 공격
+        AttackPlayer, // 유닛 스폰
         Spawn
     }
-
+    
     public enum ProjectileState
     {
         Disable,
@@ -43,20 +45,20 @@ namespace Shared
         Move,
         Hit
     }
-
+    
     public enum ProjectileType
     {
         Absolute,
         Relative
     }
-
+    
     public enum UnitSize
     {
         Small,
         Medium,
         Large
     }
-
+    
     public enum UnitState
     {
         Idle,
@@ -64,14 +66,14 @@ namespace Shared
         Attack,
         Dead
     }
-
+    
     public enum UnitType
     {
         Normal,
         Explosive,
         Concussive
     }
-
+    
     public enum StatType
     {
         Hp,
@@ -81,20 +83,20 @@ namespace Shared
         Speed,
         AttackSpeed
     }
-
+    
     public enum CommandType
     {
         Move,
         AttackSingleTarget,
         AttackMultiTarget
     }
-
+    
     public enum AttackType
     {
         Immediately,
         Projectile
     }
-
+    
     public enum Ability
     {
         NONE = 0x00000000,
@@ -119,7 +121,7 @@ namespace Shared
         UPGRADE_19 = 0x00040000,
         UPGRADE_20 = 0x00080000
     }
-
+    
     public enum Advanced
     {
         UPGRADE_WEAPON,

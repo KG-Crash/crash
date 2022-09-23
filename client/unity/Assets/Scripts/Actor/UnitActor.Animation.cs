@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Shared;
+using Shared.Type;
 using UnityEngine;
 
 namespace Game

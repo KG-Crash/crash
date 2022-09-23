@@ -1,9 +1,8 @@
 using FixMath.NET;
-using Shared;
+using Game;
+using Shared.Type;
 using UnityEngine;
 using Action = Protocol.Response.Action;
-using Game;
-using Game.Service;
 
 public partial class GameState
 {
@@ -36,7 +35,7 @@ public partial class GameState
         actionService.Send(new Protocol.Request.Action
         {
             Frame = LockStep.Frame.In,
-            Id = (int) Shared.ActionKind.Pause
+            Id = (int)ActionKind.Pause
         });
     }
 
@@ -45,7 +44,7 @@ public partial class GameState
         actionService.Send(new Protocol.Request.Action
         {
             Frame = LockStep.Frame.In,
-            Id = (int) Shared.ActionKind.Pause,
+            Id = (int)ActionKind.Pause,
             Param1 = ActionExtension.TOWORD(0, (ushort) ability),
             Param2 = 0
         });
@@ -56,7 +55,7 @@ public partial class GameState
         actionService.Send(new Protocol.Request.Action
         {
             Frame = LockStep.Frame.In,
-            Id = (int) Shared.ActionKind.Spawn,
+            Id = (int)ActionKind.Spawn,
             Param1 = ActionExtension.TOWORD((ushort) count, (ushort) type),
             Param2 = ActionExtension.TOWORD(pos)
         });
@@ -67,7 +66,7 @@ public partial class GameState
         actionService.Send(new Protocol.Request.Action
         {
             Frame = LockStep.Frame.In,
-            Id = (int) Shared.ActionKind.AttackPlayer,
+            Id = (int)ActionKind.AttackPlayer,
             Param1 = ActionExtension.TOWORD(0, (ushort) playerID)
         });
     }
