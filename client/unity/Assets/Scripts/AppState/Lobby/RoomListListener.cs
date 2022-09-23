@@ -11,7 +11,7 @@ using UnityEngine.UI;
 
 namespace Lobby
 {
-    public class RoomListListener : KG.ScrollView.IListener<string, KG.ButtonSingle>
+    public class RoomListListener : KG.ScrollView.IListener<string, KG.ButtonSingleTMP>
     {
         public RoomList roomList { get; private set; }
 
@@ -20,7 +20,7 @@ namespace Lobby
             roomList = response;
         }
 
-        public void OnCreated(string data, KG.ButtonSingle button)
+        public void OnCreated(string data, KG.ButtonSingleTMP button)
         {
             button.text = data;
             button.onClick.AddListener(() => { OnEnterButtonClick(data); });
@@ -34,7 +34,7 @@ namespace Lobby
             });
         }
 
-        public void OnDestroyed(KG.ButtonSingle kgButton)
+        public void OnDestroyed(KG.ButtonSingleTMP kgButton)
         {
             kgButton.onClick.RemoveAllListeners();
         }
