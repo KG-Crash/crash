@@ -20,6 +20,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer listen.Close()
+	fmt.Println("server is running")
 
 	ctx := context.New()
 	ist := handler.New()
