@@ -1,8 +1,7 @@
-using System;
-using Game;
 using KG;
 using Michsky.UI.ModernUIPack;
-using Shared;
+using Shared.Type;
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;

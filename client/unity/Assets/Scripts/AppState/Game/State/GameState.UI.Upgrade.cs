@@ -1,5 +1,5 @@
 using Game;
-using Shared;
+using Shared.Type;
 using UI;
 
 public partial class GameState

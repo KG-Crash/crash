@@ -1,9 +1,7 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using KG;
-using Shared;
+using Shared.Type;
+using System;
+using System.Linq;
 using UnityEngine;
 
 namespace Game

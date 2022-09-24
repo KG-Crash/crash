@@ -113,20 +113,34 @@ namespace KG.Collection
 
         public TurnBuffer this[int key] => _buffers[key];
 
-        public void Add(int userId, int turnId, int frameId, IEnumerable<IProtocol> protocols)
+        public ActionBuffer(IEnumerable<int> sequences)
         {
-            if (_buffers.ContainsKey(userId) == false)
-                _buffers.Add(userId, new TurnBuffer());
-
-            _buffers[userId].Add(turnId, frameId, protocols);
+            foreach (var sequence in sequences)
+            {
+                _buffers.Add(sequence, new TurnBuffer());
+            }
         }
 
-        public void Add(int userId, int turnId, int frameId, IProtocol protocol)
+        public void Add(int sequence, int turnId, int frameId, IEnumerable<IProtocol> protocols)
         {
-            if (_buffers.ContainsKey(userId) == false)
-                _buffers.Add(userId, new TurnBuffer());
+            if (_buffers.ContainsKey(sequence) == false)
+                return;
 
-            _buffers[userId].Add(turnId, frameId, protocol);
+            _buffers[sequence].Add(turnId, frameId, protocols);
+        }
+
+        public void Add(int sequence, int turnId, int frameId, IProtocol protocol)
+        {
+            if (_buffers.ContainsKey(sequence) == false)
+                return;
+
+            _buffers[sequence].Add(turnId, frameId, protocol);
+        }
+
+        public void Remove(int sequence)
+        {
+            if(_buffers.ContainsKey(sequence))
+                _buffers.Remove(sequence);
         }
 
         public Dictionary<int, FrameBuffer> Peek(int turnId)

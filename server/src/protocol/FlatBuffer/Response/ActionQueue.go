@@ -26,7 +26,7 @@ func (rcv *ActionQueue) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *ActionQueue) User() int32 {
+func (rcv *ActionQueue) Sequence() int32 {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
 		return rcv._tab.GetInt32(o + rcv._tab.Pos)
@@ -34,7 +34,7 @@ func (rcv *ActionQueue) User() int32 {
 	return 0
 }
 
-func (rcv *ActionQueue) MutateUser(n int32) bool {
+func (rcv *ActionQueue) MutateSequence(n int32) bool {
 	return rcv._tab.MutateInt32Slot(4, n)
 }
 
@@ -85,8 +85,8 @@ func (rcv *ActionQueue) MutateError(n uint32) bool {
 func ActionQueueStart(builder *flatbuffers.Builder) {
 	builder.StartObject(4)
 }
-func ActionQueueAddUser(builder *flatbuffers.Builder, user int32) {
-	builder.PrependInt32Slot(0, user, 0)
+func ActionQueueAddSequence(builder *flatbuffers.Builder, sequence int32) {
+	builder.PrependInt32Slot(0, sequence, 0)
 }
 func ActionQueueAddActions(builder *flatbuffers.Builder, actions flatbuffers.UOffsetT) {
 	builder.PrependUOffsetTSlot(1, flatbuffers.UOffsetT(actions), 0)

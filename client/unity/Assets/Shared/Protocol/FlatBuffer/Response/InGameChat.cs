@@ -21,7 +21,7 @@ public struct InGameChat : IFlatbufferObject
 
   public int Turn { get { int o = __p.__offset(4); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
   public int Frame { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
-  public int User { get { int o = __p.__offset(8); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
+  public int Sequence { get { int o = __p.__offset(8); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
   public string Message { get { int o = __p.__offset(10); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
 #if ENABLE_SPAN_T
   public Span<byte> GetMessageBytes() { return __p.__vector_as_span<byte>(10, 1); }
@@ -34,13 +34,13 @@ public struct InGameChat : IFlatbufferObject
   public static Offset<FlatBuffer.Response.InGameChat> CreateInGameChat(FlatBufferBuilder builder,
       int turn = 0,
       int frame = 0,
-      int user = 0,
+      int sequence = 0,
       StringOffset messageOffset = default(StringOffset),
       uint error = 0) {
     builder.StartTable(5);
     InGameChat.AddError(builder, error);
     InGameChat.AddMessage(builder, messageOffset);
-    InGameChat.AddUser(builder, user);
+    InGameChat.AddSequence(builder, sequence);
     InGameChat.AddFrame(builder, frame);
     InGameChat.AddTurn(builder, turn);
     return InGameChat.EndInGameChat(builder);
@@ -49,7 +49,7 @@ public struct InGameChat : IFlatbufferObject
   public static void StartInGameChat(FlatBufferBuilder builder) { builder.StartTable(5); }
   public static void AddTurn(FlatBufferBuilder builder, int turn) { builder.AddInt(0, turn, 0); }
   public static void AddFrame(FlatBufferBuilder builder, int frame) { builder.AddInt(1, frame, 0); }
-  public static void AddUser(FlatBufferBuilder builder, int user) { builder.AddInt(2, user, 0); }
+  public static void AddSequence(FlatBufferBuilder builder, int sequence) { builder.AddInt(2, sequence, 0); }
   public static void AddMessage(FlatBufferBuilder builder, StringOffset messageOffset) { builder.AddOffset(3, messageOffset.Value, 0); }
   public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(4, error, 0); }
   public static Offset<FlatBuffer.Response.InGameChat> EndInGameChat(FlatBufferBuilder builder) {

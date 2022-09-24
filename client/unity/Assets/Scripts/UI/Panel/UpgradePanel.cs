@@ -1,12 +1,9 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using KG;
-using Shared.Table;
-using UnityEngine;
-using System.Linq;
 using Game;
-using Shared;
+using KG;
+using Shared.Type;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace UI

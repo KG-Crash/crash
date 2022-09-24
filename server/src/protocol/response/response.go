@@ -702,11 +702,11 @@ func (obj Whisper) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type InGameChat struct {
-	Turn    int32
-	Frame   int32
-	User    int32
-	Message string
-	Error   uint32
+	Turn     int32
+	Frame    int32
+	Sequence int32
+	Message  string
+	Error    uint32
 }
 
 func (obj *InGameChat) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
@@ -715,7 +715,7 @@ func (obj *InGameChat) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT
 	source.InGameChatStart(builder)
 	source.InGameChatAddTurn(builder, obj.Turn)
 	source.InGameChatAddFrame(builder, obj.Frame)
-	source.InGameChatAddUser(builder, obj.User)
+	source.InGameChatAddSequence(builder, obj.Sequence)
 	source.InGameChatAddMessage(builder, _message)
 	source.InGameChatAddError(builder, obj.Error)
 
@@ -725,7 +725,7 @@ func (obj *InGameChat) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT
 func (obj *InGameChat) parse(x *source.InGameChat) *InGameChat {
 	obj.Turn = x.Turn()
 	obj.Frame = x.Frame()
-	obj.User = x.User()
+	obj.Sequence = x.Sequence()
 	obj.Message = string(x.Message())
 	obj.Error = x.Error()
 
@@ -830,10 +830,10 @@ func (obj Action) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type ActionQueue struct {
-	User    int32
-	Actions []Action
-	Turn    int32
-	Error   uint32
+	Sequence int32
+	Actions  []Action
+	Turn     int32
+	Error    uint32
 }
 
 func (obj *ActionQueue) actions(builder *flatbuffers.Builder, actions []Action) flatbuffers.UOffsetT {
@@ -854,7 +854,7 @@ func (obj *ActionQueue) create(builder *flatbuffers.Builder) flatbuffers.UOffset
 	_actions := obj.actions(builder, obj.Actions)
 
 	source.ActionQueueStart(builder)
-	source.ActionQueueAddUser(builder, obj.User)
+	source.ActionQueueAddSequence(builder, obj.Sequence)
 	source.ActionQueueAddActions(builder, _actions)
 	source.ActionQueueAddTurn(builder, obj.Turn)
 	source.ActionQueueAddError(builder, obj.Error)
@@ -863,7 +863,7 @@ func (obj *ActionQueue) create(builder *flatbuffers.Builder) flatbuffers.UOffset
 }
 
 func (obj *ActionQueue) parse(x *source.ActionQueue) *ActionQueue {
-	obj.User = x.User()
+	obj.Sequence = x.Sequence()
 
 	obj.Actions = []Action{}
 	for i := 0; i < x.ActionsLength(); i++ {

@@ -68,7 +68,7 @@ table Whisper {
 table InGameChat {
 	turn: int;
 	frame: int;
-	user: int;
+	sequence: int;
 	message: string;
 	error: uint32;
 }
@@ -86,7 +86,7 @@ table Action {
 }
 
 table ActionQueue {
-	user: int;
+	sequence: int;
 	actions: [Action];
 	turn: int;
 	error: uint32;

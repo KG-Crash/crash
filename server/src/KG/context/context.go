@@ -195,10 +195,10 @@ func (ctx *Context) OnGameChat(session *model.Session, req request.InGameChat) {
 
 	for _, user := range session.Room.GetAllUsers() {
 		user.Send(response.InGameChat{
-			Turn:    req.Frame,
-			Frame:   req.Frame,
-			Message: req.Message,
-			User:    int32(room.Sequences[session]),
+			Turn:     req.Frame,
+			Frame:    req.Frame,
+			Message:  req.Message,
+			Sequence: int32(room.Sequences[session]),
 		})
 	}
 }
@@ -287,9 +287,9 @@ func (ctx *Context) OnAction(session *model.Session, req request.ActionQueue) {
 		})
 	}
 	res := response.ActionQueue{
-		User:    int32(seq),
-		Actions: []response.Action{},
-		Turn:    req.Turn,
+		Sequence: int32(seq),
+		Actions:  []response.Action{},
+		Turn:     req.Turn,
 	}
 
 	for _, action := range req.Actions {

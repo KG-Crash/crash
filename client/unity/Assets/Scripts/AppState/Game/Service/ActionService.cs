@@ -20,11 +20,24 @@ namespace Game.Service
             Actions = new List<Protocol.Request.Action>()
         };
 
-        public ActionBuffer Responses { get; private set; } = new ActionBuffer();
+        public ActionBuffer Actions { get; private set; }
 
         public ActionService(Listener listener)
         {
             _listener = listener;
+        }
+
+        public void Setup(IEnumerable<int> sequences)
+        {
+            Actions = new ActionBuffer(sequences);
+        }
+
+        public void Leave(int sequence)
+        {
+            if (Actions == null)
+                return;
+
+            Actions.Remove(sequence);
         }
 
         public void Send(Protocol.Request.Action action) => Request.Actions.Add(action);
@@ -48,18 +61,24 @@ namespace Game.Service
 
         public void Receive(Protocol.Response.ActionQueue response)
         {
+            if (Actions == null)
+                return;
+
             foreach (var x in response.Actions.GroupBy(x => x.Frame))
-                Responses.Add(response.User, response.Turn, x.Key, x.Select(x => x));
+                Actions.Add(response.Sequence, response.Turn, x.Key, x.Select(x => x));
         }
 
         public void Receive(Protocol.Response.InGameChat response)
         {
-            Responses.Add(response.User, response.Turn, response.Frame, response);
+            if (Actions == null)
+                return;
+
+            Actions.Add(response.Sequence, response.Turn, response.Frame, response);
         }
 
         public bool Update()
         {
-            var buffers = Responses.Pop(LockStep.Turn.Out);
+            var buffers = Actions.Pop(LockStep.Turn.Out);
             if (buffers == null)
                 return false;
 

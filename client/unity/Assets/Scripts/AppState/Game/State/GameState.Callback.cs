@@ -68,9 +68,9 @@ public partial class GameState : ActionService.Listener
 
     public void OnChat(int userId, Protocol.Response.InGameChat chat)
     {
-        if (uuidTable.TryGetValue(userId, out var name) == false)
+        if (this.users.TryGetValue(userId, out var user) == false)
             return;
 
-        chatService.RecvMessage(chat.Message, $"{name}");
+        chatService.RecvMessage(chat.Message, $"{user.id}");
     }
 }

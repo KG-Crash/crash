@@ -491,7 +491,7 @@ namespace Protocol.Response
 
         public int Turn { get; set; }
         public int Frame { get; set; }
-        public int User { get; set; }
+        public int Sequence { get; set; }
         public string Message { get; set; }
         public uint Error { get; set; }
 
@@ -502,7 +502,7 @@ namespace Protocol.Response
         {
             this.Turn = obj.Turn;
             this.Frame = obj.Frame;
-            this.User = obj.User;
+            this.Sequence = obj.Sequence;
             this.Message = obj.Message;
             this.Error = obj.Error;
         }
@@ -511,11 +511,11 @@ namespace Protocol.Response
         {
             var _turn = this.Turn;
             var _frame = this.Frame;
-            var _user = this.User;
+            var _sequence = this.Sequence;
             var _message = builder.CreateString(this.Message);
             var _error = this.Error;
 
-            return FlatBuffer.Response.InGameChat.CreateInGameChat(builder, _turn, _frame, _user, _message, _error);
+            return FlatBuffer.Response.InGameChat.CreateInGameChat(builder, _turn, _frame, _sequence, _message, _error);
         }
 
         public byte[] Serialize()
@@ -615,7 +615,7 @@ namespace Protocol.Response
     {
         public uint Identity => (uint)Protocol.Response.Identity.ACTION_QUEUE;
 
-        public int User { get; set; }
+        public int Sequence { get; set; }
         public List<Action> Actions { get; set; }
         public int Turn { get; set; }
         public uint Error { get; set; }
@@ -625,7 +625,7 @@ namespace Protocol.Response
 
         public ActionQueue(FlatBuffer.Response.ActionQueue obj)
         {
-            this.User = obj.User;
+            this.Sequence = obj.Sequence;
             this.Actions = Enumerable.Range(0, obj.ActionsLength).Select(x => new Action(obj.Actions(x).Value)).ToList();
             this.Turn = obj.Turn;
             this.Error = obj.Error;
@@ -633,12 +633,12 @@ namespace Protocol.Response
 
         public FlatBuffers.Offset<FlatBuffer.Response.ActionQueue> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _user = this.User;
+            var _sequence = this.Sequence;
             var _actions = FlatBuffer.Response.ActionQueue.CreateActionsVector(builder, this.Actions.Select(x => x.ToFlatBuffer(builder)).ToArray());
             var _turn = this.Turn;
             var _error = this.Error;
 
-            return FlatBuffer.Response.ActionQueue.CreateActionQueue(builder, _user, _actions, _turn, _error);
+            return FlatBuffer.Response.ActionQueue.CreateActionQueue(builder, _sequence, _actions, _turn, _error);
         }
 
         public byte[] Serialize()

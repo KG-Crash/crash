@@ -1,5 +1,4 @@
-﻿using KG.Collection;
-using KG.Util;
+﻿using KG.Util;
 using Network;
 using Newtonsoft.Json;
 using Protocol.Response;
@@ -8,14 +7,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using Game;
-using UI;
+
+// 나중에 위치 따로 옮기세요
+public class User
+{ 
+    public int sequence { get; private set; }
+    public string id { get; private set; }
+
+    public User(string id, int sequence)
+    {
+        this.sequence = sequence;
+        this.id = id;
+    }
+}
 
 public partial class GameState
 {
     private FileLogger _logger;
 
-    public Dictionary<int, string> uuidTable { get; private set; } = new Dictionary<int, string>();
+    public Dictionary<int, User> users { get; private set; } = new Dictionary<int, User>();
 
 
     [FlatBufferEvent]
@@ -23,10 +33,10 @@ public partial class GameState
     {
         if (_logger != null)
         {
-            _logger.Info($"[{response.User}] : {JsonConvert.SerializeObject(response.Actions)}");
+            _logger.Info($"[{response.Sequence}] : {JsonConvert.SerializeObject(response.Actions)}");
         }
 
-        Debug.Log($"receive queue : {response.Turn}, {response.User}, me?={response.User == Client.Instance.id}");
+        Debug.Log($"receive queue : {response.Turn}, {response.Sequence}, me?={response.Sequence == Client.Instance.id}");
 
         actionService.Receive(response);
         return true;
@@ -37,11 +47,11 @@ public partial class GameState
     {
         if (_logger != null)
         {
-            _logger.Info($"[{response.User}] : {JsonConvert.SerializeObject(response)}");
+            _logger.Info($"[{response.Sequence}] : {JsonConvert.SerializeObject(response)}");
         }
 
         Debug.Log(
-            $"chat receive queue : {response.Turn}, {response.User},{response.Message} me?={response.User == Client.Instance.id}");
+            $"chat receive queue : {response.Turn}, {response.Sequence},{response.Message} me?={response.Sequence == Client.Instance.id}");
 
         actionService.Receive(response);
         return true;
@@ -61,14 +71,14 @@ public partial class GameState
             ready = true;
             _logger = new FileLogger($"log/{DateTime.Now}.txt".Replace(":", "_"));
 
-            uuidTable = response.Users.ToDictionary(x => x.Sequence, x => x.Id);
+            this.users = response.Users.ToDictionary(x => x.Sequence, x => new User(x.Id, x.Sequence));
+            actionService.Setup(this.users.Keys);
             Client.Instance.id = response.Users.FirstOrDefault(x => x.Id == Client.Instance.uuid)?.Sequence ?? -1;
 
             // team : users
             var users = response.Users
                 .GroupBy(x => x.Team)
                 .ToDictionary(x => x.Key, x => x.ToList());
-
 
             // 팀, 플레이어 구성
             foreach (var pair in users)
@@ -112,6 +122,20 @@ public partial class GameState
 
         Debug.Log($"user {response.User} resume.");
         paused = false;
+        return true;
+    }
+
+    [FlatBufferEvent]
+    public async Task<bool> OnLeave(LeaveRoom response)
+    {
+        // TODO: user id로 클라이언트에서 시퀀스를 알아내야함
+
+        var user = this.users.Values.FirstOrDefault(x => x.id == response.User);
+        if (user == null)
+            return false;
+
+        actionService.Leave(user.sequence);
+        
         return true;
     }
 }
