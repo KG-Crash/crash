@@ -184,6 +184,25 @@ func (ctx *Context) OnChat(session *model.Session, req request.Chat) {
 	}
 }
 
+func (ctx *Context) OnGameChat(session *model.Session, req request.InGameChat) {
+	room := session.Room
+	if room == nil {
+		session.Send(response.InGameChat{
+			Error: 1,
+		})
+		return
+	}
+
+	for _, user := range session.Room.GetAllUsers() {
+		user.Send(response.InGameChat{
+			Turn:    req.Frame,
+			Frame:   req.Frame,
+			Message: req.Message,
+			User:    int32(room.Sequences[session]),
+		})
+	}
+}
+
 func (ctx *Context) OnGameStart(session *model.Session, req request.GameStart) {
 	if session.Room == nil {
 		session.Send(response.GameStart{
