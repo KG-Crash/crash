@@ -11,7 +11,7 @@ using UniRx.Triggers;
 using UnityEngine;
 
 [UIBind(typeof(GamePanel), true, typeof(UpgradePanel), false)]
-[AutoBind(flatBuffer: true)]
+[AutoBind(true, true)]
 public partial class GameState : AppState
 {
     [SerializeField] private UnitTable _unitPrefabTable;
@@ -55,9 +55,7 @@ public partial class GameState : AppState
         }
 
         unitActorFactory = new UnitActorFactory();
-
-        ActionHandler.Bind(this);
-
+        
         FPS = Shared.Const.Time.FPS;
         TPS = Shared.Const.Time.TPS;
         IsNetworkMode = networkMode;
@@ -87,9 +85,6 @@ public partial class GameState : AppState
     {
         ClearGamePanel();
         ClearUpgradePanel();
-
-        ActionHandler.Unbind<GameState>();
-
         ClearInput();
         
         unitActorMaps.Clear();

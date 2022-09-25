@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using Game;
 using KG;
 using Module;
 using Network;
@@ -50,9 +51,11 @@ public class AppStateService
         if (!IsSceneLoaded(entryState.sceneName))
             await SceneManager.LoadSceneAsync(entryState.sceneName);
 
-        // 1. bind flatbuffer
+        // 1. bind 
         if (bind.autoFlatBufferBind)
             Handler.Bind(entryState, Dispatcher.Instance);
+        if (bind.autoActionBind)
+            ActionHandler.Bind(entryState);
         
         // 2. create & register ui & scene
         var refViewTypes = _binds[entryState].uiViewTypes;
@@ -104,10 +107,16 @@ public class AppStateService
                 _uiPool.Remove(refViewTypes[i]);
         }
 
-        // 3. unbind flatbuffer
+        // 3. unbind 
         {
-            if (_binds.TryGetValue(_current, out var bind) && bind.autoFlatBufferBind)
-                Handler.Unbind(_current);
+            if (_binds.TryGetValue(_current, out var bind))
+            {
+                if (bind.autoFlatBufferBind)
+                    Handler.Unbind(_current);
+            
+                if (bind.autoActionBind)
+                    ActionHandler.Unbind(_current);
+            }
         }
 
         // ---------------------------------------------------------------------------------------------------------
@@ -121,10 +130,16 @@ public class AppStateService
         
         // ---------------------------------------------------------------------------------------------------------
 
-        // 0. bind flatbuffer
+        // 0. bind 
         {
-            if (_binds.TryGetValue(moveAppState, out var bind) && bind.autoFlatBufferBind)
-                Handler.Bind(moveAppState, Dispatcher.Instance);
+            if (_binds.TryGetValue(moveAppState, out var bind))
+            {
+                if (bind.autoFlatBufferBind)
+                    Handler.Bind(moveAppState, Dispatcher.Instance);   
+             
+                if (bind.autoActionBind)
+                    ActionHandler.Bind(moveAppState);
+            }
         }
        
         {

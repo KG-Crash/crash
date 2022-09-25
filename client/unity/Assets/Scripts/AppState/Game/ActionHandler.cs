@@ -50,13 +50,13 @@ namespace Game
         
         public static void Bind<T>(T target) where T : class
         {
-            var actions = ActionHandleExtractor.ExtractActionHandles<T>();
-            _actionHandleMethodDict.Add(typeof(T), new TargetMethods(target, actions));
+            var actions = ActionHandleExtractor.ExtractActionHandles(target.GetType());
+            _actionHandleMethodDict.Add(target.GetType(), new TargetMethods(target, actions));
         }
 
-        public static void Unbind<T>() where T : class
+        public static void Unbind<T>(T target) where T : class
         {
-            _actionHandleMethodDict.Remove(typeof(T));
+            _actionHandleMethodDict.Remove(target.GetType());
         }
 
         public static void Execute<T>(int userId, Protocol.Response.Action action) where T : class

@@ -11,9 +11,14 @@ namespace Game
     {
         public static Dictionary<ActionKind, MethodInfo[]> ExtractActionHandles<Target>() where Target : class
         {
+            return ExtractActionHandles(typeof(Target));
+        }
+
+        public static Dictionary<ActionKind, MethodInfo[]> ExtractActionHandles(Type type)
+        {
             var values = (ActionKind[]) Enum.GetValues(typeof(ActionKind));
             var methodDict =
-                typeof(Target).GetMethods()
+                type.GetMethods()
                     .Select(x => (attr: x.GetCustomAttribute<ActionHandlerAttribute>(), method: x))
                     .Where(x =>
                     {

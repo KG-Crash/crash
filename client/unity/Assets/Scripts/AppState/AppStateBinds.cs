@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 public class AppStateBinds
 {
     public bool autoFlatBufferBind { get; private set; }
+    public bool autoActionBind { get; private set; }
     public Type[] uiViewTypes { get; private set; }
     public bool[] showBeforeInit { get; private set; }
     public bool receiveTransitionInInitMethod { get; private set; }
@@ -55,6 +56,10 @@ public class AppStateBinds
             autoFlatBufferBind = type.GetCustomAttributes()
                 .Where(attr => attr is AutoBindAttribute)
                 .Select(attr => (attr as AutoBindAttribute).FlatBuffer)
+                .FirstOrDefault(),
+            autoActionBind = type.GetCustomAttributes()
+                .Where(attr => attr is AutoBindAttribute)
+                .Select(attr => (attr as AutoBindAttribute).Action)
                 .FirstOrDefault(),
             uiViewTypes = type.GetCustomAttributes()
                 .Where(attr => attr is UIBindAttribute)
