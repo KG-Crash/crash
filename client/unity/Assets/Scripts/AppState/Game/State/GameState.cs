@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Game;
 using Game.Service;
 using Module;
@@ -36,21 +37,21 @@ public partial class GameState : AppState
     [InitializeMethod]
     public void Initialize()
     {
-        var roomObjects = _scene.GetRootGameObjects();
-        for (var i = 0; i < roomObjects.Length; i++)
+        var firstRoomObject = _scene.GetRootGameObjects()
+            .First(x => x.TryGetComponent<GameSceneContext>(out var _));
+        if (firstRoomObject != null)
         {
-            var context = roomObjects[i].GetComponentInChildren<GameSceneContext>();
-            if (context != null)
-            {
-                this.context = context;
-                poolOffset = context._poolOffset;
-                focusTransform = context._focusTransform;
-                map = context._map;
-                spawnPositions = context._spawnPositions;
-                networkMode = context._networkMode;
-                chatService = context._chatService;
-                break;
-            }
+            context = firstRoomObject.GetComponent<GameSceneContext>();
+            
+            poolOffset = context._poolOffset;
+            focusTransform = context._focusTransform;
+            map = context._map;
+            spawnPositions = context._spawnPositions;
+            networkMode = context._networkMode;
+            chatService = context._chatService;
+            
+            context.UpdateAsObservable().Subscribe(_ => OnUpdate());
+            context.LateUpdateAsObservable().Subscribe(_ => OnLateUpdate());
         }
 
         unitActorFactory = new UnitActorFactory();
@@ -66,9 +67,6 @@ public partial class GameState : AppState
         InitInput();
 
         _projectileActorPool = new ProjectileActorPool(_projectilehPrefabTable, 15, this, poolOffset);
-
-        context.UpdateAsObservable().Subscribe(_ => OnUpdate());
-        context.LateUpdateAsObservable().Subscribe(_ => OnLateUpdate());
 
         InitializeProjectileHandle();
         
@@ -89,12 +87,23 @@ public partial class GameState : AppState
     {
         ClearGamePanel();
         ClearUpgradePanel();
-        
-        Destroy(context);
 
         ActionHandler.Unbind<GameState>();
+
         ClearInput();
         
         unitActorMaps.Clear();
+
+        if (context)
+        {
+            Destroy(context);
+            context = null;  
+            
+            poolOffset = null;
+            focusTransform = null;
+            map = null;
+            spawnPositions = null;
+            chatService = null;
+        }
     }
 }
