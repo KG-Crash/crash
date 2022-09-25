@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Game
 {
     [CreateAssetMenu(fileName = "UpgradeIconTable", menuName = "Crash/UpgradeIconTable", order = 0)]
-    public class UpgradeIconTable : UnityTable
+    public class UpgradeIconTable : UnityTable<UpgradeIconTable>
     {
         [SerializeField]
         private SerializableDictionary<Ability, Sprite> _abilitySpriteDict =

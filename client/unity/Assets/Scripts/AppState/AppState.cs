@@ -82,12 +82,6 @@ public abstract class AppState : ScriptableObject
     {
         await _uiStack.CloseTopView<T>();
     }
-
-    public T GetTable<T>() where T : UnityTable
-    {
-        // TODO[:shkim] = 전역 접근자 제거
-        return EntryPoint.GetTable<T>();
-    }
     
     public string sceneName => _sceneName;
     public bool entryScene => _entryScene;

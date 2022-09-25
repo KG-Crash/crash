@@ -156,7 +156,7 @@ public partial class GameState : Unit.Listener, UnitActor.Listener
         if (unitActorMaps.ContainsKey(me))
             return;
 
-        var actor = unitActorFactory.CreateUnitActor(me.type, _unitPrefabTable, null, this);
+        var actor = unitActorFactory.CreateUnitActor(me.type, UnitTable.Get(), null, this);
         unitActorMaps.Add(me, actor);
     }
 

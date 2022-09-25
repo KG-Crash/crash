@@ -7,7 +7,6 @@ public static class CrashResources
 {
     private const string appStatePathPrefix = "AppState/"; 
     private const string uiCanvasPrefabPath = "UI/Canvas"; 
-    private const string unityTablePathPrefix = "Tables/"; 
     
     public static AppState[] LoadAppStates()
     {
@@ -29,13 +28,8 @@ public static class CrashResources
         return Resources.Load<CrashAppSettings>(nameof(CrashAppSettings));
     }
 
-    public static UnityTable[] LoadUnityTables()
+    public static UnityTable<T> LoadUnityTable<T>() where T : UnityTable<T>
     {
-        var type = typeof(UnityTable);
-        return Assembly.GetAssembly(type).GetTypes()
-            .Where(t => !t.IsAbstract && t.IsSubclassOf(type))
-            .Select(x => x.Name)
-            .Select(typeName => Resources.Load<UnityTable>($"{unityTablePathPrefix}{typeName}"))
-            .ToArray();
+        return Resources.Load<T>($"Tables/{nameof(T)}");
     }
 }

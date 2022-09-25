@@ -16,21 +16,20 @@ namespace UI
         [SerializeField] private UpgradeClickEvent _upgradeClick;
         
         private List<UpgradeIconButton> _upgradeIconButtons = new List<UpgradeIconButton>();
-        private UpgradeIconTable _table;
         
         public UpgradeClickEvent upgradeClick => _upgradeClick;
         public Button.ButtonClickedEvent exitClick => _exitButton.onClick;
 
-        public void Initialize(UpgradeIconTable table)
+        public void Initialize()
         {
-            _table = table;
+            var table = UpgradeIconTable.Get();
             foreach (var ability in (Ability[])Enum.GetValues(typeof(Ability)))
             {
                 if (ability == Ability.NONE) continue;
                 
                 var instance = Instantiate(_upgradeIconButtonPrefab, _iconParent);
                 instance.ability = ability;
-                instance.icon = _table[ability];
+                instance.icon = table[ability];
                 _upgradeIconButtons.Add(instance);
             }
         }

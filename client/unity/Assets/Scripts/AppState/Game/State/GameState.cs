@@ -14,9 +14,6 @@ using UnityEngine;
 [AutoBind(true, true)]
 public partial class GameState : AppState
 {
-    [SerializeField] private UnitTable _unitPrefabTable;
-    [SerializeField] private ProjectileTable _projectilehPrefabTable;
-
     private GameSceneContext context { get; set; }
     private Transform poolOffset { get; set; } 
     private Transform focusTransform { get; set; }
@@ -64,7 +61,7 @@ public partial class GameState : AppState
 
         InitInput();
 
-        _projectileActorPool = new ProjectileActorPool(_projectilehPrefabTable, 15, this, poolOffset);
+        _projectileActorPool = new ProjectileActorPool(ProjectileTable.Get(), 15, this, poolOffset);
 
         InitializeProjectileHandle();
         

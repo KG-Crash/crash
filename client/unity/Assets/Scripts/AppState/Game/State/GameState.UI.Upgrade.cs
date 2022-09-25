@@ -7,7 +7,7 @@ public partial class GameState
     public void InitializeUpgradePanel()
     {
         var upgradePanel = GetView<UpgradePanel>();
-        upgradePanel.Initialize(GetTable<UpgradeIconTable>());
+        upgradePanel.Initialize();
         upgradePanel.exitClick.AddListener(OnUpgradeExit);
         upgradePanel.upgradeClick.AddListener(OnUpgradeClick);
     }
