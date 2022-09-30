@@ -5,7 +5,6 @@ public partial class GameState
 {
     public static int FPS { get; set; }
     public static int TPS { get; set; }
-    public static bool IsNetworkMode { get; set; }
     public static Fix64 TimeSpeed { get; set; } = Fix64.One;
     public static Fix64 TimeDelta => (Fix64.One * TimeSpeed) / new Fix64(FPS);
     public static Fix64 TurnRate => Fix64.One / new Fix64(8);

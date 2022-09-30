@@ -55,7 +55,6 @@ public partial class GameState : AppState
         
         FPS = Shared.Const.Time.FPS;
         TPS = Shared.Const.Time.TPS;
-        IsNetworkMode = networkMode;
 
         Application.targetFrameRate = FPS;
 

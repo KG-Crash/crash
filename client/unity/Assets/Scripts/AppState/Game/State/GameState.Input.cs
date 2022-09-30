@@ -68,7 +68,7 @@ public partial class GameState : IInputSubscriber
 
     public void OnAlphaNum(int num)
     {
-        if (!IsNetworkMode)
+        if (!networkMode)
             FPS = Shared.Const.Time.FPS / num;
     }
 

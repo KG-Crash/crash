@@ -48,7 +48,7 @@ public partial class GameState : ActionService.Listener
 
         if (++LockStep.Frame.In >= Shared.Const.Time.FramePerTurn)
         {
-            if (IsNetworkMode)
+            if (networkMode)
             {
                 actionService.Flush();
                 Debug.Log($"send queue : {LockStep.Turn.In}");
