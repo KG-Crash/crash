@@ -30,6 +30,6 @@ public static class CrashResources
 
     public static UnityTable<T> LoadUnityTable<T>() where T : UnityTable<T>
     {
-        return Resources.Load<T>($"Tables/{nameof(T)}");
+        return Resources.Load<T>($"Tables/{typeof(T).Name}");
     }
 }
