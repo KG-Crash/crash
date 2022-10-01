@@ -42,9 +42,12 @@ public class UIBindAttribute : System.Attribute
 [System.AttributeUsage(AttributeTargets.Method)]
 public class InitializeMethodAttribute : System.Attribute
 {
+    public Type transition;
+    public Type context;
 }
 
 [System.AttributeUsage(AttributeTargets.Method)]
 public class ClearMethodAttribute : System.Attribute
 {
+    public Type nextAppState;
 }

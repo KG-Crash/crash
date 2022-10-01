@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game
 {
-    public class GameSceneContext : MonoBehaviour
+    public class GameSceneContext : SceneContext
     {
         [SerializeField] public Transform _poolOffset; 
         [SerializeField] public Transform _focusTransform;

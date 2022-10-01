@@ -24,7 +24,7 @@ public class AppStateService
     public AppStateService(AppState[] appStates, KG.UIPool uiPool)
     {
         _appStates = appStates.ToDictionary(x => x.GetType(), x => x);
-        _binds = appStates.ToDictionary(state => state, AppStateBinds.GetBinds);
+        _binds = appStates.ToDictionary(state => state, x => AppStateBindsFactory.Extract(x.GetType()));
         _uiPool = uiPool;
         _uiStack = new UIStack();
         
@@ -50,6 +50,7 @@ public class AppStateService
         // 0. load scene
         if (!IsSceneLoaded(entryState.sceneName))
             await SceneManager.LoadSceneAsync(entryState.sceneName);
+        var scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
 
         // 1. bind 
         if (bind.autoFlatBufferBind)
@@ -69,7 +70,14 @@ public class AppStateService
                 _ = entryState.ShowView(instancedViews[i]); 
         
         // 4. initialize appstate
-        bind.InvokeInitializeMethod(entryState, transition);
+        SceneContext context = null;
+        foreach (var rootGO in scene.GetRootGameObjects())
+        {
+            context = rootGO.transform.GetComponentInChildren<SceneContext>();
+            if (context != null) break;
+        }
+
+        AppStateInvoker.InvokeInitializeMethod(entryState, _binds[entryState].initMethod, transition, context);
 
         return _current = entryState;
     }
@@ -92,8 +100,9 @@ public class AppStateService
         var mustLoadScene = _current.sceneName != moveAppState.sceneName;
 
         // ---------------------------------------------------------------------------------------------------------
-        // 0. clear appstate
-        _binds[_current].InvokeClearMethod(_current, moveAppState);
+        // >> clear previous appstate
+        // 0. clear prev appstate
+        AppStateInvoker.InvokeClearMethod(_current, _binds[_current].clearMethod, moveAppState);
         
         // 1. stop all coroutines
         _current.StopAllCoroutine();
@@ -120,6 +129,7 @@ public class AppStateService
         }
 
         // ---------------------------------------------------------------------------------------------------------
+        // >> load/unload unity scene
         // 0. load next scene
         if (mustLoadScene)
             await SceneManager.LoadSceneAsync(moveAppState.sceneName);
@@ -127,9 +137,11 @@ public class AppStateService
         // 1. unload prev scene 
         if (mustLoadScene && IsSceneLoaded(_current.sceneName))
             await SceneManager.UnloadSceneAsync(_current.sceneName);
-        
-        // ---------------------------------------------------------------------------------------------------------
 
+        var scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+
+        // ---------------------------------------------------------------------------------------------------------
+        // >> initialize appstate
         // 0. bind 
         {
             if (_binds.TryGetValue(moveAppState, out var bind))
@@ -156,7 +168,14 @@ public class AppStateService
         }
         
         // 3. initialize appstate
-        _binds[moveAppState].InvokeInitializeMethod(moveAppState, transition);
+        SceneContext context = null;
+        foreach (var rootGO in scene.GetRootGameObjects())
+        {
+            context = rootGO.transform.GetComponentInChildren<SceneContext>();
+            if (context != null) break;
+        }
+
+        AppStateInvoker.InvokeInitializeMethod(moveAppState, _binds[moveAppState].initMethod, transition, context);
 
         return (_current = moveAppState) as T;
     }

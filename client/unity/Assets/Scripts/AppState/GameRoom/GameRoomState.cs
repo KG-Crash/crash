@@ -10,7 +10,7 @@ using UI;
 [AutoBind(flatBuffer: true)]
 public partial class GameRoomState : AppState
 {
-    [InitializeMethod]
+    [InitializeMethod(transition = typeof(GameRoomTransition))]
     public void Initialize(GameRoomTransition transition)
     {
         var view = GetView<GameRoomPanel>();

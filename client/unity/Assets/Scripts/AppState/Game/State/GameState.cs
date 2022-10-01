@@ -14,9 +14,6 @@ using UnityEngine;
 [AutoBind(true, true)]
 public partial class GameState : AppState
 {
-    private GameSceneContext context { get; set; }
-    private Transform poolOffset { get; set; } 
-    private Transform focusTransform { get; set; }
     private KG.Map map { get; set; }
     private Transform[] spawnPositions { get; set; }
     private bool networkMode { get; set; }
@@ -30,46 +27,32 @@ public partial class GameState : AppState
     private TeamCollection _teams;
     private ProjectileActorPool _projectileActorPool;
     private UnitActorFactory unitActorFactory;
-
-    [InitializeMethod]
-    public void Initialize()
+    
+    [InitializeMethod(context = typeof(GameSceneContext))]
+    public void Initialize(GameSceneContext context)
     {
-        var firstRoomObject = _scene.GetRootGameObjects()
-            .First(x => x.TryGetComponent<GameSceneContext>(out var _));
-        if (firstRoomObject != null)
-        {
-            context = firstRoomObject.GetComponent<GameSceneContext>();
+        networkMode = context._networkMode;
+        map = context._map;
+        spawnPositions = context._spawnPositions;
+        chatService = context._chatService;
             
-            poolOffset = context._poolOffset;
-            focusTransform = context._focusTransform;
-            map = context._map;
-            spawnPositions = context._spawnPositions;
-            networkMode = context._networkMode;
-            chatService = context._chatService;
-            
-            context.UpdateAsObservable().Subscribe(_ => OnUpdate());
-            context.LateUpdateAsObservable().Subscribe(_ => OnLateUpdate());
-        }
-
-        unitActorFactory = new UnitActorFactory();
+        context.UpdateAsObservable().Subscribe(_ => OnUpdate());
+        context.LateUpdateAsObservable().Subscribe(_ => OnLateUpdate());
         
         FPS = Shared.Const.Time.FPS;
         TPS = Shared.Const.Time.TPS;
-
+        Application.targetFrameRate = FPS;
         Application.targetFrameRate = FPS;
 
-        InitInput();
-
-        _projectileActorPool = new ProjectileActorPool(ProjectileTable.Get(), 15, this, poolOffset);
-
-        InitializeProjectileHandle();
-        
-        Application.targetFrameRate = FPS;
+        unitActorFactory = new UnitActorFactory();
+        _projectileActorPool = new ProjectileActorPool(ProjectileTable.Get(), 15, this, context._poolOffset);
         _teams = new TeamCollection(this, this);
         actionService = new ActionService(this);
 
         LockStep.Reset();
         
+        InitInput();
+        InitializeProjectileHandle();
         InitializeGamePanel();
         InitializeUpgradePanel();
 
@@ -79,22 +62,14 @@ public partial class GameState : AppState
     [ClearMethod]
     public void Clear()
     {
+        map = null;
+        spawnPositions = null;
+        chatService = null;
+        
         ClearGamePanel();
         ClearUpgradePanel();
         ClearInput();
         
         unitActorMaps.Clear();
-
-        if (context)
-        {
-            Destroy(context);
-            context = null;  
-            
-            poolOffset = null;
-            focusTransform = null;
-            map = null;
-            spawnPositions = null;
-            chatService = null;
-        }
     }
 }
