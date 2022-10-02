@@ -27,6 +27,10 @@ func (ctx *Context) OnRoomList(session *model.Session, req request.RoomList) {
 	rooms := []response.Room{}
 
 	for _, value := range ctx.Rooms {
+		if value.Playing {
+			continue
+		}
+
 		rooms = append(rooms, response.Room{
 			Id:    value.ID(),
 			Title: value.Title(),
@@ -230,6 +234,7 @@ func (ctx *Context) OnGameStart(session *model.Session, req request.GameStart) {
 
 	// TODO: Ready에서 seed 주지말고
 	// 여기서 전달해도 될 것 같음
+	session.Room.Playing = true
 	for _, user := range session.Room.GetAllUsers() {
 		user.Send(response.GameStart{})
 	}
