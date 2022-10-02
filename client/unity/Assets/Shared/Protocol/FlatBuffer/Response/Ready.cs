@@ -19,29 +19,25 @@ public struct Ready : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public Ready __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public long Seed { get { int o = __p.__offset(4); return o != 0 ? __p.bb.GetLong(o + __p.bb_pos) : (long)0; } }
-  public FlatBuffer.Response.User? Users(int j) { int o = __p.__offset(6); return o != 0 ? (FlatBuffer.Response.User?)(new FlatBuffer.Response.User()).__assign(__p.__indirect(__p.__vector(o) + j * 4), __p.bb) : null; }
-  public int UsersLength { get { int o = __p.__offset(6); return o != 0 ? __p.__vector_len(o) : 0; } }
-  public uint Error { get { int o = __p.__offset(8); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
+  public FlatBuffer.Response.User? Users(int j) { int o = __p.__offset(4); return o != 0 ? (FlatBuffer.Response.User?)(new FlatBuffer.Response.User()).__assign(__p.__indirect(__p.__vector(o) + j * 4), __p.bb) : null; }
+  public int UsersLength { get { int o = __p.__offset(4); return o != 0 ? __p.__vector_len(o) : 0; } }
+  public uint Error { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
 
   public static Offset<FlatBuffer.Response.Ready> CreateReady(FlatBufferBuilder builder,
-      long seed = 0,
       VectorOffset usersOffset = default(VectorOffset),
       uint error = 0) {
-    builder.StartTable(3);
-    Ready.AddSeed(builder, seed);
+    builder.StartTable(2);
     Ready.AddError(builder, error);
     Ready.AddUsers(builder, usersOffset);
     return Ready.EndReady(builder);
   }
 
-  public static void StartReady(FlatBufferBuilder builder) { builder.StartTable(3); }
-  public static void AddSeed(FlatBufferBuilder builder, long seed) { builder.AddLong(0, seed, 0); }
-  public static void AddUsers(FlatBufferBuilder builder, VectorOffset usersOffset) { builder.AddOffset(1, usersOffset.Value, 0); }
+  public static void StartReady(FlatBufferBuilder builder) { builder.StartTable(2); }
+  public static void AddUsers(FlatBufferBuilder builder, VectorOffset usersOffset) { builder.AddOffset(0, usersOffset.Value, 0); }
   public static VectorOffset CreateUsersVector(FlatBufferBuilder builder, Offset<FlatBuffer.Response.User>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
   public static VectorOffset CreateUsersVectorBlock(FlatBufferBuilder builder, Offset<FlatBuffer.Response.User>[] data) { builder.StartVector(4, data.Length, 4); builder.Add(data); return builder.EndVector(); }
   public static void StartUsersVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
-  public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(2, error, 0); }
+  public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(1, error, 0); }
   public static Offset<FlatBuffer.Response.Ready> EndReady(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Response.Ready>(o);

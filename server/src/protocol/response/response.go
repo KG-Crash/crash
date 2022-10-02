@@ -951,18 +951,21 @@ func (obj Team) Deserialize(bytes []byte) protocol.Protocol {
 
 type GameStart struct {
 	Error uint32
+	Seed  int64
 }
 
 func (obj *GameStart) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 
 	source.GameStartStart(builder)
 	source.GameStartAddError(builder, obj.Error)
+	source.GameStartAddSeed(builder, obj.Seed)
 
 	return source.GameStartEnd(builder)
 }
 
 func (obj *GameStart) parse(x *source.GameStart) *GameStart {
 	obj.Error = x.Error()
+	obj.Seed = x.Seed()
 
 	return obj
 }
@@ -984,7 +987,6 @@ func (obj GameStart) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type Ready struct {
-	Seed  int64
 	Users []User
 	Error uint32
 }
@@ -1007,7 +1009,6 @@ func (obj *Ready) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	_users := obj.users(builder, obj.Users)
 
 	source.ReadyStart(builder)
-	source.ReadyAddSeed(builder, obj.Seed)
 	source.ReadyAddUsers(builder, _users)
 	source.ReadyAddError(builder, obj.Error)
 
@@ -1015,7 +1016,6 @@ func (obj *Ready) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 }
 
 func (obj *Ready) parse(x *source.Ready) *Ready {
-	obj.Seed = x.Seed()
 
 	obj.Users = []User{}
 	for i := 0; i < x.UsersLength(); i++ {

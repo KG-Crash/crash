@@ -20,16 +20,20 @@ public struct GameStart : IFlatbufferObject
   public GameStart __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   public uint Error { get { int o = __p.__offset(4); return o != 0 ? __p.bb.GetUint(o + __p.bb_pos) : (uint)0; } }
+  public long Seed { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetLong(o + __p.bb_pos) : (long)0; } }
 
   public static Offset<FlatBuffer.Response.GameStart> CreateGameStart(FlatBufferBuilder builder,
-      uint error = 0) {
-    builder.StartTable(1);
+      uint error = 0,
+      long seed = 0) {
+    builder.StartTable(2);
+    GameStart.AddSeed(builder, seed);
     GameStart.AddError(builder, error);
     return GameStart.EndGameStart(builder);
   }
 
-  public static void StartGameStart(FlatBufferBuilder builder) { builder.StartTable(1); }
+  public static void StartGameStart(FlatBufferBuilder builder) { builder.StartTable(2); }
   public static void AddError(FlatBufferBuilder builder, uint error) { builder.AddUint(0, error, 0); }
+  public static void AddSeed(FlatBufferBuilder builder, long seed) { builder.AddLong(1, seed, 0); }
   public static Offset<FlatBuffer.Response.GameStart> EndGameStart(FlatBufferBuilder builder) {
     int o = builder.EndTable();
     return new Offset<FlatBuffer.Response.GameStart>(o);

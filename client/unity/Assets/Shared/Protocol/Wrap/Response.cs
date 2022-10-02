@@ -693,6 +693,7 @@ namespace Protocol.Response
         public uint Identity => (uint)Protocol.Response.Identity.GAME_START;
 
         public uint Error { get; set; }
+        public long Seed { get; set; }
 
         public GameStart()
         { }
@@ -700,13 +701,15 @@ namespace Protocol.Response
         public GameStart(FlatBuffer.Response.GameStart obj)
         {
             this.Error = obj.Error;
+            this.Seed = obj.Seed;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.GameStart> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
             var _error = this.Error;
+            var _seed = this.Seed;
 
-            return FlatBuffer.Response.GameStart.CreateGameStart(builder, _error);
+            return FlatBuffer.Response.GameStart.CreateGameStart(builder, _error, _seed);
         }
 
         public byte[] Serialize()
@@ -726,7 +729,6 @@ namespace Protocol.Response
     {
         public uint Identity => (uint)Protocol.Response.Identity.READY;
 
-        public long Seed { get; set; }
         public List<User> Users { get; set; }
         public uint Error { get; set; }
 
@@ -735,18 +737,16 @@ namespace Protocol.Response
 
         public Ready(FlatBuffer.Response.Ready obj)
         {
-            this.Seed = obj.Seed;
             this.Users = Enumerable.Range(0, obj.UsersLength).Select(x => new User(obj.Users(x).Value)).ToList();
             this.Error = obj.Error;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.Ready> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _seed = this.Seed;
             var _users = FlatBuffer.Response.Ready.CreateUsersVector(builder, this.Users.Select(x => x.ToFlatBuffer(builder)).ToArray());
             var _error = this.Error;
 
-            return FlatBuffer.Response.Ready.CreateReady(builder, _seed, _users, _error);
+            return FlatBuffer.Response.Ready.CreateReady(builder, _users, _error);
         }
 
         public byte[] Serialize()

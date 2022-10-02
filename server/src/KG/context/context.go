@@ -231,12 +231,11 @@ func (ctx *Context) OnGameStart(session *model.Session, req request.GameStart) {
 
 	seed, _ := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
 	session.Room.Seed = seed.Int64()
-
-	// TODO: Ready에서 seed 주지말고
-	// 여기서 전달해도 될 것 같음
 	session.Room.Playing = true
 	for _, user := range session.Room.GetAllUsers() {
-		user.Send(response.GameStart{})
+		user.Send(response.GameStart{
+			Seed: session.Room.Seed,
+		})
 	}
 }
 
@@ -253,7 +252,6 @@ func (ctx *Context) OnReady(session *model.Session, req request.Ready) {
 	room.Sequences[session] = next
 
 	res := response.Ready{
-		Seed:  room.Seed,
 		Users: []response.User{},
 	}
 

@@ -20,7 +20,7 @@ public partial class GameRoomState
             return true;
         }
 
-        //Client.Instance.seed = response.Seed;
+        Client.Instance.seed = response.Seed;
         _ = MoveStateAsync<GameState>();
         return true;
     }

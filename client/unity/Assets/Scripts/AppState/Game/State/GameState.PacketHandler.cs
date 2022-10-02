@@ -92,8 +92,6 @@ public partial class GameState
 
             _me = _teams.Find(Client.Instance.id);
 
-            // random seed
-            Client.Instance.seed = response.Seed;
             Debug.Log($"OnReady, myname is {Client.Instance.uuid}");
 
             foreach (var user in response.Users)
