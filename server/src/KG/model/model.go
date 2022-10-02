@@ -157,6 +157,10 @@ func (room *Room) Enter(session *Session) error {
 		return err
 	}
 
+	if room.Playing {
+		return errors.New("game room is playing")
+	}
+
 	if room.Users[team] == nil {
 		room.Users[team] = map[string]*Session{}
 	}
