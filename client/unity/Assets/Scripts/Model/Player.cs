@@ -1,16 +1,18 @@
-﻿using Shared.Table;
+﻿using System;
+using Shared.Table;
 using Shared.Type;
 using System.Collections.Generic;
 using System.Linq;
+using FixMath.NET;
+using Network;
 
 namespace Game
 {
-    public class Player
+    public class Player : IUpdateLockStep
     {
         public interface Listener : Unit.Listener
         {
             void OnSpawned(Player player);
-            void OnLeave(Player player);
             void OnFinishUpgrade(Ability ability);
             void OnAttackTargetChanged(Player attacker, Player target);
             void OnPlayerLevelChanged(Player player, uint level);
@@ -108,6 +110,14 @@ namespace Game
         public override string ToString()
         {
             return $"{base.ToString()}(playerID={id}, teamID={team.id})";
+        }
+
+        public void OnUpdateLockStep(Frame input, Frame output)
+        {
+            if (id != Client.Instance.id)
+                throw new ApplicationException("내 업그레이드만 책임을 가짐");
+
+            upgrade.UpdateAbility(input);
         }
     }
 }

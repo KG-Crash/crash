@@ -69,7 +69,7 @@ namespace Game
             set => _moveTarget = value;
         }
 
-        public override void OnUpdateLockStep(Frame f)
+        public override void OnUpdateLockStep(Frame input, Frame output)
         {
             switch (currentState)
             {
@@ -78,7 +78,7 @@ namespace Game
                 case ProjectileState.Shoot:
                     break;
                 case ProjectileState.Move:
-                    DeltaMove(f.deltaTime);
+                    DeltaMove(output.deltaTime);
                     break;
                 case ProjectileState.Hit:
                     break;

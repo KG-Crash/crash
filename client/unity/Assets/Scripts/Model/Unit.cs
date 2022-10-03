@@ -23,7 +23,7 @@ namespace Game
             void OnEndMove(Unit unit);
             void OnFireProjectile(Unit fireUnit, Unit you, int projectileOriginID);
             void OnIdle(Unit unit);
-            void OnUpdate(Unit me, Frame f);
+            void OnUpdate(Unit me, Frame input);
             void OnHPChanging(Unit me, int from, int to);
             void OnHPChanged(Unit me, int before, int after);
             void OnSpawned(Unit me);
@@ -374,7 +374,7 @@ namespace Game
                 .FirstOrDefault();
         }
         
-        public override void OnUpdateLockStep(Frame f)
+        public override void OnUpdateLockStep(Frame input, Frame output)
         {
             switch (_currentState)
             {
@@ -448,7 +448,7 @@ namespace Game
                     }
                     else
                     {   
-                        DeltaMove(f);
+                        DeltaMove(input);
                     }
                     break;
 
@@ -482,7 +482,7 @@ namespace Game
                     break;
             }
 
-            _listener?.OnUpdate(this, f);
+            _listener?.OnUpdate(this, input);
         }
 
         private Unit SearchEnemyIn(Fix64 searchRadius)

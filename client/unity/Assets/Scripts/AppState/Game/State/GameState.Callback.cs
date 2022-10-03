@@ -34,7 +34,7 @@ public partial class GameState : ActionService.Listener
         
         EnqueueHeartBeat();
         OnUpdateFrameDebug(OutputFrameChunk);
-        OnUpdateFrameForBinded(OutputFrameChunk);
+        OnUpdateFrameForBinded(InputFrameChunk, OutputFrameChunk);
     }
 
     private void OnLateUpdate()

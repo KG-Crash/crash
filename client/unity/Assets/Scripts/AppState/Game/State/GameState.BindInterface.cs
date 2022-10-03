@@ -20,7 +20,7 @@ public struct Frame
 
 interface IUpdateLockStep
 {
-    void OnUpdateLockStep(Frame frame);
+    void OnUpdateLockStep(Frame input, Frame output);
 }
 
 public partial class GameState
@@ -70,15 +70,15 @@ public partial class GameState
         _updateUnitySubscribers.Clear();
     }
 
-    public void OnUpdateFrameForBinded(Frame frame)
+    public void OnUpdateFrameForBinded(Frame input, Frame output)
     {
         foreach (var kv in _updateSubscribers)
         {
-            kv.Value.OnUpdateLockStep(frame);
+            kv.Value.OnUpdateLockStep(input, output);
         }
         foreach (var kv in _updateUnitySubscribers)
         {
-            kv.Value.OnUpdateLockStep(frame);
+            kv.Value.OnUpdateLockStep(input, output);
         }
     }
 }

@@ -47,6 +47,6 @@ namespace Game
             _listener?.OnRemove(this);
         }
 
-        public abstract void OnUpdateLockStep(Frame frame);
+        public abstract void OnUpdateLockStep(Frame input, Frame output);
     }
 }
