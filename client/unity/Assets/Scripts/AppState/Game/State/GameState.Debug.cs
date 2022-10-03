@@ -44,11 +44,11 @@ public partial class GameState
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            _me.target = _teams.Find(1);
+            me.target = teams.Find(1);
         }
         else if (Input.GetKeyUp(KeyCode.Space))
         {
-            _me.target = null;
+            me.target = null;
         }
 
         if (Input.GetKeyUp(KeyCode.F1))
@@ -87,22 +87,22 @@ public partial class GameState
     void OnUpdateFrameDebug(Frame f)
     {
         if (Input.GetKeyUp(KeyCode.Alpha1))
-            _me.upgrade.Start(Ability.UPGRADE_1, f.currentFrame);
+            me.upgrade.Start(Ability.UPGRADE_1, f.currentFrame);
         if (Input.GetKeyUp(KeyCode.Alpha2))
-            _me.upgrade.Start(Ability.UPGRADE_2, f.currentFrame);
+            me.upgrade.Start(Ability.UPGRADE_2, f.currentFrame);
         if (Input.GetKeyUp(KeyCode.Alpha3))
-            _me.upgrade.Start(Ability.UPGRADE_3, f.currentFrame);
+            me.upgrade.Start(Ability.UPGRADE_3, f.currentFrame);
         if (Input.GetKeyUp(KeyCode.Alpha4))
-            _me.upgrade.Start(Ability.UPGRADE_4, f.currentFrame);
+            me.upgrade.Start(Ability.UPGRADE_4, f.currentFrame);
         if (Input.GetKeyUp(KeyCode.Alpha5))
-            _me.upgrade.Start(Ability.UPGRADE_5, f.currentFrame);
+            me.upgrade.Start(Ability.UPGRADE_5, f.currentFrame);
         if (Input.GetKeyUp(KeyCode.Alpha6))
-            _me.upgrade.Start(Ability.UPGRADE_6, f.currentFrame);
+            me.upgrade.Start(Ability.UPGRADE_6, f.currentFrame);
         if (Input.GetKeyUp(KeyCode.Alpha7))
-            _me.upgrade.Start(Ability.UPGRADE_7, f.currentFrame);
+            me.upgrade.Start(Ability.UPGRADE_7, f.currentFrame);
         if (Input.GetKeyUp(KeyCode.Alpha8))
-            _me.upgrade.Start(Ability.UPGRADE_8, f.currentFrame);
+            me.upgrade.Start(Ability.UPGRADE_8, f.currentFrame);
         if (Input.GetKeyUp(KeyCode.Alpha9))
-            _me.upgrade.Start(Ability.UPGRADE_9, f.currentFrame);
+            me.upgrade.Start(Ability.UPGRADE_9, f.currentFrame);
     }
 }

@@ -106,8 +106,8 @@ public partial class GameState
         if (actionHandleParam.userId == targetPlayerNumber)
             return;
 
-        var attacker = _teams.Find(actionHandleParam.userId);
-        attacker.target = _teams.Find(targetPlayerNumber);
+        var attacker = teams.Find(actionHandleParam.userId);
+        attacker.target = teams.Find(targetPlayerNumber);
     }
 
     [ActionHandler(ActionKind.Spawn)]
@@ -118,7 +118,7 @@ public partial class GameState
         var count = action.Param1.HIWORD();
         var pos = action.Param2.WORD2POS();
         var playerId = actionHandleParam.userId;
-        var player = _teams.Find(playerId);
+        var player = teams.Find(playerId);
 
         for (var i = 0; i < count; i++)
             player.units.Add(unitType, map, pos);

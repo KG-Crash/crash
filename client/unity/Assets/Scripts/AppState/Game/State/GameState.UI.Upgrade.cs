@@ -26,6 +26,6 @@ public partial class GameState
 
     private void OnUpgradeClick(Ability ability)
     {
-        _me.upgrade.Start(ability, LockStep.Frame.In);
+        me.upgrade.Start(ability, LockStep.Frame.In);
     }
 }

@@ -23,10 +23,10 @@ public partial class GameState : AppState
     public Dictionary<LogicalObject, IActor> unitActorMaps { get; private set; } =
         new Dictionary<LogicalObject, IActor>();
 
-    private Player _me;
-    private TeamCollection _teams;
-    private ProjectileActorPool _projectileActorPool;
-    private UnitActorFactory unitActorFactory;
+    private Player me { get; set; }
+    private TeamCollection teams { get; set; }
+    private ProjectileActorPool projectileActorPool { get; set; }
+    private UnitActorFactory unitActorFactory { get; set; }
     
     [InitializeMethod(context = typeof(GameSceneContext))]
     public void Initialize(GameSceneContext context)
@@ -45,8 +45,8 @@ public partial class GameState : AppState
         Application.targetFrameRate = FPS;
 
         unitActorFactory = new UnitActorFactory();
-        _projectileActorPool = new ProjectileActorPool(ProjectileTable.Get(), 15, this, context._poolOffset);
-        _teams = new TeamCollection(this, this);
+        projectileActorPool = new ProjectileActorPool(ProjectileTable.Get(), 15, this, context._poolOffset);
+        teams = new TeamCollection(this, this);
         actionService = new ActionService(this);
 
         LockStep.Reset();

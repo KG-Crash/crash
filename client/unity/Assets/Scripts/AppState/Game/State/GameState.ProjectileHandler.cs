@@ -24,7 +24,7 @@ public partial class GameState : Projectile.Listener, ProjectileActor.Listener
         if (!unitActorMaps.TryGetValue(projectile.owner, out var unitActor))
             return;
 
-        var actor = _projectileActorPool.GetProjectileActor(projectile.type);
+        var actor = projectileActorPool.GetProjectileActor(projectile.type);
         actor.SetParent(unitActor.parent);
         actor.position = projectile.position;
         unitActorMaps.Add(projectile, actor);
@@ -53,6 +53,6 @@ public partial class GameState : Projectile.Listener, ProjectileActor.Listener
 
         var actor = unitActorMaps[projectile];
         if (actor is ProjectileActor projectileActor)
-            _projectileActorPool.ReturnProjectile(projectile.type, projectileActor);
+            projectileActorPool.ReturnProjectile(projectile.type, projectileActor);
     }
 }

@@ -83,14 +83,14 @@ public partial class GameState
             // 팀, 플레이어 구성
             foreach (var pair in users)
             {
-                var team = _teams.Add(pair.Key); // team id
+                var team = teams.Add(pair.Key); // team id
                 foreach (var user in pair.Value)
                 {
                     team.players.Add(user.Sequence, user.Sequence);
                 }
             }
 
-            _me = _teams.Find(Client.Instance.id);
+            me = teams.Find(Client.Instance.id);
 
             Debug.Log($"OnReady, myname is {Client.Instance.uuid}");
 

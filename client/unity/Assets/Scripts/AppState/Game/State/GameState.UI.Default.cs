@@ -39,8 +39,7 @@ public partial class GameState
 
     private void OnAttackTargetChange(int? attackTarget)
     {
-        var attacker = _teams.Find(_me.id);
-        attacker.target = attackTarget != null? _teams.Find(attackTarget.Value): null;
+        me.target = attackTarget != null? teams.Find(attackTarget.Value): null;
     }
 
     private void OnDragEvent(Vector2 delta)
