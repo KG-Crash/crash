@@ -325,9 +325,7 @@ namespace Game
             projectiles = new ProjectileCollection(this, _listener);
 
             _lastAttackFrame = -attackSpeed / new Fix64(1000) / GameState.TimeDelta;
-
-            GameState.updateFrameStream.Subscribe(Action);
-
+            
             _listener?.OnSpawned(this);
             this.position = position;
         }
@@ -376,7 +374,7 @@ namespace Game
                 .FirstOrDefault();
         }
         
-        private void Action(Frame f)
+        public override void OnUpdateLockStep(Frame f)
         {
             switch (_currentState)
             {

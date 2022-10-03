@@ -24,7 +24,6 @@ namespace Game
             currentState = ProjectileState.Shoot;
             
             listener?.OnSpawned(this);
-            GameState.updateFrameStream.Subscribe(Action);
             // TODO :: 풀링을 핟면 Disable 해야함.
             // Disable();
             Shoot();
@@ -70,7 +69,7 @@ namespace Game
             set => _moveTarget = value;
         }
 
-        private void Action(Frame f)
+        public override void OnUpdateLockStep(Frame f)
         {
             switch (currentState)
             {

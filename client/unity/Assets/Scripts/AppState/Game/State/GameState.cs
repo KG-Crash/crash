@@ -69,6 +69,7 @@ public partial class GameState : AppState
         ClearGamePanel();
         ClearUpgradePanel();
         ClearInput();
+        ClearAllBinds();
         
         unitActorMaps.Clear();
     }

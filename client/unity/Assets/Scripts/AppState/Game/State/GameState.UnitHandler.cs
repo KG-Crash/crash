@@ -22,6 +22,7 @@ public partial class GameState : Unit.Listener, UnitActor.Listener
 
     public void OnRemove(LogicalObject unit)
     {
+        Unbind(unit);
         unitActorMaps.Remove(unit);
     }
 
@@ -153,6 +154,8 @@ public partial class GameState : Unit.Listener, UnitActor.Listener
 
     public void OnSpawned(Unit me)
     {
+        Bind(me);
+        
         if (unitActorMaps.ContainsKey(me))
             return;
 

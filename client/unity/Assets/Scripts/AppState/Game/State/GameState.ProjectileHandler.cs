@@ -18,6 +18,7 @@ public partial class GameState : Projectile.Listener, ProjectileActor.Listener
 
     public void OnSpawned(Projectile projectile)
     {
+        Bind(projectile);
         _projectiles.Append(projectile);
 
         if (!unitActorMaps.TryGetValue(projectile.owner, out var unitActor))

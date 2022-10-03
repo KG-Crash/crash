@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Game
 {
-    public abstract class LogicalObject
+    public abstract class LogicalObject : IUpdateLockStep
     {
         public interface Listener
         {
@@ -46,5 +46,7 @@ namespace Game
         {
             _listener?.OnRemove(this);
         }
+
+        public abstract void OnUpdateLockStep(Frame frame);
     }
 }

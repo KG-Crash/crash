@@ -9,6 +9,8 @@ namespace Game
     {
         public interface Listener : Unit.Listener
         {
+            void OnSpawned(Player player);
+            void OnLeave(Player player);
             void OnFinishUpgrade(Ability ability);
             void OnAttackTargetChanged(Player attacker, Player target);
             void OnPlayerLevelChanged(Player player, uint level);
@@ -87,6 +89,8 @@ namespace Game
             this.upgrade = new Upgrade(this);
             this.team = team;
             this.spawnIndex = spawnIndex;
+            
+            listener?.OnSpawned(this);
         }
 
         public Dictionary<StatType, int> AdditionalStat(int unitID)

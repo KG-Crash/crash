@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Game
 {
-    public class Upgrade
+    public class Upgrade : IUpdateLockStep
     {
         private Dictionary<Ability, int> _startFrames = new Dictionary<Ability, int>();
 
@@ -17,7 +17,7 @@ namespace Game
             this.owner = owner;
         }
 
-        public void Update(Frame frame)
+        public void OnUpdateLockStep(Frame frame)
         {
             var completedList = _startFrames.Where(pair =>
             {

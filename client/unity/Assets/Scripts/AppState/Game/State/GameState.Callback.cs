@@ -33,8 +33,8 @@ public partial class GameState : ActionService.Listener
         }
         
         EnqueueHeartBeat();
-        _me.upgrade.Update(OutputFrameChunk);
         OnUpdateFrameDebug(OutputFrameChunk);
+        OnUpdateFrameForBinded(OutputFrameChunk);
     }
 
     private void OnLateUpdate()
