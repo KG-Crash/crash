@@ -1,42 +1,42 @@
 {
-  "UPGRADE_3": [
+  "UPGRADE_4": [
     {
       "Unit": 0,
       "Additional": {
         "AttackRange": 10
       },
-      "Parent": "UPGRADE_3"
+      "Parent": "UPGRADE_4"
     },
     {
       "Unit": 1,
       "Additional": {
         "Speed": 3
       },
-      "Parent": "UPGRADE_3"
+      "Parent": "UPGRADE_4"
     },
     {
       "Unit": 2,
       "Additional": {},
-      "Parent": "UPGRADE_3"
+      "Parent": "UPGRADE_4"
     }
   ],
-  "UPGRADE_4": [
+  "UPGRADE_5": [
     {
       "Unit": 0,
       "Additional": {
         "Damage": 10
       },
-      "Parent": "UPGRADE_4"
+      "Parent": "UPGRADE_5"
     }
   ],
-  "UPGRADE_10": [
+  "UPGRADE_6": [
     {
       "Unit": 0,
       "Additional": {
         "Damage": 20,
         "Speed": 6
       },
-      "Parent": "UPGRADE_10"
+      "Parent": "UPGRADE_6"
     }
   ]
 }

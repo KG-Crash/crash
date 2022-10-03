@@ -1,0 +1,32 @@
+{
+  "UPGRADE_1": [
+    {
+      "Unit": 0,
+      "Count": 1,
+      "CycleSec": 2,
+      "Parent": "UPGRADE_1"
+    },
+    {
+      "Unit": 1,
+      "Count": 2,
+      "CycleSec": 4,
+      "Parent": "UPGRADE_1"
+    }
+  ],
+  "UPGRADE_2": [
+    {
+      "Unit": 2,
+      "Count": 3,
+      "CycleSec": 8,
+      "Parent": "UPGRADE_2"
+    }
+  ],
+  "UPGRADE_3": [
+    {
+      "Unit": 3,
+      "Count": 4,
+      "CycleSec": 16,
+      "Parent": "UPGRADE_3"
+    }
+  ]
+}

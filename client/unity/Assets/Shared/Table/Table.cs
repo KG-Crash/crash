@@ -33,6 +33,14 @@ namespace Shared.Table
     public partial class TableUnitUpgradeAbility : BaseDict<Ability, List<UnitUpgradeAbility>>
     { }
 
+    [Table("json/UnitUpgradeSpawnAttribute.json")]
+    public partial class TableUnitUpgradeSpawnAttribute : BaseDict<Ability, UnitUpgradeSpawnAttribute>
+    { }
+
+    [Table("json/UnitUpgradeSpawn.json")]
+    public partial class TableUnitUpgradeSpawn : BaseDict<Ability, List<UnitUpgradeSpawn>>
+    { }
+
     [Table("json/Skill.json")]
     public partial class TableSkill : BaseDict<int, Skill>
     { }
