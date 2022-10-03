@@ -128,14 +128,14 @@ public partial class GameState : Unit.Listener, UnitActor.Listener
         x.position = after;
     }
 
-    public void OnUpdate(Unit me, Frame f)
+    public void OnUpdate(Unit me, Frame input)
     {
         if (unitActorMaps.TryGetValue(me, out var x) == false)
             return;
 
         var actor = x as UnitActor;
         // float 캐스팅
-        actor.animator.Update(f.deltaTime);
+        actor.animator.Update(input.deltaTime);
         actor.UpdateBounds();
     }
 
