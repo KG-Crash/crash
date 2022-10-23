@@ -44,7 +44,7 @@ namespace UI
                 Enumerable.Range(0, targetCount).Select(index =>
                 {
                     var attackTargetView = InstantiateAttackTargetView(transform);
-                    attackTargetView.attackTarget = index + 1;
+                    attackTargetView.attackTarget = index;
                     attackTargetView.indicator = true;
                     attackTargetView.rectTransform.localPosition = CalcTargetIndexPosition(index);
                     return attackTargetView;
@@ -73,9 +73,6 @@ namespace UI
             var rect = rectTransform.rect;
             
             _attackTarget = CalcAttackTarget(rect.center, eventData.position - (Vector2)transform.position, _touchRadius, _targetCount);
-            if (_attackTarget != null)
-                _attackTarget = Mathf.Clamp(_attackTarget.Value, 1, _targetCount);
-            
             _target.attackTarget = _attackTarget;
             _target.transform.localPosition = CalcTargetPosition(_attackTarget);
             _attackTargetChangeEvent.Invoke(_attackTarget);
@@ -83,7 +80,7 @@ namespace UI
 
         private Vector2 CalcTargetPosition(int? targetCount)
         {
-            return targetCount == null ? rectTransform.rect.center : CalcTargetIndexPosition(targetCount.Value - 1);
+            return targetCount == null ? rectTransform.rect.center : CalcTargetIndexPosition(targetCount.Value);
         }
 
         private Vector2 CalcTargetIndexPosition(int targetIndex)
@@ -110,11 +107,12 @@ namespace UI
             }
             else
             {
-                var dragRadian = Mathf.Atan2(positionDelta.y, positionDelta.x) + Mathf.PI;
                 var stepRadian = (Mathf.PI * 2) / targetCount;
-                var index = Mathf.RoundToInt(dragRadian / stepRadian);
+                var dragRadian = (Mathf.Atan2(positionDelta.y, positionDelta.x) + Mathf.PI + stepRadian/2) % (Mathf.PI * 2);
+                var index = Mathf.FloorToInt(dragRadian / stepRadian);
+                var clampedIndex = Mathf.Clamp(index, 0, targetCount - 1);
 
-                return index + 1;
+                return clampedIndex;
             }
         }
     }
