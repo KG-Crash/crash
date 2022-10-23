@@ -39,13 +39,13 @@ public partial class GameState
         });
     }
 
-    public void EnqueueUpgrade(Ability ability)
+    public void EnqueueUpgradeFinish(Ability ability)
     {
         actionService.Send(new Protocol.Request.Action
         {
             Frame = LockStep.Frame.In,
-            Id = (int)ActionKind.Pause,
-            Param1 = ActionExtension.TOWORD(0, (ushort) ability),
+            Id = (int) ActionKind.UpgradeFinish,
+            Param1 = (uint)ability,
             Param2 = 0
         });
     }
@@ -68,6 +68,17 @@ public partial class GameState
             Frame = LockStep.Frame.In,
             Id = (int)ActionKind.AttackPlayer,
             Param1 = ActionExtension.TOWORD(0, (ushort) playerID)
+        });
+    }
+
+    public void EnqueueUpgradeCancel(Ability ability)
+    {
+        actionService.Send(new Protocol.Request.Action
+        {
+            Frame = LockStep.Frame.In,
+            Id = (int) ActionKind.UpgradeCancel,
+            Param1 = (uint)ability,
+            Param2 = 0
         });
     }
 
@@ -94,18 +105,32 @@ public partial class GameState
         TimeSpeed = Fix64.One * action.Param1.LOWORD();
     }
 
-    [ActionHandler(ActionKind.Upgrade)]
-    public void OnActionUpgrade(Action action, ActionHandleParam actionHandleParam)
+    [ActionHandler(ActionKind.UpgradeFinish)]
+    public void OnActionUpgradeFinish(Action action, ActionHandleParam actionHandleParam)
     {
+        var ability = (Ability) action.Param1;
+        var player = teams.Find(actionHandleParam.userId);
+        player.upgrade.AddAbility(ability);
+        
+        if (player == me)
+            OnUpgradeFinishUI(ability);
+    }
+    
+    [ActionHandler(ActionKind.UpgradeCancel)]
+    public void OnActionUpgradeCancel(Action action, ActionHandleParam actionHandleParam)
+    {
+        var ability = (Ability) action.Param1;
+        var player = teams.Find(actionHandleParam.userId);
+        player.upgrade.RemoveAbility(ability);
+        
+        if (player == me)
+            OnUpgradeCancelUI(ability);
     }
 
     [ActionHandler(ActionKind.AttackPlayer)]
     public void OnActionAttackPlayer(Action action, ActionHandleParam actionHandleParam)
     {
         var targetPlayerNumber = action.Param1.LOWORD();
-        if (actionHandleParam.userId == targetPlayerNumber)
-            return;
-
         var attacker = teams.Find(actionHandleParam.userId);
         attacker.target = teams.Find(targetPlayerNumber);
     }
@@ -113,7 +138,6 @@ public partial class GameState
     [ActionHandler(ActionKind.Spawn)]
     public void OnActionSpawn(Action action, ActionHandleParam actionHandleParam)
     {
-        Debug.Log("on spawn unit ");
         var unitType = action.Param1.LOWORD();
         var count = action.Param1.HIWORD();
         var pos = action.Param2.WORD2POS();

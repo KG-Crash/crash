@@ -13,9 +13,11 @@ namespace Game
         public interface Listener : Unit.Listener
         {
             void OnSpawned(Player player);
-            void OnFinishUpgrade(Ability ability);
             void OnAttackTargetChanged(Player attacker, Player target);
             void OnPlayerLevelChanged(Player player, uint level);
+            void OnFinishUpgrade(Ability ability);
+            void OnUpgradeCancel(Ability ability);
+            void OnSpawnMyUnitByUpgrade(UnitUpgradeSpawn spawn); 
         }
 
         public int id { get; private set; }

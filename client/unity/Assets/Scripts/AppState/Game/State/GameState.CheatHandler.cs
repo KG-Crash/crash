@@ -64,6 +64,6 @@ public partial class GameState
         if (Enum.TryParse<Ability>(value, out var ability) == false)
             return;
 
-        EnqueueUpgrade(ability);
+        EnqueueUpgradeFinish(ability);
     }
 }

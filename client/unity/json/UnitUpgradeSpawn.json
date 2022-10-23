@@ -16,7 +16,7 @@
   "UPGRADE_2": [
     {
       "Unit": 2,
-      "Count": 3,
+      "Count": 1,
       "CycleSec": 8,
       "Parent": "UPGRADE_2"
     }

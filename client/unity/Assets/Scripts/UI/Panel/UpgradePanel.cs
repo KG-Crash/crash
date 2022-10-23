@@ -3,6 +3,7 @@ using KG;
 using Shared.Type;
 using System;
 using System.Collections.Generic;
+using Shared.Table;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,11 +14,14 @@ namespace UI
         [SerializeField] private UpgradeIconButton _upgradeIconButtonPrefab;
         [SerializeField] private ButtonSingleTMP _exitButton;
         [SerializeField] private Transform _iconParent;
-        [SerializeField] private UpgradeClickEvent _upgradeClick;
         
+        [SerializeField] private UpgradeEvent _upgradeClickEvent;
+        [SerializeField] private UpgradeEvent _upgradeCancelEvent;
+
         private List<UpgradeIconButton> _upgradeIconButtons = new List<UpgradeIconButton>();
         
-        public UpgradeClickEvent upgradeClick => _upgradeClick;
+        public UpgradeEvent upgradeClickEvent => _upgradeClickEvent;
+        public UpgradeEvent upgradeCancelEvent => _upgradeCancelEvent;
         public Button.ButtonClickedEvent exitClick => _exitButton.onClick;
 
         public void Initialize()
@@ -30,23 +34,57 @@ namespace UI
                 var instance = Instantiate(_upgradeIconButtonPrefab, _iconParent);
                 instance.ability = ability;
                 instance.icon = table[ability];
+                instance.SetState(UpgradeIconButton.State.Ready);
+                instance.onStartClick.AddListener(OnUpgradeClick);
+                instance.onCancelClick.AddListener(OnUpgradeLongClick);
+                
                 _upgradeIconButtons.Add(instance);
             }
         }
-
-        private void OnEnable()
-        {
-            _upgradeIconButtons.ForEach(x => x.onClick.AddListener(OnUpgradeClick));
-        }
         
-        private void OnDisable()
-        {
-            _upgradeIconButtons.ForEach(x => x.onClick.RemoveListener(OnUpgradeClick));
-        }
-
         private void OnUpgradeClick(Ability ability)
         {
-            _upgradeClick.Invoke(ability);
+            _upgradeClickEvent.Invoke(ability);
+        }
+        
+        private void OnUpgradeLongClick(Ability ability)
+        {
+            _upgradeCancelEvent.Invoke(ability);
+        }
+
+        public void OnSimulateProgress(Frame output, Upgrade upgrade)
+        {
+            var outputTotalFrame = output.currentFrame + output.currentTurn * Shared.Const.Time.FramePerTurn;
+            var upgradeIcon = _upgradeIconButtons.Find(x => x.ability == upgrade.currentUpdateAbility);
+            var table = Table.From<TableUnitUpgradeCost>();
+
+            if (upgrade.currentUpdateAbility != null && upgrade.updateStartFrame != null)
+            {
+                upgradeIcon.SetState(UpgradeIconButton.State.Progress);
+                var upgradeStartFrame = upgrade.updateStartFrame.Value;
+                var upgradeFrame = table[upgrade.currentUpdateAbility.Value].DurationSec * Shared.Const.Time.FPS;
+                upgradeIcon.progress = Mathf.Min((float)(outputTotalFrame - upgradeStartFrame) / upgradeFrame, 1);
+            }
+
+            var abilityList = upgrade.reservedAbilities;
+            for (var i = 0; i < abilityList.Count; i++)
+            {
+                var willUpgradeIcon = _upgradeIconButtons.Find(x => x.ability == abilityList[i]);
+                willUpgradeIcon.SetState(UpgradeIconButton.State.Pending);
+                willUpgradeIcon.pendingOrder = i + 1;
+            }
+        }
+
+        public void OnUpgradeFinish(Ability ability)
+        {
+            var icon = _upgradeIconButtons.Find(x => x.ability == ability);
+            icon.SetState(UpgradeIconButton.State.Finish);
+        }
+        
+        public void OnUpgradeCancel(Ability ability)
+        {
+            var icon = _upgradeIconButtons.Find(x => x.ability == ability);
+            icon.SetState(UpgradeIconButton.State.Ready);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using FixMath.NET;
 using Game;
@@ -18,12 +19,39 @@ public partial class GameState : Team.Listener
     
     public void OnFinishUpgrade(Ability ability)
     {
-        EnqueueUpgrade(ability);
+        EnqueueUpgradeFinish(ability);
     }
 
+    public void OnUpgradeCancel(Ability ability)
+    {
+        EnqueueUpgradeCancel(ability);
+    }
+
+    public void OnSpawnMyUnitByUpgrade(UnitUpgradeSpawn spawn)
+    {
+        FixVector3 position = spawnPositions[Client.Instance.id].position;
+        var xzpos = new FixVector2(position.x, position.z);
+        EnqueueSpawn(spawn.Unit, (uint)spawn.Count, xzpos);
+    }
+    
     public void OnAttackTargetChanged(Player player, Player target)
     {
-        EnqueueAttackPlayer((uint)target.id);
+        if (target == null)
+        {
+            foreach (var unit in player.units.Values)
+            {
+                unit.Stop();
+            }
+        }
+        else
+        {
+            FixVector3 pos = spawnPositions[target.id].position;
+
+            foreach (var unit in player.units.Values)
+            {
+                unit.MoveTo(pos);
+            }
+        }
     }
 
     public void OnPlayerLevelChanged(Player player, uint level)

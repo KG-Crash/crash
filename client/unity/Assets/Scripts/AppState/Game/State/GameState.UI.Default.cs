@@ -17,6 +17,8 @@ public partial class GameState
     {
         GetView<GamePanel>().Ready(playerCount);
     }
+    
+    private void UpdateGamePanel(Frame input, Frame output) {}
 
     private void ClearGamePanel()
     {
@@ -39,7 +41,7 @@ public partial class GameState
 
     private void OnAttackTargetChange(int? attackTarget)
     {
-        me.target = attackTarget != null? teams.Find(attackTarget.Value): null;
+        EnqueueAttackPlayer(attackTarget == null? 0: (uint) attackTarget.Value);
     }
 
     private void OnDragEvent(Vector2 delta)

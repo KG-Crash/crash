@@ -12,6 +12,6 @@ namespace Shared.Table
         [Key]
         public Ability Upgrade { get; set; }
         
-        public int Time { get; set; }
+        public int DurationSec { get; set; }
     }
 }
