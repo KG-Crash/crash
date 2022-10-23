@@ -77,32 +77,5 @@ public partial class GameState
         {
             EnqueueSpeed(3);
         }
-
-        if (Input.GetKeyUp(KeyCode.Escape))
-        {
-            _ = EntryPoint.appStateService.MoveStateAsync<LobbyState>();
-        }
-    }
-
-    void OnUpdateFrameDebug(Frame f)
-    {
-        if (Input.GetKeyUp(KeyCode.Alpha1))
-            me.upgrade.Start(Ability.UPGRADE_1, f.currentFrame);
-        if (Input.GetKeyUp(KeyCode.Alpha2))
-            me.upgrade.Start(Ability.UPGRADE_2, f.currentFrame);
-        if (Input.GetKeyUp(KeyCode.Alpha3))
-            me.upgrade.Start(Ability.UPGRADE_3, f.currentFrame);
-        if (Input.GetKeyUp(KeyCode.Alpha4))
-            me.upgrade.Start(Ability.UPGRADE_4, f.currentFrame);
-        if (Input.GetKeyUp(KeyCode.Alpha5))
-            me.upgrade.Start(Ability.UPGRADE_5, f.currentFrame);
-        if (Input.GetKeyUp(KeyCode.Alpha6))
-            me.upgrade.Start(Ability.UPGRADE_6, f.currentFrame);
-        if (Input.GetKeyUp(KeyCode.Alpha7))
-            me.upgrade.Start(Ability.UPGRADE_7, f.currentFrame);
-        if (Input.GetKeyUp(KeyCode.Alpha8))
-            me.upgrade.Start(Ability.UPGRADE_8, f.currentFrame);
-        if (Input.GetKeyUp(KeyCode.Alpha9))
-            me.upgrade.Start(Ability.UPGRADE_9, f.currentFrame);
     }
 }

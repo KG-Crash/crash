@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using FixMath.NET;
 using Game;
 using Game.Service;
+using KG;
 using Module;
 using Network;
 using UI;
@@ -18,16 +20,38 @@ public struct Frame
     public Fix64 deltaTime;
 }
 
-interface IUpdateLockStep
+public interface IUpdateLockStep
 {
     void OnUpdateLockStep(Frame input, Frame output);
 }
+
+public class UpdateLockStepAttribute : Attribute {}
 
 public partial class GameState
 {
     private Dictionary<object, IUpdateLockStep> _updateSubscribers = new Dictionary<object, IUpdateLockStep>();
     private Dictionary<UnityEngine.Object, IUpdateLockStep> _updateUnitySubscribers = new Dictionary<UnityEngine.Object, IUpdateLockStep>();
+    private Dictionary<UnityEngine.Object, MethodInfo[]> _updateMethods = new Dictionary<UnityEngine.Object, MethodInfo[]>();
 
+    private ParamOption[] _paramOptions = {
+        new ParamOption() {name = "input", type = typeof(Frame), acceptFlag = MatchParamFlag.Self, required = true},
+        new ParamOption() {name = "output", type = typeof(Frame), acceptFlag = MatchParamFlag.Self, required = true}
+    };
+
+    private object[] _expectedParamArray = new object[2];
+    private object[] _paramArray = new object[2];
+
+    [ContextMenu("1234")]
+    public void BindSelfMethod()
+    {
+        var methodFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+        _updateMethods[this] = 
+            this.GetType().GetMethods(methodFlags)
+                .Where(x => x.GetParameters().All(y => y.ParameterType == typeof(Frame)))
+                .Where(x => x.GetCustomAttribute<UpdateLockStepAttribute>() != null)
+                .ToArray();
+    }
+    
     public void Bind(object obj)
     {
         if (obj is UnityEngine.Object unityObj)
@@ -68,6 +92,7 @@ public partial class GameState
     {
         _updateSubscribers.Clear();
         _updateUnitySubscribers.Clear();
+        _updateMethods.Clear();
     }
 
     public void OnUpdateFrameForBinded(Frame input, Frame output)
@@ -79,6 +104,16 @@ public partial class GameState
         foreach (var kv in _updateUnitySubscribers)
         {
             kv.Value.OnUpdateLockStep(input, output);
+        }
+
+        _expectedParamArray[0] = input;
+        _expectedParamArray[1] = output;
+        foreach (var kv in _updateMethods)
+        {
+            foreach (var methodInfo in kv.Value)
+            {
+                DynamicInvoker.Invoke(kv.Key, methodInfo, _expectedParamArray, _paramOptions, _ => _paramArray);
+            }
         }
     }
 }

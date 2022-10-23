@@ -13,6 +13,7 @@ public partial class GameState
         upgradePanel.upgradeCancelEvent.AddListener(OnUpgradeCancelClick);
     }
 
+    [UpdateLockStep]
     private void UpdateUpgradePanel(Frame input, Frame output)
     {
         GetView<UpgradePanel>().OnSimulateProgress(output, me.upgrade);

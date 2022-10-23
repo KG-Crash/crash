@@ -33,7 +33,6 @@ public partial class GameState : ActionService.Listener
         }
         
         EnqueueHeartBeat();
-        OnUpdateFrameDebug(OutputFrameChunk);
         OnUpdateFrameForBinded(InputFrameChunk, OutputFrameChunk);
     }
 

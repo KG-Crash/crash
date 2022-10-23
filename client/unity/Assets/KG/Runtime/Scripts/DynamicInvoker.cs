@@ -18,6 +18,7 @@ namespace KG
         public Type type;
         public MatchParamFlag acceptFlag;
         public bool required;
+        public string name;
 
         public void SetFlag(bool on, MatchParamFlag flag)
         {
@@ -71,6 +72,9 @@ namespace KG
 
         private static bool MatchParam(ParameterInfo parameterInfo, ParamOption paramOptions)
         {
+            if (!string.IsNullOrEmpty(paramOptions.name))
+                return parameterInfo.Name == paramOptions.name; 
+            
             if (paramOptions.acceptSubclass && parameterInfo.ParameterType.IsSubclassOf(paramOptions.type))
                 return true;
 

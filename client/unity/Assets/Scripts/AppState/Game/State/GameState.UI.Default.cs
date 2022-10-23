@@ -18,6 +18,7 @@ public partial class GameState
         GetView<GamePanel>().Ready(playerCount);
     }
     
+    [UpdateLockStep]
     private void UpdateGamePanel(Frame input, Frame output) {}
 
     private void ClearGamePanel()

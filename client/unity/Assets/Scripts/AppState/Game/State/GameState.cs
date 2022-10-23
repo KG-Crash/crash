@@ -51,6 +51,7 @@ public partial class GameState : AppState
 
         LockStep.Reset();
         
+        BindSelfMethod();
         InitInput();
         InitializeProjectileHandle();
         InitializeGamePanel();
