@@ -36,22 +36,8 @@ public partial class GameState : Team.Listener
     
     public void OnAttackTargetChanged(Player player, Player target)
     {
-        if (target == null)
-        {
-            foreach (var unit in player.units.Values)
-            {
-                unit.Stop();
-            }
-        }
-        else
-        {
-            FixVector3 pos = spawnPositions[target.id].position;
-
-            foreach (var unit in player.units.Values)
-            {
-                unit.MoveTo(pos);
-            }
-        }
+        foreach (var unit in player.units.Values)
+            UnitMoveToTarget(unit, target);
     }
 
     public void OnPlayerLevelChanged(Player player, uint level)

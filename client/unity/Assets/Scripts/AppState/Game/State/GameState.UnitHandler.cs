@@ -155,6 +155,7 @@ public partial class GameState : Unit.Listener, UnitActor.Listener
     public void OnSpawned(Unit me)
     {
         Bind(me);
+        UnitMoveToTarget(me, this.me.target);
         
         if (unitActorMaps.ContainsKey(me))
             return;
@@ -169,5 +170,18 @@ public partial class GameState : Unit.Listener, UnitActor.Listener
             return;
 
         actor.LookAt(worldPosition);
+    }
+
+    private void UnitMoveToTarget(Game.Unit unit, Player target)
+    {
+        if (target == null)
+        {
+            unit.Stop();
+        }
+        else
+        {
+            FixVector3 pos = spawnPositions[target.id].position;
+            unit.MoveTo(pos);
+        }
     }
 }
