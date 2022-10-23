@@ -12,6 +12,18 @@ namespace Game
         public uint? updateStartFrame { get; private set; }
         public List<Ability> reservedAbilities { get; private set; }
 
+        public UpgradeStatus GetStatus(Ability ability)
+        {
+            if ((abilities & ability) > 0)
+                return UpgradeStatus.Finish;
+            if (ability == currentUpdateAbility)
+                return UpgradeStatus.Progress;
+            if (reservedAbilities.Exists(a => a == ability))
+                return UpgradeStatus.Pending;
+            
+            return UpgradeStatus.Ready;
+        }
+        
         public Player owner { get; private set; }
         public Ability abilities { get; private set; } = Ability.NONE;
         public Dictionary<Ability, int[]> lastFrames { get; private set; }  = new Dictionary<Ability, int[]>();
@@ -23,7 +35,7 @@ namespace Game
             this.owner = owner;
             reservedAbilities = new List<Ability>();
         }
-
+        
         public void UpdateAbility(Frame input)
         {
             CheckUpgradeTime(input);

@@ -34,7 +34,7 @@ namespace UI
                 var instance = Instantiate(_upgradeIconButtonPrefab, _iconParent);
                 instance.ability = ability;
                 instance.icon = table[ability];
-                instance.SetState(UpgradeIconButton.State.Ready);
+                instance.SetState(UpgradeStatus.Ready);
                 instance.onStartClick.AddListener(OnUpgradeClick);
                 instance.onCancelClick.AddListener(OnUpgradeLongClick);
                 
@@ -60,7 +60,7 @@ namespace UI
 
             if (upgrade.currentUpdateAbility != null && upgrade.updateStartFrame != null)
             {
-                upgradeIcon.SetState(UpgradeIconButton.State.Progress);
+                upgradeIcon.SetState(UpgradeStatus.Progress);
                 var upgradeStartFrame = upgrade.updateStartFrame.Value;
                 var upgradeFrame = table[upgrade.currentUpdateAbility.Value].DurationSec * Shared.Const.Time.FPS;
                 upgradeIcon.progress = Mathf.Min((float)(outputTotalFrame - upgradeStartFrame) / upgradeFrame, 1);
@@ -70,7 +70,7 @@ namespace UI
             for (var i = 0; i < abilityList.Count; i++)
             {
                 var willUpgradeIcon = _upgradeIconButtons.Find(x => x.ability == abilityList[i]);
-                willUpgradeIcon.SetState(UpgradeIconButton.State.Pending);
+                willUpgradeIcon.SetState(UpgradeStatus.Pending);
                 willUpgradeIcon.pendingOrder = i + 1;
             }
         }
@@ -78,13 +78,13 @@ namespace UI
         public void OnUpgradeFinish(Ability ability)
         {
             var icon = _upgradeIconButtons.Find(x => x.ability == ability);
-            icon.SetState(UpgradeIconButton.State.Finish);
+            icon.SetState(UpgradeStatus.Finish);
         }
         
         public void OnUpgradeCancel(Ability ability)
         {
             var icon = _upgradeIconButtons.Find(x => x.ability == ability);
-            icon.SetState(UpgradeIconButton.State.Ready);
+            icon.SetState(UpgradeStatus.Ready);
         }
     }
 }

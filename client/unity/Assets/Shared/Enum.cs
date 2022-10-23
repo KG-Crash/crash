@@ -123,6 +123,14 @@ namespace Shared.Type
         UPGRADE_20 = 0x00080000
     }
     
+    public enum UpgradeStatus
+    {
+        Ready,
+        Pending,
+        Progress,
+        Finish
+    }
+    
     public enum Advanced
     {
         UPGRADE_WEAPON,

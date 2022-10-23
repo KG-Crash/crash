@@ -16,16 +16,7 @@ namespace UI
     [RequireComponent(typeof(MultiClickButton))]
     public class UpgradeIconButton : UIAutoComponent<MultiClickButton, Icon, Progress, TextMeshProUGUI>
     {
-        public enum State
-        {
-            Disabled,
-            Ready,
-            Pending,
-            Progress,
-            Finish
-        }
-
-        private State state { get; set; }
+        private UpgradeStatus status { get; set; }
 
         [SerializeField] private UpgradeEvent _onStartClick;
         [SerializeField] private UpgradeEvent _onCancelClick;
@@ -61,20 +52,16 @@ namespace UI
         {
             instance0.maxButtonClickCount = 2;
             instance0.onClick.AddListener(OnUpgradeClick);
-            
-            SetState(State.Ready);
         }
 
         private void OnDisable()
         {
             instance0.onClick.RemoveListener(OnUpgradeClick);
-            
-            SetState(State.Disabled);
         }
 
         private void OnUpgradeClick(int count)
         {
-            if (state == State.Disabled || state == State.Finish)
+            if (status == UpgradeStatus.Finish)
                 return;
             
             if (count == 1)
@@ -83,34 +70,33 @@ namespace UI
             }
             else
             {
-                SetState(State.Ready);
+                SetState(UpgradeStatus.Ready);
                 onCancelClick.Invoke(_ability);
             }
         }
 
-        public void SetState(State state)
+        public void SetState(UpgradeStatus status)
         {
-            this.state = state;
+            this.status = status;
             
-            switch (state)
+            switch (status)
             {
-                case State.Disabled:
-                case State.Ready:
+                case UpgradeStatus.Ready:
                     instance3.gameObject.SetActive(false);
                     progress = 0;
                     pendingOrder = null;
                     instance3.text = "";
                     break;
-                case State.Pending:
+                case UpgradeStatus.Pending:
                     instance3.gameObject.SetActive(false);
                     progress = 0;
                     break;
-                case State.Progress:
+                case UpgradeStatus.Progress:
                     instance3.gameObject.SetActive(false);
                     instance3.text = "";
                     pendingOrder = null;
                     break;
-                case State.Finish:
+                case UpgradeStatus.Finish:
                     instance3.gameObject.SetActive(true);
                     instance3.text = "V";
                     progress = 1;
