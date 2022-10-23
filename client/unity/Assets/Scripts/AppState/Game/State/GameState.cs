@@ -10,7 +10,7 @@ using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 
-[UIBind(typeof(GamePanel), true, typeof(UpgradePanel), false)]
+[UIBind(typeof(GamePanel), true, typeof(GameDebugPanel), true, typeof(UpgradePanel), false)]
 [AutoBind(true, true)]
 public partial class GameState : AppState
 {
@@ -55,6 +55,7 @@ public partial class GameState : AppState
         InitInput();
         InitializeProjectileHandle();
         InitializeGamePanel();
+        InitializeDebugPanel();
         InitializeUpgradePanel();
 
         _ = Client.Send(new Protocol.Request.Ready { });
@@ -68,6 +69,7 @@ public partial class GameState : AppState
         chatService = null;
         
         ClearGamePanel();
+        ClearDebugPanel();
         ClearUpgradePanel();
         ClearInput();
         ClearAllBinds();

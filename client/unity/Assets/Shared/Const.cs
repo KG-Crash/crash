@@ -31,4 +31,14 @@ namespace Shared.Const
         public static readonly int TPS = 8;
         public static readonly int FramePerTurn = 8;
     }
+    
+    public static class Debug
+    {
+        public static readonly int UnitSpawnType1 = 1;
+        public static readonly int UnitSpawnCount1 = 1;
+        public static readonly int UnitSpawnType2 = 2;
+        public static readonly int UnitSpawnCount2 = 2;
+        public static readonly int UnitSpawnType3 = 3;
+        public static readonly int UnitSpawnCount3 = 3;
+    }
 }
