@@ -2,7 +2,7 @@
 
 CALL go env -w GO111MODULE=off
 
-PUSHD src\main
+PUSHD src\game\main
 go get
 go build
 CALL main.exe

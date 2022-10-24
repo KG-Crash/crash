@@ -2,8 +2,8 @@ package {{ package|lower }}
 
 import (
     "encoding/binary"
-    "protocol"
-    source "{{ root }}/{{ package }}"
+    "game/protocol"
+    source "game/{{ root }}/{{ package }}"
 
     flatbuffers "github.com/google/flatbuffers/go"
 )

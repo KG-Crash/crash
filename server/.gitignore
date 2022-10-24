@@ -3,7 +3,10 @@
 pkg
 bin
 src/github.com
-src/gorm.io
-src/go.opentelemetry.io
-src/main/__debug_*
-src/*.org
+src/gopkg.in
+src/google.golang.org
+src/golang.org
+src/game/gorm.io
+src/game/go.opentelemetry.io
+src/game/main/__debug_*
+src/game/*.org

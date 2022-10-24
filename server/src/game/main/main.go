@@ -1,14 +1,14 @@
 package main
 
 import (
-	"KG/context"
-	"KG/handler"
-	"KG/model"
 	"fmt"
+	"game/KG/context"
+	"game/KG/handler"
+	"game/KG/model"
+	"game/protocol/response"
 	"log"
 	"net"
 	"os"
-	"protocol/response"
 )
 
 func main() {

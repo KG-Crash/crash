@@ -2,7 +2,7 @@ package handler
 
 import (
 	"fmt"
-	"protocol"
+	"game/protocol"
 )
 
 type Session interface {
