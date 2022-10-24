@@ -4,6 +4,7 @@ using Protocol;
 using Protocol.Response;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -30,6 +31,34 @@ namespace Network
         private IDispatchable _dispatcher;
         private readonly Dictionary<Identity, Delegate> _allocators = new Dictionary<Identity, Delegate>();
         private readonly Dictionary<Identity, Func<IProtocol, Task<bool>>> _bindedEvents = new Dictionary<Identity, Func<IProtocol, Task<bool>>>();
+
+        public void Invoke(byte[] bytes)
+        {
+            try
+            {
+                using (var stream = new BinaryReader(new MemoryStream(bytes)))
+                {
+                    var size = stream.ReadInt32();
+                    var identity = (Identity)stream.ReadInt32();
+                    if (_allocators.TryGetValue(identity, out var allocator) == false)
+                        return;
+
+                    if (_bindedEvents.TryGetValue(identity, out var callback) == false)
+                        return;
+
+                    var pbytes = stream.ReadBytes(size);
+
+                    if (_dispatcher != null)
+                        _dispatcher.Dispatch(() => callback.Invoke(allocator.DynamicInvoke(pbytes) as IProtocol));
+                    else
+                        callback.Invoke(allocator.DynamicInvoke(pbytes) as IProtocol);
+                }
+            }
+            catch (Exception e)
+            {
+                //UnityEngine.Debug.LogError(e.Message);
+            }
+        }
 
         protected override void ChannelRead0(IChannelHandlerContext ctx, IByteBuffer msg)
         {

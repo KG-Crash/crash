@@ -7,6 +7,7 @@ using DotNetty.Transport.Channels.Sockets;
 using Protocol;
 using System;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Network
@@ -83,6 +84,57 @@ namespace Network
 
                     var bytes = mstream.ToArray();
                     await Instance._channel?.WriteAndFlushAsync(Unpooled.Buffer().WriteBytes(bytes));
+                }
+            }
+        }
+
+        public static async Task Request(string api, IProtocol protocol)
+        {
+            var url = $"http://localhost:8080/{api}";
+            using (var mstream = new MemoryStream())
+            {
+                using (var writer = new BinaryWriter(mstream))
+                {
+                    var serialized = protocol.Serialize();
+                    writer.Write(serialized.Length + sizeof(uint));
+                    writer.Write(protocol.Identity);
+                    writer.Write(serialized);
+                    writer.Flush();
+
+                    var bytes = mstream.ToArray();
+
+                    var request = WebRequest.Create(url) as HttpWebRequest;
+                    request.Method = "POST";
+                    request.ContentType = "application/octet-stream";
+                    request.ContentLength = bytes.Length;
+
+                    using (var stream = await request.GetRequestStreamAsync())
+                    {
+                        stream.Write(bytes, 0, bytes.Length);
+                    }
+
+                    using (var resp = await request .GetResponseAsync() as HttpWebResponse)
+                    {
+                        var status = resp.StatusCode;
+                        if (status != HttpStatusCode.OK)
+                            throw new Exception($"http request error : {status}");
+
+                        var buffer = new byte[resp.ContentLength];
+                        var read = 0;
+                        using (var sr = resp.GetResponseStream())
+                        {
+                            while (true)
+                            {
+                                var remain = (int)(resp.ContentLength - read);
+                                if (remain == 0)
+                                    break;
+
+                                read += sr.Read(buffer, read, remain);
+                            }
+                        }
+
+                        Handler.Instance.Invoke(buffer);
+                    }
                 }
             }
         }

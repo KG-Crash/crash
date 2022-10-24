@@ -29,6 +29,8 @@ public partial class IntroState : AppState
 
     private async Task<bool> ConnectAsync()
     {
+        await Client.Request("sample", new Protocol.Request.Action { });
+
         var endpoint = "localhost:8000";
         var pair = endpoint.Split(':');
         return await Client.Instance.Connect(pair[0], int.Parse(pair[1]));
