@@ -11,8 +11,8 @@ public class AppStateBindsFactory
         var allMethods = type.GetMethods(bindFlags);
 
         return new AppStateBinds(
-            AttrToValue<bool, AutoBindAttribute>(type, x => x.FlatBuffer),
-            AttrToValue<bool, AutoBindAttribute>(type, x => x.Action),
+            AttrToValue<bool, StateBindAttribute>(type, x => x.FlatBuffer),
+            AttrToValue<bool, StateBindAttribute>(type, x => x.Action),
             AttrToValues<Type, UIBindAttribute>(type, x => x.TypeAndShow.Select(x => x.type)).ToArray(),
             AttrToValues<bool, UIBindAttribute>(type, x => x.TypeAndShow.Select(x => x.showBeforeInit)).ToArray(),
             allMethods.FirstOrDefault(AppStateInvoker.IsInitializeMethod),

@@ -6,7 +6,7 @@ using UnityEngine;
 using UI;
 
 [UIBind(typeof(IntroPanel), true)]
-[AutoBindAttribute(flatBuffer: true)]
+[StateBind(flatBuffer: true)]
 public partial class IntroState : AppState
 {
     [InitializeMethod]

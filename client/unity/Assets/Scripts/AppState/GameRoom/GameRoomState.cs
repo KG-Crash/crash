@@ -7,7 +7,7 @@ using GameRoom;
 using UI;
 
 [UIBind(typeof(GameRoomPanel), true)]
-[AutoBind(flatBuffer: true)]
+[StateBind(flatBuffer: true)]
 public partial class GameRoomState : AppState
 {
     [InitializeMethod(transition = typeof(GameRoomTransition))]

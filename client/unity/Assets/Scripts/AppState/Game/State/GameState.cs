@@ -11,7 +11,7 @@ using UniRx.Triggers;
 using UnityEngine;
 
 [UIBind(typeof(GamePanel), true, typeof(GameDebugPanel), true, typeof(UpgradePanel), false)]
-[AutoBind(true, true)]
+[StateBind(true, true)]
 public partial class GameState : AppState
 {
     private KG.Map map { get; set; }

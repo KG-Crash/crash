@@ -9,7 +9,7 @@ using Protocol.Request;
 using UI;
 
 [UIBind(typeof(LobbyPanel), true)]
-[AutoBind(flatBuffer: true)]
+[StateBind(flatBuffer: true)]
 public partial class LobbyState : AppState
 {
     private DateTime _lastUpdatedRefreshDate = DateTime.Now;

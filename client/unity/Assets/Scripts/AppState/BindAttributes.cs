@@ -1,12 +1,12 @@
 using System;
 
 [System.AttributeUsage(AttributeTargets.Class)]
-public class AutoBindAttribute : System.Attribute
+public class StateBindAttribute : System.Attribute
 {
     public bool FlatBuffer { get; private set; }
     public bool Action { get; private set;}
 
-    public AutoBindAttribute(bool flatBuffer, bool action = false)
+    public StateBindAttribute(bool flatBuffer, bool action = false)
     {
         this.FlatBuffer = flatBuffer;
         this.Action = action;
