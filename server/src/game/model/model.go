@@ -1,12 +1,12 @@
 package model
 
 import (
+	"KG/handler"
 	"encoding/binary"
-	"game/KG/handler"
-	"game/protocol"
-	"game/protocol/request"
 	"io"
 	"net"
+	"protocol"
+	"protocol/request"
 
 	"crypto/rand"
 	"errors"

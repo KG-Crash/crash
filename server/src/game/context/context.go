@@ -3,11 +3,11 @@ package context
 import (
 	"crypto/rand"
 	"errors"
-	"game/KG/model"
-	"game/protocol/request"
-	"game/protocol/response"
+	"game/model"
 	"math"
 	"math/big"
+	"protocol/request"
+	"protocol/response"
 )
 
 type Context struct {
