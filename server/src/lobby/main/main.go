@@ -1,54 +1,72 @@
 package main
 
 import (
-	"KG/handler"
-	"fmt"
-	"game/context"
-	"game/model"
-	"log"
-	"net"
-	"os"
+	"context"
+	"encoding/binary"
+	"io/ioutil"
+	"net/http"
+	"protocol"
+	"protocol/request"
 	"protocol/response"
+
+	"github.com/go-redis/redis"
+
+	"github.com/gin-gonic/gin"
 )
 
+func Serialize(res protocol.Protocol) []byte {
+	serialized := res.Serialize()
+	size := uint32(len(serialized))
+
+	bytes := make([]byte, 8, 8+size)
+	binary.LittleEndian.PutUint32(bytes[:], uint32(4+len(serialized)))
+
+	identity := uint32(res.Identity())
+	binary.LittleEndian.PutUint32(bytes[4:], identity)
+
+	bytes = append(bytes, serialized...)
+	return bytes
+}
+
+func Deserialize(bytes []byte) protocol.Protocol {
+	offset := 0
+	size := binary.LittleEndian.Uint32(bytes[offset:4])
+	offset += 4
+
+	return request.Deserialize(size-4, bytes[offset:])
+}
+
+var ctx = context.Background()
+
 func main() {
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
 
-	port := 8001
-
-	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	err := rdb.Set(ctx, "key", "value", 0).Err()
 	if err != nil {
-		os.Exit(1)
+		panic(err)
 	}
-	defer listen.Close()
-	fmt.Println("server is running")
 
-	ctx := context.New()
-	ist := handler.New()
-	handler.Register(ist, ctx.OnRoomList)
-	handler.Register(ist, ctx.OnCreateRoom)
-	handler.Register(ist, ctx.OnEnterRoom)
-	handler.Register(ist, ctx.OnLeaveRoom)
-	handler.Register(ist, ctx.OnChat)
-	handler.Register(ist, ctx.OnGameChat)
-	handler.Register(ist, ctx.OnGameStart)
-	handler.Register(ist, ctx.OnReady)
-	handler.Register(ist, ctx.OnAction)
-	handler.Register(ist, ctx.OnWhisper)
-	handler.Register(ist, ctx.OnKick)
-	handler.RegisterExit(ist, ctx.OnExit)
+	r := gin.Default()
 
-	for {
-		conn, err := listen.Accept()
-		if err != nil {
-			log.Fatalln(err)
-			continue
+	r.GET("/room", func(c *gin.Context) {
+		bytes, _ := ioutil.ReadAll(c.Request.Body)
+		ptc := Deserialize(bytes)
+
+		identity := ptc.Identity()
+		if identity != request.ROOM_LIST {
+			c.Data(http.StatusOK, "application/octet-stream", Serialize(response.RoomList{
+				Error: 1,
+			}))
+			return
 		}
 
-		session := model.NewSession(conn, ist)
-		ctx.Sessions[session.ID()] = session
-		session.Send(response.Login{
-			Id: session.ID(),
-		})
-		go session.Loop()
-	}
+		c.Data(http.StatusOK, "application/octet-stream", Serialize(response.RoomList{
+			Rooms: []response.Room{},
+		}))
+	})
+	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

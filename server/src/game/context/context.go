@@ -3,9 +3,9 @@ package context
 import (
 	"crypto/rand"
 	"errors"
-	"game/model"
 	"math"
 	"math/big"
+	"model"
 	"protocol/request"
 	"protocol/response"
 )
