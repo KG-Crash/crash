@@ -1,38 +1,28 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
+using KG.Reflection;
 
 public class AppStateBindsFactory
 {
+    private static readonly BindingFlags methodFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase;
+
+    private static bool IsInitializeMethod(MethodInfo method)
+    {
+        return Predicates.MatchAttrAndParam(method, typeof(InitializeMethodAttribute), AppStateBinds.initializeParamOptions);
+    }
+    
+    private static bool IsClearMethod(MethodInfo method)
+    {
+        return Predicates.MatchAttrAndParam(method, typeof(ClearMethodAttribute), AppStateBinds.clearParamOptions);
+    }
+    
     public static AppStateBinds Extract(Type type)
     {
-        var bindFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase;
-        var allMethods = type.GetMethods(bindFlags);
+        var (stateBind, uiBind) = Extractor.GetAttributes<StateBindAttribute, UIBindAttribute>(type);
+        var (initMethod, clearMethod) = Extractor.GetMethods(type, methodFlags, IsInitializeMethod, IsClearMethod);
 
         return new AppStateBinds(
-            AttrToValue<bool, StateBindAttribute>(type, x => x.FlatBuffer),
-            AttrToValue<bool, StateBindAttribute>(type, x => x.Action),
-            AttrToValues<Type, UIBindAttribute>(type, x => x.TypeAndShow.Select(x => x.type)).ToArray(),
-            AttrToValues<bool, UIBindAttribute>(type, x => x.TypeAndShow.Select(x => x.showBeforeInit)).ToArray(),
-            allMethods.FirstOrDefault(AppStateInvoker.IsInitializeMethod),
-            allMethods.FirstOrDefault(AppStateInvoker.IsClearMethod)
+            stateBind.FlatBuffer, stateBind.Action, uiBind.types, uiBind.showBeforeInits, initMethod, clearMethod
         );
-    }
-
-    private static T AttrToValue<T, Attr>(Type type, Func<Attr, T> convert) where Attr : Attribute
-    {
-        return type.GetCustomAttributes()
-            .Where(attr => attr is Attr)
-            .Select(attr => convert((attr as Attr)))
-            .FirstOrDefault();
-    }
-
-    private static IEnumerable<T> AttrToValues<T, Attr>(Type type, Func<Attr, IEnumerable<T>> convert)
-        where Attr : Attribute
-    {
-        return type.GetCustomAttributes()
-            .Where(attr => attr is Attr)
-            .SelectMany(attr => convert((attr as Attr)));
     }
 }

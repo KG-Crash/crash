@@ -1,10 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using KG;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+using KG.Reflection;
 
 public class AppStateBinds
 {
@@ -27,4 +23,15 @@ public class AppStateBinds
         this.initMethod = initMethod;
         this.clearMethod = clearMethod;
     }
+        
+    public static readonly ParamOption[] initializeParamOptions =
+    {
+        new ParamOption {type = typeof(StateTransition), required = false, acceptFlag = MatchParamFlag.SubClass},
+        new ParamOption {type = typeof(SceneContext), required = false, acceptFlag = MatchParamFlag.SubClass}
+    };
+
+    public static readonly ParamOption[] clearParamOptions =
+    {
+        new ParamOption {type = typeof(AppState), required = false, acceptFlag = MatchParamFlag.All}
+    };
 }

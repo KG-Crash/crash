@@ -5,7 +5,7 @@ using System.Reflection;
 using FixMath.NET;
 using Game;
 using Game.Service;
-using KG;
+using KG.Reflection;
 using Module;
 using Network;
 using UI;
@@ -41,15 +41,13 @@ public partial class GameState
     private object[] _expectedParamArray = new object[2];
     private object[] _paramArray = new object[2];
 
-    [ContextMenu("1234")]
     public void BindSelfMethod()
     {
-        var methodFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-        _updateMethods[this] = 
-            this.GetType().GetMethods(methodFlags)
-                .Where(x => x.GetParameters().All(y => y.ParameterType == typeof(Frame)))
-                .Where(x => x.GetCustomAttribute<UpdateLockStepAttribute>() != null)
-                .ToArray();
+        _updateMethods[this] =
+            Extractor.ExtractMethodAsAttr<GameState, UpdateLockStepAttribute>(
+                BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
+                x => x.GetCustomAttribute<UpdateLockStepAttribute>() != null
+            );
     }
     
     public void Bind(object obj)
@@ -112,7 +110,7 @@ public partial class GameState
         {
             foreach (var methodInfo in kv.Value)
             {
-                DynamicInvoker.Invoke(kv.Key, methodInfo, _expectedParamArray, _paramOptions, _ => _paramArray);
+                Invoker.Invoke(kv.Key, methodInfo, _expectedParamArray, _paramOptions, _ => _paramArray);
             }
         }
     }

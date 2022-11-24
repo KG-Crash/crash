@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace KG
+namespace KG.Reflection
 {
     [Flags]
     public enum MatchParamFlag
@@ -41,54 +41,13 @@ namespace KG
         }
     }
     
-    public static class DynamicInvoker
+    public static class Invoker
     {
-        public static bool MatchAttrAndParam(MethodInfo method, Type attribute, IReadOnlyList<ParamOption> paramOptions)
-        {
-            if (!attribute.IsSubclassOf(typeof(System.Attribute)))
-                throw new ArgumentException();
-            
-            if (method.CustomAttributes.All(attr => attr.AttributeType != attribute))
-                return false;
-                
-            if (method.ReturnType != typeof(void))
-                return false;
-
-            return MatchRequiredParams(method.GetParameters(), paramOptions);
-        }
-
-        private static bool MatchRequiredParams(ParameterInfo[] methodParams, IReadOnlyList<ParamOption> paramOptions)
-        {
-            foreach (var invokeParam in paramOptions.Where(x => x.required))
-            {
-                if (methodParams.Any(x => MatchParam(x, invokeParam)))
-                    continue;
-
-                return false;
-            }
-
-            return true;
-        }
-
-        private static bool MatchParam(ParameterInfo parameterInfo, ParamOption paramOptions)
-        {
-            if (!string.IsNullOrEmpty(paramOptions.name))
-                return parameterInfo.Name == paramOptions.name; 
-            
-            if (paramOptions.acceptSubclass && parameterInfo.ParameterType.IsSubclassOf(paramOptions.type))
-                return true;
-
-            if (paramOptions.acceptSelf && (parameterInfo.ParameterType == paramOptions.type))
-                return true;
-
-            return false;
-        }
-
         public static void Invoke(object obj, MethodInfo info, 
             object[] expectedParameters, IReadOnlyList<ParamOption> paramOptions, Func<int, object[]> allocator)
         {
             var methodParams = info.GetParameters();
-            if (!MatchRequiredParams(methodParams, paramOptions))
+            if (!Predicates.MatchRequiredParams(methodParams, paramOptions))
                 throw new ArgumentException("");
 
             var count = GetMatchParamCount(methodParams, paramOptions);
@@ -100,7 +59,7 @@ namespace KG
 
         private static int GetMatchParamCount(ParameterInfo[] methodParams, IReadOnlyList<ParamOption> paramOptions)
         {
-            return paramOptions.Count(x => methodParams.Any(y => MatchParam(y, x)));
+            return paramOptions.Count(x => methodParams.Any(y => Predicates.MatchParam(y, x)));
         }
 
         private static void BuildParam(object[] paramArray, ParameterInfo[] methodParams,
@@ -110,7 +69,7 @@ namespace KG
             for (var optionIndex = paramOptions.Count - 1; optionIndex >= 0; optionIndex--)
             {
                 var paramOption = paramOptions[optionIndex];
-                var index = Array.FindIndex(methodParams, x => MatchParam(x, paramOption)); 
+                var index = Array.FindIndex(methodParams, x => Predicates.MatchParam(x, paramOption)); 
                 if (index < 0) continue;
 
                 paramArray[index] = parameters[optionIndex];

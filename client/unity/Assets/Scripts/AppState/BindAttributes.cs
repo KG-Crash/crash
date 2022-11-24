@@ -15,27 +15,38 @@ public class StateBindAttribute : System.Attribute
 
 [System.AttributeUsage(AttributeTargets.Class)]
 public class UIBindAttribute : System.Attribute
-{ 
-    public (Type type, bool showBeforeInit)[] TypeAndShow { get; private set; }
+{
+    public Type[] types { get; private set; }
+    public bool[] showBeforeInits { get; private set; }
 
     public UIBindAttribute(Type type, bool showBeforeInit = false)
     {
-        TypeAndShow = new[] {(type, showBeforeInit)};
+        types = new[] {type};
+        showBeforeInits = new[] {showBeforeInit};
     }
-    
+
     public UIBindAttribute(Type t1, bool s1, Type t2, bool s2)
     {
-        TypeAndShow = new [] {(t1, s1), (t2, s2)};
+        types = new[] {t1, t2};
+        showBeforeInits = new[] {s1, s2};
     }
-    
+
     public UIBindAttribute(Type t1, bool s1, Type t2, bool s2, Type t3, bool s3)
     {
-        TypeAndShow = new [] {(t1, s1), (t2, s2), (t3, s3)};
+        types = new[] {t1, t2, t3};
+        showBeforeInits = new[] {s1, s2, s3};
     }
-    
+
     public UIBindAttribute(Type t1, bool s1, Type t2, bool s2, Type t3, bool s3, Type t4, bool s4)
     {
-        TypeAndShow = new [] {(t1, s1), (t2, s2), (t3, s3), (t4, s4)};
+        types = new[] {t1, t2, t3, t4};
+        showBeforeInits = new[] {s1, s2, s3, s4};
+    }
+
+    public UIBindAttribute(Type[] types, bool[] showBeforeInits)
+    {
+        this.types = types;
+        this.showBeforeInits = showBeforeInits;
     }
 }
 

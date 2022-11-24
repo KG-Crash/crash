@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -7,11 +6,10 @@ using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Game;
 using KG;
+using KG.Reflection;
 using Module;
 using Network;
-using UnityEngine;
 using UnityEngine.SceneManagement;
-
 
 public class AppStateService
 {
@@ -21,7 +19,7 @@ public class AppStateService
     private UIPool _uiPool;
     private UIStack _uiStack;
 
-    public AppStateService(AppState[] appStates, KG.UIPool uiPool)
+    public AppStateService(AppState[] appStates, UIPool uiPool)
     {
         _appStates = appStates.ToDictionary(x => x.GetType(), x => x);
         _binds = appStates.ToDictionary(state => state, x => AppStateBindsFactory.Extract(x.GetType()));
@@ -77,7 +75,7 @@ public class AppStateService
             if (context != null) break;
         }
 
-        AppStateInvoker.InvokeInitializeMethod(entryState, _binds[entryState].initMethod, transition, context);
+        InvokeInitializeMethod(entryState, _binds[entryState].initMethod, transition, context);
 
         return _current = entryState;
     }
@@ -102,7 +100,7 @@ public class AppStateService
         // ---------------------------------------------------------------------------------------------------------
         // >> clear previous appstate
         // 0. clear prev appstate
-        AppStateInvoker.InvokeClearMethod(_current, _binds[_current].clearMethod, moveAppState);
+        InvokeClearMethod(_current, _binds[_current].clearMethod, moveAppState);
         
         // 1. stop all coroutines
         _current.StopAllCoroutine();
@@ -175,7 +173,7 @@ public class AppStateService
             if (context != null) break;
         }
 
-        AppStateInvoker.InvokeInitializeMethod(moveAppState, _binds[moveAppState].initMethod, transition, context);
+        InvokeInitializeMethod(moveAppState, _binds[moveAppState].initMethod, transition, context);
 
         return (_current = moveAppState) as T;
     }
@@ -190,5 +188,21 @@ public class AppStateService
         }
 
         return false;
+    }
+
+    private static void InvokeInitializeMethod(AppState state, MethodInfo initMethod, StateTransition transition, SceneContext context)
+    {
+        Invoker.Invoke(
+            state, initMethod, new object[] {transition, context}, 
+            AppStateBinds.initializeParamOptions, x => new object[x]
+        );
+    }
+
+    private static void InvokeClearMethod(AppState state, MethodInfo clearMethod, AppState nextState)
+    {
+        Invoker.Invoke(
+            state, clearMethod, new object[] {nextState}, 
+            AppStateBinds.clearParamOptions, x => new object[x]
+        );
     }
 }
