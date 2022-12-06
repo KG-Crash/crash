@@ -1,5 +1,9 @@
 namespace FlatBuffer.Request;
 
+table Route {
+	value: string;
+}
+
 table CreateRoom {
 	title: string;
 	teams: [int];

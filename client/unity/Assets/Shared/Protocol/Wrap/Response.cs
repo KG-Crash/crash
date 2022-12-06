@@ -5,6 +5,7 @@ namespace Protocol.Response
 {
     public enum Identity
     {
+        ROUTE,
         ROOM,
         LOGIN,
         CREATE_ROOM,
@@ -24,6 +25,46 @@ namespace Protocol.Response
         TEAM,
         GAME_START,
         READY
+    }
+
+    public class Route : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.ROUTE;
+
+        public string Host { get; set; }
+        public uint Port { get; set; }
+        public uint Error { get; set; }
+
+        public Route()
+        { }
+
+        public Route(FlatBuffer.Response.Route obj)
+        {
+            this.Host = obj.Host;
+            this.Port = obj.Port;
+            this.Error = obj.Error;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.Route> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _host = builder.CreateString(this.Host);
+            var _port = this.Port;
+            var _error = this.Error;
+
+            return FlatBuffer.Response.Route.CreateRoute(builder, _host, _port, _error);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Route Deserialize(byte[] bytes)
+        {
+            return new Route(FlatBuffer.Response.Route.GetRootAsRoute(new FlatBuffers.ByteBuffer(bytes)));
+        }
     }
 
     public class Room : IProtocol

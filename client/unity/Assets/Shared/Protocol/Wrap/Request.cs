@@ -5,6 +5,7 @@ namespace Protocol.Request
 {
     public enum Identity
     {
+        ROUTE,
         CREATE_ROOM,
         ENTER_ROOM,
         LEAVE_ROOM,
@@ -18,6 +19,40 @@ namespace Protocol.Request
         ACTION_QUEUE,
         GAME_START,
         READY
+    }
+
+    public class Route : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Request.Identity.ROUTE;
+
+        public string Value { get; set; }
+
+        public Route()
+        { }
+
+        public Route(FlatBuffer.Request.Route obj)
+        {
+            this.Value = obj.Value;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Request.Route> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _value = builder.CreateString(this.Value);
+
+            return FlatBuffer.Request.Route.CreateRoute(builder, _value);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Route Deserialize(byte[] bytes)
+        {
+            return new Route(FlatBuffer.Request.Route.GetRootAsRoute(new FlatBuffers.ByteBuffer(bytes)));
+        }
     }
 
     public class CreateRoom : IProtocol

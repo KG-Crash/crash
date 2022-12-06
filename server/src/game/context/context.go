@@ -1,25 +1,50 @@
 package context
 
 import (
+	"context"
 	"crypto/rand"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"lobby/setting"
 	"math"
 	"math/big"
 	"model"
 	"protocol/request"
 	"protocol/response"
+
+	"github.com/go-redis/redis"
 )
 
 type Context struct {
 	Sessions map[string]*model.Session
 	Rooms    map[string]*model.Room
+	rdb      *redis.Client
 }
 
 func New() *Context {
+	setting := setting.Get()
+
 	return &Context{
 		Sessions: map[string]*model.Session{},
 		Rooms:    map[string]*model.Room{},
+		rdb: redis.NewClient(&redis.Options{
+			Addr: fmt.Sprintf("%s:%d", setting.Redis.Host, setting.Redis.Port),
+			DB:   int(setting.Redis.Db),
+		}),
 	}
+}
+
+func (ctx *Context) updateRoomToRedis(room *model.Room) {
+	serialized, _ := json.Marshal(room)
+	err := ctx.rdb.HSet(context.Background(), "room", room.ID(), serialized).Err()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (ctx *Context) deleteRoomToRedis(roomId string) {
+	ctx.rdb.HDel(context.Background(), "room", roomId)
 }
 
 func (ctx *Context) OnRoomList(session *model.Session, req request.RoomList) {
@@ -56,6 +81,8 @@ func (ctx *Context) OnCreateRoom(session *model.Session, req request.CreateRoom)
 	})
 
 	ctx.Rooms[room.ID()] = &room
+	ctx.updateRoomToRedis(&room)
+
 	session.Send(response.CreateRoom{
 		Id: room.ID(),
 	})
@@ -106,6 +133,8 @@ func (ctx *Context) OnEnterRoom(session *model.Session, req request.EnterRoom) {
 	for _, user := range room.GetAllUsers() {
 		user.Send(res)
 	}
+
+	ctx.updateRoomToRedis(room)
 }
 
 func (ctx *Context) Leave(session *model.Session) (*model.Session, error) {
@@ -133,6 +162,9 @@ func (ctx *Context) Leave(session *model.Session) (*model.Session, error) {
 
 	if len(room.Users) == 0 {
 		delete(ctx.Rooms, room.ID())
+		ctx.deleteRoomToRedis(room.ID())
+	} else {
+		ctx.updateRoomToRedis(room)
 	}
 
 	session.Room = nil

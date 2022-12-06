@@ -15,6 +15,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 
 	payload := bytes[offset : offset+int(size)]
 	switch identity {
+	case ROUTE:
+		x := &Route{}
+		return x.Deserialize(payload)
+
 	case ROOM:
 		x := &Room{}
 		return x.Deserialize(payload)
@@ -98,6 +102,9 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 
 func Text(p protocol.Protocol) string {
 	switch p.(type) {
+	case *Route:
+		return "ROUTE"
+
 	case *Room:
 		return "ROOM"
 
@@ -159,7 +166,8 @@ func Text(p protocol.Protocol) string {
 }
 
 const (
-	ROOM = iota
+	ROUTE = iota
+	ROOM
 	LOGIN
 	CREATE_ROOM
 	USER
@@ -179,6 +187,47 @@ const (
 	GAME_START
 	READY
 )
+
+type Route struct {
+	Host  string
+	Port  uint32
+	Error uint32
+}
+
+func (obj *Route) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_host := builder.CreateString(obj.Host)
+
+	source.RouteStart(builder)
+	source.RouteAddHost(builder, _host)
+	source.RouteAddPort(builder, obj.Port)
+	source.RouteAddError(builder, obj.Error)
+
+	return source.RouteEnd(builder)
+}
+
+func (obj *Route) parse(x *source.Route) *Route {
+	obj.Host = string(x.Host())
+	obj.Port = x.Port()
+	obj.Error = x.Error()
+
+	return obj
+}
+
+func (obj Route) Identity() int {
+	return ROUTE
+}
+
+func (obj Route) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj Route) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsRoute(bytes, 0)
+	return obj.parse(root)
+}
 
 type Room struct {
 	Id    string
