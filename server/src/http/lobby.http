@@ -1,0 +1,7 @@
+###
+POST  http://localhost:8080/lobby/authentication
+Content-Type: application/octet-stream
+
+{
+    "id": "cshyeon"
+}

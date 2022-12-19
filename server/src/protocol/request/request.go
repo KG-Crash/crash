@@ -15,6 +15,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 
 	payload := bytes[offset : offset+int(size)]
 	switch identity {
+	case AUTHENTICATION:
+		x := &Authentication{}
+		return x.Deserialize(payload)
+
 	case ROUTE:
 		x := &Route{}
 		return x.Deserialize(payload)
@@ -78,6 +82,9 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 
 func Text(p protocol.Protocol) string {
 	switch p.(type) {
+	case *Authentication:
+		return "AUTHENTICATION"
+
 	case *Route:
 		return "ROUTE"
 
@@ -124,7 +131,8 @@ func Text(p protocol.Protocol) string {
 }
 
 const (
-	ROUTE = iota
+	AUTHENTICATION = iota
+	ROUTE
 	CREATE_ROOM
 	ENTER_ROOM
 	LEAVE_ROOM
@@ -139,6 +147,41 @@ const (
 	GAME_START
 	READY
 )
+
+type Authentication struct {
+	Id string
+}
+
+func (obj *Authentication) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_id := builder.CreateString(obj.Id)
+
+	source.AuthenticationStart(builder)
+	source.AuthenticationAddId(builder, _id)
+
+	return source.AuthenticationEnd(builder)
+}
+
+func (obj *Authentication) parse(x *source.Authentication) *Authentication {
+	obj.Id = string(x.Id())
+
+	return obj
+}
+
+func (obj Authentication) Identity() int {
+	return AUTHENTICATION
+}
+
+func (obj Authentication) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj Authentication) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsAuthentication(bytes, 0)
+	return obj.parse(root)
+}
 
 type Route struct {
 	Value string

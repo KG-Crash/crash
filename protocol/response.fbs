@@ -1,5 +1,10 @@
 namespace FlatBuffer.Response;
 
+table Authentication {
+	token: string;
+	error: uint32;
+}
+
 table Route {
 	host: string;
 	port: uint32;
@@ -109,5 +114,9 @@ table GameStart {
 
 table Ready {
 	users: [User];
+	error: uint32;
+}
+
+table HttpException {
 	error: uint32;
 }

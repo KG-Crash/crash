@@ -1,5 +1,9 @@
 namespace FlatBuffer.Request;
 
+table Authentication {
+	id: string;
+}
+
 table Route {
 	value: string;
 }

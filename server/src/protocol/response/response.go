@@ -15,6 +15,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 
 	payload := bytes[offset : offset+int(size)]
 	switch identity {
+	case AUTHENTICATION:
+		x := &Authentication{}
+		return x.Deserialize(payload)
+
 	case ROUTE:
 		x := &Route{}
 		return x.Deserialize(payload)
@@ -95,6 +99,10 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &Ready{}
 		return x.Deserialize(payload)
 
+	case HTTP_EXCEPTION:
+		x := &HttpException{}
+		return x.Deserialize(payload)
+
 	}
 
 	return nil
@@ -102,6 +110,9 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 
 func Text(p protocol.Protocol) string {
 	switch p.(type) {
+	case *Authentication:
+		return "AUTHENTICATION"
+
 	case *Route:
 		return "ROUTE"
 
@@ -161,12 +172,16 @@ func Text(p protocol.Protocol) string {
 
 	case *Ready:
 		return "READY"
+
+	case *HttpException:
+		return "HTTP_EXCEPTION"
 	}
 	return ""
 }
 
 const (
-	ROUTE = iota
+	AUTHENTICATION = iota
+	ROUTE
 	ROOM
 	LOGIN
 	CREATE_ROOM
@@ -186,7 +201,46 @@ const (
 	TEAM
 	GAME_START
 	READY
+	HTTP_EXCEPTION
 )
+
+type Authentication struct {
+	Token string
+	Error uint32
+}
+
+func (obj *Authentication) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_token := builder.CreateString(obj.Token)
+
+	source.AuthenticationStart(builder)
+	source.AuthenticationAddToken(builder, _token)
+	source.AuthenticationAddError(builder, obj.Error)
+
+	return source.AuthenticationEnd(builder)
+}
+
+func (obj *Authentication) parse(x *source.Authentication) *Authentication {
+	obj.Token = string(x.Token())
+	obj.Error = x.Error()
+
+	return obj
+}
+
+func (obj Authentication) Identity() int {
+	return AUTHENTICATION
+}
+
+func (obj Authentication) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj Authentication) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsAuthentication(bytes, 0)
+	return obj.parse(root)
+}
 
 type Route struct {
 	Host  string
@@ -1093,5 +1147,39 @@ func (obj Ready) Serialize() []byte {
 
 func (obj Ready) Deserialize(bytes []byte) protocol.Protocol {
 	root := source.GetRootAsReady(bytes, 0)
+	return obj.parse(root)
+}
+
+type HttpException struct {
+	Error uint32
+}
+
+func (obj *HttpException) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+
+	source.HttpExceptionStart(builder)
+	source.HttpExceptionAddError(builder, obj.Error)
+
+	return source.HttpExceptionEnd(builder)
+}
+
+func (obj *HttpException) parse(x *source.HttpException) *HttpException {
+	obj.Error = x.Error()
+
+	return obj
+}
+
+func (obj HttpException) Identity() int {
+	return HTTP_EXCEPTION
+}
+
+func (obj HttpException) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj HttpException) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsHttpException(bytes, 0)
 	return obj.parse(root)
 }

@@ -5,6 +5,7 @@ namespace Protocol.Response
 {
     public enum Identity
     {
+        AUTHENTICATION,
         ROUTE,
         ROOM,
         LOGIN,
@@ -24,7 +25,45 @@ namespace Protocol.Response
         ACTION_QUEUE,
         TEAM,
         GAME_START,
-        READY
+        READY,
+        HTTP_EXCEPTION
+    }
+
+    public class Authentication : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.AUTHENTICATION;
+
+        public string Token { get; set; }
+        public uint Error { get; set; }
+
+        public Authentication()
+        { }
+
+        public Authentication(FlatBuffer.Response.Authentication obj)
+        {
+            this.Token = obj.Token;
+            this.Error = obj.Error;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.Authentication> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _token = builder.CreateString(this.Token);
+            var _error = this.Error;
+
+            return FlatBuffer.Response.Authentication.CreateAuthentication(builder, _token, _error);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Authentication Deserialize(byte[] bytes)
+        {
+            return new Authentication(FlatBuffer.Response.Authentication.GetRootAsAuthentication(new FlatBuffers.ByteBuffer(bytes)));
+        }
     }
 
     public class Route : IProtocol
@@ -800,6 +839,40 @@ namespace Protocol.Response
         public static Ready Deserialize(byte[] bytes)
         {
             return new Ready(FlatBuffer.Response.Ready.GetRootAsReady(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class HttpException : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.HTTP_EXCEPTION;
+
+        public uint Error { get; set; }
+
+        public HttpException()
+        { }
+
+        public HttpException(FlatBuffer.Response.HttpException obj)
+        {
+            this.Error = obj.Error;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.HttpException> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _error = this.Error;
+
+            return FlatBuffer.Response.HttpException.CreateHttpException(builder, _error);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static HttpException Deserialize(byte[] bytes)
+        {
+            return new HttpException(FlatBuffer.Response.HttpException.GetRootAsHttpException(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 }
