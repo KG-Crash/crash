@@ -29,11 +29,18 @@ public partial class IntroState : AppState
 
     private async Task<bool> ConnectAsync()
     {
-        await Client.Request("sample", new Protocol.Request.Action { });
+        var response = await Client.Request<Protocol.Response.Authentication>("authentication", new Protocol.Request.Authentication
+        { 
+            Id = $"{Guid.NewGuid()}"
+        });
 
-        var endpoint = "localhost:8000";
-        var pair = endpoint.Split(':');
-        return await Client.Instance.Connect(pair[0], int.Parse(pair[1]));
+        Client.Instance.Token = response.Token;
+        UnityEngine.Debug.Log(response.Token);
+        return false;
+
+        //var endpoint = "localhost:8000";
+        //var pair = endpoint.Split(':');
+        //return await Client.Instance.Connect(pair[0], int.Parse(pair[1]));
     }
 
     private async void OnConnectAsync()
@@ -52,6 +59,5 @@ public partial class IntroState : AppState
             }
             view.connectSpinner.SetActive(false);
         }
-
     }
 }

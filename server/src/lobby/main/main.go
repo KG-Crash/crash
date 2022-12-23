@@ -59,11 +59,6 @@ func main() {
 	// 	DB:       int(setting.Redis.Db), // use default DB
 	// })
 
-	// err := rdb.Set(ctx, "key", "value", 0).Err()
-	// if err != nil {
-	// 	panic(err)
-	// }
-
 	r := gin.Default()
 	lobby := r.Group("/lobby")
 	lobby.Use(func(ctx *gin.Context) {
@@ -104,7 +99,7 @@ func main() {
 	})
 
 	r.POST("/authentication", func(ctx *gin.Context) {
-		req := GetRequest[request.Authentication](ctx)
+		req := GetRequest[*request.Authentication](ctx)
 		identity := req.Identity()
 
 		if identity != request.AUTHENTICATION {
@@ -125,34 +120,49 @@ func main() {
 		SetResponse(ctx, response.Authentication{Token: tokenString})
 	})
 
-	lobby.GET("/route", func(c *gin.Context) {
-		req := GetRequest[request.Route](c)
+	// lobby.POST("/create-room", func(ctx *gin.Context) {
+	// 	req := GetRequest[request.CreateRoom](ctx)
+
+	// 	roomID, err := uuid.NewUUID()
+	// 	if err != nil {
+	// 		SetResponse(ctx, response.CreateRoom{Error: 1})
+	// 		return
+	// 	}
+
+	// 	err = rdb.Set(ctx, "key", "value", 0).Err()
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	if err != nil {
+	// 		SetResponse(ctx, response.CreateRoom{Error: 1})
+	// 		return
+	// 	}
+	// })
+
+	lobby.POST("/route", func(ctx *gin.Context) {
+		req := GetRequest[request.Route](ctx)
 		identity := req.Identity()
 
 		if identity != request.CREATE_ROOM {
-			c.Data(http.StatusOK, "application/octet-stream", Serialize(response.Route{
-				Error: 1,
-			}))
+			SetResponse(ctx, response.Route{Error: 1})
 			return
 		}
 
 		if req.Value == "" { // req.Value는 room id로 해야할듯
-			c.Data(http.StatusOK, "application/octet-stream", Serialize(response.Route{
-				Error: 2,
-			}))
+			SetResponse(ctx, response.Route{Error: 2})
 			return
 		}
 
 		index := 0 // 임시
 		endpoint := setting.Server["game"][index]
 
-		c.Data(http.StatusOK, "application/octet-stream", Serialize(response.Route{
+		SetResponse(ctx, response.Route{
 			Host: endpoint.Host,
 			Port: uint32(endpoint.Port),
-		}))
+		})
 	})
 
-	lobby.GET("/room", func(ctx *gin.Context) {
+	lobby.POST("/room", func(ctx *gin.Context) {
 		req := GetRequest[request.RoomList](ctx)
 
 		identity := req.Identity()

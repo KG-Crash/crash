@@ -32,7 +32,7 @@ namespace Network
         private readonly Dictionary<Identity, Delegate> _allocators = new Dictionary<Identity, Delegate>();
         private readonly Dictionary<Identity, Func<IProtocol, Task<bool>>> _bindedEvents = new Dictionary<Identity, Func<IProtocol, Task<bool>>>();
 
-        public void Invoke(byte[] bytes)
+        public IProtocol Invoke(byte[] bytes)
         {
             try
             {
@@ -41,22 +41,57 @@ namespace Network
                     var size = stream.ReadInt32();
                     var identity = (Identity)stream.ReadInt32();
                     if (_allocators.TryGetValue(identity, out var allocator) == false)
-                        return;
+                        return null;
 
                     if (_bindedEvents.TryGetValue(identity, out var callback) == false)
-                        return;
+                        return null;
 
                     var pbytes = stream.ReadBytes(size);
+                    var protocol = allocator.DynamicInvoke(pbytes) as IProtocol;
 
                     if (_dispatcher != null)
-                        _dispatcher.Dispatch(() => callback.Invoke(allocator.DynamicInvoke(pbytes) as IProtocol));
+                        _dispatcher.Dispatch(() => callback.Invoke(protocol));
                     else
-                        callback.Invoke(allocator.DynamicInvoke(pbytes) as IProtocol);
+                        callback.Invoke(protocol);
+
+                    return protocol;
                 }
             }
             catch (Exception e)
             {
                 //UnityEngine.Debug.LogError(e.Message);
+                return null;
+            }
+        }
+
+        public T Invoke<T>(byte[] bytes) where T : class, IProtocol
+        {
+            try
+            {
+                using (var stream = new BinaryReader(new MemoryStream(bytes)))
+                {
+                    var size = stream.ReadInt32();
+                    var identity = (Identity)stream.ReadInt32();
+                    var allocator = GetAllocator<T>();
+
+                    var pbytes = stream.ReadBytes(size);
+                    var protocol = allocator.DynamicInvoke(pbytes) as T;
+
+                    if (_bindedEvents.TryGetValue(identity, out var callback))
+                    {
+                        if (_dispatcher != null)
+                            _dispatcher.Dispatch(() => callback.Invoke(protocol));
+                        else
+                            callback.Invoke(protocol);
+                    }
+
+                    return protocol;
+                }
+            }
+            catch (Exception e)
+            {
+                //UnityEngine.Debug.LogError(e.Message);
+                return null;
             }
         }
 
@@ -106,6 +141,19 @@ namespace Network
                 return true;
             });
         }
+
+        private static Delegate GetAllocator<T>() where T : IProtocol
+        {
+            return GetAllocator(typeof(T));
+        }
+
+        private static Delegate GetAllocator(Type type)
+        {
+            if(type.GetInterface(nameof(IProtocol)) == null)
+                throw new Exception();
+
+            return type.GetMethod("Deserialize").CreateDelegate(typeof(Func<,>).MakeGenericType(typeof(byte[]), type));
+        }
         
         public static void Bind(object classInstance, IDispatchable dispatcher = null)
         {
@@ -121,8 +169,7 @@ namespace Network
                     var protocolType = parameters[0].ParameterType;
                     var instance = Activator.CreateInstance(protocolType) as IProtocol;
 
-                    var allocator = protocolType.GetMethod("Deserialize").CreateDelegate(typeof(Func<,>).MakeGenericType(typeof(byte[]), protocolType));
-                    _ist.Value._allocators.Add((Identity)instance.Identity, allocator);
+                    _ist.Value._allocators.Add((Identity)instance.Identity, GetAllocator(protocolType));
 
                     var delegateType = Expression.GetDelegateType(parameters.Select(x => x.ParameterType).Concat(new[] { method.ReturnType }).ToArray());
                     var createdDelegate = method.CreateDelegate(delegateType, classInstance);

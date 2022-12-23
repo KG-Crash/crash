@@ -30,6 +30,7 @@ namespace Network
         public int id { get; set; } = -1;
         public long seed { get; set; }
         public bool Connected => _channel?.Active ?? false;
+        public string Token { get; set; } = null;
 
         private Client()
         {
@@ -88,7 +89,8 @@ namespace Network
             }
         }
 
-        public static async Task Request(string api, IProtocol protocol)
+        public static async Task<T> Request<T>(string api, IProtocol protocol)
+            where T : class, IProtocol
         {
             var url = $"http://localhost:8080/{api}";
             using (var mstream = new MemoryStream())
@@ -107,6 +109,8 @@ namespace Network
                     request.Method = "POST";
                     request.ContentType = "application/octet-stream";
                     request.ContentLength = bytes.Length;
+                    if(string.IsNullOrEmpty(Instance.Token) == false)
+                        request.Headers.Add("Authorization", $"Bearer {Instance.Token}");
 
                     using (var stream = await request.GetRequestStreamAsync())
                     {
@@ -133,7 +137,7 @@ namespace Network
                             }
                         }
 
-                        Handler.Instance.Invoke(buffer);
+                        return Handler.Instance.Invoke<T>(buffer);
                     }
                 }
             }
