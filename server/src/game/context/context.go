@@ -47,6 +47,11 @@ func (ctx *Context) deleteRoomToRedis(roomId string) {
 	ctx.rdb.HDel(context.Background(), "room", roomId)
 }
 
+func (ctx *Context) OnLogin(session *model.Session, req request.Login) {
+	session.Setup(req.Id)
+	session.Send(response.Login{})
+}
+
 func (ctx *Context) OnRoomList(session *model.Session, req request.RoomList) {
 
 	rooms := []response.Room{}

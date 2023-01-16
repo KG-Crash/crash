@@ -19,8 +19,16 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &Authentication{}
 		return x.Deserialize(payload)
 
-	case ROUTE:
-		x := &Route{}
+	case ROUTE_CREATE:
+		x := &RouteCreate{}
+		return x.Deserialize(payload)
+
+	case ROUTE_ENTER:
+		x := &RouteEnter{}
+		return x.Deserialize(payload)
+
+	case LOGIN:
+		x := &Login{}
 		return x.Deserialize(payload)
 
 	case CREATE_ROOM:
@@ -85,8 +93,14 @@ func Text(p protocol.Protocol) string {
 	case *Authentication:
 		return "AUTHENTICATION"
 
-	case *Route:
-		return "ROUTE"
+	case *RouteCreate:
+		return "ROUTE_CREATE"
+
+	case *RouteEnter:
+		return "ROUTE_ENTER"
+
+	case *Login:
+		return "LOGIN"
 
 	case *CreateRoom:
 		return "CREATE_ROOM"
@@ -132,7 +146,9 @@ func Text(p protocol.Protocol) string {
 
 const (
 	AUTHENTICATION = iota
-	ROUTE
+	ROUTE_CREATE
+	ROUTE_ENTER
+	LOGIN
 	CREATE_ROOM
 	ENTER_ROOM
 	LEAVE_ROOM
@@ -183,42 +199,112 @@ func (obj Authentication) Deserialize(bytes []byte) protocol.Protocol {
 	return obj.parse(root)
 }
 
-type Route struct {
-	Value string
+type RouteCreate struct {
 }
 
-func (obj *Route) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
-	_value := builder.CreateString(obj.Value)
+func (obj *RouteCreate) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 
-	source.RouteStart(builder)
-	source.RouteAddValue(builder, _value)
+	source.RouteCreateStart(builder)
 
-	return source.RouteEnd(builder)
+	return source.RouteCreateEnd(builder)
 }
 
-func (obj *Route) parse(x *source.Route) *Route {
-	obj.Value = string(x.Value())
+func (obj *RouteCreate) parse(x *source.RouteCreate) *RouteCreate {
 
 	return obj
 }
 
-func (obj Route) Identity() int {
-	return ROUTE
+func (obj RouteCreate) Identity() int {
+	return ROUTE_CREATE
 }
 
-func (obj Route) Serialize() []byte {
+func (obj RouteCreate) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj Route) Deserialize(bytes []byte) protocol.Protocol {
-	root := source.GetRootAsRoute(bytes, 0)
+func (obj RouteCreate) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsRouteCreate(bytes, 0)
+	return obj.parse(root)
+}
+
+type RouteEnter struct {
+	Id string
+}
+
+func (obj *RouteEnter) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_id := builder.CreateString(obj.Id)
+
+	source.RouteEnterStart(builder)
+	source.RouteEnterAddId(builder, _id)
+
+	return source.RouteEnterEnd(builder)
+}
+
+func (obj *RouteEnter) parse(x *source.RouteEnter) *RouteEnter {
+	obj.Id = string(x.Id())
+
+	return obj
+}
+
+func (obj RouteEnter) Identity() int {
+	return ROUTE_ENTER
+}
+
+func (obj RouteEnter) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj RouteEnter) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsRouteEnter(bytes, 0)
+	return obj.parse(root)
+}
+
+type Login struct {
+	Id    string
+	Error uint32
+}
+
+func (obj *Login) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_id := builder.CreateString(obj.Id)
+
+	source.LoginStart(builder)
+	source.LoginAddId(builder, _id)
+	source.LoginAddError(builder, obj.Error)
+
+	return source.LoginEnd(builder)
+}
+
+func (obj *Login) parse(x *source.Login) *Login {
+	obj.Id = string(x.Id())
+	obj.Error = x.Error()
+
+	return obj
+}
+
+func (obj Login) Identity() int {
+	return LOGIN
+}
+
+func (obj Login) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj Login) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsLogin(bytes, 0)
 	return obj.parse(root)
 }
 
 type CreateRoom struct {
+	Id    string
 	Title string
 	Teams []int32
 }
@@ -238,10 +324,12 @@ func (obj *CreateRoom) teams(builder *flatbuffers.Builder, teams []int32) flatbu
 }
 
 func (obj *CreateRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_id := builder.CreateString(obj.Id)
 	_title := builder.CreateString(obj.Title)
 	_teams := obj.teams(builder, obj.Teams)
 
 	source.CreateRoomStart(builder)
+	source.CreateRoomAddId(builder, _id)
 	source.CreateRoomAddTitle(builder, _title)
 	source.CreateRoomAddTeams(builder, _teams)
 
@@ -249,6 +337,7 @@ func (obj *CreateRoom) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT
 }
 
 func (obj *CreateRoom) parse(x *source.CreateRoom) *CreateRoom {
+	obj.Id = string(x.Id())
 	obj.Title = string(x.Title())
 
 	obj.Teams = []int32{}

@@ -8,12 +8,11 @@ import (
 	"model"
 	"net"
 	"os"
-	"protocol/response"
 )
 
 func main() {
 
-	port := 8001
+	port := 8000
 
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
@@ -24,6 +23,7 @@ func main() {
 
 	ctx := context.New()
 	ist := handler.New()
+	handler.Register(ist, ctx.OnLogin)
 	handler.Register(ist, ctx.OnRoomList)
 	handler.Register(ist, ctx.OnCreateRoom)
 	handler.Register(ist, ctx.OnEnterRoom)
@@ -45,10 +45,6 @@ func main() {
 		}
 
 		session := model.NewSession(conn, ist)
-		ctx.Sessions[session.ID()] = session
-		session.Send(response.Login{
-			Id: session.ID(),
-		})
 		go session.Loop()
 	}
 }

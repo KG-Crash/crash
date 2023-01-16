@@ -6,7 +6,8 @@ namespace Protocol.Response
     public enum Identity
     {
         AUTHENTICATION,
-        ROUTE,
+        ROUTE_CREATE,
+        ROUTE_ENTER,
         ROOM,
         LOGIN,
         CREATE_ROOM,
@@ -66,31 +67,34 @@ namespace Protocol.Response
         }
     }
 
-    public class Route : IProtocol
+    public class RouteCreate : IProtocol
     {
-        public uint Identity => (uint)Protocol.Response.Identity.ROUTE;
+        public uint Identity => (uint)Protocol.Response.Identity.ROUTE_CREATE;
 
+        public string Id { get; set; }
         public string Host { get; set; }
         public uint Port { get; set; }
         public uint Error { get; set; }
 
-        public Route()
+        public RouteCreate()
         { }
 
-        public Route(FlatBuffer.Response.Route obj)
+        public RouteCreate(FlatBuffer.Response.RouteCreate obj)
         {
+            this.Id = obj.Id;
             this.Host = obj.Host;
             this.Port = obj.Port;
             this.Error = obj.Error;
         }
 
-        public FlatBuffers.Offset<FlatBuffer.Response.Route> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        public FlatBuffers.Offset<FlatBuffer.Response.RouteCreate> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
+            var _id = builder.CreateString(this.Id);
             var _host = builder.CreateString(this.Host);
             var _port = this.Port;
             var _error = this.Error;
 
-            return FlatBuffer.Response.Route.CreateRoute(builder, _host, _port, _error);
+            return FlatBuffer.Response.RouteCreate.CreateRouteCreate(builder, _id, _host, _port, _error);
         }
 
         public byte[] Serialize()
@@ -100,9 +104,49 @@ namespace Protocol.Response
             return builder.DataBuffer.ToSizedArray();
         }
 
-        public static Route Deserialize(byte[] bytes)
+        public static RouteCreate Deserialize(byte[] bytes)
         {
-            return new Route(FlatBuffer.Response.Route.GetRootAsRoute(new FlatBuffers.ByteBuffer(bytes)));
+            return new RouteCreate(FlatBuffer.Response.RouteCreate.GetRootAsRouteCreate(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class RouteEnter : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Response.Identity.ROUTE_ENTER;
+
+        public string Host { get; set; }
+        public uint Port { get; set; }
+        public uint Error { get; set; }
+
+        public RouteEnter()
+        { }
+
+        public RouteEnter(FlatBuffer.Response.RouteEnter obj)
+        {
+            this.Host = obj.Host;
+            this.Port = obj.Port;
+            this.Error = obj.Error;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Response.RouteEnter> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _host = builder.CreateString(this.Host);
+            var _port = this.Port;
+            var _error = this.Error;
+
+            return FlatBuffer.Response.RouteEnter.CreateRouteEnter(builder, _host, _port, _error);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static RouteEnter Deserialize(byte[] bytes)
+        {
+            return new RouteEnter(FlatBuffer.Response.RouteEnter.GetRootAsRouteEnter(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 
@@ -147,7 +191,6 @@ namespace Protocol.Response
     {
         public uint Identity => (uint)Protocol.Response.Identity.LOGIN;
 
-        public string Id { get; set; }
         public uint Error { get; set; }
 
         public Login()
@@ -155,16 +198,14 @@ namespace Protocol.Response
 
         public Login(FlatBuffer.Response.Login obj)
         {
-            this.Id = obj.Id;
             this.Error = obj.Error;
         }
 
         public FlatBuffers.Offset<FlatBuffer.Response.Login> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _id = builder.CreateString(this.Id);
             var _error = this.Error;
 
-            return FlatBuffer.Response.Login.CreateLogin(builder, _id, _error);
+            return FlatBuffer.Response.Login.CreateLogin(builder, _error);
         }
 
         public byte[] Serialize()

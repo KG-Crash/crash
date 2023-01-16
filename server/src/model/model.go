@@ -52,6 +52,10 @@ func (session *Session) ID() string {
 	return session.id
 }
 
+func (session *Session) Setup(id string) {
+	session.id = id
+}
+
 func (session *Session) Send(res protocol.Protocol) {
 	serialized := res.Serialize()
 	size := uint32(len(serialized))

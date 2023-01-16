@@ -4,11 +4,21 @@ table Authentication {
 	id: string;
 }
 
-table Route {
-	value: string;
+table RouteCreate {
+	
+}
+
+table RouteEnter {
+	id: string;
+}
+
+table Login {
+	id: string;
+	error: uint32;
 }
 
 table CreateRoom {
+	id: string;
 	title: string;
 	teams: [int];
 }

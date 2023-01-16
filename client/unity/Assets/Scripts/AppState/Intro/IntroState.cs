@@ -29,14 +29,25 @@ public partial class IntroState : AppState
 
     private async Task<bool> ConnectAsync()
     {
-        var response = await Client.Request<Protocol.Response.Authentication>("authentication", new Protocol.Request.Authentication
-        { 
-            Id = $"{Guid.NewGuid()}"
-        });
+        try
+        {
+            var uuid = $"{Guid.NewGuid()}";
 
-        Client.Instance.Token = response.Token;
-        UnityEngine.Debug.Log(response.Token);
-        return false;
+            var response = await Client.Request<Protocol.Response.Authentication>("authentication", new Protocol.Request.Authentication
+            {
+                Id = uuid
+            });
+
+            Client.Instance.Token = response.Token;
+            UnityEngine.Debug.Log(response.Token);
+
+            Client.Instance.uuid = uuid;
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
 
         //var endpoint = "localhost:8000";
         //var pair = endpoint.Split(':');
@@ -50,14 +61,12 @@ public partial class IntroState : AppState
         while (!await ConnectAsync())
         {
             var retry = await UI.Popup.Boolean("Connection Failed, Re?", "GO", "NO");
-
-
             if (!retry)
-            {
-               
                 break;
-            }
+
             view.connectSpinner.SetActive(false);
         }
+
+        await MoveStateAsync<LobbyState>();
     }
 }

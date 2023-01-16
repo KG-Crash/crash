@@ -6,7 +6,9 @@ namespace Protocol.Request
     public enum Identity
     {
         AUTHENTICATION,
-        ROUTE,
+        ROUTE_CREATE,
+        ROUTE_ENTER,
+        LOGIN,
         CREATE_ROOM,
         ENTER_ROOM,
         LEAVE_ROOM,
@@ -56,25 +58,24 @@ namespace Protocol.Request
         }
     }
 
-    public class Route : IProtocol
+    public class RouteCreate : IProtocol
     {
-        public uint Identity => (uint)Protocol.Request.Identity.ROUTE;
+        public uint Identity => (uint)Protocol.Request.Identity.ROUTE_CREATE;
 
-        public string Value { get; set; }
+        
 
-        public Route()
+        public RouteCreate()
         { }
 
-        public Route(FlatBuffer.Request.Route obj)
+        public RouteCreate(FlatBuffer.Request.RouteCreate obj)
         {
-            this.Value = obj.Value;
+            
         }
 
-        public FlatBuffers.Offset<FlatBuffer.Request.Route> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        public FlatBuffers.Offset<FlatBuffer.Request.RouteCreate> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
-            var _value = builder.CreateString(this.Value);
-
-            return FlatBuffer.Request.Route.CreateRoute(builder, _value);
+            FlatBuffer.Request.RouteCreate.StartRouteCreate(builder);
+            return FlatBuffer.Request.RouteCreate.EndRouteCreate(builder);
         }
 
         public byte[] Serialize()
@@ -84,9 +85,80 @@ namespace Protocol.Request
             return builder.DataBuffer.ToSizedArray();
         }
 
-        public static Route Deserialize(byte[] bytes)
+        public static RouteCreate Deserialize(byte[] bytes)
         {
-            return new Route(FlatBuffer.Request.Route.GetRootAsRoute(new FlatBuffers.ByteBuffer(bytes)));
+            return new RouteCreate(FlatBuffer.Request.RouteCreate.GetRootAsRouteCreate(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class RouteEnter : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Request.Identity.ROUTE_ENTER;
+
+        public string Id { get; set; }
+
+        public RouteEnter()
+        { }
+
+        public RouteEnter(FlatBuffer.Request.RouteEnter obj)
+        {
+            this.Id = obj.Id;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Request.RouteEnter> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _id = builder.CreateString(this.Id);
+
+            return FlatBuffer.Request.RouteEnter.CreateRouteEnter(builder, _id);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static RouteEnter Deserialize(byte[] bytes)
+        {
+            return new RouteEnter(FlatBuffer.Request.RouteEnter.GetRootAsRouteEnter(new FlatBuffers.ByteBuffer(bytes)));
+        }
+    }
+
+    public class Login : IProtocol
+    {
+        public uint Identity => (uint)Protocol.Request.Identity.LOGIN;
+
+        public string Id { get; set; }
+        public uint Error { get; set; }
+
+        public Login()
+        { }
+
+        public Login(FlatBuffer.Request.Login obj)
+        {
+            this.Id = obj.Id;
+            this.Error = obj.Error;
+        }
+
+        public FlatBuffers.Offset<FlatBuffer.Request.Login> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
+        {
+            var _id = builder.CreateString(this.Id);
+            var _error = this.Error;
+
+            return FlatBuffer.Request.Login.CreateLogin(builder, _id, _error);
+        }
+
+        public byte[] Serialize()
+        {
+            var builder = new FlatBuffers.FlatBufferBuilder(512);
+            builder.Finish(this.ToFlatBuffer(builder).Value);
+            return builder.DataBuffer.ToSizedArray();
+        }
+
+        public static Login Deserialize(byte[] bytes)
+        {
+            return new Login(FlatBuffer.Request.Login.GetRootAsLogin(new FlatBuffers.ByteBuffer(bytes)));
         }
     }
 
@@ -94,6 +166,7 @@ namespace Protocol.Request
     {
         public uint Identity => (uint)Protocol.Request.Identity.CREATE_ROOM;
 
+        public string Id { get; set; }
         public string Title { get; set; }
         public List<int> Teams { get; set; }
 
@@ -102,16 +175,18 @@ namespace Protocol.Request
 
         public CreateRoom(FlatBuffer.Request.CreateRoom obj)
         {
+            this.Id = obj.Id;
             this.Title = obj.Title;
             this.Teams = Enumerable.Range(0, obj.TeamsLength).Select(x => obj.Teams(x)).ToList();
         }
 
         public FlatBuffers.Offset<FlatBuffer.Request.CreateRoom> ToFlatBuffer(FlatBuffers.FlatBufferBuilder builder)
         {
+            var _id = builder.CreateString(this.Id);
             var _title = builder.CreateString(this.Title);
             var _teams = FlatBuffer.Request.CreateRoom.CreateTeamsVector(builder, this.Teams.ToArray());
 
-            return FlatBuffer.Request.CreateRoom.CreateCreateRoom(builder, _title, _teams);
+            return FlatBuffer.Request.CreateRoom.CreateCreateRoom(builder, _id, _title, _teams);
         }
 
         public byte[] Serialize()

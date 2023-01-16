@@ -19,34 +19,44 @@ public struct CreateRoom : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p = new Table(_i, _bb); }
   public CreateRoom __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public string Title { get { int o = __p.__offset(4); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
+  public string Id { get { int o = __p.__offset(4); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
 #if ENABLE_SPAN_T
-  public Span<byte> GetTitleBytes() { return __p.__vector_as_span<byte>(4, 1); }
+  public Span<byte> GetIdBytes() { return __p.__vector_as_span<byte>(4, 1); }
 #else
-  public ArraySegment<byte>? GetTitleBytes() { return __p.__vector_as_arraysegment(4); }
+  public ArraySegment<byte>? GetIdBytes() { return __p.__vector_as_arraysegment(4); }
 #endif
-  public byte[] GetTitleArray() { return __p.__vector_as_array<byte>(4); }
-  public int Teams(int j) { int o = __p.__offset(6); return o != 0 ? __p.bb.GetInt(__p.__vector(o) + j * 4) : (int)0; }
-  public int TeamsLength { get { int o = __p.__offset(6); return o != 0 ? __p.__vector_len(o) : 0; } }
+  public byte[] GetIdArray() { return __p.__vector_as_array<byte>(4); }
+  public string Title { get { int o = __p.__offset(6); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
 #if ENABLE_SPAN_T
-  public Span<int> GetTeamsBytes() { return __p.__vector_as_span<int>(6, 4); }
+  public Span<byte> GetTitleBytes() { return __p.__vector_as_span<byte>(6, 1); }
 #else
-  public ArraySegment<byte>? GetTeamsBytes() { return __p.__vector_as_arraysegment(6); }
+  public ArraySegment<byte>? GetTitleBytes() { return __p.__vector_as_arraysegment(6); }
 #endif
-  public int[] GetTeamsArray() { return __p.__vector_as_array<int>(6); }
+  public byte[] GetTitleArray() { return __p.__vector_as_array<byte>(6); }
+  public int Teams(int j) { int o = __p.__offset(8); return o != 0 ? __p.bb.GetInt(__p.__vector(o) + j * 4) : (int)0; }
+  public int TeamsLength { get { int o = __p.__offset(8); return o != 0 ? __p.__vector_len(o) : 0; } }
+#if ENABLE_SPAN_T
+  public Span<int> GetTeamsBytes() { return __p.__vector_as_span<int>(8, 4); }
+#else
+  public ArraySegment<byte>? GetTeamsBytes() { return __p.__vector_as_arraysegment(8); }
+#endif
+  public int[] GetTeamsArray() { return __p.__vector_as_array<int>(8); }
 
   public static Offset<FlatBuffer.Request.CreateRoom> CreateCreateRoom(FlatBufferBuilder builder,
+      StringOffset idOffset = default(StringOffset),
       StringOffset titleOffset = default(StringOffset),
       VectorOffset teamsOffset = default(VectorOffset)) {
-    builder.StartTable(2);
+    builder.StartTable(3);
     CreateRoom.AddTeams(builder, teamsOffset);
     CreateRoom.AddTitle(builder, titleOffset);
+    CreateRoom.AddId(builder, idOffset);
     return CreateRoom.EndCreateRoom(builder);
   }
 
-  public static void StartCreateRoom(FlatBufferBuilder builder) { builder.StartTable(2); }
-  public static void AddTitle(FlatBufferBuilder builder, StringOffset titleOffset) { builder.AddOffset(0, titleOffset.Value, 0); }
-  public static void AddTeams(FlatBufferBuilder builder, VectorOffset teamsOffset) { builder.AddOffset(1, teamsOffset.Value, 0); }
+  public static void StartCreateRoom(FlatBufferBuilder builder) { builder.StartTable(3); }
+  public static void AddId(FlatBufferBuilder builder, StringOffset idOffset) { builder.AddOffset(0, idOffset.Value, 0); }
+  public static void AddTitle(FlatBufferBuilder builder, StringOffset titleOffset) { builder.AddOffset(1, titleOffset.Value, 0); }
+  public static void AddTeams(FlatBufferBuilder builder, VectorOffset teamsOffset) { builder.AddOffset(2, teamsOffset.Value, 0); }
   public static VectorOffset CreateTeamsVector(FlatBufferBuilder builder, int[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddInt(data[i]); return builder.EndVector(); }
   public static VectorOffset CreateTeamsVectorBlock(FlatBufferBuilder builder, int[] data) { builder.StartVector(4, data.Length, 4); builder.Add(data); return builder.EndVector(); }
   public static void StartTeamsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }

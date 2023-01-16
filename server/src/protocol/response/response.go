@@ -19,8 +19,12 @@ func Deserialize(size uint32, bytes []byte) protocol.Protocol {
 		x := &Authentication{}
 		return x.Deserialize(payload)
 
-	case ROUTE:
-		x := &Route{}
+	case ROUTE_CREATE:
+		x := &RouteCreate{}
+		return x.Deserialize(payload)
+
+	case ROUTE_ENTER:
+		x := &RouteEnter{}
 		return x.Deserialize(payload)
 
 	case ROOM:
@@ -113,8 +117,11 @@ func Text(p protocol.Protocol) string {
 	case *Authentication:
 		return "AUTHENTICATION"
 
-	case *Route:
-		return "ROUTE"
+	case *RouteCreate:
+		return "ROUTE_CREATE"
+
+	case *RouteEnter:
+		return "ROUTE_ENTER"
 
 	case *Room:
 		return "ROOM"
@@ -181,7 +188,8 @@ func Text(p protocol.Protocol) string {
 
 const (
 	AUTHENTICATION = iota
-	ROUTE
+	ROUTE_CREATE
+	ROUTE_ENTER
 	ROOM
 	LOGIN
 	CREATE_ROOM
@@ -242,24 +250,28 @@ func (obj Authentication) Deserialize(bytes []byte) protocol.Protocol {
 	return obj.parse(root)
 }
 
-type Route struct {
+type RouteCreate struct {
+	Id    string
 	Host  string
 	Port  uint32
 	Error uint32
 }
 
-func (obj *Route) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+func (obj *RouteCreate) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_id := builder.CreateString(obj.Id)
 	_host := builder.CreateString(obj.Host)
 
-	source.RouteStart(builder)
-	source.RouteAddHost(builder, _host)
-	source.RouteAddPort(builder, obj.Port)
-	source.RouteAddError(builder, obj.Error)
+	source.RouteCreateStart(builder)
+	source.RouteCreateAddId(builder, _id)
+	source.RouteCreateAddHost(builder, _host)
+	source.RouteCreateAddPort(builder, obj.Port)
+	source.RouteCreateAddError(builder, obj.Error)
 
-	return source.RouteEnd(builder)
+	return source.RouteCreateEnd(builder)
 }
 
-func (obj *Route) parse(x *source.Route) *Route {
+func (obj *RouteCreate) parse(x *source.RouteCreate) *RouteCreate {
+	obj.Id = string(x.Id())
 	obj.Host = string(x.Host())
 	obj.Port = x.Port()
 	obj.Error = x.Error()
@@ -267,19 +279,60 @@ func (obj *Route) parse(x *source.Route) *Route {
 	return obj
 }
 
-func (obj Route) Identity() int {
-	return ROUTE
+func (obj RouteCreate) Identity() int {
+	return ROUTE_CREATE
 }
 
-func (obj Route) Serialize() []byte {
+func (obj RouteCreate) Serialize() []byte {
 
 	builder := flatbuffers.NewBuilder(0)
 	builder.Finish(obj.create(builder))
 	return builder.FinishedBytes()
 }
 
-func (obj Route) Deserialize(bytes []byte) protocol.Protocol {
-	root := source.GetRootAsRoute(bytes, 0)
+func (obj RouteCreate) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsRouteCreate(bytes, 0)
+	return obj.parse(root)
+}
+
+type RouteEnter struct {
+	Host  string
+	Port  uint32
+	Error uint32
+}
+
+func (obj *RouteEnter) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+	_host := builder.CreateString(obj.Host)
+
+	source.RouteEnterStart(builder)
+	source.RouteEnterAddHost(builder, _host)
+	source.RouteEnterAddPort(builder, obj.Port)
+	source.RouteEnterAddError(builder, obj.Error)
+
+	return source.RouteEnterEnd(builder)
+}
+
+func (obj *RouteEnter) parse(x *source.RouteEnter) *RouteEnter {
+	obj.Host = string(x.Host())
+	obj.Port = x.Port()
+	obj.Error = x.Error()
+
+	return obj
+}
+
+func (obj RouteEnter) Identity() int {
+	return ROUTE_ENTER
+}
+
+func (obj RouteEnter) Serialize() []byte {
+
+	builder := flatbuffers.NewBuilder(0)
+	builder.Finish(obj.create(builder))
+	return builder.FinishedBytes()
+}
+
+func (obj RouteEnter) Deserialize(bytes []byte) protocol.Protocol {
+	root := source.GetRootAsRouteEnter(bytes, 0)
 	return obj.parse(root)
 }
 
@@ -323,22 +376,18 @@ func (obj Room) Deserialize(bytes []byte) protocol.Protocol {
 }
 
 type Login struct {
-	Id    string
 	Error uint32
 }
 
 func (obj *Login) create(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
-	_id := builder.CreateString(obj.Id)
 
 	source.LoginStart(builder)
-	source.LoginAddId(builder, _id)
 	source.LoginAddError(builder, obj.Error)
 
 	return source.LoginEnd(builder)
 }
 
 func (obj *Login) parse(x *source.Login) *Login {
-	obj.Id = string(x.Id())
 	obj.Error = x.Error()
 
 	return obj

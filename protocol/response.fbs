@@ -5,7 +5,14 @@ table Authentication {
 	error: uint32;
 }
 
-table Route {
+table RouteCreate {
+	id: string;
+	host: string;
+	port: uint32;
+	error: uint32;
+}
+
+table RouteEnter {
 	host: string;
 	port: uint32;
 	error: uint32;
@@ -17,7 +24,6 @@ table Room {
 }
 
 table Login {
-	id: string;
 	error: uint32;
 }
 

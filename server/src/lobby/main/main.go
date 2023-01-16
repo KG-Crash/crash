@@ -12,6 +12,7 @@ import (
 	"protocol/response"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 )
@@ -53,12 +54,6 @@ var hmacSecret = []byte("kg-crash")
 func main() {
 	setting := setting.Get()
 
-	// rdb := redis.NewClient(&redis.Options{
-	// 	Addr:     fmt.Sprintf("%s:%d", setting.Redis.Host, setting.Redis.Port),
-	// 	Password: "",                    // no password set
-	// 	DB:       int(setting.Redis.Db), // use default DB
-	// })
-
 	r := gin.Default()
 	lobby := r.Group("/lobby")
 	lobby.Use(func(ctx *gin.Context) {
@@ -73,7 +68,7 @@ func main() {
 		}
 
 		var tokenString string
-		_, err := fmt.Sscanf("Bearer %s", tokenString)
+		_, err := fmt.Sscanf(ctx.Request.Header["Authorization"][0], "Bearer %s", &tokenString)
 		if err != nil {
 			SetResponse(ctx, response.HttpException{Error: 1})
 			return
@@ -88,7 +83,7 @@ func main() {
 		})
 
 		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok || token.Valid {
+		if !ok || !token.Valid {
 			SetResponse(ctx, response.HttpException{Error: 1})
 			return
 		}
@@ -120,50 +115,60 @@ func main() {
 		SetResponse(ctx, response.Authentication{Token: tokenString})
 	})
 
-	// lobby.POST("/create-room", func(ctx *gin.Context) {
-	// 	req := GetRequest[request.CreateRoom](ctx)
-
-	// 	roomID, err := uuid.NewUUID()
-	// 	if err != nil {
-	// 		SetResponse(ctx, response.CreateRoom{Error: 1})
-	// 		return
-	// 	}
-
-	// 	err = rdb.Set(ctx, "key", "value", 0).Err()
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	if err != nil {
-	// 		SetResponse(ctx, response.CreateRoom{Error: 1})
-	// 		return
-	// 	}
-	// })
-
-	lobby.POST("/route", func(ctx *gin.Context) {
-		req := GetRequest[request.Route](ctx)
+	lobby.POST("/create-room", func(ctx *gin.Context) {
+		req := GetRequest[*request.RouteCreate](ctx)
 		identity := req.Identity()
-
-		if identity != request.CREATE_ROOM {
-			SetResponse(ctx, response.Route{Error: 1})
+		if identity != request.ROUTE_CREATE {
+			SetResponse(ctx, response.RouteEnter{Error: 1})
 			return
 		}
 
-		if req.Value == "" { // req.Value는 room id로 해야할듯
-			SetResponse(ctx, response.Route{Error: 2})
+		roomID, err := uuid.NewUUID()
+		if err != nil {
+			SetResponse(ctx, response.CreateRoom{Error: 1})
+			return
+		}
+
+		// rdb := redis.NewClient(&redis.Options{
+		// 	Addr:     fmt.Sprintf("%s:%d", setting.Redis.Host, setting.Redis.Port),
+		// 	Password: "",
+		// 	DB:       int(setting.Redis.Db),
+		// })
+
+		// err = rdb.Set(ctx, "key", "value", 0).Err()
+		if err != nil {
+			panic(err)
+		}
+		if err != nil {
+			SetResponse(ctx, response.RouteCreate{Error: 1})
+			return
+		}
+
+		index := 0 // 임시
+		endpoint := setting.Server["game"][index]
+		SetResponse(ctx, response.RouteCreate{Id: roomID.String(), Host: endpoint.Host, Port: uint32(endpoint.Port)})
+	})
+
+	lobby.POST("/enter-room", func(ctx *gin.Context) {
+		req := GetRequest[*request.RouteEnter](ctx)
+		identity := req.Identity()
+
+		if identity != request.ROUTE_ENTER {
+			SetResponse(ctx, response.RouteEnter{Error: 1})
 			return
 		}
 
 		index := 0 // 임시
 		endpoint := setting.Server["game"][index]
 
-		SetResponse(ctx, response.Route{
+		SetResponse(ctx, response.RouteEnter{
 			Host: endpoint.Host,
 			Port: uint32(endpoint.Port),
 		})
 	})
 
 	lobby.POST("/room", func(ctx *gin.Context) {
-		req := GetRequest[request.RoomList](ctx)
+		req := GetRequest[*request.RoomList](ctx)
 
 		identity := req.Identity()
 		if identity != request.ROOM_LIST {

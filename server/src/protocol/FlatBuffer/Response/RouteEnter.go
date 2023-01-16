@@ -6,27 +6,27 @@ import (
 	flatbuffers "github.com/google/flatbuffers/go"
 )
 
-type Route struct {
+type RouteEnter struct {
 	_tab flatbuffers.Table
 }
 
-func GetRootAsRoute(buf []byte, offset flatbuffers.UOffsetT) *Route {
+func GetRootAsRouteEnter(buf []byte, offset flatbuffers.UOffsetT) *RouteEnter {
 	n := flatbuffers.GetUOffsetT(buf[offset:])
-	x := &Route{}
+	x := &RouteEnter{}
 	x.Init(buf, n+offset)
 	return x
 }
 
-func (rcv *Route) Init(buf []byte, i flatbuffers.UOffsetT) {
+func (rcv *RouteEnter) Init(buf []byte, i flatbuffers.UOffsetT) {
 	rcv._tab.Bytes = buf
 	rcv._tab.Pos = i
 }
 
-func (rcv *Route) Table() flatbuffers.Table {
+func (rcv *RouteEnter) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *Route) Host() []byte {
+func (rcv *RouteEnter) Host() []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
 		return rcv._tab.ByteVector(o + rcv._tab.Pos)
@@ -34,7 +34,7 @@ func (rcv *Route) Host() []byte {
 	return nil
 }
 
-func (rcv *Route) Port() uint32 {
+func (rcv *RouteEnter) Port() uint32 {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(6))
 	if o != 0 {
 		return rcv._tab.GetUint32(o + rcv._tab.Pos)
@@ -42,11 +42,11 @@ func (rcv *Route) Port() uint32 {
 	return 0
 }
 
-func (rcv *Route) MutatePort(n uint32) bool {
+func (rcv *RouteEnter) MutatePort(n uint32) bool {
 	return rcv._tab.MutateUint32Slot(6, n)
 }
 
-func (rcv *Route) Error() uint32 {
+func (rcv *RouteEnter) Error() uint32 {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(8))
 	if o != 0 {
 		return rcv._tab.GetUint32(o + rcv._tab.Pos)
@@ -54,22 +54,22 @@ func (rcv *Route) Error() uint32 {
 	return 0
 }
 
-func (rcv *Route) MutateError(n uint32) bool {
+func (rcv *RouteEnter) MutateError(n uint32) bool {
 	return rcv._tab.MutateUint32Slot(8, n)
 }
 
-func RouteStart(builder *flatbuffers.Builder) {
+func RouteEnterStart(builder *flatbuffers.Builder) {
 	builder.StartObject(3)
 }
-func RouteAddHost(builder *flatbuffers.Builder, host flatbuffers.UOffsetT) {
+func RouteEnterAddHost(builder *flatbuffers.Builder, host flatbuffers.UOffsetT) {
 	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(host), 0)
 }
-func RouteAddPort(builder *flatbuffers.Builder, port uint32) {
+func RouteEnterAddPort(builder *flatbuffers.Builder, port uint32) {
 	builder.PrependUint32Slot(1, port, 0)
 }
-func RouteAddError(builder *flatbuffers.Builder, error uint32) {
+func RouteEnterAddError(builder *flatbuffers.Builder, error uint32) {
 	builder.PrependUint32Slot(2, error, 0)
 }
-func RouteEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
+func RouteEnterEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()
 }

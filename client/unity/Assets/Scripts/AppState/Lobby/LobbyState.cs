@@ -39,8 +39,23 @@ public partial class LobbyState : AppState
 
     public async void OnCreateGameRoom()
     {
+        var response = await Client.Request<Protocol.Response.RouteCreate>("lobby/create-room", new Protocol.Request.RouteCreate
+        { });
+
+        if (await Client.Instance.Connect(response.Host, (int)response.Port) == false)
+        {
+            // TODO: 게임서버에 연결못했을 때 에러처리
+            return;
+        }
+
+        await Client.Send(new Login
+        {
+            Id = Client.Instance.uuid
+        });
+
         await Client.Send(new CreateRoom 
         {
+            Id = response.Id,
             Title = "my game room title",
             Teams = new System.Collections.Generic.List<int>
             {
