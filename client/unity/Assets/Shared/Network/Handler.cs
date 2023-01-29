@@ -79,7 +79,7 @@ namespace Network
             }
 
             foreach (var x in queue)
-                x.SetResult(protocol);
+                x.TrySetResult(protocol);
             queue.Clear();
         }
 
