@@ -89,6 +89,24 @@ namespace Network
             }
         }
 
+        public static async Task<T> Request<T>(IProtocol protocol, TimeSpan? timeout = null) where T : class, IProtocol
+        {
+            using (var mstream = new MemoryStream())
+            {
+                using (var bwriter = new BinaryWriter(mstream))
+                {
+                    bwriter.Write(protocol.Identity);
+                    bwriter.Write(protocol.Serialize());
+                    bwriter.Flush();
+
+                    var bytes = mstream.ToArray();
+                    await Instance._channel?.WriteAndFlushAsync(Unpooled.Buffer().WriteBytes(bytes));
+                }
+            }
+
+            return await Handler.Instance.GetProtocolResult<T>(timeout) as T;
+        }
+
         public static async Task<T> Request<T>(string api, IProtocol protocol)
             where T : class, IProtocol
         {

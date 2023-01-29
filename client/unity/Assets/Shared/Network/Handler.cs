@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Network
@@ -31,6 +32,7 @@ namespace Network
         private IDispatchable _dispatcher;
         private readonly Dictionary<Identity, Delegate> _allocators = new Dictionary<Identity, Delegate>();
         private readonly Dictionary<Identity, Func<IProtocol, Task<bool>>> _bindedEvents = new Dictionary<Identity, Func<IProtocol, Task<bool>>>();
+        private readonly Dictionary<Type, Queue<TaskCompletionSource<IProtocol>>> _tcs = new Dictionary<Type, Queue<TaskCompletionSource<IProtocol>>>();
 
         public IProtocol Invoke(byte[] bytes)
         {
@@ -54,6 +56,8 @@ namespace Network
                     else
                         callback.Invoke(protocol);
 
+                    SetProtocolResult(protocol);
+
                     return protocol;
                 }
             }
@@ -62,6 +66,41 @@ namespace Network
                 //UnityEngine.Debug.LogError(e.Message);
                 return null;
             }
+        }
+
+        private void SetProtocolResult(IProtocol protocol)
+        {
+            var type = protocol.GetType();
+
+            if (_tcs.TryGetValue(type, out var queue) == false)
+            {
+                queue = new Queue<TaskCompletionSource<IProtocol>>();
+                _tcs.Add(type, queue);
+            }
+
+            foreach (var x in queue)
+                x.SetResult(protocol);
+            queue.Clear();
+        }
+
+        public Task<IProtocol> GetProtocolResult<T>(TimeSpan? timeout = null) where T : class, IProtocol
+        {
+            if (_tcs.TryGetValue(typeof(T), out var queue) == false)
+            {
+                queue = new Queue<TaskCompletionSource<IProtocol>>();
+                _tcs.Add(typeof(T), queue);
+            }
+
+            var tcs = new TaskCompletionSource<IProtocol>();
+            queue.Enqueue(tcs);
+
+            if (timeout != null)
+            {
+                var cts = new CancellationTokenSource(timeout.Value);
+                cts.Token.Register(() => tcs.TrySetCanceled(), useSynchronizationContext: false);
+            }
+
+            return tcs.Task;
         }
 
         public T Invoke<T>(byte[] bytes) where T : class, IProtocol
@@ -85,6 +124,7 @@ namespace Network
                             callback.Invoke(protocol);
                     }
 
+                    SetProtocolResult(protocol);
                     return protocol;
                 }
             }
@@ -110,10 +150,13 @@ namespace Network
                 var bytes = new byte[msg.ReadableBytes];
                 msg.ReadBytes(bytes);
 
+                var protocol = allocator.DynamicInvoke(bytes) as IProtocol;
                 if (_dispatcher != null)
-                    _dispatcher.Dispatch(() => callback.Invoke(allocator.DynamicInvoke(bytes) as IProtocol));
+                    _dispatcher.Dispatch(() => callback.Invoke(protocol));
                 else
-                    callback.Invoke(allocator.DynamicInvoke(bytes) as IProtocol);
+                    callback.Invoke(protocol);
+
+                SetProtocolResult(protocol);
             }
             catch (Exception e)
             {

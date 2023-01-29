@@ -44,16 +44,16 @@ public partial class LobbyState : AppState
 
         if (await Client.Instance.Connect(response.Host, (int)response.Port) == false)
         {
-            // TODO: °ÔÀÓ¼­¹ö¿¡ ¿¬°á¸øÇßÀ» ¶§ ¿¡·¯Ã³¸®
+            // TODO: ê²Œì„ì„œë²„ì— ì—°ê²°ëª»í–ˆì„ ë•Œ ì—ëŸ¬ì²˜ë¦¬
             return;
         }
 
-        await Client.Send(new Login
+        var response1 = await Client.Request<Protocol.Response.Login>(new Login
         {
             Id = Client.Instance.uuid
         });
 
-        await Client.Send(new CreateRoom 
+        var response2 = await Client.Request<Protocol.Response.CreateRoom>(new CreateRoom
         {
             Id = response.Id,
             Title = "my game room title",
