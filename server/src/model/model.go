@@ -30,13 +30,13 @@ type RoomConfig struct {
 }
 
 type Room struct {
-	Id        string
-	Users     map[int]map[string]*Session
-	Playing   bool
-	Config    RoomConfig
-	Master    *Session
-	Seed      int64
-	Sequences map[*Session]int
+	Id        string                      `json:"id"`
+	Users     map[int]map[string]*Session `json:"-"`
+	Playing   bool                        `json:"playing"`
+	Config    RoomConfig                  `json:"config"`
+	Master    *Session                    `json:"-"`
+	Seed      int64                       `json:"seed"`
+	Sequences map[*Session]int            `json:"-"`
 }
 
 func NewSession(conn net.Conn, handler *handler.Handler) *Session {

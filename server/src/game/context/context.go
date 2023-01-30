@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"lobby/setting"
+	"game/setting"
 	"math"
 	"math/big"
 	"model"
@@ -36,8 +36,11 @@ func New() *Context {
 }
 
 func (ctx *Context) updateRoomToRedis(room *model.Room) {
-	serialized, _ := json.Marshal(room)
-	err := ctx.rdb.HSet(context.Background(), "room", room.ID(), serialized).Err()
+	serialized, err := json.Marshal(room)
+	if err != nil {
+		panic(err)
+	}
+	err = ctx.rdb.HSet(context.Background(), "room", room.ID(), serialized).Err()
 	if err != nil {
 		panic(err)
 	}

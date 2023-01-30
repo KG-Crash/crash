@@ -35,7 +35,14 @@ public partial class LobbyState : AppState
         view.refreshButton.RemoveListener(OnRefreshRoom);
     }
     
-    public async Task Refresh() => await Client.Send(new RoomList { });
+    public async Task Refresh()
+    {
+        var response = await Client.Request<Protocol.Response.RoomList>("lobby/room", new Protocol.Request.RoomList
+        { });
+
+        // TODO: 기능복구
+        UnityEngine.Debug.Log(response);
+    }
 
     public async void OnCreateGameRoom()
     {

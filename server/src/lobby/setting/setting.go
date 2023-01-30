@@ -19,7 +19,7 @@ type Redis struct {
 
 type Setting struct {
 	Server map[string][]Server
-	Redis  Redis
+	Redis  []Redis
 }
 
 var ist Setting

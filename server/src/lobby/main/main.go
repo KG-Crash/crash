@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"lobby/setting"
@@ -12,6 +13,7 @@ import (
 	"protocol/response"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-redis/redis"
 	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
@@ -171,12 +173,30 @@ func main() {
 		req := GetRequest[*request.RoomList](ctx)
 
 		identity := req.Identity()
+
 		if identity != request.ROOM_LIST {
 			SetResponse(ctx, response.RoomList{Error: 1})
 			return
 		}
 
-		SetResponse(ctx, response.RoomList{Rooms: []response.Room{}})
+		res := response.RoomList{
+			Rooms: []response.Room{},
+		}
+		for _, redisSetting := range setting.Redis {
+			rdb := redis.NewClient(&redis.Options{
+				Addr: fmt.Sprintf("%s:%d", redisSetting.Host, redisSetting.Port),
+				DB:   int(redisSetting.Db),
+			})
+
+			redisResult, _ := rdb.HGetAll(context.Background(), "room").Result()
+			for _, stringify := range redisResult {
+				var room response.Room
+				json.Unmarshal([]byte(stringify), &room)
+				res.Rooms = append(res.Rooms, room)
+			}
+		}
+
+		SetResponse(ctx, res)
 	})
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
