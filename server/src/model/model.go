@@ -170,6 +170,7 @@ func (room *Room) Enter(session *Session) error {
 	}
 
 	room.Users[team][session.ID()] = session
+	session.Room = room
 	return nil
 }
 
