@@ -206,7 +206,7 @@ namespace Game
                 //     $"update detail route. unitID: {unitID}, _cellPath.Count: {_cellPath.Count}, _regionPath.Count: {_regionPath.Count}");
                 return true;
             }
-            catch (ClientException e)
+            catch (ClientException)
             {
                 // Debug.LogError($"code: {e._code}, exception: {e.Message}, unitID: {unitID}");
                 _cellPath.Clear();

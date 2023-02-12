@@ -29,11 +29,9 @@ namespace Game
             Shoot();
         }
 
-        public int type { get; private set; }
         public uint uniqueID { get; private set; }
 
         public Listener listener { get; set; }
-        public FixVector3 position { get; set; }
 
         public Shared.Table.Projectile info { get; private set; }
 

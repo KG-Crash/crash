@@ -19,20 +19,20 @@ namespace UI
             _yesButton.text = yes;
             _noButton.text = no;
         }
-        
-        private void OnEnable()
+
+        protected override void OnEnable()
         {
             _yesButton.onClick.AddListener(OnYes);
             _noButton.onClick.AddListener(OnNo);
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
             _yesButton.onClick.RemoveListener(OnYes);
             _noButton.onClick.RemoveListener(OnNo);
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             utcs.TrySetCanceled();
         }

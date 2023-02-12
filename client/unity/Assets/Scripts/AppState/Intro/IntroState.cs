@@ -44,7 +44,7 @@ public partial class IntroState : AppState
             Client.Instance.uuid = uuid;
             return true;
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return false;
         }

@@ -8,6 +8,7 @@ using Protocol.Response;
 using System.Linq;
 using Lobby;
 using UI;
+#pragma warning disable 1998
 
 public partial class LobbyState
 {

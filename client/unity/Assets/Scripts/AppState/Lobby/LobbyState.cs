@@ -5,6 +5,7 @@ using Module;
 using Network;
 using UnityEngine;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using Protocol.Request;
 using UI;
 
@@ -71,11 +72,10 @@ public partial class LobbyState : AppState
         });
     }
 
-    public async void OnRefreshRoom()
+    private void OnRefreshRoom()
     {
-        Refresh();
+        Refresh().AsUniTask().Forget();
     }
-
 
     public IEnumerator RefreshRoom(int seconds) 
     {

@@ -8,6 +8,7 @@ using Protocol.Response;
 using UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+#pragma warning disable 1998
 
 public partial class GameRoomState
 {

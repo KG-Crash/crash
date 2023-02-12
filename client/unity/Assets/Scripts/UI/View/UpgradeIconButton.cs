@@ -48,13 +48,13 @@ namespace UI
             set => instance3.text = value != null? value.Value.ToString(): "";
         }
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
             instance0.maxButtonClickCount = 2;
             instance0.onClick.AddListener(OnUpgradeClick);
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
             instance0.onClick.RemoveListener(OnUpgradeClick);
         }
