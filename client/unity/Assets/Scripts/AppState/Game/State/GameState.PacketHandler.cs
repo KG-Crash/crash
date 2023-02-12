@@ -9,19 +9,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 #pragma warning disable 1998
 
-// 나중에 위치 따로 옮기세요
-public class User
-{ 
-    public int sequence { get; private set; }
-    public string id { get; private set; }
-
-    public User(string id, int sequence)
-    {
-        this.sequence = sequence;
-        this.id = id;
-    }
-}
-
 public partial class GameState
 {
     private FileLogger _logger;
