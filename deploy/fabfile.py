@@ -46,8 +46,8 @@ def environment(e):
 @task
 @runs_once
 def build(service='game'):
-    with lcd(f'server/src/{service}'):
-        local(f'docker build -t cshyeon/crash:{service} .')
+    with lcd(f'server'):
+        local(f'docker build -t cshyeon/crash:{service} --build-arg SERVICE={service} .')
         local(f'docker push cshyeon/crash:{service}')
 
     local(f'docker image prune -f')
