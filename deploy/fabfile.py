@@ -46,7 +46,7 @@ def environment(e):
 @task
 @runs_once
 def build(service='game'):
-    with lcd('server'):
+    with lcd(f'server/src/{service}'):
         local(f'docker build -t cshyeon/crash:{service} .')
         local(f'docker push cshyeon/crash:{service}')
 

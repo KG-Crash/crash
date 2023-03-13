@@ -3,13 +3,13 @@ pipeline {
     stages {
         stage('Build') {
             steps{ 
-                sh 'fab -f deploy/fabfile.py environment:e=development build'
+                sh 'fab -f deploy/fabfile.py environment:e=development build:game build:lobby'
             }
         }
 
         stage('Deploy') {
             steps{ 
-                sh 'fab -f deploy/fabfile.py environment:e=development deploy'
+                sh 'fab -f deploy/fabfile.py environment:e=development deploy:game deploy:lobby'
             }
         }
 
