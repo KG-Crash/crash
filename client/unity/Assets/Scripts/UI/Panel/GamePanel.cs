@@ -20,6 +20,11 @@ namespace UI
         public AttackTargetChangeEvent attackTargetChange => _attackToggleView.attackTargetChange;
         public GameDragEvent gameDragEvent => _gameDragView.gameDragEvent;
 
+        public void Initialize(Texture2D minimapTex)
+        {
+            _minimapView.minimap.texture = minimapTex;
+        }
+
         public void Ready(int targetCount)
         {
             _attackToggleView.Initialize(targetCount);   

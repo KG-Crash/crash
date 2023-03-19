@@ -54,7 +54,7 @@ public partial class GameState : AppState
         BindSelfMethod();
         InitInput();
         InitializeProjectileHandle();
-        InitializeGamePanel();
+        InitializeGamePanel(context._map);
         InitializeDebugPanel();
         InitializeUpgradePanel();
 

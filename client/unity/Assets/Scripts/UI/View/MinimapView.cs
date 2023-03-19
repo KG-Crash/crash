@@ -1,6 +1,10 @@
+using KG;
+using UnityEngine.UI;
+
 namespace UI
 {
-    public class MinimapView : KG.UIView
+    public class MinimapView : UIAutoComponent<RawImage>
     {
+        public RawImage minimap => instance;
     }
 }

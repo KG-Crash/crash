@@ -4,13 +4,19 @@ using UnityEngine;
 
 public partial class GameState
 {
-    private void InitializeGamePanel()
+    private Minimap _minimap;
+    
+    private void InitializeGamePanel(KG.Map map)
     {
         var gamePanel = GetView<GamePanel>();
         gamePanel.upgradeOpenClick.AddListener(OnClickUpgrade);
         gamePanel.exitClick.AddListener(OnClickExit);
         gamePanel.attackTargetChange.AddListener(OnAttackTargetChange);
         gamePanel.gameDragEvent.AddListener(OnDragEvent);
+
+        _minimap = new Minimap();
+        _minimap.LoadMapData(map, 2, 8.0f);
+        gamePanel.Initialize(_minimap.texture);
     }
 
     private void ReadyGamePanel(int playerCount)
