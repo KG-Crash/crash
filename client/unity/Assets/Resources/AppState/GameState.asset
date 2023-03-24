@@ -16,3 +16,6 @@ MonoBehaviour:
   _entryScene: 0
   _spawnUnitOriginID: 0
   _spawnPlayerID: 0
+  _minimapOptions:
+    staticScaler: 1
+    staticMergeCellSize: 3

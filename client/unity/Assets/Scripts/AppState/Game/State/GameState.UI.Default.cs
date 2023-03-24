@@ -2,9 +2,19 @@ using Game;
 using UI;
 using UnityEngine;
 
+[System.Serializable]
+public struct MinimapOption
+{
+    public float staticScaler;
+    public int staticMergeCellSize;
+}
+
 public partial class GameState
 {
     private Minimap _minimap;
+
+    [SerializeField]
+    private MinimapOption _minimapOptions = new MinimapOption { staticScaler = 1, staticMergeCellSize = 2 };
     
     private void InitializeGamePanel(KG.Map map)
     {
@@ -15,8 +25,8 @@ public partial class GameState
         gamePanel.gameDragEvent.AddListener(OnDragEvent);
 
         _minimap = new Minimap();
-        _minimap.LoadMapData(map, 2, 8.0f);
-        gamePanel.Initialize(_minimap.texture);
+        _minimap.LoadMapData(map, _minimapOptions.staticMergeCellSize, _minimapOptions.staticScaler);
+        gamePanel.Initialize(_minimap.staticTexture);
     }
 
     private void ReadyGamePanel(int playerCount)
