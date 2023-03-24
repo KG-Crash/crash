@@ -10,12 +10,14 @@ namespace Game
     public class Minimap
     {
         private Texture2D _staticStaticTexture;
-        public Texture2D staticTexture => _staticStaticTexture;
+        private RenderTexture _completeRT;
+        public Texture minimapTexture => _completeRT;
 
-        public void LoadMapData(KG.Map map, int mergeCellSize, float scaler)
+        public void LoadMapData(Vector2 pixelSize, KG.Map map, int mergeCellSize, float scaler)
         {
             var scaledMergeCellSize = Mathf.Max(1, Mathf.RoundToInt(mergeCellSize * scaler));
             LoadMapData(map, scaledMergeCellSize);
+            OnResize(pixelSize);
         }
 
         private void LoadMapData(KG.Map map, int mergeCellSize)
@@ -66,6 +68,21 @@ namespace Game
             var intensity = (byte) Mathf.FloorToInt(255 / validCount * count);
             
             return new Color32(intensity, 0, 0, 255);
+        }
+
+        private void OnResize(Vector2 pixelSize)
+        {
+            var pixelSizeInt = new Vector2Int((int)pixelSize.x, (int)pixelSize.y);
+            if (_completeRT != null)
+                RenderTexture.ReleaseTemporary(_completeRT);
+            _completeRT = RenderTexture.GetTemporary(pixelSizeInt.x, pixelSizeInt.y, 0, RenderTextureFormat.Default);
+        }
+
+        public void OnUpdateCommandBuffer(CommandBuffer cb)
+        {
+            cb.SetRenderTarget(_completeRT);
+            cb.ClearRenderTarget(true, true, Color.clear);
+            cb.Blit(_staticStaticTexture, _completeRT);
         }
     }
 }

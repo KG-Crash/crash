@@ -19,8 +19,9 @@ namespace UI
         public UnityEvent exitClick => _exitButton.onClick;
         public AttackTargetChangeEvent attackTargetChange => _attackToggleView.attackTargetChange;
         public GameDragEvent gameDragEvent => _gameDragView.gameDragEvent;
+        public Vector2 minimapViewSize => _minimapView.rectTransform.rect.size;
 
-        public void Initialize(Texture2D minimapTex)
+        public void Initialize(Texture minimapTex)
         {
             _minimapView.minimap.texture = minimapTex;
         }

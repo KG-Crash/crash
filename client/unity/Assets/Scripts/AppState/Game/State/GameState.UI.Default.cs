@@ -1,6 +1,7 @@
 using Game;
 using UI;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 [System.Serializable]
 public struct MinimapOption
@@ -12,11 +13,12 @@ public struct MinimapOption
 public partial class GameState
 {
     private Minimap _minimap;
+    private CommandBuffer _updateMinimapCb;
 
     [SerializeField]
     private MinimapOption _minimapOptions = new MinimapOption { staticScaler = 1, staticMergeCellSize = 2 };
     
-    private void InitializeGamePanel(KG.Map map)
+    private void InitializeGamePanel(KG.Map map, Camera camera)
     {
         var gamePanel = GetView<GamePanel>();
         gamePanel.upgradeOpenClick.AddListener(OnClickUpgrade);
@@ -24,9 +26,14 @@ public partial class GameState
         gamePanel.attackTargetChange.AddListener(OnAttackTargetChange);
         gamePanel.gameDragEvent.AddListener(OnDragEvent);
 
+        _updateMinimapCb = new CommandBuffer();
         _minimap = new Minimap();
-        _minimap.LoadMapData(map, _minimapOptions.staticMergeCellSize, _minimapOptions.staticScaler);
-        gamePanel.Initialize(_minimap.staticTexture);
+        _minimap.LoadMapData(gamePanel.minimapViewSize, map, _minimapOptions.staticMergeCellSize, _minimapOptions.staticScaler);
+        _minimap.OnUpdateCommandBuffer(_updateMinimapCb);
+        
+        gamePanel.Initialize(_minimap.minimapTexture);
+        
+        camera.AddCommandBuffer(CameraEvent.AfterSkybox, _updateMinimapCb);
     }
 
     private void ReadyGamePanel(int playerCount)

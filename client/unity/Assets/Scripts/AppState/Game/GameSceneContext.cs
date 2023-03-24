@@ -11,5 +11,6 @@ namespace Game
         [SerializeField] public Transform[] _spawnPositions;
         [SerializeField] public bool _networkMode;
         [SerializeField] public ChatService _chatService;
+        [SerializeField] public Camera _mainCamera;
     }
 }

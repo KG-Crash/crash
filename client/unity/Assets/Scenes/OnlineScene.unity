@@ -4297,6 +4297,7 @@ MonoBehaviour:
   - {fileID: 685684699}
   _networkMode: 1
   _chatService: {fileID: 1122248850}
+  _mainCamera: {fileID: 773611983}
 --- !u!114 &1122248845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4324,6 +4325,7 @@ MonoBehaviour:
   _useCheat: 1
   _chatLog: {fileID: 1612677424}
   _input: {fileID: 781797551}
+  _inputTmp: {fileID: 0}
   _scrollRect: {fileID: 1940785040}
 --- !u!1001 &1154649189
 PrefabInstance:
