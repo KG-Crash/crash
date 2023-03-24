@@ -9,6 +9,7 @@ using KG;
 using KG.Reflection;
 using Module;
 using Network;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class AppStateService
@@ -65,8 +66,9 @@ public class AppStateService
         var showBeforeInit = _binds[entryState].showBeforeInit;
         for (var i = 0; i < showBeforeInit.Length; i++)
             if (showBeforeInit[i])
-                _ = entryState.ShowView(instancedViews[i]); 
-        
+                _ = entryState.ShowView(instancedViews[i]);
+        Canvas.ForceUpdateCanvases();
+
         // 4. initialize appstate
         SceneContext context = null;
         foreach (var rootGO in scene.GetRootGameObjects())
@@ -163,6 +165,7 @@ public class AppStateService
             for (var i = 0; i < showBeforeInit.Length; i++)
                 if (showBeforeInit[i])
                     _ = moveAppState.ShowView(instancedViews[i]); 
+            Canvas.ForceUpdateCanvases();
         }
         
         // 3. initialize appstate
