@@ -51,6 +51,12 @@ public partial class GameState
         camera.AddCommandBuffer(CameraEvent.AfterSkybox, _updateMinimapCb);
 
         _unitRectMaterial = new Material(Shader.Find("Content/UnitToMinimap"));
+
+        var maxCount = 500;
+        _unitNormalizedPositions.Clear();
+        _unitNormalizedPositions.AddRange(Enumerable.Repeat(Vector4.zero, maxCount * 4 / 2));
+        _unitColorIndices.Clear();
+        _unitColorIndices.AddRange(Enumerable.Repeat(0.0f, maxCount));
     }
 
     private void ReadyGamePanel(int playerCount)
@@ -69,8 +75,7 @@ public partial class GameState
         // 유닛 위치 업데이트
         var minimapViewSize = GetView<GamePanel>().minimapViewSize;
         var normalizedUnitSize = _minimapOptions.unitPixelSize / minimapViewSize;
-        
-        _unitNormalizedPositions.Clear(); _unitColorIndices.Clear();
+        var unitCount = 0;
         
         foreach (var unit in unitActorMaps.Keys.OfType<Unit>())
         {
@@ -78,17 +83,18 @@ public partial class GameState
                 unit.position.x / map.width,
                 unit.position.z / map.height
             );
-            _unitNormalizedPositions.Add( new Vector4(
+            _unitNormalizedPositions[unitCount * 2 + 0] = new Vector4(
                 p.y - normalizedUnitSize.x, p.x - normalizedUnitSize.y,  
-                p.y - normalizedUnitSize.x, p.x + normalizedUnitSize.y)
+                p.y - normalizedUnitSize.x, p.x + normalizedUnitSize.y
             );
-            _unitNormalizedPositions.Add(new Vector4(
+            _unitNormalizedPositions[unitCount * 2 + 1] = new Vector4(
                 p.y + normalizedUnitSize.x, p.x + normalizedUnitSize.y,  
                 p.y + normalizedUnitSize.x, p.x - normalizedUnitSize.y
-            ));
+            );
 
-            var c = unit.team.id;
-            _unitColorIndices.Add(c);
+            _unitColorIndices[unitCount] = unit.team.id;
+            
+            unitCount++;
         }
 
         if (_unitNormalizedPositions.Count > 0)
@@ -97,7 +103,7 @@ public partial class GameState
             _unitRectMaterial.SetFloatArray("_UnitColorIndices", _unitColorIndices);
             _unitRectMaterial.SetColorArray("_UnitColors", _minimapOptions.unitTeamColors);
             _updateMinimapCb.DrawProcedural(
-                Matrix4x4.identity, _unitRectMaterial, 0, MeshTopology.Quads, 4, _unitNormalizedPositions.Count / 2
+                Matrix4x4.identity, _unitRectMaterial, 0, MeshTopology.Quads, 4, unitCount
             );
         }
     }
@@ -109,6 +115,9 @@ public partial class GameState
         gamePanel.exitClick.RemoveListener(OnClickExit);
         gamePanel.attackTargetChange.RemoveListener(OnAttackTargetChange);
         gamePanel.gameDragEvent.RemoveListener(OnDragEvent);
+        
+        _unitNormalizedPositions.Clear();
+        _unitColorIndices.Clear();
     }
 
     private void OnClickUpgrade()
