@@ -13,14 +13,14 @@ namespace Game
         private RenderTexture _completeRT;
         public Texture minimapTexture => _completeRT;
 
-        public void LoadMapData(Vector2 pixelSize, KG.Map map, int mergeCellSize, float scaler)
+        public void LoadMapData(Vector2 pixelSize, KG.Map map, int mergeCellSize, float scaler, Color color)
         {
             var scaledMergeCellSize = Mathf.Max(1, Mathf.RoundToInt(mergeCellSize * scaler));
-            LoadMapData(map, scaledMergeCellSize);
+            LoadMapData(map, scaledMergeCellSize, color);
             OnResize(pixelSize);
         }
 
-        private void LoadMapData(KG.Map map, int mergeCellSize)
+        private void LoadMapData(KG.Map map, int mergeCellSize, Color color)
         {
             var cellWidth = map.width / mergeCellSize;
             var cellHeight = map.height / mergeCellSize;
@@ -48,7 +48,7 @@ namespace Game
                     walkables[bufferIndex] = map._walkability[mapIndex];
                 }
 
-                staticCells[cellYIndex + (cellWidth - 1 - cellXIndex) * cellHeight] = ToColor32(walkables, validCount);
+                staticCells[cellYIndex + (cellWidth - 1 - cellXIndex) * cellHeight] = ToColor32(walkables, validCount, color);
             }
 
             _staticStaticTexture = new Texture2D(map.width / mergeCellSize, map.height / mergeCellSize, TextureFormat.RGBA32, false);
@@ -58,16 +58,15 @@ namespace Game
             _staticStaticTexture.Apply();
         }
 
-        private static Color32 ToColor32(Span<bool> walkables, int validCount)
+        private static Color32 ToColor32(Span<bool> walkables, int validCount, Color color)
         {
             var count = 0;
             for (var i = 0; i < walkables.Length; i++)
                 if (walkables[i])
                     count++;
-            // ReSharper disable once PossibleLossOfFraction
-            var intensity = (byte) Mathf.FloorToInt(255 / validCount * count);
-            
-            return new Color32(intensity, 0, 0, 255);
+            var weightedColor = (color / validCount * count);
+            weightedColor.a = 1;
+            return weightedColor;
         }
 
         private void OnResize(Vector2 pixelSize)

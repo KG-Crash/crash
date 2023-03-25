@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Game;
 using UI;
 using UnityEngine;
@@ -8,15 +11,28 @@ public struct MinimapOption
 {
     public float staticScaler;
     public int staticMergeCellSize;
+
+    public Vector2 unitPixelSize;
+    public Color staticCellColor;
+    public Color[] unitTeamColors;
 }
 
 public partial class GameState
 {
     private Minimap _minimap;
     private CommandBuffer _updateMinimapCb;
+    
+    private List<Vector4> _unitNormalizedPositions = new List<Vector4>();
+    private List<float> _unitColorIndices = new List<float>();
+    private Material _unitRectMaterial;
 
     [SerializeField]
-    private MinimapOption _minimapOptions = new MinimapOption { staticScaler = 1, staticMergeCellSize = 2 };
+    private MinimapOption _minimapOptions = new MinimapOption
+    {
+        staticScaler = 1, staticMergeCellSize = 2, staticCellColor = Color.red, 
+        unitPixelSize = new Vector2(25f,25f),
+        unitTeamColors = new Color[] {Color.white, Color.blue, Color.green, Color.yellow, Color.magenta, Color.cyan}
+    };
     
     private void InitializeGamePanel(KG.Map map, Camera camera)
     {
@@ -26,23 +42,65 @@ public partial class GameState
         gamePanel.attackTargetChange.AddListener(OnAttackTargetChange);
         gamePanel.gameDragEvent.AddListener(OnDragEvent);
 
-        _updateMinimapCb = new CommandBuffer();
         _minimap = new Minimap();
-        _minimap.LoadMapData(gamePanel.minimapViewSize, map, _minimapOptions.staticMergeCellSize, _minimapOptions.staticScaler);
-        _minimap.OnUpdateCommandBuffer(_updateMinimapCb);
-        
+        _minimap.LoadMapData(gamePanel.minimapViewSize, map, _minimapOptions.staticMergeCellSize, _minimapOptions.staticScaler, _minimapOptions.staticCellColor);
         gamePanel.Initialize(_minimap.minimapTexture);
         
+        _updateMinimapCb = new CommandBuffer();
+        _minimap.OnUpdateCommandBuffer(_updateMinimapCb);
         camera.AddCommandBuffer(CameraEvent.AfterSkybox, _updateMinimapCb);
+
+        _unitRectMaterial = new Material(Shader.Find("Content/UnitToMinimap"));
     }
 
     private void ReadyGamePanel(int playerCount)
     {
         GetView<GamePanel>().Ready(playerCount);
     }
-    
+
     [UpdateLockStep]
-    private void UpdateGamePanel(Frame input, Frame output) {}
+    private void UpdateGamePanel(Frame input, Frame output)
+    {
+        _updateMinimapCb.Clear();
+        _minimap.OnUpdateCommandBuffer(_updateMinimapCb);
+
+        var map = UnityEngine.Object.FindObjectOfType<KG.Map>();
+        
+        // 유닛 위치 업데이트
+        var minimapViewSize = GetView<GamePanel>().minimapViewSize;
+        var normalizedUnitSize = _minimapOptions.unitPixelSize / minimapViewSize;
+        
+        _unitNormalizedPositions.Clear(); _unitColorIndices.Clear();
+        
+        foreach (var unit in unitActorMaps.Keys.OfType<Unit>())
+        {
+            var p = new Vector2(
+                unit.position.x / map.width,
+                unit.position.z / map.height
+            );
+            _unitNormalizedPositions.Add( new Vector4(
+                p.y - normalizedUnitSize.x, p.x - normalizedUnitSize.y,  
+                p.y - normalizedUnitSize.x, p.x + normalizedUnitSize.y)
+            );
+            _unitNormalizedPositions.Add(new Vector4(
+                p.y + normalizedUnitSize.x, p.x + normalizedUnitSize.y,  
+                p.y + normalizedUnitSize.x, p.x - normalizedUnitSize.y
+            ));
+
+            var c = unit.team.id;
+            _unitColorIndices.Add(c);
+        }
+
+        if (_unitNormalizedPositions.Count > 0)
+        {
+            _unitRectMaterial.SetVectorArray("_UnitPositions", _unitNormalizedPositions);
+            _unitRectMaterial.SetFloatArray("_UnitColorIndices", _unitColorIndices);
+            _unitRectMaterial.SetColorArray("_UnitColors", _minimapOptions.unitTeamColors);
+            _updateMinimapCb.DrawProcedural(
+                Matrix4x4.identity, _unitRectMaterial, 0, MeshTopology.Quads, 4, _unitNormalizedPositions.Count / 2
+            );
+        }
+    }
 
     private void ClearGamePanel()
     {
