@@ -77,7 +77,7 @@ namespace Game
             _completeRT = RenderTexture.GetTemporary(pixelSizeInt.x, pixelSizeInt.y, 0, RenderTextureFormat.Default);
         }
 
-        public void OnUpdateCommandBuffer(CommandBuffer cb)
+        public void DrawReducedTerrainToMinimap(CommandBuffer cb)
         {
             cb.SetRenderTarget(_completeRT);
             cb.ClearRenderTarget(true, true, Color.clear);

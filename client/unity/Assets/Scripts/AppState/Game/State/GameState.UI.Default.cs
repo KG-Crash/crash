@@ -20,11 +20,8 @@ public struct MinimapOption
 public partial class GameState
 {
     private Minimap _minimap;
+    private UnitRectInMinimapDrawer _unitDrawer;
     private CommandBuffer _updateMinimapCb;
-    
-    private List<Vector4> _unitNormalizedPositions = new List<Vector4>();
-    private List<float> _unitColorIndices = new List<float>();
-    private Material _unitRectMaterial;
 
     [SerializeField]
     private MinimapOption _minimapOptions = new MinimapOption
@@ -47,16 +44,11 @@ public partial class GameState
         gamePanel.Initialize(_minimap.minimapTexture);
         
         _updateMinimapCb = new CommandBuffer();
-        _minimap.OnUpdateCommandBuffer(_updateMinimapCb);
+        _minimap.DrawReducedTerrainToMinimap(_updateMinimapCb);
         camera.AddCommandBuffer(CameraEvent.AfterSkybox, _updateMinimapCb);
 
-        _unitRectMaterial = new Material(Shader.Find("Content/UnitToMinimap"));
-
-        var maxCount = 500;
-        _unitNormalizedPositions.Clear();
-        _unitNormalizedPositions.AddRange(Enumerable.Repeat(Vector4.zero, maxCount * 4 / 2));
-        _unitColorIndices.Clear();
-        _unitColorIndices.AddRange(Enumerable.Repeat(0.0f, maxCount));
+        _unitDrawer = new UnitRectInMinimapDrawer(500);
+        _unitDrawer.Initialize();
     }
 
     private void ReadyGamePanel(int playerCount)
@@ -68,44 +60,14 @@ public partial class GameState
     private void UpdateGamePanel(Frame input, Frame output)
     {
         _updateMinimapCb.Clear();
-        _minimap.OnUpdateCommandBuffer(_updateMinimapCb);
-
-        var map = UnityEngine.Object.FindObjectOfType<KG.Map>();
-        
-        // 유닛 위치 업데이트
-        var minimapViewSize = GetView<GamePanel>().minimapViewSize;
-        var normalizedUnitSize = _minimapOptions.unitPixelSize / minimapViewSize;
-        var unitCount = 0;
-        
-        foreach (var unit in unitActorMaps.Keys.OfType<Unit>())
-        {
-            var p = new Vector2(
-                unit.position.x / map.width,
-                unit.position.z / map.height
-            );
-            _unitNormalizedPositions[unitCount * 2 + 0] = new Vector4(
-                p.y - normalizedUnitSize.x, p.x - normalizedUnitSize.y,  
-                p.y - normalizedUnitSize.x, p.x + normalizedUnitSize.y
-            );
-            _unitNormalizedPositions[unitCount * 2 + 1] = new Vector4(
-                p.y + normalizedUnitSize.x, p.x + normalizedUnitSize.y,  
-                p.y + normalizedUnitSize.x, p.x - normalizedUnitSize.y
-            );
-
-            _unitColorIndices[unitCount] = unit.team.id;
-            
-            unitCount++;
-        }
-
-        if (_unitNormalizedPositions.Count > 0)
-        {
-            _unitRectMaterial.SetVectorArray("_UnitPositions", _unitNormalizedPositions);
-            _unitRectMaterial.SetFloatArray("_UnitColorIndices", _unitColorIndices);
-            _unitRectMaterial.SetColorArray("_UnitColors", _minimapOptions.unitTeamColors);
-            _updateMinimapCb.DrawProcedural(
-                Matrix4x4.identity, _unitRectMaterial, 0, MeshTopology.Quads, 4, unitCount
-            );
-        }
+        _minimap.DrawReducedTerrainToMinimap(_updateMinimapCb);
+        _unitDrawer.DrawUnitRectsToMinimap(
+            _updateMinimapCb,
+            FindObjectOfType<KG.Map>(),
+            _minimapOptions.unitTeamColors,
+            unitActorMaps.Keys.OfType<Unit>(),
+            _minimapOptions.unitPixelSize / GetView<GamePanel>().minimapViewSize
+        );
     }
 
     private void ClearGamePanel()
@@ -115,9 +77,6 @@ public partial class GameState
         gamePanel.exitClick.RemoveListener(OnClickExit);
         gamePanel.attackTargetChange.RemoveListener(OnAttackTargetChange);
         gamePanel.gameDragEvent.RemoveListener(OnDragEvent);
-        
-        _unitNormalizedPositions.Clear();
-        _unitColorIndices.Clear();
     }
 
     private void OnClickUpgrade()
