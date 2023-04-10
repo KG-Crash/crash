@@ -2,8 +2,9 @@ package response
 
 import (
 	"encoding/binary"
-	"protocol"
-	source "protocol/FlatBuffer/Response"
+
+	"github.com/KG-Crash/crash/protocol"
+	source "github.com/KG-Crash/crash/protocol/FlatBuffer/Response"
 
 	flatbuffers "github.com/google/flatbuffers/go"
 )

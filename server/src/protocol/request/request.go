@@ -2,8 +2,9 @@ package request
 
 import (
 	"encoding/binary"
-	"protocol"
-	source "protocol/FlatBuffer/Request"
+
+	"github.com/KG-Crash/crash/protocol"
+	source "github.com/KG-Crash/crash/protocol/FlatBuffer/Request"
 
 	flatbuffers "github.com/google/flatbuffers/go"
 )

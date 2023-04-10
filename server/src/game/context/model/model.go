@@ -1,12 +1,13 @@
 package model
 
 import (
-	"KG/handler"
 	"encoding/binary"
 	"io"
 	"net"
-	"protocol"
-	"protocol/request"
+
+	"github.com/KG-Crash/crash/KG/handler"
+	"github.com/KG-Crash/crash/protocol"
+	"github.com/KG-Crash/crash/protocol/request"
 
 	"crypto/rand"
 	"errors"

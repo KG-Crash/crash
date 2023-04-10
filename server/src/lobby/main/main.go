@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"lobby/setting"
 	"net/http"
-	"protocol"
-	"protocol/request"
-	"protocol/response"
+
+	"github.com/KG-Crash/crash/lobby/setting"
+	"github.com/KG-Crash/crash/protocol"
+	"github.com/KG-Crash/crash/protocol/request"
+	"github.com/KG-Crash/crash/protocol/response"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-redis/redis"
@@ -188,7 +189,7 @@ func main() {
 				DB:   int(redisSetting.Db),
 			})
 
-			redisResult, _ := rdb.HGetAll(context.Background(), "room").Result()
+			redisResult, _ := rdb.HGetAll("room").Result()
 			for _, stringify := range redisResult {
 				var room response.Room
 				json.Unmarshal([]byte(stringify), &room)

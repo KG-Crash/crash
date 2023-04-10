@@ -6,7 +6,7 @@ flatc --csharp response.fbs
 flatc --go request.fbs
 flatc --go response.fbs
 
-app.exe --root=protocol
+app.exe --root=github.com/KG-Crash/crash/protocol
 
 RMDIR ..\client\unity\Assets\Shared\Protocol\FlatBuffer /s /q
 ROBOCOPY FlatBuffer ..\client\unity\Assets\Shared\Protocol\FlatBuffer *.cs /E /njh /njs /ndl /nc /ns

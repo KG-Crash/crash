@@ -2,7 +2,7 @@ package {{ package|lower }}
 
 import (
     "encoding/binary"
-    "protocol"
+    "{{ root }}"
     source "{{ root }}/{{ package }}"
 
     flatbuffers "github.com/google/flatbuffers/go"

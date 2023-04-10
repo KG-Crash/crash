@@ -1,18 +1,17 @@
 package context
 
 import (
-	"context"
 	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"game/setting"
 	"math"
 	"math/big"
-	"model"
-	"protocol/request"
-	"protocol/response"
 
+	"github.com/KG-Crash/crash/game/setting"
+	"github.com/KG-Crash/crash/model"
+	"github.com/KG-Crash/crash/protocol/request"
+	"github.com/KG-Crash/crash/protocol/response"
 	"github.com/go-redis/redis"
 )
 
@@ -40,14 +39,14 @@ func (ctx *Context) updateRoomToRedis(room *model.Room) {
 	if err != nil {
 		panic(err)
 	}
-	err = ctx.rdb.HSet(context.Background(), "room", room.ID(), serialized).Err()
+	err = ctx.rdb.HSet("room", room.ID(), serialized).Err()
 	if err != nil {
 		panic(err)
 	}
 }
 
 func (ctx *Context) deleteRoomToRedis(roomId string) {
-	ctx.rdb.HDel(context.Background(), "room", roomId)
+	ctx.rdb.HDel("room", roomId)
 }
 
 func (ctx *Context) OnLogin(session *model.Session, req request.Login) {

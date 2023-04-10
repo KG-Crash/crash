@@ -1,13 +1,14 @@
 package main
 
 import (
-	"KG/handler"
 	"fmt"
-	"game/context"
 	"log"
-	"model"
 	"net"
 	"os"
+
+	"github.com/KG-Crash/crash/KG/handler"
+	"github.com/KG-Crash/crash/game/context"
+	"github.com/KG-Crash/crash/model"
 )
 
 func main() {

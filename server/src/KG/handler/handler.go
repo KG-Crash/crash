@@ -2,7 +2,8 @@ package handler
 
 import (
 	"fmt"
-	"protocol"
+
+	"github.com/KG-Crash/crash/protocol"
 )
 
 type Session interface {
