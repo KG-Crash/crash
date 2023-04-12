@@ -2,7 +2,6 @@ package request
 
 import (
 	"encoding/binary"
-
 	"github.com/KG-Crash/crash/protocol"
 	source "github.com/KG-Crash/crash/protocol/FlatBuffer/Request"
 
