@@ -2,7 +2,7 @@ FROM golang:alpine
 ARG SERVICE
   
 ENV GOPATH=/app
-ENV GO111MODULE=off
+ENV GO111MODULE=on
 
 RUN apk add git
 
