@@ -105,6 +105,19 @@
                 "port": 8000,
                 "mysql": ["main", "shard.1", "shard.2"]
             }
+        ],
+        "lobby":
+        [
+            {
+                "host": {"public": "192.168.0.181", "private": "192.168.0.181"},
+                "port": 8001,
+                "mysql": ["main", "shard.1", "shard.2"]
+            },
+            {
+                "host": {"public": "192.168.0.182", "private": "192.168.0.182"},
+                "port": 8001,
+                "mysql": ["main", "shard.1", "shard.2"]
+            }
         ]
     }
 }
