@@ -44,7 +44,6 @@ def environment(e):
     env.hosts = list(set([host for role in env.roledefs.values() for host in role]))
 
 @task
-@runs_once
 def build(service='game'):
     with lcd(f'server'):
         local(f'docker build -t cshyeon/crash:{service} --build-arg SERVICE={service} .')
@@ -54,7 +53,6 @@ def build(service='game'):
 
 
 @task
-@parallel
 def stop(service='game'):
     configs = [x for x in CONFIGURATION['servers'][service] if env.host in (x['host']['private'], x['host']['public'])]
     names = [f'crash.{service}.{i}' for i, x in enumerate(configs)]
@@ -63,7 +61,6 @@ def stop(service='game'):
         sudo(f"docker stop {' '.join(names)}", quiet=True)
 
 @task
-@parallel
 def remove(service='game'):
     stop(service)
 
@@ -74,7 +71,6 @@ def remove(service='game'):
         sudo(f"docker rm {' '.join(names)}", quiet=True)
 
 @task
-@parallel
 def deploy(service='game'):
     global CONFIGURATION
     global ENVIRONMENT
@@ -128,7 +124,6 @@ def _haproxy_master():
         
         sudo(f'docker run -d --restart unless-stopped --name {container_name} --net=host -v $PWD:/usr/local/etc/redis redis:6.2.3-alpine redis-server /usr/local/etc/redis/redis.conf')
 
-@parallel
 @roles('haproxy.slave')
 def _haproxy_slave():
     global CONFIGURATION
@@ -160,7 +155,6 @@ def _haproxy_slave():
             master = CONFIGURATION['haproxy']['master']
             sudo(f"docker run -d --restart unless-stopped --name {container_name} --net=host -v $PWD:/usr/local/etc/redis redis:6.2.3-alpine redis-server /usr/local/etc/redis/redis.conf --slaveof {master['host']['private']} {master['port']}")
 
-@parallel
 @roles('haproxy.sentinel')
 def _haproxy_sentinel():
     global CONFIGURATION
@@ -226,6 +220,5 @@ def haproxy():
     execute(_haproxy_haproxy)
 
 @task
-@parallel
 def cleanup():
     sudo('docker image prune -f')
