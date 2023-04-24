@@ -98,12 +98,14 @@
             {
                 "host": {"public": "192.168.0.181", "private": "192.168.0.181"},
                 "port": 8000,
-                "mysql": ["main", "shard.1", "shard.2"]
+                "mysql": ["main", "shard.1", "shard.2"],
+                "environments": {"CRASH_ENVIRONMENT": "development.1"}
             },
             {
                 "host": {"public": "192.168.0.182", "private": "192.168.0.182"},
                 "port": 8000,
-                "mysql": ["main", "shard.1", "shard.2"]
+                "mysql": ["main", "shard.1", "shard.2"],
+                "environments": {"CRASH_ENVIRONMENT": "development.2"}
             }
         ],
         "lobby":
@@ -111,12 +113,14 @@
             {
                 "host": {"public": "192.168.0.181", "private": "192.168.0.181"},
                 "port": 8001,
-                "mysql": ["main", "shard.1", "shard.2"]
+                "mysql": ["main", "shard.1", "shard.2"],
+                "environments": {"CRASH_ENVIRONMENT": "development"}
             },
             {
                 "host": {"public": "192.168.0.182", "private": "192.168.0.182"},
                 "port": 8001,
-                "mysql": ["main", "shard.1", "shard.2"]
+                "mysql": ["main", "shard.1", "shard.2"],
+                "environments": {"CRASH_ENVIRONMENT": "development"}
             }
         ]
     }

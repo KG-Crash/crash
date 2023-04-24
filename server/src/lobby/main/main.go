@@ -132,13 +132,6 @@ func main() {
 			return
 		}
 
-		// rdb := redis.NewClient(&redis.Options{
-		// 	Addr:     fmt.Sprintf("%s:%d", setting.Redis.Host, setting.Redis.Port),
-		// 	Password: "",
-		// 	DB:       int(setting.Redis.Db),
-		// })
-
-		// err = rdb.Set(ctx, "key", "value", 0).Err()
 		if err != nil {
 			panic(err)
 		}

@@ -2,6 +2,7 @@ package setting
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -19,7 +20,13 @@ type Setting struct {
 var ist Setting
 
 func init() {
-	data, _ := os.Open("setting.json")
+	var fname string
+	if env, ok := os.LookupEnv("CRASH_ENVIRONMENT"); ok {
+		fname = fmt.Sprintf("setting.%s.json", env)
+	} else {
+		fname = "setting.json"
+	}
+	data, _ := os.Open(fname)
 	bytes, _ := ioutil.ReadAll(data)
 	json.Unmarshal(bytes, &ist)
 }
