@@ -88,15 +88,12 @@ def deploy(service='game'):
         root = f'/etc/crash/appsettings/{i}'
         sudo(f'mkdir -p {root}')
         
-        # appsettings_fname = f'appsettings.{ENVIRONMENT}.json'
-        # files.upload_template('appsettings.txt', f'{root}/{appsettings_fname}', context=config, use_jinja=True, template_dir='deploy/templates', use_sudo=True, backup=False)
-        
         envcmd = ''
         if 'environments' in config:
             envcmd = [f' -e {k}={v}' for k, v in config['environments'].items()]
 
         container_name = f'crash.{service}.{i}'
-        sudo(f"docker run -it -d --restart unless-stopped --name {container_name} -p {config['own']['port']}:{config['own']['port']} -v {root}/{appsettings_fname}:/app/{appsettings_fname} {envcmd} {image_name}")
+        sudo(f"docker run -it -d --restart unless-stopped --name {container_name} -p {config['own']['port']}:{config['own']['port']} {envcmd} {image_name}")
 
 @task
 @roles('haproxy.master')
