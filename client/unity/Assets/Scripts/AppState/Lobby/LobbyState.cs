@@ -38,7 +38,7 @@ public partial class LobbyState : AppState
     
     public async Task Refresh()
     {
-        var response = await Client.Request<Protocol.Response.RoomList>("lobby/room", new Protocol.Request.RoomList
+        var response = await CrashClient.Request<Protocol.Response.RoomList>("lobby/room", new Protocol.Request.RoomList
         { });
 
         // TODO: 기능복구
@@ -47,7 +47,7 @@ public partial class LobbyState : AppState
 
     public async void OnCreateGameRoom()
     {
-        var response = await Client.Request<Protocol.Response.RouteCreate>("lobby/create-room", new Protocol.Request.RouteCreate
+        var response = await CrashClient.Request<Protocol.Response.RouteCreate>("lobby/create-room", new Protocol.Request.RouteCreate
         { });
 
         if (await Client.Instance.Connect(response.Host, (int)response.Port) == false)

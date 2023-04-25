@@ -29,6 +29,11 @@ public static class CrashResources
         return Resources.Load<CrashAppSettings>(nameof(CrashAppSettings));
     }
 
+    public static CrashServerSettings LoadServerSettings()
+    {
+        return Resources.Load<CrashServerSettings>(nameof(CrashServerSettings));
+    }
+
     public static UnityTable<T> LoadUnityTable<T>() where T : UnityTable<T>
     {
         return Resources.Load<T>($"Tables/{typeof(T).Name}");

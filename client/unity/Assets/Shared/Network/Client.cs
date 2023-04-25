@@ -107,10 +107,10 @@ namespace Network
             return await Handler.Instance.GetProtocolResult<T>(timeout) as T;
         }
 
-        public static async Task<T> Request<T>(string api, IProtocol protocol)
+        public static async Task<T> Request<T>(string host, string api, IProtocol protocol)
             where T : class, IProtocol
         {
-            var url = $"http://localhost:8080/{api}";
+            var url = $"{host}/{api}";
             using (var mstream = new MemoryStream())
             {
                 using (var writer = new BinaryWriter(mstream))

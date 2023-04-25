@@ -33,15 +33,14 @@ public partial class IntroState : AppState
         {
             var uuid = $"{Guid.NewGuid()}";
 
-            var response = await Client.Request<Protocol.Response.Authentication>("authentication", new Protocol.Request.Authentication
-            {
-                Id = uuid
-            });
+            var response = await CrashClient.Request<Protocol.Response.Authentication>(
+                "authentication", new Protocol.Request.Authentication {Id = uuid}
+            );
 
             Client.Instance.Token = response.Token;
-            UnityEngine.Debug.Log(response.Token);
-
             Client.Instance.uuid = uuid;
+            
+            Debug.Log($"response.Token={response.Token}, uuid={uuid}");
             return true;
         }
         catch (Exception)
