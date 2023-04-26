@@ -89,7 +89,7 @@ def deploy(service='game'):
         sudo(f'mkdir -p {root}')
         
         envcmd = ''
-        if 'environments' in config:
+        if 'environments' in config['own']:
             envcmd = [f' -e {k}={v}' for k, v in config['environments'].items()]
 
         container_name = f'crash.{service}.{i}'
