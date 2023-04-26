@@ -90,7 +90,7 @@ def deploy(service='game'):
         
         envcmd = ''
         if 'environments' in config['own']:
-            envcmd = [f' -e {k}={v}' for k, v in config['environments'].items()]
+            envcmd = [f' -e {k}={v}' for k, v in config['own']['environments'].items()]
 
         container_name = f'crash.{service}.{i}'
         sudo(f"docker run -it -d --restart unless-stopped --name {container_name} -p {config['own']['port']}:{config['own']['port']} {envcmd} {image_name}")
