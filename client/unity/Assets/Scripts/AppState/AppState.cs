@@ -91,6 +91,8 @@ public abstract class AppState : ScriptableObject
         return await EntryPoint.appStateService.MoveStateAsync<T>(transition);
     }
 
+    public bool Now<T>() where T : AppState => EntryPoint.appStateService.Now<T>();
+
     public Coroutine StartCoroutine(IEnumerator enumerator)
     {
         var coroutine = Dispatcher.Instance.StartCoroutine(enumerator);

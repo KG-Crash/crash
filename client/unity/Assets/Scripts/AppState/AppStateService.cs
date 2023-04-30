@@ -39,6 +39,8 @@ public class AppStateService
         return _appStates[typeof(T)] as T;
     }
 
+    public bool Now<T>() where T : AppState => _current is T;
+
     public async Task<AppState> LoadEntrySceneAsync(StateTransition transition = null)
     {
         var entryState = GetEntryScene();

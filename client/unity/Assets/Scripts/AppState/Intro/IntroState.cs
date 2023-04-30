@@ -74,6 +74,9 @@ public partial class IntroState : AppState
         view.connectSpinner.SetActive(true);
         while (!await ConnectAsync())
         {
+            if (!Now<IntroState>())
+                return;
+            
             var retry = await UI.Popup.Boolean("Connection Failed, Re?", "GO", "NO");
             if (!retry)
                 break;
@@ -81,6 +84,6 @@ public partial class IntroState : AppState
             view.connectSpinner.SetActive(false);
         }
 
-        await MoveStateAsync<LobbyState>();
+        await MoveStateAsync<LobbyState>();   
     }
 }
