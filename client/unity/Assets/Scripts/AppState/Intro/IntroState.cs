@@ -18,13 +18,28 @@ public partial class IntroState : AppState
 
         view.connectSpinner.SetActive(false);
 
+#if UNITY_EDITOR
+        view.connectToggleAuto.gameObject.SetActive(true);
+        view.connectToggleAuto.onToggle.AddListener(OnConnectToggle);
+#endif
     }
+    
+#if UNITY_EDITOR
+    private void OnConnectToggle(bool remote)
+    {
+        CrashResources.LoadServerSettings().connectToRemote = remote;
+        GetView<IntroPanel>().connectToggleAuto.on = remote;
+    }
+#endif
     
     [ClearMethod]
     public void Clear()
     {
         var view = GetView<IntroPanel>();
         view.startButtonClick.RemoveListener(OnConnectAsync);
+#if UNITY_EDITOR
+        view.connectToggleAuto.onToggle.RemoveListener(OnConnectToggle);
+#endif
     }
 
     private async Task<bool> ConnectAsync()
