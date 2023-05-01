@@ -64,6 +64,7 @@
     <Compile Include="Assets\Scripts\AppState\Game\Follower.cs" />
     <Compile Include="Assets\Scripts\Logger\Logger.cs" />
     <Compile Include="Assets\Scripts\UI\Popup\BoolPopupTMP.cs" />
+    <Compile Include="Assets\Scripts\CrashClient.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\InputBridge.cs" />
     <Compile Include="Assets\Scripts\AppState\BindAttributes.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\UnityObjects.cs" />
@@ -112,11 +113,14 @@
     <Compile Include="Assets\Scripts\AppState\Lobby\LobbyState.PacketHandler.cs" />
     <Compile Include="Assets\Scripts\Actor\UnitActor.Animation.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\State\GameState.UnitHandler.cs" />
+    <Compile Include="Assets\Scripts\AppState\Game\User.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\State\GameState.Global.cs" />
     <Compile Include="Assets\Scripts\AppState\SceneContext.cs" />
     <Compile Include="Assets\Scripts\Model\Player.Collection.cs" />
     <Compile Include="Assets\Scripts\EntryPoint.cs" />
     <Compile Include="Assets\Scripts\CrashAppSettings.cs" />
+    <Compile Include="Assets\Scripts\CrashServerSettings.cs" />
+    <Compile Include="Assets\Scripts\Rendering\UnitRectInMinimapDrawer.cs" />
     <Compile Include="Assets\Scripts\Model\Unit.cs" />
     <Compile Include="Assets\Scripts\AppState\GameRoom\UserListListener.cs" />
     <Compile Include="Assets\Scripts\AppState\AppStateService.cs" />
@@ -153,6 +157,7 @@
     <Compile Include="Assets\Scripts\AppState\Game\CrashUserOption.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\Tables\ProjectileTable.cs" />
     <Compile Include="Assets\Scripts\AppState\AppStateBindsFactory.cs" />
+    <Compile Include="Assets\Scripts\Model\Minimap.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\Service\ActionService.cs" />
     <Compile Include="Assets\Scripts\UI\View\MinimapView.cs" />
   </ItemGroup>

@@ -1,12 +1,8 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Lobby;
 using Network;
-using UnityEngine.SceneManagement;
 using Protocol.Response;
 using System.Linq;
-using Lobby;
+using System.Threading.Tasks;
 using UI;
 #pragma warning disable 1998
 

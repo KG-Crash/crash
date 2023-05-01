@@ -54,7 +54,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Assets\KG\Runtime\Scripts\UI\Interface\TextLabel.cs" />
-    <Compile Include="Assets\KG\Runtime\Scripts\UI\Interface\Toggle.cs" />
+    <Compile Include="Assets\KG\Runtime\Scripts\UI\Interface\ToggleAuto.cs" />
     <Compile Include="Assets\KG\Runtime\Scripts\UI\ScrollView.cs" />
     <Compile Include="Assets\KG\Runtime\Scripts\UI\Interface\TextField.cs" />
     <Compile Include="Assets\KG\Runtime\Scripts\UI\UIComponent.cs" />

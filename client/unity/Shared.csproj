@@ -64,8 +64,8 @@
     <Compile Include="Assets\Shared\Table\Common\UnitUpgradeSpawnAttribute.cs" />
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Response\ActionQueue.cs" />
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Request\Chat.cs" />
+    <Compile Include="Assets\Shared\Protocol\FlatBuffer\Response\RouteCreate.cs" />
     <Compile Include="Assets\Shared\Enum.cs" />
-    <Compile Include="Assets\Shared\Network\Client.cs" />
     <Compile Include="Assets\Shared\Table\Table.cs" />
     <Compile Include="Assets\Shared\Table\Common\LevelExp.cs" />
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Request\LeaveRoom.cs" />
@@ -73,10 +73,12 @@
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Response\LeaveRoom.cs" />
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Request\EnterRoom.cs" />
     <Compile Include="Assets\Shared\Table\Common\Sample2.cs" />
+    <Compile Include="Assets\Shared\Network\BaseClient.cs" />
     <Compile Include="Assets\Shared\FlatBuffers\IFlatbufferObject.cs" />
     <Compile Include="Assets\Shared\FlatBuffers\ByteBuffer.cs" />
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Response\Ready.cs" />
     <Compile Include="Assets\Shared\MasterData.cs" />
+    <Compile Include="Assets\Shared\Protocol\FlatBuffer\Request\RouteCreate.cs" />
     <Compile Include="Assets\Shared\Table\Client\LevelExp.cs" />
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Request\GameStart.cs" />
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Request\Action.cs" />
@@ -95,12 +97,14 @@
     <Compile Include="Assets\Shared\Network\Handler.cs" />
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Response\DestroyedRoom.cs" />
     <Compile Include="Assets\Shared\Table\Common\UnitUpgradeAbilityAttribute.cs" />
+    <Compile Include="Assets\Shared\Protocol\FlatBuffer\Response\RouteEnter.cs" />
     <Compile Include="Assets\Shared\Table\Common\UnitUpgradeCost.cs" />
     <Compile Include="Assets\Shared\FlatBuffers\FlatBufferConstants.cs" />
     <Compile Include="Assets\Shared\FlatBuffers\Table.cs" />
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Response\KickRoom.cs" />
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Response\GameStart.cs" />
     <Compile Include="Assets\Shared\Table\Client\Sample2.cs" />
+    <Compile Include="Assets\Shared\Protocol\FlatBuffer\Request\Login.cs" />
     <Compile Include="Assets\Shared\Table\Client\UnitUpgradeAbilityAttribute.cs" />
     <Compile Include="Assets\Shared\Table\Client\SampleAttribute.cs" />
     <Compile Include="Assets\Shared\Table\Client\Projectile.cs" />
@@ -126,14 +130,10 @@
     <Compile Include="Assets\Shared\Protocol\IProtocol.cs" />
     <Compile Include="Assets\Shared\FlatBuffers\Offset.cs" />
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Request\RoomList.cs" />
+    <Compile Include="Assets\Shared\Protocol\FlatBuffer\Request\RouteEnter.cs" />
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Response\Action.cs" />
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Response\KickedRoom.cs" />
     <Compile Include="Assets\Shared\Protocol\FlatBuffer\Request\InGameChat.cs" />
-    <Compile Include="Assets\Shared\Protocol\FlatBuffer\Request\RouteEnter.cs" />
-    <Compile Include="Assets\Shared\Protocol\FlatBuffer\Response\RouteCreate.cs" />
-    <Compile Include="Assets\Shared\Protocol\FlatBuffer\Response\RouteEnter.cs" />
-    <Compile Include="Assets\Shared\Protocol\FlatBuffer\Request\RouteCreate.cs" />
-    <Compile Include="Assets\Shared\Protocol\FlatBuffer\Request\Login.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Shared\Shared.asmdef" />

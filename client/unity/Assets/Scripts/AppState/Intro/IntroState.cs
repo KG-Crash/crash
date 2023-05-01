@@ -1,9 +1,7 @@
 using System;
 using System.Threading.Tasks;
-using Module;
-using Network;
-using UnityEngine;
 using UI;
+using UnityEngine;
 
 [UIBind(typeof(IntroPanel), true)]
 [StateBind(flatBuffer: true)]

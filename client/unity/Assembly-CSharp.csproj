@@ -173,6 +173,7 @@
     <None Include="Assets\Arts\Polygonal Aliens Pack\Polygonal Alien Ulifo\www.meshtint.com.txt" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
     <None Include="Assets\DOTween\DOTween.dll" />
+    <None Include="Assets\Shaders\UnitToMinimap.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets\LastUI\Third-Party Notices.txt" />
     <None Include="Assets\Arts\SkySerie Freebie\Hdri setup.txt" />
@@ -838,6 +839,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="ModernUIPack_Runtime.csproj">
+      <Project>{8C126296-AF78-D966-80DB-8FDF2EA8CD4F}</Project>
+      <Name>ModernUIPack_Runtime</Name>
+    </ProjectReference>
     <ProjectReference Include="LeTai.TranslucentImage.Demo.csproj">
       <Project>{13340F27-BDB6-A81F-3818-181CF8BE3D89}</Project>
       <Name>LeTai.TranslucentImage.Demo</Name>
@@ -845,6 +850,10 @@
     <ProjectReference Include="Shared.csproj">
       <Project>{398E8100-0D0B-6558-6FE8-B683EC78A0C5}</Project>
       <Name>Shared</Name>
+    </ProjectReference>
+    <ProjectReference Include="ModernUIPack_Editor.csproj">
+      <Project>{04D0921F-E7C3-8615-110D-F8CD5FDE16E5}</Project>
+      <Name>ModernUIPack_Editor</Name>
     </ProjectReference>
     <ProjectReference Include="DotNettry.csproj">
       <Project>{8E215265-BDB7-55B5-5FE7-9CECAF991EA6}</Project>
@@ -877,14 +886,6 @@
     <ProjectReference Include="Fix64.Editor.csproj">
       <Project>{0D2261E5-B3D7-46B5-E930-0DC61300E151}</Project>
       <Name>Fix64.Editor</Name>
-    </ProjectReference>
-    <ProjectReference Include="ModernUIPack_Runtime.csproj">
-      <Project>{8C126296-AF78-D966-80DB-8FDF2EA8CD4F}</Project>
-      <Name>ModernUIPack_Runtime</Name>
-    </ProjectReference>
-    <ProjectReference Include="ModernUIPack_Editor.csproj">
-      <Project>{04D0921F-E7C3-8615-110D-F8CD5FDE16E5}</Project>
-      <Name>ModernUIPack_Editor</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

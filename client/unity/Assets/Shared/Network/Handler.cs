@@ -26,13 +26,15 @@ namespace Network
 
     public class Handler : SimpleChannelInboundHandler<IByteBuffer>
     {
-        private static readonly Lazy<Handler> _ist = new Lazy<Handler>(() => new Handler());
-        public static Handler Instance => _ist.Value;
-
         private IDispatchable _dispatcher;
         private readonly Dictionary<Identity, Delegate> _allocators = new Dictionary<Identity, Delegate>();
         private readonly Dictionary<Identity, Func<IProtocol, Task<bool>>> _bindedEvents = new Dictionary<Identity, Func<IProtocol, Task<bool>>>();
         private readonly Dictionary<Type, Queue<TaskCompletionSource<IProtocol>>> _tcs = new Dictionary<Type, Queue<TaskCompletionSource<IProtocol>>>();
+
+        public Handler(object ist, IDispatchable dispatcher)
+        {
+            Bind(ist, dispatcher);
+        }
 
         public IProtocol Invoke(byte[] bytes)
         {
@@ -164,7 +166,7 @@ namespace Network
             }
         }
         
-        private static IEnumerable<MethodInfo> GetMethods(Type type)
+        private IEnumerable<MethodInfo> GetMethods(Type type)
         {
             return type.GetMethods().Where(x =>
             {
@@ -185,12 +187,12 @@ namespace Network
             });
         }
 
-        private static Delegate GetAllocator<T>() where T : IProtocol
+        private Delegate GetAllocator<T>() where T : IProtocol
         {
             return GetAllocator(typeof(T));
         }
 
-        private static Delegate GetAllocator(Type type)
+        private Delegate GetAllocator(Type type)
         {
             if(type.GetInterface(nameof(IProtocol)) == null)
                 throw new Exception();
@@ -198,11 +200,11 @@ namespace Network
             return type.GetMethod("Deserialize").CreateDelegate(typeof(Func<,>).MakeGenericType(typeof(byte[]), type));
         }
         
-        public static void Bind(object classInstance, IDispatchable dispatcher = null)
+        private void Bind(object ist, IDispatchable dispatcher = null)
         {
-            _ist.Value._dispatcher = dispatcher;
+            _dispatcher = dispatcher;
 
-            var methods = GetMethods(classInstance.GetType());
+            var methods = GetMethods(ist.GetType());
 
             foreach (var method in methods)
             {
@@ -212,11 +214,11 @@ namespace Network
                     var protocolType = parameters[0].ParameterType;
                     var instance = Activator.CreateInstance(protocolType) as IProtocol;
 
-                    _ist.Value._allocators.Add((Identity)instance.Identity, GetAllocator(protocolType));
+                    _allocators.Add((Identity)instance.Identity, GetAllocator(protocolType));
 
                     var delegateType = Expression.GetDelegateType(parameters.Select(x => x.ParameterType).Concat(new[] { method.ReturnType }).ToArray());
-                    var createdDelegate = method.CreateDelegate(delegateType, classInstance);
-                    _ist.Value._bindedEvents.Add((Identity)instance.Identity, new Func<IProtocol, Task<bool>>((protocol) =>
+                    var createdDelegate = method.CreateDelegate(delegateType, ist);
+                    _bindedEvents.Add((Identity)instance.Identity, new Func<IProtocol, Task<bool>>((protocol) =>
                     {
                         return createdDelegate.DynamicInvoke(Convert.ChangeType(protocol, protocolType)) as Task<bool>;
                     }));
@@ -228,9 +230,9 @@ namespace Network
             }
         }
 
-        public static void Unbind(object classInstance)
+        private void Unbind(object ist)
         {
-            var methods = GetMethods(classInstance.GetType());
+            var methods = GetMethods(ist.GetType());
             
             foreach (var method in methods)
             {
@@ -240,8 +242,8 @@ namespace Network
                     var protocolType = parameters[0].ParameterType;
                     var instance = Activator.CreateInstance(protocolType) as IProtocol;
 
-                    _ist.Value._allocators.Remove((Identity) instance.Identity);
-                    _ist.Value._bindedEvents.Remove((Identity) instance.Identity);
+                    _allocators.Remove((Identity) instance.Identity);
+                    _bindedEvents.Remove((Identity) instance.Identity);
                 }
                 catch (Exception e)
                 {
