@@ -14,32 +14,38 @@ using UnityEngine.SceneManagement;
 
 public class AppStateService
 {
+    private Type[] _appStateTypes;
     private Dictionary<Type, AppState> _appStates;
+    private AppState _currentAppState;
     private Dictionary<AppState, AppStateBinds> _binds;
     private AppState _current;
     private UIPool _uiPool;
     private UIStack _uiStack;
 
-    public AppStateService(AppState[] appStates, UIPool uiPool)
+    public AppStateService(UIPool uiPool)
     {
-        _appStates = appStates.ToDictionary(x => x.GetType(), x => x);
-        _binds = appStates.ToDictionary(state => state, x => AppStateBindsFactory.Extract(x.GetType()));
+        var appStateTypes = 
+            Assembly.GetAssembly(typeof(AppState)).GetTypes()
+            .Where(x => x.IsSubclassOf(typeof(AppState)))
+            .ToArray();
+        _appStates = appStateTypes.ToDictionary(x => x, x => Activator.CreateInstance(x) as AppState);
+        _binds = _appStates.ToDictionary(kv => kv.Value, kv => AppStateBindsFactory.Extract(kv.Value.GetType()));
         _uiPool = uiPool;
         _uiStack = new UIStack();
         
-        foreach (var appState in appStates)
-            appState.uiStack = _uiStack;
+        foreach (var appState in _appStates)
+            appState.Value.uiStack = _uiStack;
 
         if (_binds.Any(kv => !kv.Value.valid))
             throw new Exception($"not valid state = {_binds.First(kv => !kv.Value.valid).Key.GetType().Name}");
     }
-
+    
     public T Get<T>() where T : AppState
     {
         return _appStates[typeof(T)] as T;
     }
 
-    public bool Now<T>() where T : AppState => _current is T;
+    public bool Now<T>() => _current is T;
 
     public async Task<AppState> LoadEntrySceneAsync(StateTransition transition = null)
     {
@@ -54,8 +60,6 @@ public class AppStateService
         var scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
 
         // 1. bind 
-        if (bind.autoFlatBufferBind)
-            Handler.Bind(entryState, Dispatcher.Instance);
         if (bind.autoActionBind)
             ActionHandler.Bind(entryState);
         
@@ -122,13 +126,12 @@ public class AppStateService
         {
             if (_binds.TryGetValue(_current, out var bind))
             {
-                if (bind.autoFlatBufferBind)
-                    Handler.Unbind(_current);
-            
                 if (bind.autoActionBind)
                     ActionHandler.Unbind(_current);
             }
         }
+        
+        _current.CopyTo(moveAppState); 
 
         // ---------------------------------------------------------------------------------------------------------
         // >> load/unload unity scene
@@ -148,9 +151,6 @@ public class AppStateService
         {
             if (_binds.TryGetValue(moveAppState, out var bind))
             {
-                if (bind.autoFlatBufferBind)
-                    Handler.Bind(moveAppState, Dispatcher.Instance);   
-             
                 if (bind.autoActionBind)
                     ActionHandler.Bind(moveAppState);
             }

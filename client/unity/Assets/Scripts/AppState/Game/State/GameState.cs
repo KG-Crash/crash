@@ -46,8 +46,8 @@ public partial class GameState : AppState
 
         unitActorFactory = new UnitActorFactory();
         projectileActorPool = new ProjectileActorPool(ProjectileTable.Get(), 15, this, context._poolOffset);
-        teams = new TeamCollection(this, this);
-        actionService = new ActionService(this);
+        teams = new TeamCollection(this, this, this);
+        actionService = new ActionService(this, this);
 
         LockStep.Reset();
         
@@ -58,7 +58,7 @@ public partial class GameState : AppState
         InitializeDebugPanel();
         InitializeUpgradePanel();
 
-        _ = Client.Send(new Protocol.Request.Ready { });
+        _ = Send(new Protocol.Request.Ready { });
     }
 
     [ClearMethod]

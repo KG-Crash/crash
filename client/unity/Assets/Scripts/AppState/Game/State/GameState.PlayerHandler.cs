@@ -13,7 +13,7 @@ public partial class GameState : Team.Listener
 {
     public void OnSpawned(Player player)
     {
-        if (player.id == Client.Instance.id)
+        if (player.id == id)
             Bind(player);   
     }
     
@@ -29,7 +29,7 @@ public partial class GameState : Team.Listener
 
     public void OnSpawnMyUnitByUpgrade(UnitUpgradeSpawn spawn)
     {
-        FixVector3 position = spawnPositions[Client.Instance.id].position;
+        FixVector3 position = spawnPositions[id].position;
         var xzpos = new FixVector2(position.x, position.z);
         EnqueueSpawn(spawn.Unit, (uint)spawn.Count, xzpos);
     }

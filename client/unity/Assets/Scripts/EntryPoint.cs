@@ -15,7 +15,7 @@ public static class EntryPoint
     {
         var option = CrashResources.LoadAppSettings();
         uiPool = new KG.UIPool(CrashResources.LoadUICanvasPrefab(), option.uiBundleName);
-        appStateService = new AppStateService(CrashResources.LoadAppStates(), uiPool);
+        appStateService = new AppStateService(uiPool);
         
         if (option.moveEntrySceneWhenStart)
             _ = appStateService.LoadEntrySceneAsync();

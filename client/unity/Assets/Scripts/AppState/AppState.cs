@@ -5,21 +5,22 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Network;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public abstract class AppState : ScriptableObject
+public abstract class AppState : CrashClient
 {
-    [SerializeField] private string _sceneName;
-    [SerializeField] private bool _entryScene;
-    
     // Contexts
     private Dictionary<Type, UIView> _uiViews = new Dictionary<Type, UIView>();
     private List<Coroutine> _coroutines = new List<Coroutine>();
     protected Scene _scene;
     private UIStack _uiStack = null;
 
+    public AppStateSettings settings { private set; get; }
     public UIStack uiStack { set => _uiStack = value; }
+
+    protected AppState() => settings = Resources.Load<AppStateSettings>($"{nameof(AppStateSettings)}/{GetType().Name}");
     
     public void Register(UIView[] views, Scene scene)
     {
@@ -48,7 +49,7 @@ public abstract class AppState : ScriptableObject
             view = _uiViews[type] as T;
         else
             view = null;
-
+  
         return view != null;
     }
     
@@ -83,8 +84,8 @@ public abstract class AppState : ScriptableObject
         await _uiStack.CloseTopView<T>();
     }
     
-    public string sceneName => _sceneName;
-    public bool entryScene => _entryScene;
+    public string sceneName => settings.sceneName;
+    public bool entryScene => settings.entryScene;
     
     public async Task<T> MoveStateAsync<T>(StateTransition transition = null) where T : AppState 
     {

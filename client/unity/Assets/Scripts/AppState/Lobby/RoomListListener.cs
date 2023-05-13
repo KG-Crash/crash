@@ -14,10 +14,12 @@ namespace Lobby
     public class RoomListListener : KG.ScrollView.IListener<string, KG.ButtonSingleTMP>
     {
         public RoomList roomList { get; private set; }
+        public BaseClient client { get; private set; }
 
-        public RoomListListener(RoomList response)
+        public RoomListListener(RoomList response, BaseClient client)
         {
             roomList = response;
+            this.client = client;
         }
 
         public void OnCreated(string data, KG.ButtonSingleTMP button)
@@ -28,7 +30,7 @@ namespace Lobby
 
         private async void OnEnterButtonClick(string RoomId)
         {
-            await Client.Send(new Protocol.Request.EnterRoom
+            await client.Send(new Protocol.Request.EnterRoom
             {
                 Id = RoomId
             });

@@ -46,6 +46,14 @@ namespace Network
             }));
         }
 
+        public void CopyTo(BaseClient other)
+        {
+            other.uuid = this.uuid;
+            other.id = this.id;
+            other.seed = this.seed;
+            other.Token = this.Token;
+        }
+
         public async Task<bool> Connect(string ip, int port)
         {
             try

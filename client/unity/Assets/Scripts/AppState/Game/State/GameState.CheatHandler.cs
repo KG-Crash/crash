@@ -23,7 +23,7 @@ public partial class GameState
         FixVector2 spawnCenterPos;
         if (x.HasValue == false || y.HasValue == false)
         {
-            var mySpawnPos = (FixVector3) spawnPositions[Client.Instance.id].position;
+            var mySpawnPos = (FixVector3) spawnPositions[id].position;
             spawnCenterPos = new FixVector2(mySpawnPos.x, mySpawnPos.z);
         }
         else

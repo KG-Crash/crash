@@ -10,14 +10,14 @@ public partial class GameRoomState : AppState
     public void Initialize(GameRoomTransition transition)
     {
         var view = GetView<GameRoomPanel>();
-        view.userNameList.Refresh(new UserListListenerWithButton(Client.Instance.uuid, transition.roomUsers));
+        view.userNameList.Refresh(new UserListListenerWithButton(uuid, transition.roomUsers));
         
         view.roomExitButtonClick.AddListener(OnExit);
         view.gameStartButtonClick.AddListener(OnGameStart);
         
-        _ = Client.Send(new Chat 
+        _ = Send(new Chat 
         {
-            Message = $"입장 : {Client.Instance.uuid}" 
+            Message = $"입장 : {uuid}" 
         });
     }
 
@@ -31,11 +31,11 @@ public partial class GameRoomState : AppState
     
     private async void OnGameStart()
     {
-        await Client.Send(new GameStart());
+        await Send(new GameStart());
     }
 
     private async void OnExit()
     {
-        await Client.Send(new LeaveRoom());
+        await Send(new LeaveRoom());
     }
 }

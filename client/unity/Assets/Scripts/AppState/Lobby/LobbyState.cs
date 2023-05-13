@@ -38,7 +38,7 @@ public partial class LobbyState : AppState
     
     public async Task Refresh()
     {
-        var response = await CrashClient.Request<Protocol.Response.RoomList>("lobby/room", new Protocol.Request.RoomList
+        var response = await Request<Protocol.Response.RoomList>("lobby/room", new Protocol.Request.RoomList
         { });
 
         // TODO: 기능복구
@@ -47,21 +47,21 @@ public partial class LobbyState : AppState
 
     public async void OnCreateGameRoom()
     {
-        var response = await CrashClient.Request<Protocol.Response.RouteCreate>("lobby/create-room", new Protocol.Request.RouteCreate
+        var response = await Request<Protocol.Response.RouteCreate>("lobby/create-room", new Protocol.Request.RouteCreate
         { });
 
-        if (await Client.Instance.Connect(response.Host, (int)response.Port) == false)
+        if (await Connect(response.Host, (int)response.Port) == false)
         {
             // TODO: 게임서버에 연결못했을 때 에러처리
             return;
         }
 
-        var response1 = await Client.Request<Protocol.Response.Login>(new Login
+        var response1 = await Request<Protocol.Response.Login>(new Login
         {
-            Id = Client.Instance.uuid
+            Id = uuid
         });
 
-        var response2 = await Client.Request<Protocol.Response.CreateRoom>(new CreateRoom
+        var response2 = await Request<Protocol.Response.CreateRoom>(new CreateRoom
         {
             Id = response.Id,
             Title = "my game room title",

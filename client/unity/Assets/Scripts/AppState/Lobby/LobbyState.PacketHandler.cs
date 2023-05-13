@@ -11,7 +11,7 @@ public partial class LobbyState
     [FlatBufferEvent]
     public async Task<bool> OnLogin(Login response)
     {
-        // °ÔÀÓ¼­¹ö ¿¬°áµÆÀ» ¶§ Ã³¸®
+        // ê²Œì„ì„œë²„ ì—°ê²°ëì„ ë•Œ ì²˜ë¦¬
         return true;
     }
 
@@ -19,7 +19,7 @@ public partial class LobbyState
     public async Task<bool> OnCreateRoom(CreateRoom response)
     {
         await MoveStateAsync<GameRoomState>(new GameRoomTransition(
-            true, new[] { Client.Instance.uuid })
+            true, new[] { uuid })
         );
         return true;
     }
@@ -28,7 +28,7 @@ public partial class LobbyState
     public async Task<bool> OnEnterRoom(EnterRoom response)
     {
         await MoveStateAsync<GameRoomState>(new GameRoomTransition(
-            response.User == Client.Instance.uuid, 
+            response.User == uuid, 
             response.Users.Select(x => x.Id).ToArray()
         ));
         return true;
@@ -37,7 +37,7 @@ public partial class LobbyState
     [FlatBufferEvent]
     public async Task<bool> OnRoomList(RoomList response)
     {
-        GetView<LobbyPanel>().gameRoomList.Refresh(new RoomListListener(response));
+        GetView<LobbyPanel>().gameRoomList.Refresh(new RoomListListener(response, this));
         return true;
     }
 }

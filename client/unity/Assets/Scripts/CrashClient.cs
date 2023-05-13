@@ -1,11 +1,12 @@
 using System.Threading.Tasks;
+using Network;
 using Protocol;
 
-public class CrashClient
+public class CrashClient : BaseClient
 {
-    public static async Task<T> Request<T>(string api, IProtocol protocol)
+    public async Task<T> Request<T>(string api, IProtocol protocol)
         where T : class, IProtocol
     {
-        return await Network.Client.Request<T>(CrashResources.LoadServerSettings().lobbyServerAddress, api, protocol);
+        return await Request<T>(CrashResources.LoadServerSettings().lobbyServerAddress, api, protocol);
     }
 }

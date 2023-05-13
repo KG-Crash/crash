@@ -17,7 +17,7 @@ public partial class GameRoomState
             return true;
         }
 
-        Client.Instance.seed = response.Seed;
+        seed = response.Seed;
         _ = MoveStateAsync<GameState>();
         return true;
     }
@@ -25,7 +25,7 @@ public partial class GameRoomState
     [FlatBufferEvent]
     public async Task<bool> OnLeaveRoom(LeaveRoom response)
     {
-        var isMine = (response.User == Client.Instance.uuid);
+        var isMine = (response.User == uuid);
 
         if (isMine)
         {
@@ -49,7 +49,7 @@ public partial class GameRoomState
     [FlatBufferEvent]
     public async Task<bool> OnWhisper(Whisper response)
     {
-        if (Client.Instance.uuid == response.From)
+        if (uuid == response.From)
         {
             UnityEngine.Debug.Log($"{response.To} << {response.Message}");
         }
@@ -64,7 +64,7 @@ public partial class GameRoomState
     public async Task<bool> OnEnterRoom(EnterRoom response)
     {
         var view = GetView<GameRoomPanel>();
-        view.userNameList.Refresh(new UserListListenerWithButton(Client.Instance.uuid, response.Users.Select(x => x.Id)));
+        view.userNameList.Refresh(new UserListListenerWithButton(uuid, response.Users.Select(x => x.Id)));
         return true;
     }
 }

@@ -12,7 +12,7 @@ public partial class IntroState : AppState
     {
         var view = GetView<IntroPanel>();
         view.startButtonClick.AddListener(OnConnectAsync);
-        _ = Client.Instance.Disconnect();
+        _ = Disconnect();
 
         view.connectSpinner.SetActive(false);
 
@@ -46,12 +46,12 @@ public partial class IntroState : AppState
         {
             var uuid = $"{Guid.NewGuid()}";
 
-            var response = await CrashClient.Request<Protocol.Response.Authentication>(
+            var response = await Request<Protocol.Response.Authentication>(
                 "authentication", new Protocol.Request.Authentication {Id = uuid}
             );
 
-            Client.Instance.Token = response.Token;
-            Client.Instance.uuid = uuid;
+            Token = response.Token;
+            this.uuid = uuid;
             
             Debug.Log($"response.Token={response.Token}, uuid={uuid}");
             return true;
