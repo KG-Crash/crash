@@ -16,6 +16,8 @@ public partial class LobbyState : AppState
     private DateTime _lastUpdatedRefreshDate = DateTime.Now;
     public const int REFRESH_ROOM_INTERVAL = 10;
     
+    public LobbyState() : base() {}
+    
     [InitializeMethod]
     public void Initialize()
     {

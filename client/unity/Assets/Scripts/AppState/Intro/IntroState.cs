@@ -7,6 +7,8 @@ using UnityEngine;
 [StateBind(flatBuffer: true)]
 public partial class IntroState : AppState
 {
+    public IntroState() : base() {}
+    
     [InitializeMethod]
     public void Initialize()
     {

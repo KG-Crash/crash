@@ -20,7 +20,10 @@ public abstract class AppState : CrashClient
     public AppStateSettings settings { private set; get; }
     public UIStack uiStack { set => _uiStack = value; }
 
-    protected AppState() => settings = Resources.Load<AppStateSettings>($"{nameof(AppStateSettings)}/{GetType().Name}");
+    protected AppState() : base()
+    {
+        settings = Resources.Load<AppStateSettings>($"{nameof(AppStateSettings)}/{GetType().Name}");  
+    } 
     
     public void Register(UIView[] views, Scene scene)
     {

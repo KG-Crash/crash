@@ -6,6 +6,8 @@ using UI;
 [StateBind(flatBuffer: true)]
 public partial class GameRoomState : AppState
 {
+    public GameRoomState() : base() {}
+    
     [InitializeMethod(transition = typeof(GameRoomTransition))]
     public void Initialize(GameRoomTransition transition)
     {

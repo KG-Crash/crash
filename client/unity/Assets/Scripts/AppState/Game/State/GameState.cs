@@ -28,6 +28,8 @@ public partial class GameState : AppState
     private ProjectileActorPool projectileActorPool { get; set; }
     private UnitActorFactory unitActorFactory { get; set; }
     
+    public GameState() : base() {}
+    
     [InitializeMethod(context = typeof(GameSceneContext))]
     public void Initialize(GameSceneContext context)
     {
