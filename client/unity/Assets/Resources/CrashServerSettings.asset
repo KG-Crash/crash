@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54ba99baf1bd4298a4893210787f8e19, type: 3}
   m_Name: CrashServerSettings
   m_EditorClassIdentifier: 
-  _connectToRemote: 1
-  _localLobbyServerAddress: http://localhost:8080
+  _connectToRemote: 0
+  _localLobbyServerAddress: http://localhost:8001
   _remoteLobbyServerAddress: http://175.196.121.225:8001
