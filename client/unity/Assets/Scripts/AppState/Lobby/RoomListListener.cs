@@ -1,22 +1,15 @@
-using Network;
 using Protocol.Response;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using KG;
-using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 namespace Lobby
 {
     public class RoomListListener : KG.ScrollView.IListener<string, KG.ButtonSingleTMP>
     {
         public RoomList roomList { get; private set; }
-        public BaseClient client { get; private set; }
+        public LobbyState client { get; private set; }
 
-        public RoomListListener(RoomList response, BaseClient client)
+        public RoomListListener(RoomList response, LobbyState client)
         {
             roomList = response;
             this.client = client;
@@ -30,6 +23,8 @@ namespace Lobby
 
         private async void OnEnterButtonClick(string RoomId)
         {
+            await client.ConnectAsEnter(RoomId);
+
             await client.Send(new Protocol.Request.EnterRoom
             {
                 Id = RoomId
