@@ -52,6 +52,7 @@ namespace Network
             other.id = this.id;
             other.seed = this.seed;
             other.Token = this.Token;
+            other._channel = this._channel;
         }
 
         public async Task<bool> Connect(string ip, int port)
