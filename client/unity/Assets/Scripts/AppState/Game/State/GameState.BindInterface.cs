@@ -31,7 +31,7 @@ public partial class GameState
 {
     private Dictionary<object, IUpdateLockStep> _updateSubscribers = new Dictionary<object, IUpdateLockStep>();
     private Dictionary<UnityEngine.Object, IUpdateLockStep> _updateUnitySubscribers = new Dictionary<UnityEngine.Object, IUpdateLockStep>();
-    private Dictionary<UnityEngine.Object, MethodInfo[]> _updateMethods = new Dictionary<UnityEngine.Object, MethodInfo[]>();
+    private Dictionary<object, MethodInfo[]> _updateMethods = new Dictionary<object, MethodInfo[]>();
 
     private ParamOption[] _paramOptions = {
         new ParamOption() {name = "input", type = typeof(Frame), acceptFlag = MatchParamFlag.Self, required = true},

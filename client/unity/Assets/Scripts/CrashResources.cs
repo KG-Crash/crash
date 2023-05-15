@@ -5,19 +5,8 @@ using UnityEngine;
 
 public static class CrashResources
 {
-    private const string appStatePathPrefix = "AppState/"; 
     private const string uiCanvasPrefabPath = "UI/Canvas";
     private static Mesh quad = null;
-    
-    public static AppState[] LoadAppStates()
-    {
-        var type = typeof(AppState);
-        return Assembly.GetAssembly(type).GetTypes()
-            .Where(t => !t.IsAbstract && t.IsSubclassOf(type))
-            .Select(x => x.Name)
-            .Select(typeName => Resources.Load<AppState>($"{appStatePathPrefix}{typeName}"))
-            .ToArray();
-    }
     
     public static Canvas LoadUICanvasPrefab()
     {

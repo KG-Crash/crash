@@ -4,6 +4,6 @@ public partial class GameState
 {
     public void SendResume()
     {
-        _ = Client.Send(new Protocol.Request.Resume());
+        _ = Send(new Protocol.Request.Resume());
     }
 }

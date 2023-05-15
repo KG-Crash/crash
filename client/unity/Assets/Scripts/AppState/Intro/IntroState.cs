@@ -1,20 +1,20 @@
 using System;
 using System.Threading.Tasks;
-using Module;
-using Network;
-using UnityEngine;
 using UI;
+using UnityEngine;
 
 [UIBind(typeof(IntroPanel), true)]
 [StateBind(flatBuffer: true)]
 public partial class IntroState : AppState
 {
+    public IntroState() : base() {}
+    
     [InitializeMethod]
     public void Initialize()
     {
         var view = GetView<IntroPanel>();
         view.startButtonClick.AddListener(OnConnectAsync);
-        _ = Client.Instance.Disconnect();
+        _ = Disconnect();
 
         view.connectSpinner.SetActive(false);
 
@@ -48,12 +48,12 @@ public partial class IntroState : AppState
         {
             var uuid = $"{Guid.NewGuid()}";
 
-            var response = await CrashClient.Request<Protocol.Response.Authentication>(
+            var response = await Request<Protocol.Response.Authentication>(
                 "authentication", new Protocol.Request.Authentication {Id = uuid}
             );
 
-            Client.Instance.Token = response.Token;
-            Client.Instance.uuid = uuid;
+            Token = response.Token;
+            CrashClient.uuid = uuid;
             
             Debug.Log($"response.Token={response.Token}, uuid={uuid}");
             return true;

@@ -14,6 +14,7 @@ namespace Game.Service
         }
 
         private Listener _listener;
+        private BaseClient _client;
 
         public Protocol.Request.ActionQueue Request { get; private set; } = new Protocol.Request.ActionQueue
         {
@@ -22,9 +23,10 @@ namespace Game.Service
 
         public ActionBuffer Actions { get; private set; }
 
-        public ActionService(Listener listener)
+        public ActionService(Listener listener, Network.BaseClient client)
         {
             _listener = listener;
+            _client = client;
         }
 
         public void Setup(IEnumerable<int> sequences)
@@ -44,7 +46,7 @@ namespace Game.Service
 
         public void Send(string message)
         {
-            _ = Client.Send(new Protocol.Request.InGameChat
+            _ = _client.Send(new Protocol.Request.InGameChat
             {
                 Frame = LockStep.Frame.In,
                 Turn = LockStep.Turn.In,
@@ -55,7 +57,7 @@ namespace Game.Service
         public void Flush()
         {
             Request.Turn = LockStep.Turn.In;
-            _ = Client.Send(Request);
+            _ = _client.Send(Request);
             Request.Actions.Clear();
         }
 

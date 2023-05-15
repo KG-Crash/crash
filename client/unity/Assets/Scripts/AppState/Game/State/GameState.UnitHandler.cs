@@ -97,7 +97,7 @@ public partial class GameState : Unit.Listener, UnitActor.Listener
 
     public void OnClear(UnitActor actor)
     {
-        DestroyImmediate(actor.gameObject);
+        UnityEngine.Object.DestroyImmediate(actor.gameObject);
     }
 
     // TODO :: 무지성 시퀀스 어케함?

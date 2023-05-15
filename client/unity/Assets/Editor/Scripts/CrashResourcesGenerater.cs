@@ -8,18 +8,18 @@ public static class CrashResourcesGenerater
 {
     private const string appStatePath = "Assets/Resources/AppState/"; 
     
-    [MenuItem("Crash/Generate All AppState")]
+    [MenuItem("Crash/Generate All AppStateSettings")]
     private static void GenerateAppStates()
     {
-        var appStateTypes = System.AppDomain.CurrentDomain.GetAssemblies()
+        var appStateSettingTypes = System.AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(x => x.GetTypes())
-            .Where(x => x.IsSubclassOf(typeof(AppState)) && !x.IsAbstract)
+            .Where(x => x.IsSubclassOf(typeof(AppStateSettings)) && !x.IsAbstract)
             .ToArray();
 
-        foreach (var type in appStateTypes)
+        foreach (var type in appStateSettingTypes)
         {
-            var path = $"{appStatePath}{type.Name}.asset";
-            var appStateObj = AssetDatabase.LoadAssetAtPath<AppState>(path);
+            var path = $"{appStatePath}{type.Name}.asset".Replace("Settings", "");
+            var appStateObj = AssetDatabase.LoadAssetAtPath<AppStateSettings>(path);
 
             if (appStateObj != null) continue;
             

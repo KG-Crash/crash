@@ -5,15 +5,10 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-public class Controller
+public class Client : BaseClient
 {
     public string Id { get; private set; }
     public bool IsMaster { get; private set; }
-
-    public Controller()
-    {
-        Handler.Bind(this);
-    }
 
     [FlatBufferEvent]
     public async Task<bool> OnLogin(Protocol.Response.Login response)
@@ -21,7 +16,7 @@ public class Controller
         if (response.Error > 0)
             return false;
 
-        this.Id = response.Id;
+        //this.Id = response.Id;
         return true;
     }
 
@@ -60,7 +55,7 @@ public class Controller
             }
         }
 
-        await Client.Send(new Protocol.Request.Chat
+        await Send(new Protocol.Request.Chat
         {
             Message = "하이요"
         });
@@ -68,34 +63,34 @@ public class Controller
         if (response.Master == this.Id)
         {
 #if CASE_KICK
-            await Client.Send(new Protocol.Request.Whisper
+            await Send(new Protocol.Request.Whisper
             {
                 User = response.User,
                 Message = "님 그냥 강퇴시킬게요"
             });
 
-            await Client.Send(new Protocol.Request.KickRoom
+            await Send(new Protocol.Request.KickRoom
             {
                 User = response.User
             });
 #elif CASE_SWITCH_MASTER
 
-            await Client.Send(new Protocol.Request.Whisper
+            await Send(new Protocol.Request.Whisper
             {
                 User = response.User,
                 Message = "님 그냥 저 나가볼게요"
             });
 
-            await Client.Send(new Protocol.Request.LeaveRoom
+            await Send(new Protocol.Request.LeaveRoom
             { });
 #else
-            await Client.Send(new Protocol.Request.Whisper
+            await Send(new Protocol.Request.Whisper
             {
                 User = response.User,
                 Message = "게임 시작 할게요"
             });
 
-            await Client.Send(new Protocol.Request.GameStart
+            await Send(new Protocol.Request.GameStart
             { });
 #endif
         }
@@ -149,14 +144,14 @@ public class Controller
 
         if (response.Rooms.Count > 0)
         {
-            await Client.Send(new Protocol.Request.EnterRoom
+            await Send(new Protocol.Request.EnterRoom
             {
                 Id = response.Rooms.First().Id
             });
         }
         else
         {
-            await Client.Send(new Protocol.Request.CreateRoom 
+            await Send(new Protocol.Request.CreateRoom
             {
                 Title = "my game room title",
                 Teams = new System.Collections.Generic.List<int>
@@ -165,7 +160,7 @@ public class Controller
                 }
             });
         }
-        
+
         return true;
     }
 
@@ -200,8 +195,8 @@ public class Controller
 
     [FlatBufferEvent]
     public async Task<bool> OnKicked(Protocol.Response.KickedRoom response)
-    { 
-        if(response.Error > 0)
+    {
+        if (response.Error > 0)
             return false;
 
         Console.WriteLine("당신은 강퇴당했습니다.");
@@ -215,11 +210,11 @@ namespace console
     {
         static async Task Main(string[] args)
         {
-            var controller = new Controller();
+            var client = new Client();
 
-            if (await Client.Instance.Connect("localhost", 8000))
+            if (await client.Connect("localhost", 8000))
             {
-                await Client.Send(new Protocol.Request.RoomList { });
+                await client.Send(new Protocol.Request.RoomList { });
             }
 
             Console.ReadLine();

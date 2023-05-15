@@ -63,7 +63,7 @@ public partial class GameState
         _minimap.DrawReducedTerrainToMinimap(_updateMinimapCb);
         _unitDrawer.DrawUnitRectsToMinimap(
             _updateMinimapCb,
-            FindObjectOfType<KG.Map>(),
+            UnityEngine.Object.FindObjectOfType<KG.Map>(),
             _minimapOptions.unitTeamColors,
             unitActorMaps.Keys.OfType<Unit>(),
             _minimapOptions.unitPixelSize / GetView<GamePanel>().minimapViewSize

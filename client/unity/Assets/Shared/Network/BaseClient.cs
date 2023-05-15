@@ -12,28 +12,24 @@ using System.Threading.Tasks;
 
 namespace Network
 {
-    public class Client
+    public class BaseClient
     {
         // Events
         public event Action OnConnectFailed;
 
-        // Singleton instance
-        private static readonly Lazy<Client> _ist = new Lazy<Client>(() => new Client());
-        public static Client Instance => _ist.Value;
-
         // DotNetty
+        private Handler _handler;
         private readonly MultithreadEventLoopGroup _multiThreadEventLoopGroup = new MultithreadEventLoopGroup();
         private readonly Bootstrap _bootstrap = new Bootstrap();
         private IChannel _channel = null;
 
-        public string uuid { get; set; }
-        public int id { get; set; } = -1;
-        public long seed { get; set; }
         public bool Connected => _channel?.Active ?? false;
-        public string Token { get; set; } = null;
+        public virtual string Token { get; set; } = null;
 
-        private Client()
+        protected BaseClient(IDispatchable dispatcher = null)
         {
+            _handler = new Handler(this, dispatcher);
+
             _bootstrap
             .Group(_multiThreadEventLoopGroup)
             .Channel<TcpSocketChannel>()
@@ -43,8 +39,12 @@ namespace Network
                 channel.Pipeline.AddLast(new LengthFieldBasedFrameDecoder(ByteOrder.LittleEndian, 1024 * 1024, 0, 4, 0, 4, true));
                 channel.Pipeline.AddLast(new LengthFieldPrepender(ByteOrder.LittleEndian, 4, 0, false));
                 channel.Pipeline.AddLast(new IdleStateHandler(0, 30, 0));
-                channel.Pipeline.AddLast(Handler.Instance);
+                channel.Pipeline.AddLast(_handler);
             }));
+        }
+
+        public void CopyTo(BaseClient other)
+        {
         }
 
         public async Task<bool> Connect(string ip, int port)
@@ -73,7 +73,7 @@ namespace Network
             _channel = null;
         }
 
-        public static async Task Send(IProtocol protocol)
+        public async Task Send(IProtocol protocol)
         {
             using (var mstream = new MemoryStream())
             {
@@ -84,12 +84,12 @@ namespace Network
                     bwriter.Flush();
 
                     var bytes = mstream.ToArray();
-                    await Instance._channel?.WriteAndFlushAsync(Unpooled.Buffer().WriteBytes(bytes));
+                    await _channel?.WriteAndFlushAsync(Unpooled.Buffer().WriteBytes(bytes));
                 }
             }
         }
 
-        public static async Task<T> Request<T>(IProtocol protocol, TimeSpan? timeout = null) where T : class, IProtocol
+        public async Task<T> Request<T>(IProtocol protocol, TimeSpan? timeout = null) where T : class, IProtocol
         {
             using (var mstream = new MemoryStream())
             {
@@ -100,14 +100,14 @@ namespace Network
                     bwriter.Flush();
 
                     var bytes = mstream.ToArray();
-                    await Instance._channel?.WriteAndFlushAsync(Unpooled.Buffer().WriteBytes(bytes));
+                    await _channel?.WriteAndFlushAsync(Unpooled.Buffer().WriteBytes(bytes));
                 }
             }
 
-            return await Handler.Instance.GetProtocolResult<T>(timeout) as T;
+            return await _handler.GetProtocolResult<T>(timeout) as T;
         }
 
-        public static async Task<T> Request<T>(string host, string api, IProtocol protocol)
+        public async Task<T> Request<T>(string host, string api, IProtocol protocol)
             where T : class, IProtocol
         {
             var url = $"{host}/{api}";
@@ -127,8 +127,8 @@ namespace Network
                     request.Method = "POST";
                     request.ContentType = "application/octet-stream";
                     request.ContentLength = bytes.Length;
-                    if(string.IsNullOrEmpty(Instance.Token) == false)
-                        request.Headers.Add("Authorization", $"Bearer {Instance.Token}");
+                    if(string.IsNullOrEmpty(Token) == false)
+                        request.Headers.Add("Authorization", $"Bearer {Token}");
 
                     using (var stream = await request.GetRequestStreamAsync())
                     {
@@ -155,7 +155,7 @@ namespace Network
                             }
                         }
 
-                        return Handler.Instance.Invoke<T>(buffer);
+                        return _handler.Invoke<T>(buffer);
                     }
                 }
             }

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Network;
 
 namespace Game
 {
@@ -40,12 +41,14 @@ namespace Game
         #region properties
         public GameState owner { get; private set; }
         public List<Player> allPlayers => this.SelectMany(x => x.Value.players.Values).ToList();
+        private BaseClient _client;
         #endregion
 
-        public TeamCollection(GameState owner, Team.Listener listener)
+        public TeamCollection(GameState owner, Team.Listener listener, BaseClient client)
         {
             this.owner = owner;
             _listener = listener;
+            _client = client;
         }
 
         public Team Add(int id)
@@ -53,7 +56,7 @@ namespace Game
             if (this._teams.ContainsKey(id))
                 throw new Exception("asd");
 
-            var team = new Team(id, _listener);
+            var team = new Team(id, _listener, _client);
             _teams.Add(id, team);
             return team;
         }

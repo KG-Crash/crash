@@ -59,7 +59,15 @@ namespace KG
         {
             var view = _pool[type];
             _pool.Remove(type);
-            Object.Destroy(view.gameObject);
+            try
+            {
+                Object.Destroy(view.gameObject);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw e;
+            }
         }
 
         public UIView Get(Type type)

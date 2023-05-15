@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Network;
 
 namespace Game
 {
@@ -38,12 +39,14 @@ namespace Game
         #region private fields
         private Team _team;
         private Player.Listener _listener;
+        private BaseClient _client;
         #endregion
 
-        public PlayerCollection(Team team, Player.Listener listener)
+        public PlayerCollection(Team team, Player.Listener listener, BaseClient client)
         {
             _team = team;
             _listener = listener;
+            _client = client;
         }
 
         public Player Add(int id, int spawnIndex)
@@ -51,7 +54,7 @@ namespace Game
             if (this._players.ContainsKey(id))
                 throw new Exception("asd");
 
-            var player = new Player(id, _team, spawnIndex, _listener);
+            var player = new Player(id, _team, spawnIndex, _listener, _client);
             this._players.Add(id, player);
             return player;
         }

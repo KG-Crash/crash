@@ -85,7 +85,9 @@ namespace Game
 
         public Team team { get; private set; }
 
-        public Player(int id, Team team, int spawnIndex, Listener listener)
+        private BaseClient client { get; set; }
+
+        public Player(int id, Team team, int spawnIndex, Listener listener, BaseClient client)
         {
             units = new UnitCollection(this, listener);
             this.listener = listener;
@@ -93,6 +95,7 @@ namespace Game
             this.upgrade = new Upgrade(this);
             this.team = team;
             this.spawnIndex = spawnIndex;
+            this.client = client;
             
             listener?.OnSpawned(this);
         }
@@ -116,7 +119,7 @@ namespace Game
 
         public void OnUpdateLockStep(Frame input, Frame output)
         {
-            if (id != Client.Instance.id)
+            if (id != CrashClient.id)
                 throw new ApplicationException("내 업그레이드만 책임을 가짐");
 
             upgrade.UpdateAbility(input);
