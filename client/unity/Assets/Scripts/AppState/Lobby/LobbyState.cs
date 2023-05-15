@@ -6,6 +6,7 @@ using Network;
 using UnityEngine;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using Protocol;
 using Protocol.Request;
 using UI;
 
@@ -47,57 +48,29 @@ public partial class LobbyState : AppState
         UnityEngine.Debug.Log(response);
     }
 
-    public async Task<(Protocol.Response.RouteCreate, Protocol.Response.Login)> ConnectAsCreate()
+    public async Task ConnectAsCreate()
     {
         var response = await Request<Protocol.Response.RouteCreate>(
             "lobby/create-room", new Protocol.Request.RouteCreate()
         );
-
-        if (await Connect(response.Host, (int)response.Port) == false)
-        {
-            // TODO: 게임서버에 연결못했을 때 에러처리
-            return (response, null);
-        }
-
-        var response1 = await Request<Protocol.Response.Login>(new Login
-        {
-            Id = uuid
+        await MoveStateAsync<GameRoomState>(new GameRoomTransition() {
+            Host = response.Host, Port = response.Port, Enter = false, RouteCreate = response
         });
-
-        return (response, response1);
     }
 
-    public async Task<(Protocol.Response.RouteEnter, Protocol.Response.Login)> ConnectAsEnter(string RoomId)
+    public async Task ConnectAsEnter(string RoomId)
     {
-        var response = await Request<Protocol.Response.RouteEnter>("lobby/enter-room", new Protocol.Request.RouteEnter() { Id = RoomId });
-            
-        if (await Connect(response.Host, (int)response.Port) == false)
-        {
-            // TODO: 게임서버에 연결못했을 때 에러처리
-            return (response, null);
-        }
-
-        var response1 = await Request<Protocol.Response.Login>(new Protocol.Request.Login
-        {
-            Id = uuid
+        var response = await Request<Protocol.Response.RouteEnter>(
+            "lobby/enter-room", new Protocol.Request.RouteEnter() { Id = RoomId }
+        );
+        await MoveStateAsync<GameRoomState>(new GameRoomTransition() {
+            Host = response.Host, Port = response.Port, Enter = true, RouteEnter = response, RoomId = RoomId
         });
-
-        return (response, response1);
     }
 
     public async void OnCreateGameRoom()
     {
-        var response = await ConnectAsCreate();
-
-        var response2 = await Request<Protocol.Response.CreateRoom>(new CreateRoom
-        {
-            Id = response.Item1.Id,
-            Title = "my game room title",
-            Teams = new System.Collections.Generic.List<int>
-            {
-                2, 2 // 2 vs 2
-            }
-        });
+        await ConnectAsCreate();
     }
 
     private void OnRefreshRoom()

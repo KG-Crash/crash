@@ -25,6 +25,10 @@ public struct LogScope : IDisposable
 
 public class CrashClient : BaseClient
 {
+    public static string uuid { get; set; }
+    public static int id { get; set; }
+    public static long seed { get; set; }
+
     protected CrashClient() : base(Dispatcher.Instance) { }
 
     public async Task<T> Request<T>(string api, IProtocol protocol)

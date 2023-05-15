@@ -53,7 +53,7 @@ public partial class IntroState : AppState
             );
 
             Token = response.Token;
-            this.uuid = uuid;
+            CrashClient.uuid = uuid;
             
             Debug.Log($"response.Token={response.Token}, uuid={uuid}");
             return true;

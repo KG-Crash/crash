@@ -14,26 +14,7 @@ public partial class LobbyState
         // 게임서버 연결됐을 때 처리
         return true;
     }
-
-    [FlatBufferEvent]
-    public async Task<bool> OnCreateRoom(CreateRoom response)
-    {
-        await MoveStateAsync<GameRoomState>(new GameRoomTransition(
-            true, new[] { uuid })
-        );
-        return true;
-    }
-
-    [FlatBufferEvent]
-    public async Task<bool> OnEnterRoom(EnterRoom response)
-    {
-        await MoveStateAsync<GameRoomState>(new GameRoomTransition(
-            response.User == uuid, 
-            response.Users.Select(x => x.Id).ToArray()
-        ));
-        return true;
-    }
-
+    
     [FlatBufferEvent]
     public async Task<bool> OnRoomList(RoomList response)
     {

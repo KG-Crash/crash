@@ -23,9 +23,6 @@ namespace Network
         private readonly Bootstrap _bootstrap = new Bootstrap();
         private IChannel _channel = null;
 
-        public virtual string uuid { get; set; }
-        public virtual int id { get; set; } = -1;
-        public virtual long seed { get; set; }
         public bool Connected => _channel?.Active ?? false;
         public virtual string Token { get; set; } = null;
 

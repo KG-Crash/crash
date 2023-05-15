@@ -11,18 +11,6 @@ using UnityEngine.SceneManagement;
 
 public abstract class AppState : CrashClient
 {
-    public static int GlobalId { get; set; }
-    public override int id { get => GlobalId; set => GlobalId = value; }
-
-    public static long GlobalSeed { get; set; }
-    public override long seed { get => GlobalSeed; set => GlobalSeed = value; }
-
-    public static string GlobalUUID { get; set; }
-    public override string uuid { get => GlobalUUID; set => GlobalUUID = value; }
-    
-    public static string GlobalToken { get; set; }
-    public override string Token { get => GlobalToken; set => GlobalToken = value; }
-
     // Contexts
     private Dictionary<Type, UIView> _uiViews = new Dictionary<Type, UIView>();
     private List<Coroutine> _coroutines = new List<Coroutine>();

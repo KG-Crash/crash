@@ -25,10 +25,6 @@ namespace Lobby
         {
             await client.ConnectAsEnter(RoomId);
 
-            await client.Send(new Protocol.Request.EnterRoom
-            {
-                Id = RoomId
-            });
         }
 
         public void OnDestroyed(KG.ButtonSingleTMP kgButton)

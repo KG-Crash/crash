@@ -119,7 +119,7 @@ namespace Game
 
         public void OnUpdateLockStep(Frame input, Frame output)
         {
-            if (id != client.id)
+            if (id != CrashClient.id)
                 throw new ApplicationException("내 업그레이드만 책임을 가짐");
 
             upgrade.UpdateAbility(input);

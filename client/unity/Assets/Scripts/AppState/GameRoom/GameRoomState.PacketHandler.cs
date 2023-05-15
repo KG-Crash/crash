@@ -9,6 +9,22 @@ using UI;
 public partial class GameRoomState
 {
     [FlatBufferEvent]
+    public async Task<bool> OnCreateRoom(CreateRoom response)
+    {
+        var view = GetView<GameRoomPanel>();
+        view.userNameList.Refresh(new UserListListenerWithButton(uuid, new [] {uuid}));
+        return true;
+    }
+
+    [FlatBufferEvent]
+    public async Task<bool> OnEnterRoom(EnterRoom response)
+    {
+        var view = GetView<GameRoomPanel>();
+        view.userNameList.Refresh(new UserListListenerWithButton(uuid, response.Users.Select(x => x.Id)));
+        return true;
+    }
+    
+    [FlatBufferEvent]
     public async Task<bool> OnGameStart(GameStart response)
     {
         if (response.Error != 0)
@@ -57,14 +73,6 @@ public partial class GameRoomState
         {
             UnityEngine.Debug.Log($"{response.From} >> {response.Message}");
         }
-        return true;
-    }
-
-    [FlatBufferEvent]
-    public async Task<bool> OnEnterRoom(EnterRoom response)
-    {
-        var view = GetView<GameRoomPanel>();
-        view.userNameList.Refresh(new UserListListenerWithButton(uuid, response.Users.Select(x => x.Id)));
         return true;
     }
 }

@@ -12,15 +12,39 @@ public partial class GameRoomState : AppState
     public void Initialize(GameRoomTransition transition)
     {
         var view = GetView<GameRoomPanel>();
-        view.userNameList.Refresh(new UserListListenerWithButton(uuid, transition.roomUsers));
-        
         view.roomExitButtonClick.AddListener(OnExit);
         view.gameStartButtonClick.AddListener(OnGameStart);
-        
-        _ = Send(new Chat 
+    }
+
+    public async void Connect(GameRoomTransition transition)
+    {
+        if (await Connect(transition.Host, (int) transition.Port) == false)
         {
-            Message = $"입장 : {uuid}" 
+            // TODO: 게임서버에 연결못했을 때 에러처리
+            return;
+        }
+
+        var loginResponse = await Request<Protocol.Response.Login>(new Protocol.Request.Login
+        {
+            Id = uuid
         });
+
+        if (transition.Enter)
+        {
+            var _ = await Request<Protocol.Response.CreateRoom>(new CreateRoom
+            {
+                Id = transition.RouteCreate.Id,
+                Title = "my game room title",
+                Teams = new System.Collections.Generic.List<int>
+                {
+                    2, 2 // 2 vs 2
+                }
+            });
+        }
+        else
+        {
+            await Send(new Protocol.Request.EnterRoom {Id = transition.RoomId});
+        }
     }
 
     [ClearMethod]
