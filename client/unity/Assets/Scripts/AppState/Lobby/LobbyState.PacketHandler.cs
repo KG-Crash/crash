@@ -8,12 +8,6 @@ using UI;
 
 public partial class LobbyState
 {
-    [FlatBufferEvent]
-    public async Task<bool> OnLogin(Login response)
-    {
-        // 게임서버 연결됐을 때 처리
-        return true;
-    }
     
     [FlatBufferEvent]
     public async Task<bool> OnRoomList(RoomList response)
