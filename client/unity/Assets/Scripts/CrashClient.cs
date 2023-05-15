@@ -28,6 +28,12 @@ public class CrashClient : BaseClient
     public static string uuid { get; set; }
     public static int id { get; set; }
     public static long seed { get; set; }
+    public static string GlobalToken;
+    public override string Token
+    {
+        get => GlobalToken;
+        set => GlobalToken = value;
+    }
 
     protected CrashClient() : base(Dispatcher.Instance) { }
 

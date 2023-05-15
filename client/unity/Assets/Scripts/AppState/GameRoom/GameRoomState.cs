@@ -14,6 +14,8 @@ public partial class GameRoomState : AppState
         var view = GetView<GameRoomPanel>();
         view.roomExitButtonClick.AddListener(OnExit);
         view.gameStartButtonClick.AddListener(OnGameStart);
+
+        Connect(transition);
     }
 
     public async void Connect(GameRoomTransition transition)
@@ -31,6 +33,10 @@ public partial class GameRoomState : AppState
 
         if (transition.Enter)
         {
+            await Send(new Protocol.Request.EnterRoom {Id = transition.RoomId});
+        }
+        else
+        {
             var _ = await Request<Protocol.Response.CreateRoom>(new CreateRoom
             {
                 Id = transition.RouteCreate.Id,
@@ -40,10 +46,6 @@ public partial class GameRoomState : AppState
                     2, 2 // 2 vs 2
                 }
             });
-        }
-        else
-        {
-            await Send(new Protocol.Request.EnterRoom {Id = transition.RoomId});
         }
     }
 
