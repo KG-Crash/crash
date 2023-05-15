@@ -23,11 +23,11 @@ namespace Network
         private readonly Bootstrap _bootstrap = new Bootstrap();
         private IChannel _channel = null;
 
-        public string uuid { get; set; }
-        public int id { get; set; } = -1;
-        public long seed { get; set; }
+        public virtual string uuid { get; set; }
+        public virtual int id { get; set; } = -1;
+        public virtual long seed { get; set; }
         public bool Connected => _channel?.Active ?? false;
-        public string Token { get; set; } = null;
+        public virtual string Token { get; set; } = null;
 
         protected BaseClient(IDispatchable dispatcher = null)
         {
@@ -48,11 +48,6 @@ namespace Network
 
         public void CopyTo(BaseClient other)
         {
-            other.uuid = this.uuid;
-            other.id = this.id;
-            other.seed = this.seed;
-            other.Token = this.Token;
-            other._channel = this._channel;
         }
 
         public async Task<bool> Connect(string ip, int port)

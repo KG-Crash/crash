@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="Assets\Editor\Scripts\CrashResourcesGenerater.cs" />
     <Compile Include="Assets\Editor\Scripts\UnitExportTableEditor.cs" />
+    <Compile Include="Assets\Editor\Scripts\UpgradeIconTableEditor.cs" />
     <Compile Include="Assets\Editor\Scripts\UnitEditor.cs" />
     <Compile Include="Assets\Editor\Scripts\UnitTableEditor.cs" />
     <Compile Include="Assets\Editor\Scripts\CrashSettings.cs" />
@@ -62,7 +63,6 @@
     <Compile Include="Assets\Editor\Scripts\UnitExportTable.cs" />
     <Compile Include="Assets\Editor\Scripts\CrashSettingsProvider.cs" />
     <Compile Include="Assets\Editor\Scripts\SerializableDictionaryEditor.cs" />
-    <Compile Include="Assets\Editor\Scripts\UpgradeIconTableEditor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Editor\Editor.asmdef" />

@@ -83,7 +83,7 @@
     <Compile Include="Assets\Scripts\AppState\Game\ActionBuffer.cs" />
     <Compile Include="Assets\Scripts\SerializableDictionary.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\Tables\UpgradeIconTable.cs" />
-    <Compile Include="Assets\Scripts\AppState\Lobby\LobbyState.cs" />
+    <Compile Include="Assets\Scripts\AppState\Lobby\LobbyStateSettings.cs" />
     <Compile Include="Assets\Scripts\UI\View\UpgradeIconButton.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\Service\ChatService.cs" />
     <Compile Include="Assets\Scripts\UI\Panel\LobbyPanel.cs" />
@@ -110,7 +110,9 @@
     <Compile Include="Assets\Scripts\Model\Team.cs" />
     <Compile Include="Assets\Scripts\UI\Popup.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\UnityResources.cs" />
+    <Compile Include="Assets\Scripts\AppState\GameRoom\GameRoomState.cs" />
     <Compile Include="Assets\Scripts\AppState\Lobby\LobbyState.PacketHandler.cs" />
+    <Compile Include="Assets\Scripts\AppState\Game\State\GameState.cs" />
     <Compile Include="Assets\Scripts\Actor\UnitActor.Animation.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\State\GameState.UnitHandler.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\User.cs" />
@@ -126,11 +128,14 @@
     <Compile Include="Assets\Scripts\AppState\AppStateService.cs" />
     <Compile Include="Assets\Scripts\Model\LogicalObject.cs" />
     <Compile Include="Assets\Scripts\AppState\Intro\IntroState.PacketHandler.cs" />
-    <Compile Include="Assets\Scripts\AppState\GameRoom\GameRoomState.cs" />
+    <Compile Include="Assets\Scripts\AppState\GameRoom\GameRoomStateSettings.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\State\GameState.BindInterface.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\State\GameState.Callback.cs" />
+    <Compile Include="Assets\Scripts\AppState\Lobby\LobbyState.cs" />
     <Compile Include="Assets\Scripts\Model\Projectile.cs" />
     <Compile Include="Assets\Scripts\UI\Panel\GameRoomPanel.cs" />
+    <Compile Include="Assets\Scripts\AppState\Intro\IntroState.cs" />
+    <Compile Include="Assets\Scripts\AppState\AppStateSettings.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\State\GameState.PacketHandler.cs" />
     <Compile Include="Assets\Scripts\UI\View\AttackTargetView.cs" />
     <Compile Include="Assets\Scripts\Model\Unit.Path.cs" />
@@ -141,7 +146,7 @@
     <Compile Include="Assets\Scripts\Actor\ProjectileActorFactory.cs" />
     <Compile Include="Assets\Scripts\AppState\GameRoom\UserListListenerWithButton.cs" />
     <Compile Include="Assets\Scripts\UI\View\GameDragView.cs" />
-    <Compile Include="Assets\Scripts\AppState\Game\State\GameState.cs" />
+    <Compile Include="Assets\Scripts\AppState\Game\State\GameStateSettings.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\ActionHandleExtractor.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\State\GameState.Input.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\State\GameState.PlayerHandler.cs" />
@@ -152,7 +157,7 @@
     <Compile Include="Assets\Scripts\UI\Popup\IPopup.cs" />
     <Compile Include="Assets\Scripts\Actor\ProjectileActor.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\Map.cs" />
-    <Compile Include="Assets\Scripts\AppState\Intro\IntroState.cs" />
+    <Compile Include="Assets\Scripts\AppState\Intro\IntroStateSettings.cs" />
     <Compile Include="Assets\Scripts\CrashResources.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\CrashUserOption.cs" />
     <Compile Include="Assets\Scripts\AppState\Game\Tables\ProjectileTable.cs" />
