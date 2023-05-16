@@ -44,28 +44,17 @@ public partial class IntroState : AppState
 
     private async Task<bool> ConnectAsync()
     {
-        try
-        {
-            var uuid = $"{Guid.NewGuid()}";
+        var uuid = $"{Guid.NewGuid()}";
 
-            var response = await Request<Protocol.Response.Authentication>(
-                "authentication", new Protocol.Request.Authentication {Id = uuid}
-            );
+        var response = await Request<Protocol.Response.Authentication>(
+            "authentication", new Protocol.Request.Authentication {Id = uuid}
+        );
 
-            Token = response.Token;
-            CrashClient.uuid = uuid;
-            
-            Debug.Log($"response.Token={response.Token}, uuid={uuid}");
-            return true;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
+        CrashNetwork.token = response.Token;
+        CrashNetwork.uuid = uuid;
 
-        //var endpoint = "localhost:8000";
-        //var pair = endpoint.Split(':');
-        //return await Client.Instance.Connect(pair[0], int.Parse(pair[1]));
+        Debug.Log($"response.Token={response.Token}, uuid={uuid}");
+        return true;
     }
 
     private async void OnConnectAsync()

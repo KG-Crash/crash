@@ -23,19 +23,15 @@ public struct LogScope : IDisposable
     } 
 }
 
-public class CrashClient : BaseClient
+public class CrashStateClient : BaseClient
 {
-    public static string uuid { get; set; }
-    public static int id { get; set; }
-    public static long seed { get; set; }
-    public static string GlobalToken;
     public override string Token
     {
-        get => GlobalToken;
-        set => GlobalToken = value;
+        get => CrashNetwork.token;
+        set => CrashNetwork.token = value;
     }
 
-    protected CrashClient() : base(Dispatcher.Instance) { }
+    protected CrashStateClient() : base(Dispatcher.Instance) { }
 
     public async Task<T> Request<T>(string api, IProtocol protocol)
         where T : class, IProtocol

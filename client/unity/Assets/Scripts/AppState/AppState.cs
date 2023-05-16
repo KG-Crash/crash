@@ -9,7 +9,7 @@ using Network;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public abstract class AppState : CrashClient
+public abstract class AppState : CrashStateClient
 {
     // Contexts
     private Dictionary<Type, UIView> _uiViews = new Dictionary<Type, UIView>();

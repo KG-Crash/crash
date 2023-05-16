@@ -11,7 +11,7 @@ public partial class GameRoomState
     [FlatBufferEvent]
     public async Task<bool> OnLogin(Login response)
     {
-        // 게임서버 연결됐을 때 처리
+        // TODO : Request-Response 인 경우 핸들러가 있어야 넘어감 ㅠ 
         return true;
     }
 
@@ -19,7 +19,7 @@ public partial class GameRoomState
     public async Task<bool> OnCreateRoom(CreateRoom response)
     {
         var view = GetView<GameRoomPanel>();
-        view.userNameList.Refresh(new UserListListenerWithButton(uuid, new [] {uuid}));
+        view.userNameList.Refresh(new UserListListenerWithButton(CrashNetwork.uuid, new [] {CrashNetwork.uuid}));
         return true;
     }
 
@@ -27,7 +27,7 @@ public partial class GameRoomState
     public async Task<bool> OnEnterRoom(EnterRoom response)
     {
         var view = GetView<GameRoomPanel>();
-        view.userNameList.Refresh(new UserListListenerWithButton(uuid, response.Users.Select(x => x.Id)));
+        view.userNameList.Refresh(new UserListListenerWithButton(CrashNetwork.uuid, response.Users.Select(x => x.Id)));
         return true;
     }
     
@@ -40,7 +40,7 @@ public partial class GameRoomState
             return true;
         }
 
-        seed = response.Seed;
+        CrashNetwork.seed = response.Seed;
         _ = MoveStateAsync<GameState>();
         return true;
     }
@@ -48,7 +48,7 @@ public partial class GameRoomState
     [FlatBufferEvent]
     public async Task<bool> OnLeaveRoom(LeaveRoom response)
     {
-        var isMine = (response.User == uuid);
+        var isMine = (response.User == CrashNetwork.uuid);
 
         if (isMine)
         {
@@ -72,7 +72,7 @@ public partial class GameRoomState
     [FlatBufferEvent]
     public async Task<bool> OnWhisper(Whisper response)
     {
-        if (uuid == response.From)
+        if (CrashNetwork.uuid == response.From)
         {
             UnityEngine.Debug.Log($"{response.To} << {response.Message}");
         }

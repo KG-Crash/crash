@@ -28,7 +28,7 @@ public partial class GameRoomState : AppState
 
         var loginResponse = await Request<Protocol.Response.Login>(new Protocol.Request.Login
         {
-            Id = uuid
+            Id = CrashNetwork.uuid
         });
 
         if (transition.Enter)

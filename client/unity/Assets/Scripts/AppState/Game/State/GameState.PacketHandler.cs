@@ -24,7 +24,7 @@ public partial class GameState
             _logger.Info($"[{response.Sequence}] : {JsonConvert.SerializeObject(response.Actions)}");
         }
 
-        Debug.Log($"receive queue : {response.Turn}, {response.Sequence}, me?={response.Sequence == id}");
+        Debug.Log($"receive queue : {response.Turn}, {response.Sequence}, me?={response.Sequence == CrashNetwork.id}");
 
         actionService.Receive(response);
         return true;
@@ -39,7 +39,7 @@ public partial class GameState
         }
 
         Debug.Log(
-            $"chat receive queue : {response.Turn}, {response.Sequence},{response.Message} me?={response.Sequence == id}");
+            $"chat receive queue : {response.Turn}, {response.Sequence},{response.Message} me?={response.Sequence == CrashNetwork.id}");
 
         actionService.Receive(response);
         return true;
@@ -61,7 +61,7 @@ public partial class GameState
 
             this.users = response.Users.ToDictionary(x => x.Sequence, x => new User(x.Id, x.Sequence));
             actionService.Setup(this.users.Keys);
-            id = response.Users.FirstOrDefault(x => x.Id == uuid)?.Sequence ?? -1;
+            CrashNetwork.id = response.Users.FirstOrDefault(x => x.Id == CrashNetwork.uuid)?.Sequence ?? -1;
 
             // team : users
             var users = response.Users
@@ -78,9 +78,9 @@ public partial class GameState
                 }
             }
 
-            me = teams.Find(id);
+            me = teams.Find(CrashNetwork.id);
 
-            Debug.Log($"OnReady, myname is {uuid}");
+            Debug.Log($"OnReady, myname is {CrashNetwork.uuid}");
 
             foreach (var user in response.Users)
             {
