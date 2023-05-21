@@ -43,10 +43,6 @@ namespace Network
             }));
         }
 
-        public void CopyTo(BaseClient other)
-        {
-        }
-
         public async Task<bool> Connect(string ip, int port)
         {
             try

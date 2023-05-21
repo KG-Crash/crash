@@ -54,7 +54,7 @@ public partial class LobbyState : AppState
             "lobby/create-room", new Protocol.Request.RouteCreate()
         );
         await MoveStateAsync<GameRoomState>(new GameRoomTransition() {
-            Host = response.Host, Port = response.Port, Enter = false, RouteCreate = response
+            Host = response.Host, Port = response.Port, Enter = false, RoomId = response.Id
         });
     }
 
@@ -64,7 +64,7 @@ public partial class LobbyState : AppState
             "lobby/enter-room", new Protocol.Request.RouteEnter() { Id = RoomId }
         );
         await MoveStateAsync<GameRoomState>(new GameRoomTransition() {
-            Host = response.Host, Port = response.Port, Enter = true, RouteEnter = response, RoomId = RoomId
+            Host = response.Host, Port = response.Port, Enter = true, RoomId = RoomId
         });
     }
 

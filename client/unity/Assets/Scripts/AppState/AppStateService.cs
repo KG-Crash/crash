@@ -131,8 +131,6 @@ public class AppStateService
             }
         }
         
-        _current.CopyTo(moveAppState); 
-
         // ---------------------------------------------------------------------------------------------------------
         // >> load/unload unity scene
         // 0. load next scene

@@ -1,5 +1,5 @@
 using GameRoom;
-using Protocol.Request;
+using Protocol.Response;
 using UI;
 
 [UIBind(typeof(GameRoomPanel), true)]
@@ -26,7 +26,7 @@ public partial class GameRoomState : AppState
             return;
         }
 
-        var loginResponse = await Request<Protocol.Response.Login>(new Protocol.Request.Login
+        var _ = await Request<Protocol.Response.Login>(new Protocol.Request.Login
         {
             Id = CrashNetwork.uuid
         });
@@ -37,9 +37,9 @@ public partial class GameRoomState : AppState
         }
         else
         {
-            var _ = await Request<Protocol.Response.CreateRoom>(new CreateRoom
+            await Request<Protocol.Response.CreateRoom>(new Protocol.Request.CreateRoom
             {
-                Id = transition.RouteCreate.Id,
+                Id = transition.RoomId,
                 Title = "my game room title",
                 Teams = new System.Collections.Generic.List<int>
                 {
