@@ -17,9 +17,11 @@ namespace UI
      
         public UnityEvent upgradeOpenClick => _upgradeOpenButton.onClick;
         public UnityEvent exitClick => _exitButton.onClick;
+        public UnityEvent chatSendClick => _chattingView.sendButton.onClick;
         public AttackTargetChangeEvent attackTargetChange => _attackToggleView.attackTargetChange;
         public GameDragEvent gameDragEvent => _gameDragView.gameDragEvent;
         public Vector2 minimapViewSize => _minimapView.rectTransform.rect.size;
+        public ChattingView chattingView => _chattingView;
 
         public void Initialize(Texture minimapTex)
         {
