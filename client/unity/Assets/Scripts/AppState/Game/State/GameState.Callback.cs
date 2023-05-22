@@ -10,6 +10,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Game;
+using UI;
 
 public partial class GameState : ActionService.Listener
 {
@@ -70,6 +71,6 @@ public partial class GameState : ActionService.Listener
         if (this.users.TryGetValue(userId, out var user) == false)
             return;
 
-        chatService.RecvMessage(chat.Message, $"{user.id}");
+        chatService.Recv(chat.Message, $"{user.id}");
     }
 }

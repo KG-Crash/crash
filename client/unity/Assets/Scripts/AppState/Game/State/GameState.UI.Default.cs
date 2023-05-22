@@ -38,6 +38,7 @@ public partial class GameState
         gamePanel.exitClick.AddListener(OnClickExit);
         gamePanel.attackTargetChange.AddListener(OnAttackTargetChange);
         gamePanel.gameDragEvent.AddListener(OnDragEvent);
+        gamePanel.chatSendClick.AddListener(OnChatSend);
 
         _minimap = new Minimap();
         _minimap.LoadMapData(gamePanel.minimapViewSize, map, _minimapOptions.staticMergeCellSize, _minimapOptions.staticScaler, _minimapOptions.staticCellColor);
@@ -77,6 +78,7 @@ public partial class GameState
         gamePanel.exitClick.RemoveListener(OnClickExit);
         gamePanel.attackTargetChange.RemoveListener(OnAttackTargetChange);
         gamePanel.gameDragEvent.RemoveListener(OnDragEvent);
+        gamePanel.chatSendClick.RemoveListener(OnChatSend);
     }
 
     private void OnClickUpgrade()
@@ -101,4 +103,16 @@ public partial class GameState
         var lastDelta = delta * (float)Shared.Const.Input.DragDelta;
         focusTransform.position += new Vector3(lastDelta.y, 0, -lastDelta.x);
     }
+    private void OnChatSend()
+	{
+        // cheat
+        var inputText = GetView<GamePanel>().chattingView.inputFieldText;
+        var parsedString = Game.Service.CheatService.ParseMessage(inputText, this);
+
+        if (parsedString.Equals(string.Empty))
+            return;
+
+        // send chat
+        actionService.Send(parsedString);
+	}
 }

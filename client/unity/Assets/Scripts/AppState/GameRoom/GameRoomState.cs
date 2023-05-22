@@ -14,6 +14,7 @@ public partial class GameRoomState : AppState
         var view = GetView<GameRoomPanel>();
         view.roomExitButtonClick.AddListener(OnExit);
         view.gameStartButtonClick.AddListener(OnGameStart);
+        view.sendChatButtonClick.AddListener(OnChatSend);
 
         Connect(transition);
     }
@@ -55,6 +56,7 @@ public partial class GameRoomState : AppState
         var view = GetView<GameRoomPanel>();
         view.roomExitButtonClick.RemoveListener(OnExit);
         view.gameStartButtonClick.RemoveListener(OnGameStart);
+        view.sendChatButtonClick.RemoveListener(OnChatSend);
     }
     
     private async void OnGameStart()
@@ -66,4 +68,10 @@ public partial class GameRoomState : AppState
     {
         await Send(new LeaveRoom());
     }
+
+    private async void OnChatSend()
+	{
+        var msg = GetView<GameRoomPanel>().chattingView.inputFieldText;
+        await Send(new Protocol.Request.Chat { Message = msg }); 
+	}
 }

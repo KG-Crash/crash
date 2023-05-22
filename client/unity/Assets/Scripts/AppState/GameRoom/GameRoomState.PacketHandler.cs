@@ -65,7 +65,8 @@ public partial class GameRoomState
     [FlatBufferEvent]
     public async Task<bool> OnChat(Chat response)
     {
-        UnityEngine.Debug.Log(response.Message);
+        var view = GetView<GameRoomPanel>();
+        view.chattingView.chatLog.Refresh(new ChatLogListener(response));
         return true;
     }
 
