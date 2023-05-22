@@ -1904,7 +1904,7 @@ GameObject:
   - component: {fileID: 581581099065213492}
   - component: {fileID: 795856775137457179}
   m_Layer: 0
-  m_Name: ChatView
+  m_Name: ChattingView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
