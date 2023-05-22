@@ -35,7 +35,6 @@ public partial class GameState : AppState
         networkMode = context._networkMode;
         map = context._map;
         spawnPositions = context._spawnPositions;
-        chatService = context._chatService;
             
         context.UpdateAsObservable().Subscribe(_ => OnUpdate());
         context.LateUpdateAsObservable().Subscribe(_ => OnLateUpdate());
@@ -67,7 +66,6 @@ public partial class GameState : AppState
     {
         map = null;
         spawnPositions = null;
-        chatService = null;
         
         ClearGamePanel();
         ClearDebugPanel();

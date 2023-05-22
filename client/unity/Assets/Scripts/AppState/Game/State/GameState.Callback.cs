@@ -71,6 +71,6 @@ public partial class GameState : ActionService.Listener
         if (this.users.TryGetValue(userId, out var user) == false)
             return;
 
-        chatService.Recv(chat.Message, $"{user.id}");
+        // recieve msg from action queue
     }
 }
