@@ -17,7 +17,6 @@ public partial class GameState : AppState
     private KG.Map map { get; set; }
     private Transform[] spawnPositions { get; set; }
     private bool networkMode { get; set; }
-    private ChatService chatService { get; set; }
     public ActionService actionService { get; private set; }
     
     public Dictionary<LogicalObject, IActor> unitActorMaps { get; private set; } =
