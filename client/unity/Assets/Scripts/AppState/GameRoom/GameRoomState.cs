@@ -1,5 +1,3 @@
-using GameRoom;
-using Protocol.Response;
 using UI;
 
 [UIBind(typeof(GameRoomPanel), true)]
@@ -61,12 +59,12 @@ public partial class GameRoomState : AppState
     
     private async void OnGameStart()
     {
-        await Send(new GameStart());
+        await Send(new Protocol.Request.GameStart());
     }
 
     private async void OnExit()
     {
-        await Send(new LeaveRoom());
+        await Send(new Protocol.Request.LeaveRoom());
     }
 
     private async void OnChatSend()
