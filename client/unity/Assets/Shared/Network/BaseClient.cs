@@ -21,10 +21,10 @@ namespace Network
         private Handler _handler;
         private readonly MultithreadEventLoopGroup _multiThreadEventLoopGroup = new MultithreadEventLoopGroup();
         private readonly Bootstrap _bootstrap = new Bootstrap();
-        private IChannel _channel = null;
 
-        public bool Connected => _channel?.Active ?? false;
+        public bool Connected => Channel?.Active ?? false;
         public virtual string Token { get; set; } = null;
+        public virtual IChannel Channel { get; set; } = null;
 
         protected BaseClient(IDispatchable dispatcher = null)
         {
@@ -50,7 +50,7 @@ namespace Network
                 if (Connected)
                     return false;
 
-                _channel = await _bootstrap.ConnectAsync(ip, port);
+                Channel = await _bootstrap.ConnectAsync(ip, port);
                 return true;
             }
             catch (Exception e)
@@ -62,11 +62,11 @@ namespace Network
 
         public async Task Disconnect()
         {
-            if (_channel == null)
+            if (Channel == null)
                 return;
 
-            await _channel.DisconnectAsync();
-            _channel = null;
+            await Channel.DisconnectAsync();
+            Channel = null;
         }
 
         public async Task Send(IProtocol protocol)
@@ -80,7 +80,7 @@ namespace Network
                     bwriter.Flush();
 
                     var bytes = mstream.ToArray();
-                    await _channel?.WriteAndFlushAsync(Unpooled.Buffer().WriteBytes(bytes));
+                    await Channel?.WriteAndFlushAsync(Unpooled.Buffer().WriteBytes(bytes));
                 }
             }
         }
@@ -96,7 +96,7 @@ namespace Network
                     bwriter.Flush();
 
                     var bytes = mstream.ToArray();
-                    await _channel?.WriteAndFlushAsync(Unpooled.Buffer().WriteBytes(bytes));
+                    await Channel?.WriteAndFlushAsync(Unpooled.Buffer().WriteBytes(bytes));
                 }
             }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using DotNetty.Transport.Channels;
 using Module;
 using Network;
 using Protocol;
@@ -29,6 +30,12 @@ public class CrashStateClient : BaseClient
     {
         get => CrashNetwork.token;
         set => CrashNetwork.token = value;
+    }
+
+    public override IChannel Channel
+    {
+        get => CrashNetwork.channel;
+        set => CrashNetwork.channel = value;
     }
 
     protected CrashStateClient() : base(Dispatcher.Instance) { }
